@@ -8,5 +8,18 @@
             "name" : "Minhao Zhang",
             "email": "minhao.zhang@qq.com"
         }
-    ]
+    ],
+    "require": {
+        "symfony/http-foundation": "^3.0",
+        "silex/silex": "^1.3",
+        "symfony/routing": "^3.0",
+        "symfony/config": "^3.0",
+        "symfony/yaml": "^3.0",
+        "symfony/expression-language": "^3.0",
+        "oasis/logging": "^1.1"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^5.2",
+        "symfony/browser-kit": "^3.0"
+    }
 }

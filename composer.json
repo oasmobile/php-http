@@ -1,0 +1,12 @@
+{
+    "name"             : "oasis/http",
+    "description"      : "An extension to Silex, for HTTP related routing, middleware, and so on.",
+    "minimum-stability": "stable",
+    "license"          : "MIT",
+    "authors"          : [
+        {
+            "name" : "Minhao Zhang",
+            "email": "minhao.zhang@qq.com"
+        }
+    ]
+}

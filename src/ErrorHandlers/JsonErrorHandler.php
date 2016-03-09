@@ -6,11 +6,11 @@
  * Time: 21:11
  */
 
-namespace Oasis\Mlib\Http\Views;
+namespace Oasis\Mlib\Http\ErrorHandlers;
 
 use Symfony\Component\HttpFoundation\JsonResponse;
 
-class JsonErrorViewHandler
+class JsonErrorHandler
 {
     function __invoke(\Exception $e, $code)
     {

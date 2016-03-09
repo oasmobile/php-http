@@ -5,8 +5,8 @@
  * Date: 2016-03-08
  * Time: 17:09
  */
+use Oasis\Mlib\Http\ErrorHandlers\JsonErrorHandler;
 use Oasis\Mlib\Http\SilexKernel;
-use Oasis\Mlib\Http\Views\JsonErrorViewHandler;
 use Oasis\Mlib\Http\Views\JsonViewHandler;
 
 $config              = [
@@ -22,7 +22,7 @@ $app->view_handlers  = [
     new JsonViewHandler(),
 ];
 $app->error_handlers = [
-    new JsonErrorViewHandler(),
+    new JsonErrorHandler(),
 ];
 
 return $app;

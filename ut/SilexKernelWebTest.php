@@ -1,8 +1,4 @@
 <?php
-use Oasis\Mlib\Http\Middlewares\CrossOriginResourceSharingMiddleware;
-use Oasis\Mlib\Http\SilexKernel;
-use Oasis\Mlib\Http\Views\JsonErrorViewHandler;
-use Oasis\Mlib\Http\Views\JsonViewHandler;
 use Silex\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
@@ -42,7 +38,7 @@ class SilexKernelWebTest extends WebTestCase
         $client->request('GET', '/404'); // non existing route
         $response = $client->getResponse();
         $this->assertEquals(Response::HTTP_NOT_FOUND, $response->getStatusCode());
-        $json     = json_decode($response->getContent(), true);
+        $json = json_decode($response->getContent(), true);
         $this->assertTrue(is_array($json));
         $this->assertTrue(isset($json['code']), $response->getContent());
     }

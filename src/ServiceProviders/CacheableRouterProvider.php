@@ -80,42 +80,7 @@ class CacheableRouterProvider implements ServiceProviderInterface
      */
     public function boot(Application $app)
     {
-        //$app->before([$this, 'route'], Application::EARLY_EVENT);
     }
-
-    //public function route(Request $request)
-    //{
-    //    try {
-    //        $router     = $this->getRouter($request);
-    //        $attributes = $this->router->match($request->getPathInfo());
-    //
-    //        // check if we should prepend controller namespace
-    //        /** @noinspection PhpUnusedLocalVariableInspection */
-    //        list($className, $methodName) = explode("::", $attributes['_controller'], 2);
-    //        if (!class_exists($className)) {
-    //            if ($this->controllerNamespaces) {
-    //                foreach ($this->controllerNamespaces as $namespace) {
-    //                    if (class_exists($namespace . "\\" . $className)) {
-    //                        $attributes['_controller'] = $namespace . "\\" . $attributes['_controller'];
-    //                        break;
-    //                    }
-    //                }
-    //            }
-    //        }
-    //
-    //        // add resolved routing info to request object
-    //        foreach ($attributes as $k => $v) {
-    //            $request->attributes->set($k, $v);
-    //        }
-    //        unset($attributes['_controller']);
-    //        unset($attributes['_route']);
-    //        $request->attributes->set('_route_params', $attributes);
-    //
-    //    } catch (ResourceNotFoundException $e) {
-    //        // routing will be further handled by Silex
-    //        mdebug("Path %s not found in router", $request->getPathInfo());
-    //    }
-    //}
 
     protected function getRouter(RequestContext $requestContext)
     {

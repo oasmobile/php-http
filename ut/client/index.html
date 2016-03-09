@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CORS Test</title>
+    <script src="jquery-1.11.2.js"></script>
+</head>
+<body>
+
+<input id="btn" type="button"/>
+<script type="text/javascript">
+    console.log("hello");
+    $(window).load(function () {
+        console.log("ready!");
+
+        $('#btn').click(function () {
+            $.ajax("http://localhost:8004/cors/home?XDEBUG_SESSION_START=1", {
+                success: function (xhr) {
+                    console.log("success");
+                },
+                headers: {
+                    "custom_header" : "bbb"
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>

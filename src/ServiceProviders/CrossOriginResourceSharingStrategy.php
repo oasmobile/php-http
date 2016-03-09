@@ -15,7 +15,7 @@ use Oasis\Mlib\Utils\StringUtils;
 
 class CrossOriginResourceSharingStrategy
 {
-    const DOMAIN_MATCHING_PATTERN = "#^(https?://)?(([a-z0-9\\.-]+)+\\.[a-z]+(:\\d+)?)(/.*)?\$#";
+    const DOMAIN_MATCHING_PATTERN = "#^(https?://)?((((\\d+\\.){3}\\d+)|localhost|([a-z0-9\\.-]+)+\\.[a-z]+)(:\\d+)?)(/.*)?\$#";
 
     const SIMPLE_REQUEST_HEADERS = [
         "accept",
@@ -88,7 +88,7 @@ class CrossOriginResourceSharingStrategy
             return false;
         }
         $origin = $matches[2];
-        
+
         if (sizeof($this->originsAllowed)
             && !in_array($origin, $this->originsAllowed)
             && !$this->isWildcardOriginAllowed()

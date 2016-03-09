@@ -12,6 +12,7 @@ use Oasis\Mlib\Http\Configuration\ConfigurationValidationTrait;
 use Oasis\Mlib\Http\Configuration\HttpConfiguration;
 use Oasis\Mlib\Http\Middlewares\MiddlewareInterface;
 use Oasis\Mlib\Http\ServiceProviders\CacheableRouterProvider;
+use Oasis\Mlib\Http\ServiceProviders\CacheableRouterUrlGeneratorProvider;
 use Oasis\Mlib\Utils\ArrayDataProvider;
 use Oasis\Mlib\Utils\DataProviderInterface;
 use Silex\Application as SilexApp;
@@ -52,7 +53,8 @@ class SilexKernel extends SilexApp
         
         $this->register(new ServiceControllerServiceProvider());
         $routingConfig = $this->httpDataProvider->getOptional('routing', DataProviderInterface::ARRAY_TYPE, []);
-        $this->register(new CacheableRouterProvider($routingConfig, $this->isDebug));
+        $this->register($routerProvider = new CacheableRouterProvider($routingConfig, $this->isDebug));
+        $this->register(new CacheableRouterUrlGeneratorProvider($routerProvider));
     }
 
     /**

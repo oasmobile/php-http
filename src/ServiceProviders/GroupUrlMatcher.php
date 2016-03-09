@@ -13,27 +13,25 @@ use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 use Symfony\Component\Routing\Matcher\UrlMatcherInterface;
 use Symfony\Component\Routing\RequestContext;
 
-class CacheableUrlMatcher implements UrlMatcherInterface
+class GroupUrlMatcher implements UrlMatcherInterface
 {
     /** @var  RequestContext */
     protected $context;
-    /** @var  UrlMatcherInterface */
-    protected $primaryMatcher;
-    /** @var  UrlMatcherInterface */
-    protected $silexMatcher;
-    /** @var  array */
-    protected $namespaces;
+    /** @var  UrlMatcherInterface[] */
+    protected $matchers;
 
+    /**
+     * GroupUrlMatcher constructor.
+     *
+     * @param RequestContext        $context
+     * @param UrlMatcherInterface[] $matchers
+     */
     public function __construct(RequestContext $context,
-                                UrlMatcherInterface $primaryMatcher,
-                                UrlMatcherInterface $silexMatcher,
-                                array $namespaces
+                                array $matchers
     )
     {
-        $this->context        = $context;
-        $this->primaryMatcher = $primaryMatcher;
-        $this->silexMatcher   = $silexMatcher;
-        $this->namespaces     = $namespaces;
+        $this->context  = $context;
+        $this->matchers = $matchers;
     }
 
     /**
@@ -71,26 +69,23 @@ class CacheableUrlMatcher implements UrlMatcherInterface
      */
     public function match($pathinfo)
     {
-        try {
-            $result = $this->primaryMatcher->match($pathinfo);
+        $total   = sizeof($this->matchers);
+        $matched = 0;
+        foreach ($this->matchers as $matcher) {
+            $matched++;
+            try {
+                $result = $matcher->match($pathinfo);
 
-            // check if we should prepend controller namespace
-            /** @noinspection PhpUnusedLocalVariableInspection */
-            list($className, $methodName) = explode("::", $result['_controller'], 2);
-            if (!class_exists($className)) {
-                if ($this->namespaces) {
-                    foreach ($this->namespaces as $namespace) {
-                        if (class_exists($namespace . "\\" . $className)) {
-                            $result['_controller'] = $namespace . "\\" . $result['_controller'];
-                            break;
-                        }
-                    }
+                // matched
+                return $result;
+            } catch (ResourceNotFoundException $e) {
+                if ($matched == $total) {
+                    // already last matcher
+                    throw $e;
                 }
             }
-        } catch (ResourceNotFoundException $e) {
-            $result = $this->silexMatcher->match($pathinfo);
         }
 
-        return $result;
+        throw new ResourceNotFoundException("Cannot find route for $pathinfo");
     }
 }

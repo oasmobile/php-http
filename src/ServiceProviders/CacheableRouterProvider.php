@@ -57,11 +57,15 @@ class CacheableRouterProvider implements ServiceProviderInterface
             function ($urlMatcher, $c) {
                 $context = $c['request_context'];
 
-                $newMatcher = new CacheableUrlMatcher(
+                $newMatcher = new GroupUrlMatcher(
                     $context,
-                    $this->getRouter($context)->getMatcher(),
-                    $urlMatcher,
-                    $this->controllerNamespaces
+                    [
+                        new CacheableRouterUrlMatcherWrapper(
+                            $this->getRouter($context)->getMatcher(),
+                            $this->controllerNamespaces
+                        ),
+                        $urlMatcher,
+                    ]
                 );
 
                 return $newMatcher;
@@ -82,7 +86,7 @@ class CacheableRouterProvider implements ServiceProviderInterface
     {
     }
 
-    protected function getRouter(RequestContext $requestContext)
+    public function getRouter(RequestContext $requestContext)
     {
         if (!$this->router) {
             $routerFile = 'routes.yml';

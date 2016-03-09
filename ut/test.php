@@ -6,7 +6,7 @@
  * Time: 16:53
  */
 
-$pattern = "#^(https?://)?(([a-z0-9\\.-]+)+\\.[a-z]+(:\\d+)?)(/.*)?\$#";
+$pattern = "#^(https?://)?((((\\d+\\.){3}\\d+)|localhost|([a-z0-9\\.-]+)+\\.[a-z]+)(:\\d+)?)(/.*)?\$#";
 $urls    = [
     "https://abc.com/ddd",
     "http://abc.com/ddd",
@@ -16,6 +16,11 @@ $urls    = [
     "http://ab99c.com/ddd",
     "http://ab-c.com/ddd",
     "http://abc.com:8888/ddd",
+    "localhost/abc?ldld",
+    "localhost:7777/abc",
+    "http://127.0.0.1/ljl",
+    "127.0.0.1:999",
+    "7.5:999",
 ];
 
 foreach ($urls as $url) {

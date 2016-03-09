@@ -8,18 +8,22 @@
 
 namespace Oasis\Mlib\Http\Views;
 
+use Symfony\Component\HttpFoundation\JsonResponse;
+
 class JsonErrorViewHandler
 {
     function __invoke(\Exception $e, $code)
     {
         mtrace($e, "Exception while processing request, code = $code.");
 
-        return [
-            "code"    => $code,
-            "type"    => get_class($e),
-            "message" => $e->getMessage(),
-            "file"    => $e->getFile(),
-            "line"    => $e->getLine(),
-        ];
+        return new JsonResponse(
+            [
+                "code"    => $code,
+                "type"    => get_class($e),
+                "message" => $e->getMessage(),
+                "file"    => $e->getFile(),
+                "line"    => $e->getLine(),
+            ]
+        );
     }
 }

@@ -1,0 +1,4 @@
+sub.home:
+    path: /
+    defaults:
+        _controller: SubTestController::home

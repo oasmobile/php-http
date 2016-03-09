@@ -1,0 +1,32 @@
+home:
+    path: /
+    defaults:
+        _controller: TestController::home
+
+domain.test.localhost:
+    path: /domain
+    host: localhost
+    defaults:
+        _controller: TestController::domainLocalhost
+
+domain.test.baidu:
+    path: /domain
+    host: baidu.com
+    defaults:
+        _controller: TestController::domainBaidu
+
+sub:
+    prefix: sub/
+    resource: "subroutes.yml"
+
+cors.home:
+    path: /cors/home
+    defaults:
+        _controller: TestController::corsHome
+
+cors.put:
+    path: /cors/put
+
+    methods: [PUT]
+    defaults:
+        _controller: TestController::corsHome

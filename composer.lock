@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "dd875bfb825e46ed99945fe4193b1212",
+    "hash": "5dd15b50708689a0ea8c33dfedb836d5",
     "content-hash": "359ba2b3069aa3faec363c710201a53d",
     "packages": [
         {
@@ -169,16 +169,16 @@
         },
         {
             "name": "oasis/logging",
-            "version": "v1.1.4",
+            "version": "v1.1.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/oasmobile/php-logging.git",
-                "reference": "41109cf34ca65451a2d44d0942deddcfbf07f0ac"
+                "reference": "84e695d0d58f6eaf3164639a02c3ddb98cf9d014"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/oasmobile/php-logging/zipball/41109cf34ca65451a2d44d0942deddcfbf07f0ac",
-                "reference": "41109cf34ca65451a2d44d0942deddcfbf07f0ac",
+                "url": "https://api.github.com/repos/oasmobile/php-logging/zipball/84e695d0d58f6eaf3164639a02c3ddb98cf9d014",
+                "reference": "84e695d0d58f6eaf3164639a02c3ddb98cf9d014",
                 "shasum": ""
             },
             "require": {
@@ -216,7 +216,7 @@
                 }
             ],
             "description": "Wrapper of monolog/monolog. Should be easier to use/configure than monolog",
-            "time": "2016-01-27 05:45:59"
+            "time": "2016-03-08 08:11:35"
         },
         {
             "name": "oasis/utils",

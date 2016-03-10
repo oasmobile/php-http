@@ -38,6 +38,30 @@ class TestController
         ];
     }
 
+    public function paramDomain($game)
+    {
+        return [
+            'called' => $this->createTestString(__CLASS__, __FUNCTION__),
+            'game'   => $game,
+        ];
+    }
+
+    public function paramId($id)
+    {
+        return [
+            'called' => $this->createTestString(__CLASS__, __FUNCTION__),
+            'id'     => $id,
+        ];
+    }
+
+    public function paramSlug($slug)
+    {
+        return [
+            'called' => $this->createTestString(__CLASS__, __FUNCTION__),
+            'slug'     => $slug,
+        ];
+    }
+
     protected function createTestString($class, $function)
     {
         return $class . "::" . $function . "()";

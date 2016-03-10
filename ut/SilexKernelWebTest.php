@@ -69,4 +69,44 @@ class SilexKernelWebTest extends WebTestCase
         $this->assertTrue(is_array($json));
         $this->assertEquals('Oasis\\Mlib\\Http\\Ut\\SubTestController::home()', $json['called']);
     }
+
+    public function testDomainMatching()
+    {
+        $client = $this->createClient(['HTTP_HOST' => "naruto.baidu.com"]);
+        $client->request('GET', '/param/domain');
+        $response = $client->getResponse();
+        $json     = json_decode($response->getContent(), true);
+        $this->assertTrue(is_array($json));
+        $this->assertEquals('Oasis\\Mlib\\Http\\Ut\\TestController::paramDomain()', $json['called']);
+        $this->assertEquals('naruto', $json['game']);
+
+    }
+
+    public function testParameterMatching()
+    {
+        $client = $this->createClient(['HTTP_HOST' => "naruto.baidu.com"]);
+        $client->request('GET', '/param/id/29');
+        $response = $client->getResponse();
+        $json     = json_decode($response->getContent(), true);
+        $this->assertTrue(is_array($json));
+        $this->assertEquals('Oasis\\Mlib\\Http\\Ut\\TestController::paramId()', $json['called']);
+        $this->assertEquals('29', $json['id']);
+
+        $client = $this->createClient(['HTTP_HOST' => "naruto.baidu.com"]);
+        $client->request('GET', '/param/id/moi');
+        $response = $client->getResponse();
+        $json     = json_decode($response->getContent(), true);
+        $this->assertTrue(is_array($json));
+        $this->assertEquals('Oasis\\Mlib\\Http\\Ut\\TestController::paramSlug()', $json['called']);
+        $this->assertEquals('moi', $json['slug']);
+
+        $client = $this->createClient(['HTTP_HOST' => "naruto.baidu.com"]);
+        $client->request('GET', '/param/id/moi/hei');
+        $response = $client->getResponse();
+        $json     = json_decode($response->getContent(), true);
+        $this->assertTrue(is_array($json));
+        $this->assertEquals('Oasis\\Mlib\\Http\\Ut\\TestController::paramSlug()', $json['called']);
+        $this->assertEquals('moi/hei', $json['slug']);
+
+    }
 }

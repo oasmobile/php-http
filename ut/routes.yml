@@ -26,7 +26,28 @@ cors.home:
 
 cors.put:
     path: /cors/put
-
     methods: [PUT]
     defaults:
         _controller: TestController::corsHome
+
+param.domain:
+    path: /param/domain
+    host: "{game}.baidu.com"
+    defaults:
+        _controller: TestController::paramDomain
+
+param.id:
+    path: "/param/id/{id}"
+    host: "{game}.baidu.com"
+    defaults:
+        _controller: TestController::paramId
+    requirements:
+        id: \d+
+
+param.slug:
+    path: "/param/id/{slug}"
+    host: "{game}.baidu.com"
+    defaults:
+        _controller: TestController::paramSlug
+    requirements:
+        slug: .*

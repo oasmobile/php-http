@@ -1,0 +1,20 @@
+secured.admin:
+    path: /admin
+    defaults:
+        _controller: AuthController::admin
+secured.fadmin:
+    path: /fadmin
+    defaults:
+        _controller: AuthController::fadmin
+secured.fadmin.test:
+    path: /fadmin/test
+    defaults:
+        _controller: AuthController::fadmin
+secured.padmin:
+    path: /padmin
+    defaults:
+        _controller: AuthController::padmin
+secured.madmin:
+    path: /madmin
+    defaults:
+        _controller: AuthController::madmin

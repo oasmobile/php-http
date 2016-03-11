@@ -8,6 +8,7 @@
 use Oasis\Mlib\Http\ErrorHandlers\JsonErrorHandler;
 use Oasis\Mlib\Http\SilexKernel;
 use Oasis\Mlib\Http\Views\JsonViewHandler;
+use Oasis\Mlib\Logging\MLogging;
 
 $config              = [
     'routing' => [
@@ -24,5 +25,6 @@ $app->view_handlers  = [
 $app->error_handlers = [
     new JsonErrorHandler(),
 ];
+$app['logger'] = MLogging::getLogger();
 
 return $app;

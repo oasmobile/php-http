@@ -28,7 +28,8 @@ use Symfony\Component\Routing\Router;
  * @package Oasis\Mlib\Http
  *
  *
- * @property-write array $service_providers
+ * @property-write array $service_providers array of ServiceProviderInterface,
+ *                                          or a tube of <ServiceProviderInterface, parameters>
  * @property-write array $middlewares
  * @property-write array $view_handlers
  * @property-write array $error_handlers
@@ -87,16 +88,25 @@ class SilexKernel extends SilexApp
                            $providers = array_filter(
                                $value,
                                function ($v) {
-                                   return $v instanceof ServiceProviderInterface;
+                                   return ($v instanceof ServiceProviderInterface
+                                           || (is_array($v)
+                                               && sizeof($v) == 2
+                                               && $v[0] instanceof ServiceProviderInterface
+                                           )
+                                   );
                                }
                            )
                        ) != sizeof($value)
                 ) {
                     throw new InvalidConfigurationException("$name must be an array of ServiceProvider");
                 };
-                /** @var ServiceProviderInterface $provider */
                 foreach ($providers as $provider) {
-                    $this->register($provider);
+                    if ($provider instanceof ServiceProviderInterface) {
+                        $this->register($provider);
+                    }
+                    else {
+                        $this->register($provider[0], $provider[1]);
+                    }
                 }
             }
                 break;

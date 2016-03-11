@@ -10,5 +10,8 @@
             <file>ut/SilexKernelWebTest.php</file>
             <file>ut/CrossOriginResourceSharingTest.php</file>
         </testsuite>
+        <testsuite name="security">
+            <file>ut/SecurityServiceProviderTest.php</file>
+        </testsuite>
     </testsuites>
 </phpunit>

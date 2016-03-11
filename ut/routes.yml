@@ -3,6 +3,14 @@ home:
     defaults:
         _controller: TestController::home
 
+sub:
+    prefix: sub/
+    resource: "subroutes.yml"
+
+secured:
+    prefix: secured/
+    resource: "secured.routes.yml"
+
 domain.test.localhost:
     path: /domain
     host: localhost
@@ -14,10 +22,6 @@ domain.test.baidu:
     host: baidu.com
     defaults:
         _controller: TestController::domainBaidu
-
-sub:
-    prefix: sub/
-    resource: "subroutes.yml"
 
 cors.home:
     path: /cors/home

@@ -6,7 +6,11 @@
  * Time: 19:26
  */
 
-namespace Oasis\Mlib\Http\Ut;
+namespace Oasis\Mlib\Http\Ut\Controllers;
+
+use Oasis\Mlib\Http\SilexKernel;
+use Silex\Application;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 class AuthController
 {
@@ -30,9 +34,12 @@ class AuthController
             'called' => $this->createTestString(__CLASS__, __FUNCTION__),
         ];
     }
-    public function madmin()
+
+    public function madmin(SilexKernel $app)
     {
+
         return [
+            'admin'  => $app->isGranted('ROLE_ADMIN'),
             'called' => $this->createTestString(__CLASS__, __FUNCTION__),
         ];
     }

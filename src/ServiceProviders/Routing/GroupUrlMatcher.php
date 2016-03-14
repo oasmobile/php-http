@@ -6,7 +6,7 @@
  * Time: 21:06
  */
 
-namespace Oasis\Mlib\Http\ServiceProviders;
+namespace Oasis\Mlib\Http\ServiceProviders\Routing;
 
 use Symfony\Component\Routing\Exception\MethodNotAllowedException;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;

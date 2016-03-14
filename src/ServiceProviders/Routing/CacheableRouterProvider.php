@@ -6,7 +6,7 @@
  * Time: 20:53
  */
 
-namespace Oasis\Mlib\Http\ServiceProviders;
+namespace Oasis\Mlib\Http\ServiceProviders\Routing;
 
 use Oasis\Mlib\Http\Configuration\CacheableRouterConfiguration;
 use Oasis\Mlib\Http\Configuration\ConfigurationValidationTrait;

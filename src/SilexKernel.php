@@ -11,8 +11,8 @@ namespace Oasis\Mlib\Http;
 use Oasis\Mlib\Http\Configuration\ConfigurationValidationTrait;
 use Oasis\Mlib\Http\Configuration\HttpConfiguration;
 use Oasis\Mlib\Http\Middlewares\MiddlewareInterface;
-use Oasis\Mlib\Http\ServiceProviders\CacheableRouterProvider;
-use Oasis\Mlib\Http\ServiceProviders\CacheableRouterUrlGeneratorProvider;
+use Oasis\Mlib\Http\ServiceProviders\Routing\CacheableRouterProvider;
+use Oasis\Mlib\Http\ServiceProviders\Routing\CacheableRouterUrlGeneratorProvider;
 use Oasis\Mlib\Utils\ArrayDataProvider;
 use Oasis\Mlib\Utils\DataProviderInterface;
 use Silex\Application as SilexApp;
@@ -21,6 +21,7 @@ use Silex\ServiceProviderInterface;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Routing\Router;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 /**
  * Class SilexKernel
@@ -34,7 +35,7 @@ use Symfony\Component\Routing\Router;
  * @property-write array $view_handlers
  * @property-write array $error_handlers
  */
-class SilexKernel extends SilexApp
+class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
 {
     use ConfigurationValidationTrait;
 
@@ -172,4 +173,23 @@ class SilexKernel extends SilexApp
         }
     }
 
+    /**
+     * Checks if the attributes are granted against the current authentication token and optionally supplied object.
+     *
+     * @param mixed $attributes
+     * @param mixed $object
+     *
+     * @return bool
+     */
+    public function isGranted($attributes, $object = null)
+    {
+        $checker = $this['security.authorization_checker'];
+        if ($checker instanceof AuthorizationCheckerInterface) {
+            return $checker->isGranted($attributes, $object);
+        }
+        else {
+            // TODO: should we throw an exception?
+            return false;
+        }
+    }
 }

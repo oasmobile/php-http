@@ -5,8 +5,9 @@
  * Date: 2016-03-08
  * Time: 17:09
  */
-use Oasis\Mlib\Http\ServiceProviders\CrossOriginResourceSharingProvider;
-use Oasis\Mlib\Http\ServiceProviders\CrossOriginResourceSharingStrategy;
+
+use Oasis\Mlib\Http\ServiceProviders\Cors\CrossOriginResourceSharingProvider;
+use Oasis\Mlib\Http\ServiceProviders\Cors\CrossOriginResourceSharingStrategy;
 
 $app                    = require __DIR__ . "/app.php";
 $app->service_providers = [

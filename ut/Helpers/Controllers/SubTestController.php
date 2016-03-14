@@ -6,7 +6,7 @@
  * Time: 14:17
  */
 
-namespace Oasis\Mlib\Http\Ut;
+namespace Oasis\Mlib\Http\Ut\Controllers;
 
 class SubTestController extends TestController
 {

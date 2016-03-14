@@ -6,7 +6,7 @@
  * Time: 21:07
  */
 
-namespace Oasis\Mlib\Http\ServiceProviders;
+namespace Oasis\Mlib\Http\ServiceProviders\Routing;
 
 use Symfony\Component\Routing\Exception\InvalidParameterException;
 use Symfony\Component\Routing\Exception\MissingMandatoryParametersException;

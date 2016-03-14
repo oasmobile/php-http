@@ -6,7 +6,7 @@
  * Time: 20:16
  */
 
-namespace Oasis\Mlib\Http\ServiceProviders;
+namespace Oasis\Mlib\Http\ServiceProviders\Cors;
 
 use Oasis\Mlib\Http\Views\PrefilightResponse;
 use Silex\Application;

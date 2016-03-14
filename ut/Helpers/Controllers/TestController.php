@@ -6,7 +6,7 @@
  * Time: 11:17
  */
 
-namespace Oasis\Mlib\Http\Ut;
+namespace Oasis\Mlib\Http\Ut\Controllers;
 
 class TestController
 {

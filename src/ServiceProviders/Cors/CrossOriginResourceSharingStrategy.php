@@ -6,7 +6,7 @@
  * Time: 20:20
  */
 
-namespace Oasis\Mlib\Http\ServiceProviders;
+namespace Oasis\Mlib\Http\ServiceProviders\Cors;
 
 use Oasis\Mlib\Http\Configuration\ConfigurationValidationTrait;
 use Oasis\Mlib\Http\Configuration\CrossOriginResourceSharingConfiguration;

@@ -6,7 +6,7 @@
  * Time: 20:43
  */
 
-namespace Oasis\Mlib\Http\ServiceProviders;
+namespace Oasis\Mlib\Http\ServiceProviders\Routing;
 
 use Silex\Application;
 use Silex\Provider\UrlGeneratorServiceProvider;

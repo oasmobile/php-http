@@ -6,9 +6,10 @@
  * Time: 19:50
  */
 
-namespace Oasis\Mlib\Http\ServiceProviders;
+namespace Oasis\Mlib\Http\ServiceProviders\Security;
 
 use Silex\Application;
+use Symfony\Component\Security\Core\Authentication\Provider\AuthenticationProviderInterface;
 use Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface;
 use Symfony\Component\Security\Http\Firewall\ListenerInterface;
 
@@ -21,23 +22,29 @@ interface AuthenticationPolicyInterface
     const AUTH_TYPE_REMEMBER_ME = "remember_me";
     const AUTH_TYPE_ANONYMOUS   = "anonymous";
 
-    /**
-     * If anonymous is allowed in this policy
-     *
-     * @return bool
-     */
-    public function isAnonymousAllowed();
-
     public function getAuthenticationType();
-    
+
     /**
+     * If string is returned, it must be either "anonymous" or "dao"
+     *
      * @param Application $app
-     * @param             $name
+     * @param             $firewallName
      * @param             $options
+     *
+     * @return string|AuthenticationProviderInterface
+     */
+    public function getAuthenticationProvider(Application $app, $firewallName, $options);
+
+    /**
+     * @param Application                    $app
+     * @param                                $firewallName
+     * @param                                $options
      *
      * @return ListenerInterface
      */
-    public function getAuthenticationListener(Application $app, $name, $options);
+    public function getAuthenticationListener(Application $app,
+                                              $firewallName,
+                                              $options);
 
     /**
      * @param Application $app
@@ -47,5 +54,4 @@ interface AuthenticationPolicyInterface
      * @return AuthenticationEntryPointInterface
      */
     public function getEntryPoint(Application $app, $name, $options);
-
 }

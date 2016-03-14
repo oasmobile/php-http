@@ -26,9 +26,12 @@ class SecurityServiceProviderTest extends WebTestCase
         return $app;
     }
 
+    /**
+     * @iss
+     */
     public function testBasicAuth()
     {
-        $this->markTestSkipped();
+        //$this->markTestSkipped();
         $client = $this->createClient(
             [
                 'PHP_AUTH_USER' => "admin",
@@ -52,7 +55,7 @@ class SecurityServiceProviderTest extends WebTestCase
 
     public function testFormAuth()
     {
-        $this->markTestSkipped();
+        //$this->markTestSkipped();
         $client = $this->createClient();
         $client->request('GET', '/secured/fadmin/test');
         $response = $client->getResponse();
@@ -60,12 +63,6 @@ class SecurityServiceProviderTest extends WebTestCase
         $this->assertTrue($response->headers->has('Location'));
         $this->assertStringEndsWith('/secured/flogin', $response->headers->get('Location'));
 
-        //$client = $this->createClient(
-        //    [
-        //        'PHP_AUTH_USER' => "admin",
-        //        "PHP_AUTH_PW"   => "1234",
-        //    ]
-        //);
         $client->request(
             'POST',
             '/secured/fadmin/check',
@@ -90,14 +87,32 @@ class SecurityServiceProviderTest extends WebTestCase
         $response = $client->getResponse();
         $this->assertEquals(Response::HTTP_FOUND, $response->getStatusCode());
         $this->assertTrue($response->headers->has('Location'));
-        $this->assertStringEndsWith('/secured/flogin', $response->headers->get('Location'));
+        $this->assertStringEndsWith('/secured/fadmin/test', $response->headers->get('Location'));
     }
 
     public function testPreAuth()
     {
         $client = $this->createClient();
-        $client->request('GET', '/secured/madmin');
+        $client->request(
+            'GET',
+            '/secured/madmin'
+        );
         $response = $client->getResponse();
+        $this->assertEquals(Response::HTTP_FORBIDDEN, $response->getStatusCode());
+
+        $client->request(
+            'GET',
+            '/secured/madmin',
+            [
+                'sig' => 'abcd',
+            ]
+        );
+        $response = $client->getResponse();
+        $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
+        $json = json_decode($response->getContent(), true);
+        $this->assertTrue(is_array($json));
+        $this->assertEquals('Oasis\\Mlib\\Http\\Ut\\Controllers\\AuthController::madmin()', $json['called']);
+        $this->assertEquals(true, $json['admin']);
 
     }
 }

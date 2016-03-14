@@ -6,7 +6,7 @@
  * Time: 17:41
  */
 
-namespace Oasis\Mlib\Http\Ut;
+namespace Oasis\Mlib\Http\Ut\Controllers;
 
 use Oasis\Mlib\Http\SilexKernel;
 use Symfony\Component\HttpFoundation\Request;

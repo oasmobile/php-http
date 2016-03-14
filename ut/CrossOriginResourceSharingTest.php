@@ -1,5 +1,5 @@
 <?php
-use Oasis\Mlib\Http\ServiceProviders\CrossOriginResourceSharingProvider;
+use Oasis\Mlib\Http\ServiceProviders\Cors\CrossOriginResourceSharingProvider;
 use Silex\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\HttpKernelInterface;

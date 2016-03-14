@@ -11,8 +11,8 @@ use Oasis\Mlib\Logging\LocalFileHandler;
 //require_once __DIR__ . "/../vendor/autoload.php";
 
 /** @var ClassLoader $loader */
-$loader = require_once  __DIR__ . "/../vendor/autoload.php";
-$loader->addPsr4('Oasis\\Mlib\\Http\\Ut\\', __DIR__);
+$loader = require_once __DIR__ . "/../vendor/autoload.php";
+$loader->addPsr4('Oasis\\Mlib\\Http\\Ut\\', __DIR__ . "/Helpers");
 
 error_reporting(E_ALL ^ ~E_NOTICE);
 

@@ -8,6 +8,7 @@
 use Oasis\Mlib\Http\ServiceProviders\Security\SimpleAuthenticationPolicy;
 use Oasis\Mlib\Http\ServiceProviders\Security\SimpleSecurityProvider;
 use Oasis\Mlib\Http\SilexKernel;
+use Oasis\Mlib\Http\Ut\Security\TestAccessRule;
 use Oasis\Mlib\Http\Ut\Security\TestApiUserPreAuthenticator;
 use Oasis\Mlib\Http\Ut\Security\TestApiUserProvider;
 use Oasis\Mlib\Http\Ut\Security\TestAuthenticationFirewall;
@@ -58,14 +59,15 @@ $provider->addFirewall(
     ]
 );
 $provider->addFirewall("minhao.admin", $testFirewall);
+$provider->addAccessRule(new TestAccessRule());
 
 $app->service_providers = [
     [
         $provider,
         [
-            'security.access_rules' => [
-                ['^/secured/madmin', 'ROLE_ADMIN', 'http'],
-            ],
+            //'security.access_rules' => [
+            //    ['^/secured/madmin', 'ROLE_ADMIN', 'http'],
+            //],
         ],
     ],
     new SessionServiceProvider(),

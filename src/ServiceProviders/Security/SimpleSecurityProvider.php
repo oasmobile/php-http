@@ -18,6 +18,9 @@ class SimpleSecurityProvider extends SecurityServiceProvider
     /** @var FirewallInterface[]|array */
     protected $firewalls = [];
 
+    /** @var AccessRuleInterface[]|array */
+    protected $accessRules = [];
+
     /** @var AuthenticationPolicyInterface[] */
     protected $authPolicies = [];
 
@@ -62,6 +65,20 @@ class SimpleSecurityProvider extends SecurityServiceProvider
         }
         $app['security.firewalls'] = $firewallSetting;
 
+        $rulesSetting = [];
+        foreach ($this->accessRules as $rule) {
+            if ($rule instanceof AccessRuleInterface) {
+                $rulesSetting[] = [
+                    $rule->getPattern(),
+                    $rule->getRequiredRoles(),
+                    $rule->getRequiredChannel(),
+                ];
+            }
+            else {
+                $rulesSetting[] = $rule;
+            }
+        }
+        $app['security.access_rules'] = $rulesSetting;
     }
 
     public function addAuthenticationPolicy($typeName, AuthenticationPolicyInterface $policy)
@@ -72,6 +89,14 @@ class SimpleSecurityProvider extends SecurityServiceProvider
     public function addFirewall($firewallName, $firewall)
     {
         $this->firewalls[$firewallName] = $firewall;
+    }
+
+    /**
+     * @param AccessRuleInterface|array $rule
+     */
+    public function addAccessRule($rule)
+    {
+        $this->accessRules[] = $rule;
     }
 
     protected function installAuthenticationFactory($policyName,

@@ -15,7 +15,7 @@ use Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface
 
 class SimpleSecurityProvider extends SecurityServiceProvider
 {
-    /** @var FirewallInterface[] */
+    /** @var FirewallInterface[]|array */
     protected $firewalls = [];
 
     /** @var AuthenticationPolicyInterface[] */
@@ -53,7 +53,12 @@ class SimpleSecurityProvider extends SecurityServiceProvider
 
         $firewallSetting = [];
         foreach ($this->firewalls as $firewallName => $firewall) {
-            $firewallSetting[$firewallName] = $this->parseFirewall($firewall, $app);
+            if ($firewall instanceof FirewallInterface) {
+                $firewallSetting[$firewallName] = $this->parseFirewall($firewall, $app);
+            }
+            else {
+                $firewallSetting[$firewallName] = $firewall;
+            }
         }
         $app['security.firewalls'] = $firewallSetting;
 
@@ -64,7 +69,7 @@ class SimpleSecurityProvider extends SecurityServiceProvider
         $this->authPolicies[$typeName] = $policy;
     }
 
-    public function addFirewall($firewallName, FirewallInterface $firewall)
+    public function addFirewall($firewallName, $firewall)
     {
         $this->firewalls[$firewallName] = $firewall;
     }

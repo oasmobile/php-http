@@ -30,6 +30,12 @@ class TestApiUserProvider implements UserProviderInterface
      */
     public function loadUserByUsername($username)
     {
+        minfo("Loading username: %s", $username);
+
+        switch ($username) {
+            default:
+                throw new UsernameNotFoundException("Username $username not found for test api");
+        }
     }
 
     /**
@@ -48,6 +54,7 @@ class TestApiUserProvider implements UserProviderInterface
      */
     public function refreshUser(UserInterface $user)
     {
+        return $user;
     }
 
     /**
@@ -59,6 +66,7 @@ class TestApiUserProvider implements UserProviderInterface
      */
     public function supportsClass($class)
     {
+        return TestApiUser::class;
     }
 
     /**
@@ -66,7 +74,20 @@ class TestApiUserProvider implements UserProviderInterface
      *
      * @return TestApiUser
      */
-    public function loadUserForApiKey($apiKey) {
-        return new TestApiUser();
+    public function loadUserForApiKey($apiKey)
+    {
+        switch ($apiKey) {
+            case 'abcd':
+                return new TestApiUser('admin', ['ROLE_GOOD', 'ROLE_ADMIN']);
+                break;
+            case 'parent':
+                return new TestApiUser('parent', ['ROLE_PARENT']);
+                break;
+            case 'child':
+                return new TestApiUser('child', ['ROLE_CHILD']);
+                break;
+            default:
+                throw new UsernameNotFoundException("apikey $apiKey doesn't match any user!");
+        }
     }
 }

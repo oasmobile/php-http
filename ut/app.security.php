@@ -59,17 +59,18 @@ $provider->addFirewall(
     ]
 );
 $provider->addFirewall("minhao.admin", $testFirewall);
-$provider->addAccessRule(new TestAccessRule());
+$provider->addAccessRule(new TestAccessRule('^/secured/madmin/admin', 'ROLE_ADMIN'));
+$provider->addAccessRule(new TestAccessRule('^/secured/madmin/parent', 'ROLE_PARENT'));
+$provider->addAccessRule(new TestAccessRule('^/secured/madmin/child', 'ROLE_CHILD'));
+$provider->addAccessRule(new TestAccessRule('^/secured/madmin', 'ROLE_USER'));
+
+$provider->addRoleHierarchy('ROLE_GOOD', 'ROLE_USER');
+$provider->addRoleHierarchy('ROLE_CHILD', 'ROLE_USER');
+$provider->addRoleHierarchy('ROLE_PARENT', 'ROLE_CHILD');
+$provider->addRoleHierarchy('ROLE_PARENT', 'ROLE_USER');
 
 $app->service_providers = [
-    [
-        $provider,
-        [
-            //'security.access_rules' => [
-            //    ['^/secured/madmin', 'ROLE_ADMIN', 'http'],
-            //],
-        ],
-    ],
+    $provider,
     new SessionServiceProvider(),
 ];
 

@@ -18,3 +18,21 @@ secured.madmin:
     path: /madmin
     defaults:
         _controller: AuthController::madmin
+
+secured.madmin.admin:
+    path: /madmin/admin
+    defaults:
+        _controller: AuthController::madmin
+
+secured.madmin.good:
+    path: /madmin/good
+    defaults:
+        _controller: AuthController::madminGood
+secured.madmin.parent:
+    path: /madmin/parent
+    defaults:
+        _controller: AuthController::madminParent
+secured.madmin.child:
+    path: /madmin/child
+    defaults:
+        _controller: AuthController::madminChild

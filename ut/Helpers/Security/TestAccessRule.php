@@ -12,19 +12,29 @@ use Oasis\Mlib\Http\ServiceProviders\Security\AccessRuleInterface;
 
 class TestAccessRule implements AccessRuleInterface
 {
-    
+    protected $pattern;
+    protected $roles;
+    protected $channel;
+
+    public function __construct($pattern, $roles, $channel = null)
+    {
+        $this->pattern = $pattern;
+        $this->roles   = $roles;
+        $this->channel = $channel;
+    }
+
     public function getPattern()
     {
-        return "^/secured/madmin";
+        return $this->pattern;
     }
 
     public function getRequiredRoles()
     {
-        return "ROLE_ADMIN";
+        return $this->roles;
     }
 
     public function getRequiredChannel()
     {
-        return null;
+        return $this->channel;
     }
 }

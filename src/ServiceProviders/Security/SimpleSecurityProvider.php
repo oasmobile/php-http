@@ -24,31 +24,13 @@ class SimpleSecurityProvider extends SecurityServiceProvider
     /** @var AuthenticationPolicyInterface[] */
     protected $authPolicies = [];
 
+    protected $roleHierarchy = [];
+
     public function register(Application $app)
     {
         parent::register($app);
 
-        //$preAuthFactory                                           = $app['security.authentication_listener.factory.pre_auth'];
-        //$app['security.authentication_listener.factory.pre_auth'] = $app->protect(
-        //    function ($name, $options) use ($app, $preAuthFactory) {
-        //        list($authProviderId, $authListenerId, $entryPointId, $authType) = call_user_func(
-        //            $preAuthFactory,
-        //            $name,
-        //            $options
-        //        );
-        //        if (!$entryPointId) {
-        //            $app['security.entry_point.' . $name . '.pre_auth'] = new BasicAuthenticationEntryPoint('google!');
-        //            $entryPointId                                       = 'security.entry_point.' . $name . '.pre_auth';
-        //        }
-        //
-        //        return [
-        //            $authProviderId,
-        //            $authListenerId,
-        //            $entryPointId,
-        //            $authType,
-        //        ];
-        //    }
-        //);
+        $app['security.role_hierarchy'] = $this->getRoleHierarchy();
 
         foreach ($this->authPolicies as $policyName => $policy) {
             $this->installAuthenticationFactory($policyName, $policy, $app);
@@ -164,11 +146,28 @@ class SimpleSecurityProvider extends SecurityServiceProvider
 
     protected function parseFirewall(FirewallInterface $firewall, Application $app)
     {
-        $setting            = $firewall->getPolicies();
-        $setting['pattern'] = $firewall->getPattern();
-        $setting['users']   = $firewall->getUserProvider();
-        $setting            = array_merge($setting, $firewall->getOtherSettings());
+        $setting              = $firewall->getPolicies();
+        $setting['pattern']   = $firewall->getPattern();
+        $setting['users']     = $firewall->getUserProvider();
+        $setting['stateless'] = $firewall->isStateless();
+        $setting              = array_merge($setting, $firewall->getOtherSettings());
 
         return $setting;
+    }
+
+    /**
+     * @return array
+     */
+    public function getRoleHierarchy()
+    {
+        return $this->roleHierarchy;
+    }
+
+    public function addRoleHierarchy($role, $children)
+    {
+        $old = isset($this->roleHierarchy[$role]) ? $this->roleHierarchy[$role] : [];
+        $old = array_merge($old, (array)$children);
+
+        $this->roleHierarchy[$role] = $old;
     }
 }

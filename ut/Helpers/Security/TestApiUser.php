@@ -10,9 +10,17 @@ namespace Oasis\Mlib\Http\Ut\Security;
 
 use Symfony\Component\Security\Core\User\UserInterface;
 
-class TestApiUser implements UserInterface
+class TestApiUser implements UserInterface, \JsonSerializable
 {
-    
+    protected $username;
+    protected $roles;
+
+    public function __construct($username, $roles)
+    {
+        $this->roles    = $roles;
+        $this->username = $username;
+    }
+
     /**
      * Returns the roles granted to the user.
      *
@@ -31,7 +39,7 @@ class TestApiUser implements UserInterface
      */
     public function getRoles()
     {
-        return ['ROLE_GOOD', 'ROLE_ADMIN'];
+        return $this->roles;
     }
 
     /**
@@ -64,6 +72,7 @@ class TestApiUser implements UserInterface
      */
     public function getUsername()
     {
+        return $this->username;
     }
 
     /**
@@ -74,5 +83,18 @@ class TestApiUser implements UserInterface
      */
     public function eraseCredentials()
     {
+    }
+
+    /**
+     * Specify data which should be serialized to JSON
+     *
+     * @link  http://php.net/manual/en/jsonserializable.jsonserialize.php
+     * @return mixed data which can be serialized by <b>json_encode</b>,
+     *        which is a value of any type other than a resource.
+     * @since 5.4.0
+     */
+    function jsonSerialize()
+    {
+        return $this->getUsername();
     }
 }

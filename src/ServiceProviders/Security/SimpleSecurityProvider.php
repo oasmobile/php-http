@@ -8,6 +8,9 @@
 
 namespace Oasis\Mlib\Http\ServiceProviders\Security;
 
+use Oasis\Mlib\Http\Configuration\ConfigurationValidationTrait;
+use Oasis\Mlib\Http\Configuration\SecurityConfiguration;
+use Oasis\Mlib\Utils\DataProviderInterface;
 use Silex\Application;
 use Silex\Provider\SecurityServiceProvider;
 use Symfony\Component\Security\Core\Authentication\Provider\AuthenticationProviderInterface;
@@ -15,6 +18,8 @@ use Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface
 
 class SimpleSecurityProvider extends SecurityServiceProvider
 {
+    use ConfigurationValidationTrait;
+
     /** @var FirewallInterface[]|array */
     protected $firewalls = [];
 
@@ -25,6 +30,32 @@ class SimpleSecurityProvider extends SecurityServiceProvider
     protected $authPolicies = [];
 
     protected $roleHierarchy = [];
+
+    public function __construct(array $securityConfiguration = [])
+    {
+        if ($securityConfiguration) {
+            $dp = $this->processConfiguration($securityConfiguration, new SecurityConfiguration());
+            if ($policies = $dp->getOptional('policies', DataProviderInterface::ARRAY_TYPE, [])) {
+                foreach ($policies as $name => $policy) {
+                    if ($policy instanceof AuthenticationPolicyInterface) {
+                        $this->addAuthenticationPolicy($name, $policy);
+                    }
+                }
+            }
+            if ($firewalls = $dp->getOptional('firewalls', DataProviderInterface::ARRAY_TYPE, [])) {
+                foreach ($firewalls as $name => $firewallData) {
+                    $firewall = new SimpleFirewall($firewallData);
+                    $this->addFirewall($name, $firewall);
+                }
+            }
+            if ($accessRules = $dp->getOptional('access_rules', DataProviderInterface::ARRAY_TYPE, [])) {
+                foreach ($accessRules as $name => $ruleData) {
+                    $rule = new SimpleAccessRule($ruleData);
+                    $this->addAccessRule($rule);
+                }
+            }
+        }
+    }
 
     public function register(Application $app)
     {
@@ -63,9 +94,9 @@ class SimpleSecurityProvider extends SecurityServiceProvider
         $app['security.access_rules'] = $rulesSetting;
     }
 
-    public function addAuthenticationPolicy($typeName, AuthenticationPolicyInterface $policy)
+    public function addAuthenticationPolicy($policyName, AuthenticationPolicyInterface $policy)
     {
-        $this->authPolicies[$typeName] = $policy;
+        $this->authPolicies[$policyName] = $policy;
     }
 
     public function addFirewall($firewallName, $firewall)

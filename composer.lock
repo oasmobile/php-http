@@ -220,16 +220,16 @@
         },
         {
             "name": "oasis/utils",
-            "version": "v1.3.0",
+            "version": "v1.3.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/oasmobile/php-utils.git",
-                "reference": "a482bda003ca649a82da8928b1717193178d1622"
+                "reference": "bd3d5819ee55f10fbb0c0384a97838263cde0bd2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/oasmobile/php-utils/zipball/a482bda003ca649a82da8928b1717193178d1622",
-                "reference": "a482bda003ca649a82da8928b1717193178d1622",
+                "url": "https://api.github.com/repos/oasmobile/php-utils/zipball/bd3d5819ee55f10fbb0c0384a97838263cde0bd2",
+                "reference": "bd3d5819ee55f10fbb0c0384a97838263cde0bd2",
                 "shasum": ""
             },
             "require": {
@@ -255,7 +255,7 @@
                 }
             ],
             "description": "Various utility classes & functions",
-            "time": "2016-02-18 03:55:31"
+            "time": "2016-03-16 07:00:59"
         },
         {
             "name": "paragonie/random_compat",

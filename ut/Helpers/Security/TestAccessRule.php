@@ -8,33 +8,18 @@
 
 namespace Oasis\Mlib\Http\Ut\Security;
 
-use Oasis\Mlib\Http\ServiceProviders\Security\AccessRuleInterface;
+use Oasis\Mlib\Http\ServiceProviders\Security\SimpleAccessRule;
 
-class TestAccessRule implements AccessRuleInterface
+class TestAccessRule extends SimpleAccessRule
 {
-    protected $pattern;
-    protected $roles;
-    protected $channel;
-
     public function __construct($pattern, $roles, $channel = null)
     {
-        $this->pattern = $pattern;
-        $this->roles   = $roles;
-        $this->channel = $channel;
-    }
-
-    public function getPattern()
-    {
-        return $this->pattern;
-    }
-
-    public function getRequiredRoles()
-    {
-        return $this->roles;
-    }
-
-    public function getRequiredChannel()
-    {
-        return $this->channel;
+        parent::__construct(
+            [
+                'pattern' => $pattern,
+                'roles'   => $roles,
+                'channel' => $channel,
+            ]
+        );
     }
 }

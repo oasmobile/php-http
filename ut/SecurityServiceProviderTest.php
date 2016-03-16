@@ -26,12 +26,9 @@ class SecurityServiceProviderTest extends WebTestCase
         return $app;
     }
 
-    /**
-     * @iss
-     */
     public function testBasicAuth()
     {
-        $this->markTestSkipped();
+        //$this->markTestSkipped();
         $client = $this->createClient(
             [
                 'PHP_AUTH_USER' => "admin",
@@ -55,7 +52,7 @@ class SecurityServiceProviderTest extends WebTestCase
 
     public function testFormAuth()
     {
-        $this->markTestSkipped();
+        //$this->markTestSkipped();
         $client = $this->createClient();
         $client->request('GET', '/secured/fadmin/test');
         $response = $client->getResponse();
@@ -92,7 +89,7 @@ class SecurityServiceProviderTest extends WebTestCase
 
     public function testPreAuth()
     {
-        $this->markTestSkipped();
+        //$this->markTestSkipped();
         $client = $this->createClient();
         $client->request(
             'GET',

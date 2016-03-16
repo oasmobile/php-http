@@ -5,15 +5,12 @@
  * Date: 2016-03-08
  * Time: 17:09
  */
-use Oasis\Mlib\Http\ServiceProviders\Security\SimpleAuthenticationPolicy;
+use Oasis\Mlib\Http\ServiceProviders\Security\SimpleFirewall;
 use Oasis\Mlib\Http\ServiceProviders\Security\SimpleSecurityProvider;
 use Oasis\Mlib\Http\SilexKernel;
 use Oasis\Mlib\Http\Ut\Security\TestAccessRule;
-use Oasis\Mlib\Http\Ut\Security\TestApiUserPreAuthenticator;
 use Oasis\Mlib\Http\Ut\Security\TestApiUserProvider;
-use Oasis\Mlib\Http\Ut\Security\TestAuthenticationFirewall;
 use Oasis\Mlib\Http\Ut\Security\TestAuthenticationPolicy;
-use Oasis\Mlib\Http\Ut\TestPreAuthAuthenticationListener;
 use Silex\Provider\SessionServiceProvider;
 
 $users = [
@@ -33,9 +30,18 @@ $preUsers = new TestApiUserProvider();
 $app = require __DIR__ . "/app.php";
 
 $secPolicy = new TestAuthenticationPolicy();
-$secPolicy->setPreAuthenticator(new TestApiUserPreAuthenticator());
 
-$testFirewall = new TestAuthenticationFirewall();
+//$testFirewall = new TestAuthenticationFirewall();
+$testFirewall = new SimpleFirewall(
+    [
+        "pattern"  => "^/secured/madmin",
+        "policies" => [
+            "mauth" => true,
+        ],
+        "users"    => new TestApiUserProvider(),
+
+    ]
+);
 
 $provider = new SimpleSecurityProvider();
 $provider->addAuthenticationPolicy('mauth', $secPolicy);
@@ -60,7 +66,7 @@ $provider->addFirewall(
 );
 $provider->addFirewall("minhao.admin", $testFirewall);
 $provider->addAccessRule(new TestAccessRule('^/secured/madmin/admin', 'ROLE_ADMIN'));
-$provider->addAccessRule(new TestAccessRule('^/secured/madmin/parent', 'ROLE_PARENT'));
+$provider->addAccessRule(new TestAccessRule('^/secured/madmin/parent', ['ROLE_PARENT']));
 $provider->addAccessRule(new TestAccessRule('^/secured/madmin/child', 'ROLE_CHILD'));
 $provider->addAccessRule(new TestAccessRule('^/secured/madmin', 'ROLE_USER'));
 

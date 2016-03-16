@@ -22,15 +22,26 @@ class SecurityConfiguration implements ConfigurationInterface
      */
     public function getConfigTreeBuilder()
     {
-        $builder = new TreeBuilder();
+        $builder  = new TreeBuilder();
         $security = $builder->root('security');
         {
+            /** @var ArrayNodeDefinition $policies */
+            $policies = $security->children()->arrayNode('policies');
+            {
+                $policies->prototype('variable');
+            }
             /** @var ArrayNodeDefinition $firewalls */
-            $firewalls = $security->children()->variableNode('firewalls');
+            $firewalls = $security->children()->arrayNode('firewalls');
             {
                 $firewalls->prototype('variable');
             }
+            /** @var ArrayNodeDefinition $accessRules */
+            $accessRules = $security->children()->arrayNode('access_rules');
+            {
+                $accessRules->prototype('variable');
+            }
         }
+
         return $builder;
     }
 }

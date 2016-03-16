@@ -8,17 +8,26 @@
 
 namespace Oasis\Mlib\Http\Ut\Security;
 
+use Oasis\Mlib\Http\ServiceProviders\Security\AbstractSimplePreAuthenticator;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Authentication\Token\PreAuthenticatedToken;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\BadCredentialsException;
+use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
+use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
-use Symfony\Component\Security\Http\Authentication\SimplePreAuthenticatorInterface;
 
-class TestApiUserPreAuthenticator implements SimplePreAuthenticatorInterface
+class TestApiUserPreAuthenticator extends AbstractSimplePreAuthenticator
 {
-    
-    public function authenticateToken(TokenInterface $token, UserProviderInterface $userProvider, $providerKey)
+    /**
+     * @param TokenInterface        $token
+     * @param UserProviderInterface $userProvider
+     *
+     * @return UserInterface
+     *
+     * @throws UsernameNotFoundException if a user cannot be loaded by the specified token, this exception is thrown
+     */
+    public function loadUserByToken(TokenInterface $token, UserProviderInterface $userProvider)
     {
         if (!$userProvider instanceof TestApiUserProvider) {
             throw new \InvalidArgumentException("User provider of wrong type, type = ", get_class($userProvider));
@@ -26,25 +35,11 @@ class TestApiUserPreAuthenticator implements SimplePreAuthenticatorInterface
 
         $apiKey = $token->getCredentials();
         $user   = $userProvider->loadUserForApiKey($apiKey);
-        $roles  = $user->getRoles();
 
-        return new PreAuthenticatedToken(
-            $user,
-            $apiKey,
-            $providerKey,
-            $roles
-        );
+        return $user;
     }
 
-    public function supportsToken(TokenInterface $token, $providerKey)
-    {
-        return (
-            $token instanceof PreAuthenticatedToken
-            && $token->getProviderKey() === $providerKey
-        );
-    }
-
-    public function createToken(Request $request, $providerKey)
+    public function getCredentialsFromRequest(Request $request)
     {
         $apiKey = $request->query->get('sig');
 
@@ -52,6 +47,6 @@ class TestApiUserPreAuthenticator implements SimplePreAuthenticatorInterface
             throw new BadCredentialsException("sig not found!");
         }
 
-        return new PreAuthenticatedToken('anon.', $apiKey, $providerKey);
+        return $apiKey;
     }
 }

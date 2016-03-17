@@ -54,6 +54,12 @@ class SimpleSecurityProvider extends SecurityServiceProvider
                     $this->addAccessRule($rule);
                 }
             }
+            if ($roleHierarchy = $dp->getOptional('role_hierarchy', DataProviderInterface::ARRAY_TYPE, [])) {
+                foreach ($roleHierarchy as $parent => $children)
+                {
+                    $this->addRoleHierarchy($parent, $children);
+                }
+            }
         }
     }
 

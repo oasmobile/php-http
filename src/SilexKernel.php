@@ -13,6 +13,8 @@ use Oasis\Mlib\Http\Configuration\HttpConfiguration;
 use Oasis\Mlib\Http\Middlewares\MiddlewareInterface;
 use Oasis\Mlib\Http\ServiceProviders\Routing\CacheableRouterProvider;
 use Oasis\Mlib\Http\ServiceProviders\Routing\CacheableRouterUrlGeneratorProvider;
+use Oasis\Mlib\Http\ServiceProviders\Security\SimpleSecurityProvider;
+use Oasis\Mlib\Logging\MLogging;
 use Oasis\Mlib\Utils\ArrayDataProvider;
 use Oasis\Mlib\Utils\DataProviderInterface;
 use Silex\Application as SilexApp;
@@ -44,22 +46,57 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
 
     /** @var  ArrayDataProvider */
     protected $httpDataProvider;
-    /** @var  Router */
-    protected $router;
     /** @var bool */
     protected $isDebug = true;
     
     public function __construct(array $httpConfig, $isDebug)
     {
         parent::__construct();
-        
+
+        $this['logger'] = MLogging::getLogger();
+
         $this->httpDataProvider = $this->processConfiguration($httpConfig, new HttpConfiguration());
         $this->isDebug          = $isDebug;
         
         $this->register(new ServiceControllerServiceProvider());
-        $routingConfig = $this->httpDataProvider->getOptional('routing', DataProviderInterface::ARRAY_TYPE, []);
-        $this->register($routerProvider = new CacheableRouterProvider($routingConfig, $this->isDebug));
-        $this->register(new CacheableRouterUrlGeneratorProvider($routerProvider));
+
+        if ($routingConfig = $this->httpDataProvider->getOptional('routing', DataProviderInterface::ARRAY_TYPE, [])) {
+            $this->register($routerProvider = new CacheableRouterProvider($routingConfig, $this->isDebug));
+            $this->register(new CacheableRouterUrlGeneratorProvider($routerProvider));
+        }
+
+        if ($securityConfig = $this->httpDataProvider->getOptional('security', DataProviderInterface::ARRAY_TYPE, [])) {
+            $this->register(new SimpleSecurityProvider($securityConfig));
+        }
+
+        if ($viewHandlersConfig = $this->httpDataProvider->getOptional(
+            'view_handlers',
+            DataProviderInterface::MIXED_TYPE
+        )
+        ) {
+            $this->view_handlers = $viewHandlersConfig;
+        }
+        if ($errorHandlersConfig = $this->httpDataProvider->getOptional(
+            'error_handlers',
+            DataProviderInterface::MIXED_TYPE
+        )
+        ) {
+            $this->error_handlers = $errorHandlersConfig;
+        }
+        if ($middlewaresConfig = $this->httpDataProvider->getOptional(
+            'middlewares',
+            DataProviderInterface::MIXED_TYPE
+        )
+        ) {
+            $this->middlewares = $middlewaresConfig;
+        }
+        if ($providersConfig = $this->httpDataProvider->getOptional(
+            'providers',
+            DataProviderInterface::MIXED_TYPE
+        )
+        ) {
+            $this->service_providers = $providersConfig;
+        }
     }
 
     /**
@@ -85,22 +122,24 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
 
     function __set($name, $value)
     {
+        if (!is_array($value)) {
+            $value = [$value];
+        }
         switch ($name) {
             case 'service_providers': {
-                if (!is_array($value)
-                    || sizeof(
-                           $providers = array_filter(
-                               $value,
-                               function ($v) {
-                                   return ($v instanceof ServiceProviderInterface
-                                           || (is_array($v)
-                                               && sizeof($v) == 2
-                                               && $v[0] instanceof ServiceProviderInterface
-                                           )
-                                   );
-                               }
-                           )
-                       ) != sizeof($value)
+                if (sizeof(
+                        $providers = array_filter(
+                            $value,
+                            function ($v) {
+                                return ($v instanceof ServiceProviderInterface
+                                        || (is_array($v)
+                                            && sizeof($v) == 2
+                                            && $v[0] instanceof ServiceProviderInterface
+                                        )
+                                );
+                            }
+                        )
+                    ) != sizeof($value)
                 ) {
                     throw new InvalidConfigurationException("$name must be an array of ServiceProvider");
                 };
@@ -114,16 +153,15 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
                 }
             }
                 break;
-            case 'middleware': {
-                if (!is_array($value)
-                    || sizeof(
-                           $middlewares = array_filter(
-                               $value,
-                               function ($v) {
-                                   return $v instanceof MiddlewareInterface;
-                               }
-                           )
-                       ) != sizeof($value)
+            case 'middlewares': {
+                if (sizeof(
+                        $middlewares = array_filter(
+                            $value,
+                            function ($v) {
+                                return $v instanceof MiddlewareInterface;
+                            }
+                        )
+                    ) != sizeof($value)
                 ) {
                     throw new InvalidConfigurationException("$name must be an array of Middleware");
                 };
@@ -134,15 +172,14 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
             }
                 break;
             case 'view_handlers': {
-                if (!is_array($value)
-                    || sizeof(
-                           $viewHandlers = array_filter(
-                               $value,
-                               function ($v) {
-                                   return is_callable($v);
-                               }
-                           )
-                       ) != sizeof($value)
+                if (sizeof(
+                        $viewHandlers = array_filter(
+                            $value,
+                            function ($v) {
+                                return is_callable($v);
+                            }
+                        )
+                    ) != sizeof($value)
                 ) {
                     throw new InvalidConfigurationException("$name must be an array of Callable");
                 };
@@ -153,15 +190,14 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
             }
                 break;
             case 'error_handlers': {
-                if (!is_array($value)
-                    || sizeof(
-                           $errorHandlers = array_filter(
-                               $value,
-                               function ($v) {
-                                   return is_callable($v);
-                               }
-                           )
-                       ) != sizeof($value)
+                if (sizeof(
+                        $errorHandlers = array_filter(
+                            $value,
+                            function ($v) {
+                                return is_callable($v);
+                            }
+                        )
+                    ) != sizeof($value)
                 ) {
                     throw new InvalidConfigurationException("$name must be an array of Callable");
                 };

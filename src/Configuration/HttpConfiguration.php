@@ -25,6 +25,7 @@ class HttpConfiguration implements ConfigurationInterface
         $http    = $builder->root('http');
         {
             $http->children()->variableNode('routing');
+            $http->children()->variableNode('security');
             $http->children()->variableNode('view_handlers');
             $http->children()->variableNode('error_handlers');
             $http->children()->variableNode('middlewares');

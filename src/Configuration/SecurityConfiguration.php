@@ -40,6 +40,14 @@ class SecurityConfiguration implements ConfigurationInterface
             {
                 $accessRules->prototype('variable');
             }
+            $roleHierarchy = $security->children()->arrayNode('role_hierarchy');
+            {
+                $roleHierarchy->prototype('variable')->beforeNormalization()->ifString()->then(
+                    function ($v) {
+                        return [$v];
+                    }
+                );
+            }
         }
 
         return $builder;

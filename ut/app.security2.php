@@ -8,12 +8,14 @@
  * Date: 2016-03-08
  * Time: 17:09
  */
-use Oasis\Mlib\Http\ServiceProviders\Security\SimpleFirewall;
-use Oasis\Mlib\Http\ServiceProviders\Security\SimpleSecurityProvider;
+use Oasis\Mlib\Http\ErrorHandlers\JsonErrorHandler;
 use Oasis\Mlib\Http\SilexKernel;
 use Oasis\Mlib\Http\Ut\Security\TestApiUserProvider;
 use Oasis\Mlib\Http\Ut\Security\TestAuthenticationPolicy;
+use Oasis\Mlib\Http\Views\JsonViewHandler;
 use Silex\Provider\SessionServiceProvider;
+
+require_once __DIR__ . '/bootstrap.php';
 
 $users = [
     "admin"  => [
@@ -26,31 +28,18 @@ $users = [
     ],
 ];
 
-$preUsers = new TestApiUserProvider();
-
-/** @var SilexKernel $app */
-$app = require __DIR__ . "/app.php";
-
-$secPolicy = new TestAuthenticationPolicy();
-
-//$testFirewall = new TestAuthenticationFirewall();
-$testFirewall = new SimpleFirewall(
-    [
-        "pattern"  => "^/secured/madmin",
-        "policies" => [
-            "mauth" => true,
+$config = [
+    'routing'        => [
+        'path'       => __DIR__ . "/routes.yml",
+        'namespaces' => [
+            'Oasis\\Mlib\\Http\\Ut\\Controllers\\',
         ],
-        "users"    => new TestApiUserProvider(),
-
-    ]
-);
-
-$provider = new SimpleSecurityProvider(
-    [
-        'policies'     => [
+    ],
+    'security'       => [
+        'policies'       => [
             'mauth' => new TestAuthenticationPolicy(),
         ],
-        'firewalls'    => [
+        'firewalls'      => [
             'minhao.admin' => [
                 "pattern"  => "^/secured/madmin",
                 "policies" => [
@@ -76,7 +65,7 @@ $provider = new SimpleSecurityProvider(
                 "users"    => $users,
             ],
         ],
-        'access_rules' => [
+        'access_rules'   => [
             [
                 'pattern' => '^/secured/madmin/admin',
                 'roles'   => 'ROLE_ADMIN',
@@ -94,17 +83,22 @@ $provider = new SimpleSecurityProvider(
                 'roles'   => 'ROLE_USER',
             ],
         ],
-    ]
-);
-
-$provider->addRoleHierarchy('ROLE_GOOD', 'ROLE_USER');
-$provider->addRoleHierarchy('ROLE_CHILD', 'ROLE_USER');
-$provider->addRoleHierarchy('ROLE_PARENT', 'ROLE_CHILD');
-$provider->addRoleHierarchy('ROLE_PARENT', 'ROLE_USER');
-
-$app->service_providers = [
-    $provider,
-    new SessionServiceProvider(),
+        'role_hierarchy' => [
+            'ROLE_GOOD'   => 'ROLE_USER',
+            'ROLE_CHILD'  => ['ROLE_USER'],
+            'ROLE_PARENT' => ['ROLE_CHILD', 'ROLE_USER'],
+        ],
+    ],
+    'view_handlers'  => new JsonViewHandler(),
+    'error_handlers' => new JsonErrorHandler(),
+    'providers'      => new SessionServiceProvider(),
 ];
+
+$app = new SilexKernel($config, true);
+//
+//$provider->addRoleHierarchy('ROLE_GOOD', 'ROLE_USER');
+//$provider->addRoleHierarchy('ROLE_CHILD', 'ROLE_USER');
+//$provider->addRoleHierarchy('ROLE_PARENT', 'ROLE_CHILD');
+//$provider->addRoleHierarchy('ROLE_PARENT', 'ROLE_USER');
 
 return $app;

@@ -17,5 +17,6 @@ $loader->addPsr4('Oasis\\Mlib\\Http\\Ut\\', __DIR__ . "/Helpers");
 
 //error_reporting(E_ALL ^ ~E_NOTICE);
 Debug::enable(E_ALL ^ ~E_NOTICE);
+
 (new LocalFileHandler('/tmp'))->install();
 

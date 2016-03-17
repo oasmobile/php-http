@@ -48,8 +48,11 @@ class CrossOriginResourceSharingProvider implements ServiceProviderInterface
      */
     public function __construct(array $strategies)
     {
-        foreach ($strategies as $strategy) {
-            if (!$strategy instanceof CrossOriginResourceSharingStrategy) {
+        foreach ($strategies as &$strategy) {
+            if (is_array($strategy)) {
+                $strategy = new CrossOriginResourceSharingStrategy($strategy);
+            }
+            elseif (!$strategy instanceof CrossOriginResourceSharingStrategy) {
                 throw new \InvalidArgumentException(
                     static::class . " must be constructed with array of " . CrossOriginResourceSharingStrategy::class
                 );

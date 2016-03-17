@@ -13,13 +13,14 @@ $app                    = require __DIR__ . "/app.php";
 $app->service_providers = [
     new CrossOriginResourceSharingProvider(
         [
-            new CrossOriginResourceSharingStrategy(
-                [
-                    'path'    => '/cors/*',
-                    'origins' => ['localhost', 'baidu.com', "cors.oasis.mlib.com"],
-                    'headers' => ['CUSTOM_HEADER', 'custom_header2', 'CUSTOM_HEADER3', 'CUSTOM_HEADER4'],
-                ]
-            ),
+            //new CrossOriginResourceSharingStrategy(
+            [
+                'path'    => '/cors/*',
+                'origins' => ['localhost', 'baidu.com', "cors.oasis.mlib.com"],
+                'headers' => ['CUSTOM_HEADER', 'custom_header2', 'CUSTOM_HEADER3', 'CUSTOM_HEADER4'],
+            ]
+            //),
+            ,
             new CrossOriginResourceSharingStrategy(
                 [
                     'path'                => '*',

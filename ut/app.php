@@ -25,6 +25,5 @@ $app->view_handlers  = [
 $app->error_handlers = [
     new JsonErrorHandler(),
 ];
-$app['logger'] = MLogging::getLogger();
 
 return $app;

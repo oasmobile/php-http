@@ -11,6 +11,7 @@ namespace Oasis\Mlib\Http;
 use Oasis\Mlib\Http\Configuration\ConfigurationValidationTrait;
 use Oasis\Mlib\Http\Configuration\HttpConfiguration;
 use Oasis\Mlib\Http\Middlewares\MiddlewareInterface;
+use Oasis\Mlib\Http\ServiceProviders\Cors\CrossOriginResourceSharingProvider;
 use Oasis\Mlib\Http\ServiceProviders\Routing\CacheableRouterProvider;
 use Oasis\Mlib\Http\ServiceProviders\Routing\CacheableRouterUrlGeneratorProvider;
 use Oasis\Mlib\Http\ServiceProviders\Security\SimpleSecurityProvider;
@@ -66,6 +67,9 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
 
         if ($securityConfig = $this->httpDataProvider->getOptional('security', DataProviderInterface::ARRAY_TYPE, [])) {
             $this->register(new SimpleSecurityProvider($securityConfig));
+        }
+        if ($corsConfig = $this->httpDataProvider->getOptional('cors', DataProviderInterface::ARRAY_TYPE, [])) {
+            $this->register(new CrossOriginResourceSharingProvider($corsConfig));
         }
 
         if ($viewHandlersConfig = $this->httpDataProvider->getOptional(

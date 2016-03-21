@@ -27,6 +27,7 @@ class CacheableRouterProvider implements ServiceProviderInterface
     protected $router;
     /** @var  DataProviderInterface */
     protected $configDataProvider;
+    protected $cacheDir             = null;
     protected $isDebug              = false;
     protected $controllerNamespaces = [];
 
@@ -39,6 +40,7 @@ class CacheableRouterProvider implements ServiceProviderInterface
             DataProviderInterface::ARRAY_TYPE,
             []
         );
+        $this->cacheDir             = $this->configDataProvider->getOptional('cache_dir');
         $this->isDebug              = $isDebug;
     }
     
@@ -96,12 +98,14 @@ class CacheableRouterProvider implements ServiceProviderInterface
                 $routerPath = dirname($routerPath);
             }
 
+            $cacheDir     = strcasecmp($this->cacheDir, "false") == 0 ? null :
+                ($this->cacheDir ? : $routerPath . "/cache");
             $locator      = new FileLocator([$routerPath]);
             $this->router = new Router(
                 new YamlFileLoader($locator),
                 $routerFile,
                 [
-                    'cache_dir' => $routerPath . '/cache',
+                    'cache_dir' => $cacheDir,
                     "debug"     => $this->isDebug,
                 ],
                 $requestContext

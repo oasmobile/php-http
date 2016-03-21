@@ -25,6 +25,7 @@ class CacheableRouterConfiguration implements ConfigurationInterface
         $routing = $builder->root('routing');
         {
             $routing->children()->scalarNode('path');
+            $routing->children()->scalarNode('cache_dir')->defaultValue(null);
             $routing->children()->variableNode('namespaces')->beforeNormalization()->ifString()->then(
                 function ($v) {
                     return [$v];

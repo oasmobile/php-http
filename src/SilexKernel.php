@@ -20,6 +20,7 @@ use Oasis\Mlib\Utils\ArrayDataProvider;
 use Oasis\Mlib\Utils\DataProviderInterface;
 use Silex\Application as SilexApp;
 use Silex\Provider\ServiceControllerServiceProvider;
+use Silex\Provider\TwigServiceProvider;
 use Silex\ServiceProviderInterface;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\HttpKernel\KernelEvents;
@@ -57,10 +58,15 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
 
         $this->httpDataProvider = $this->processConfiguration($httpConfig, new HttpConfiguration());
         $this->isDebug          = $isDebug;
+        $cacheDir               = $this->httpDataProvider->getOptional('cache_dir');
         
         $this->register(new ServiceControllerServiceProvider());
 
+        // providers with built-in support
         if ($routingConfig = $this->httpDataProvider->getOptional('routing', DataProviderInterface::ARRAY_TYPE, [])) {
+            if ($cacheDir) {
+                $routingConfig = array_merge(['cache_dir' => $cacheDir], $routingConfig);
+            }
             $this->register($routerProvider = new CacheableRouterProvider($routingConfig, $this->isDebug));
             $this->register(new CacheableRouterUrlGeneratorProvider($routerProvider));
         }
@@ -68,10 +74,13 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
         if ($securityConfig = $this->httpDataProvider->getOptional('security', DataProviderInterface::ARRAY_TYPE, [])) {
             $this->register(new SimpleSecurityProvider($securityConfig));
         }
+
         if ($corsConfig = $this->httpDataProvider->getOptional('cors', DataProviderInterface::ARRAY_TYPE, [])) {
             $this->register(new CrossOriginResourceSharingProvider($corsConfig));
         }
+        $this->register(new TwigServiceProvider());
 
+        // other configuration settings
         if ($viewHandlersConfig = $this->httpDataProvider->getOptional(
             'view_handlers',
             DataProviderInterface::MIXED_TYPE

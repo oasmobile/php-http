@@ -100,13 +100,15 @@ class CacheableRouterProvider implements ServiceProviderInterface
 
             $cacheDir     = strcasecmp($this->cacheDir, "false") == 0 ? null :
                 ($this->cacheDir ? : $routerPath . "/cache");
+            $matcherCacheClassname = "ProjectUrlMatcher_" . md5(realpath($cacheDir));
             $locator      = new FileLocator([$routerPath]);
             $this->router = new Router(
                 new YamlFileLoader($locator),
                 $routerFile,
                 [
-                    'cache_dir' => $cacheDir,
-                    "debug"     => $this->isDebug,
+                    'cache_dir'           => $cacheDir,
+                    'matcher_cache_class' => $matcherCacheClassname,
+                    "debug"               => $this->isDebug,
                 ],
                 $requestContext
             );

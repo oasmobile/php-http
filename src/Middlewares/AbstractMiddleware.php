@@ -12,6 +12,11 @@ use Silex\Application;
 
 abstract class AbstractMiddleware implements MiddlewareInterface
 {
+    public function onlyForMasterRequest()
+    {
+        return true;
+    }
+
     public function getAfterPriority()
     {
         return Application::LATE_EVENT;

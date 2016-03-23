@@ -19,9 +19,14 @@ use Oasis\Mlib\Logging\MLogging;
 use Oasis\Mlib\Utils\ArrayDataProvider;
 use Oasis\Mlib\Utils\DataProviderInterface;
 use Silex\Application as SilexApp;
+use Silex\CallbackResolver;
 use Silex\Provider\ServiceControllerServiceProvider;
 use Silex\ServiceProviderInterface;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
+use Symfony\Component\HttpKernel\Event\GetResponseEvent;
+use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
@@ -113,13 +118,96 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
         $this->on(KernelEvents::EXCEPTION, new ExtendedExceptionListnerWrapper($this, $callback), $priority);
     }
 
+    /**
+     * @override Overrides parent function to enable before middleware for SUB_REQUEST
+     *
+     * Registers a before filter.
+     *
+     * Before filters are run before any route has been matched.
+     *
+     * @param mixed $callback          Before filter callback
+     * @param int   $priority          The higher this value, the earlier an event
+     *                                 listener will be triggered in the chain (defaults to 0)
+     * @param bool  $masterRequestOnly If this middleware is only applicable for Master Request
+     */
+    public function before($callback, $priority = 0, $masterRequestOnly = true)
+    {
+        $app = $this;
+
+        $this->on(
+            KernelEvents::REQUEST,
+            function (GetResponseEvent $event) use ($callback, $app, $masterRequestOnly) {
+                if ($masterRequestOnly && HttpKernelInterface::MASTER_REQUEST !== $event->getRequestType()) {
+                    return;
+                }
+
+                /** @var CallbackResolver $resolver */
+                $resolver = $app['callback_resolver'];
+                $ret      = call_user_func(
+                    $resolver->resolveCallback($callback),
+                    $event->getRequest(),
+                    $app
+                );
+
+                if ($ret instanceof Response) {
+                    $event->setResponse($ret);
+                }
+            },
+            $priority
+        );
+    }
+
+    /**
+     * @override Overrides parent function to enable before middleware for SUB_REQUEST
+     *
+     * Registers an after filter.
+     *
+     * After filters are run after the controller has been executed.
+     *
+     * @param mixed $callback          After filter callback
+     * @param int   $priority          The higher this value, the earlier an event
+     *                                 listener will be triggered in the chain (defaults to 0)
+     * @param bool  $masterRequestOnly If this middleware is only applicable for Master Request
+     */
+    public function after($callback, $priority = 0, $masterRequestOnly = true)
+    {
+        $app = $this;
+
+        $this->on(
+            KernelEvents::RESPONSE,
+            function (FilterResponseEvent $event) use ($callback, $app, $masterRequestOnly) {
+                if ($masterRequestOnly && HttpKernelInterface::MASTER_REQUEST !== $event->getRequestType()) {
+                    return;
+                }
+
+                /** @var CallbackResolver $resolver */
+                $resolver = $app['callback_resolver'];
+                $response = call_user_func(
+                    $resolver->resolveCallback($callback),
+                    $event->getRequest(),
+                    $event->getResponse(),
+                    $app
+                );
+                if ($response instanceof Response) {
+                    $event->setResponse($response);
+                }
+                elseif (null !== $response) {
+                    throw new \RuntimeException(
+                        'An after middleware returned an invalid response value. Must return null or an instance of Response.'
+                    );
+                }
+            },
+            $priority
+        );
+    }
+
     public function addMiddleware(MiddlewareInterface $middleware)
     {
         if (false !== ($priority = $middleware->getBeforePriority())) {
-            $this->before([$middleware, 'before'], $priority);
+            $this->before([$middleware, 'before'], $priority, $middleware->onlyForMasterRequest());
         }
         if (false !== ($priority = $middleware->getAfterPriority())) {
-            $this->after([$middleware, 'after'], $priority);
+            $this->after([$middleware, 'after'], $priority, $middleware->onlyForMasterRequest());
         }
     }
 

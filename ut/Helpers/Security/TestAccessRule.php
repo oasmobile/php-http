@@ -9,9 +9,17 @@
 namespace Oasis\Mlib\Http\Ut\Security;
 
 use Oasis\Mlib\Http\ServiceProviders\Security\SimpleAccessRule;
+use Symfony\Component\Routing\Matcher\RequestMatcherInterface;
 
 class TestAccessRule extends SimpleAccessRule
 {
+    /**
+     * TestAccessRule constructor.
+     *
+     * @param string|RequestMatcherInterface $pattern
+     * @param string|array      $roles
+     * @param string|null       $channel
+     */
     public function __construct($pattern, $roles, $channel = null)
     {
         parent::__construct(

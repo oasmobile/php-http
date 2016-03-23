@@ -24,7 +24,7 @@ class SimpleAccessRuleConfiguration implements ConfigurationInterface
         $builder = new TreeBuilder();
         $rule    = $builder->root('rule');
         {
-            $rule->children()->scalarNode('pattern')->isRequired();
+            $rule->children()->variableNode('pattern')->isRequired();
             $rule->children()->variableNode('roles')->isRequired()->beforeNormalization()->ifString()->then(
                 function ($v) {
                     return [$v];

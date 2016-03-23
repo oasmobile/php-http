@@ -24,7 +24,7 @@ class SimpleFirewallConfiguration implements ConfigurationInterface
         $builder  = new TreeBuilder();
         $firewall = $builder->root('firewall');
         {
-            $firewall->children()->scalarNode('pattern')->isRequired();
+            $firewall->children()->variableNode('pattern')->isRequired();
             $firewall->children()->variableNode('policies')->isRequired();
             $firewall->children()->variableNode('users')->isRequired();
             $firewall->children()->booleanNode('stateless')->defaultValue('false');

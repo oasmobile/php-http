@@ -11,12 +11,13 @@ namespace Oasis\Mlib\Http\ServiceProviders\Security;
 use Oasis\Mlib\Http\Configuration\ConfigurationValidationTrait;
 use Oasis\Mlib\Http\Configuration\SimpleAccessRuleConfiguration;
 use Oasis\Mlib\Utils\DataProviderInterface;
+use Symfony\Component\HttpFoundation\RequestMatcherInterface;
 
 class SimpleAccessRule implements AccessRuleInterface
 {
     use ConfigurationValidationTrait;
 
-    /** @var  string */
+    /** @var  string|RequestMatcherInterface */
     protected $pattern;
     /** @var  array */
     protected $requiredRoles;
@@ -27,13 +28,13 @@ class SimpleAccessRule implements AccessRuleInterface
     {
         $dp = $this->processConfiguration($ruleConfiguration, new SimpleAccessRuleConfiguration());
 
-        $this->pattern         = $dp->getMandatory('pattern');
+        $this->pattern         = $dp->getMandatory('pattern', DataProviderInterface::MIXED_TYPE);
         $this->requiredRoles   = $dp->getMandatory('roles', DataProviderInterface::ARRAY_TYPE);
         $this->requiredChannel = $dp->getOptional('channel', DataProviderInterface::STRING_TYPE);
     }
 
     /**
-     * @return string
+     * @return string|RequestMatcherInterface
      */
     public function getPattern()
     {

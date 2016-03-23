@@ -8,11 +8,22 @@
 
 namespace Oasis\Mlib\Http\ServiceProviders\Security;
 
+use Symfony\Component\HttpFoundation\RequestMatcherInterface;
+
 interface AccessRuleInterface
 {
+    /**
+     * @return string|RequestMatcherInterface
+     */
     public function getPattern();
 
+    /**
+     * @return string|array
+     */
     public function getRequiredRoles();
 
+    /**
+     * @return string|null
+     */
     public function getRequiredChannel();
 }

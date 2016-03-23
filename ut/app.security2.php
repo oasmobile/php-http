@@ -14,6 +14,7 @@ use Oasis\Mlib\Http\Ut\Security\TestApiUserProvider;
 use Oasis\Mlib\Http\Ut\Security\TestAuthenticationPolicy;
 use Oasis\Mlib\Http\Views\JsonViewHandler;
 use Silex\Provider\SessionServiceProvider;
+use Symfony\Component\HttpFoundation\RequestMatcher;
 
 require_once __DIR__ . '/bootstrap.php';
 
@@ -72,7 +73,7 @@ $config = [
                 'roles'   => 'ROLE_ADMIN',
             ],
             [
-                'pattern' => '^/secured/madmin/parent',
+                'pattern' => new RequestMatcher('^/secured/madmin/parent', "bai(du|da)\\.com"),
                 'roles'   => ['ROLE_PARENT'],
             ],
             [

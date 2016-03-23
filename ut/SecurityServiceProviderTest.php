@@ -142,9 +142,24 @@ class SecurityServiceProviderTest extends WebTestCase
 
     }
 
-    public function testAccessRuleNoRole()
+    public function testAccessRuleOnHostWithRole()
     {
         $client = $this->createClient();
+        $client->request(
+            'GET',
+            '/secured/madmin/parent',
+            [
+                'sig' => 'child',
+            ]
+        );
+        $response = $client->getResponse();
+        $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
+
+    }
+
+    public function testAccessRuleOnHostNoRole()
+    {
+        $client = $this->createClient(['HTTP_HOST' => "baida.com"]);
         $client->request(
             'GET',
             '/secured/madmin/parent',

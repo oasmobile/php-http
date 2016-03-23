@@ -11,13 +11,14 @@ namespace Oasis\Mlib\Http\ServiceProviders\Security;
 use Oasis\Mlib\Http\Configuration\ConfigurationValidationTrait;
 use Oasis\Mlib\Http\Configuration\SimpleFirewallConfiguration;
 use Oasis\Mlib\Utils\DataProviderInterface;
+use Symfony\Component\Routing\Matcher\RequestMatcherInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 
 class SimpleFirewall implements FirewallInterface
 {
     use ConfigurationValidationTrait;
 
-    /** @var  string */
+    /** @var  string|RequestMatcherInterface */
     protected $pattern;
     /** @var  array */
     protected $policies;
@@ -31,7 +32,7 @@ class SimpleFirewall implements FirewallInterface
     public function __construct(array $firewallConfiguration)
     {
         $dp                  = $this->processConfiguration($firewallConfiguration, new SimpleFirewallConfiguration());
-        $this->pattern       = $dp->getMandatory('pattern');
+        $this->pattern       = $dp->getMandatory('pattern', DataProviderInterface::MIXED_TYPE);
         $this->policies      = $dp->getMandatory('policies', DataProviderInterface::ARRAY_TYPE);
         $this->userProvider  = $dp->getMandatory('users', DataProviderInterface::MIXED_TYPE);
         $this->stateless     = $dp->getMandatory('stateless', DataProviderInterface::BOOL_TYPE);
@@ -40,7 +41,7 @@ class SimpleFirewall implements FirewallInterface
     }
 
     /**
-     * @return string
+     * @return string|RequestMatcherInterface
      */
     public function getPattern()
     {

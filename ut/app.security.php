@@ -12,6 +12,7 @@ use Oasis\Mlib\Http\Ut\Security\TestAccessRule;
 use Oasis\Mlib\Http\Ut\Security\TestApiUserProvider;
 use Oasis\Mlib\Http\Ut\Security\TestAuthenticationPolicy;
 use Silex\Provider\SessionServiceProvider;
+use Symfony\Component\HttpFoundation\RequestMatcher;
 
 $users = [
     "admin"  => [
@@ -66,8 +67,17 @@ $provider->addFirewall(
 );
 $provider->addFirewall("minhao.admin", $testFirewall);
 $provider->addAccessRule(new TestAccessRule('^/secured/madmin/admin', 'ROLE_ADMIN'));
-$provider->addAccessRule(new TestAccessRule('^/secured/madmin/parent', ['ROLE_PARENT']));
-$provider->addAccessRule(new TestAccessRule('^/secured/madmin/child', 'ROLE_CHILD'));
+$provider->addAccessRule(
+    new TestAccessRule(
+        new RequestMatcher('^/secured/madmin/parent', "bai(du|da)\\.com"), ['ROLE_PARENT']
+    )
+);
+$provider->addAccessRule(
+    new TestAccessRule(
+        new RequestMatcher('^/secured/madmin/child'),
+        'ROLE_CHILD'
+    )
+);
 $provider->addAccessRule(new TestAccessRule('^/secured/madmin', 'ROLE_USER'));
 
 $provider->addRoleHierarchy('ROLE_GOOD', 'ROLE_USER');

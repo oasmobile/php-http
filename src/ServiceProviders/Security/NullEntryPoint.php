@@ -38,6 +38,6 @@ class NullEntryPoint implements AuthenticationEntryPointInterface
     public function start(Request $request, AuthenticationException $authException = null)
     {
         $msg = $authException ? $authException->getMessage() : 'Access Denied';
-        throw new AccessDeniedHttpException();
+        throw new AccessDeniedHttpException($msg);
     }
 }

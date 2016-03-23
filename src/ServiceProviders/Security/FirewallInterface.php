@@ -8,12 +8,13 @@
 
 namespace Oasis\Mlib\Http\ServiceProviders\Security;
 
+use Symfony\Component\Routing\Matcher\RequestMatcherInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 
 interface FirewallInterface
 {
     /**
-     * @return string
+     * @return string|RequestMatcherInterface
      */
     public function getPattern();
 

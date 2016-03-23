@@ -181,7 +181,9 @@ class SimpleSecurityProvider extends SecurityServiceProvider
         );
     }
 
-    protected function parseFirewall(FirewallInterface $firewall, Application $app)
+    protected function parseFirewall(FirewallInterface $firewall,
+        /** @noinspection PhpUnusedParameterInspection */
+                                     Application $app)
     {
         $setting              = $firewall->getPolicies();
         $setting['pattern']   = $firewall->getPattern();

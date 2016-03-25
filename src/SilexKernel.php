@@ -8,6 +8,7 @@
 
 namespace Oasis\Mlib\Http;
 
+use InvalidArgumentException;
 use Oasis\Mlib\Http\Configuration\ConfigurationValidationTrait;
 use Oasis\Mlib\Http\Configuration\HttpConfiguration;
 use Oasis\Mlib\Http\Middlewares\MiddlewareInterface;
@@ -130,6 +131,26 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
         if (false !== ($priority = $middleware->getAfterPriority())) {
             $this->after([$middleware, 'after'], $priority);
         }
+    }
+
+    /**
+     * Returns a closure that calls the service definition every time it is called. Hence acting as a
+     * factory provider. Object returned by service definition is not unique in any scope. This is different
+     * compared against share()
+     *
+     * @param callable $callable A service definition to create object
+     *
+     * @return Closure The wrapped closure
+     */
+    public static function factory($callable)
+    {
+        if (!is_object($callable) || !method_exists($callable, '__invoke')) {
+            throw new InvalidArgumentException('Service definition is not a Closure or invokable object.');
+        }
+
+        return function ($c) use ($callable) {
+            return $callable($c);
+        };
     }
 
     function __set($name, $value)

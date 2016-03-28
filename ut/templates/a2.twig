@@ -1,0 +1,18 @@
+{% extends 'a.twig' %}
+
+{% use 'side.twig' %}
+{% import 'macros.twig' as me %}
+
+{% block foo %}
+    yyzzMljlkfda
+{% endblock %}
+
+{% block sidebar %}
+    {{ parent() }}
+    {{ me.mymacro('alice',9) }}
+
+    {% verbatim %}
+just <!-- kidding -->
+    {% endverbatim %}
+{% endblock %}
+

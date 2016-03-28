@@ -1,0 +1,3 @@
+{% macro mymacro(name = 'Michael', age = 18) %}
+    <input type="button" value="{{ name ~ '@' ~ age }}"/>
+{% endmacro %}

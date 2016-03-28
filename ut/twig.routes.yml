@@ -1,0 +1,9 @@
+twig.home:
+    path: /
+    defaults:
+        _controller: TwigController::a
+
+twig.a2:
+    path: /2
+    defaults:
+        _controller: TwigController::a2

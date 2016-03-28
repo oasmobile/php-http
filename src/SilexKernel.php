@@ -16,12 +16,12 @@ use Oasis\Mlib\Http\ServiceProviders\Cors\CrossOriginResourceSharingProvider;
 use Oasis\Mlib\Http\ServiceProviders\Routing\CacheableRouterProvider;
 use Oasis\Mlib\Http\ServiceProviders\Routing\CacheableRouterUrlGeneratorProvider;
 use Oasis\Mlib\Http\ServiceProviders\Security\SimpleSecurityProvider;
+use Oasis\Mlib\Http\ServiceProviders\Twig\SimpleTwigServiceProvider;
 use Oasis\Mlib\Logging\MLogging;
 use Oasis\Mlib\Utils\ArrayDataProvider;
 use Oasis\Mlib\Utils\DataProviderInterface;
 use Silex\Application as SilexApp;
 use Silex\Provider\ServiceControllerServiceProvider;
-use Silex\Provider\TwigServiceProvider;
 use Silex\ServiceProviderInterface;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\HttpKernel\KernelEvents;
@@ -29,6 +29,7 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Twig_Environment;
 
 /**
  * Class SilexKernel
@@ -45,31 +46,42 @@ use Symfony\Component\Security\Core\User\UserInterface;
 class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
 {
     use ConfigurationValidationTrait;
+    use SilexApp\TwigTrait;
 
     /** @var  ArrayDataProvider */
     protected $httpDataProvider;
     /** @var bool */
     protected $isDebug = true;
+    /** @var string|null */
+    protected $cacheDir = null;
     
     public function __construct(array $httpConfig, $isDebug)
     {
         parent::__construct();
 
-        $this['logger'] = MLogging::getLogger();
-
         $this->httpDataProvider = $this->processConfiguration($httpConfig, new HttpConfiguration());
         $this->isDebug          = $isDebug;
-        $cacheDir               = $this->httpDataProvider->getOptional('cache_dir');
-        
+        $this->cacheDir         = $this->httpDataProvider->getOptional('cache_dir');
+
+        $this['logger'] = MLogging::getLogger();
+        $this['debug']  = $this->isDebug;
+
         $this->register(new ServiceControllerServiceProvider());
 
         // providers with built-in support
         if ($routingConfig = $this->httpDataProvider->getOptional('routing', DataProviderInterface::ARRAY_TYPE, [])) {
-            if ($cacheDir) {
-                $routingConfig = array_merge(['cache_dir' => $cacheDir], $routingConfig);
+            if ($this->cacheDir) {
+                $routingConfig = array_merge(['cache_dir' => $this->cacheDir], $routingConfig);
             }
             $this->register($routerProvider = new CacheableRouterProvider($routingConfig, $this->isDebug));
             $this->register(new CacheableRouterUrlGeneratorProvider($routerProvider));
+        }
+
+        if ($twigConfig = $this->httpDataProvider->getOptional('twig', DataProviderInterface::ARRAY_TYPE, [])) {
+            if ($this->cacheDir) {
+                $twigConfig = array_merge(['cache_dir' => $this->cacheDir], $twigConfig);
+            }
+            $this->register(new SimpleTwigServiceProvider($twigConfig));
         }
 
         if ($securityConfig = $this->httpDataProvider->getOptional('security', DataProviderInterface::ARRAY_TYPE, [])) {
@@ -79,7 +91,6 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
         if ($corsConfig = $this->httpDataProvider->getOptional('cors', DataProviderInterface::ARRAY_TYPE, [])) {
             $this->register(new CrossOriginResourceSharingProvider($corsConfig));
         }
-        $this->register(new TwigServiceProvider());
 
         // other configuration settings
         if ($viewHandlersConfig = $this->httpDataProvider->getOptional(
@@ -288,5 +299,13 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
         else {
             return $token->getUser();
         }
+    }
+
+    /**
+     * @return Twig_Environment|null
+     */
+    public function getTwig()
+    {
+        return $this['twig'];
     }
 }

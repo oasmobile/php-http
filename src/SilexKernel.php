@@ -346,7 +346,10 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
 
     public function getCacheDirectories()
     {
-        $ret = [$this->cacheDir];
+        $ret = [];
+        if ($this->cacheDir) {
+            $ret[] = $this->cacheDir;
+        }
         if ($cacheDir = $this->httpDataProvider->getOptional('routing.cache_dir')) {
             $ret[] = $cacheDir;
         }

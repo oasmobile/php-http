@@ -13,6 +13,11 @@ use Symfony\Component\HttpFoundation\Request;
 require_once __DIR__ . "/bootstrap.php";
 
 /** @var SilexKernel $app */
+$app = require __DIR__ . "/app.security2.php";
+
+$app->run(Request::create("/secured/admin"));
+
+/** @var SilexKernel $app */
 $app = require __DIR__ . "/app.security.php";
 
-$app->run(Request::create("/secured/madmin"));
+$app->run(Request::create("/secured/admin"));

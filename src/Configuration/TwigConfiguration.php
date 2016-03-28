@@ -2,8 +2,8 @@
 /**
  * Created by PhpStorm.
  * User: minhao
- * Date: 2016-03-08
- * Time: 20:54
+ * Date: 2016-03-25
+ * Time: 10:26
  */
 
 namespace Oasis\Mlib\Http\Configuration;
@@ -11,7 +11,7 @@ namespace Oasis\Mlib\Http\Configuration;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
-class CacheableRouterConfiguration implements ConfigurationInterface
+class TwigConfiguration implements ConfigurationInterface
 {
     
     /**
@@ -22,15 +22,10 @@ class CacheableRouterConfiguration implements ConfigurationInterface
     public function getConfigTreeBuilder()
     {
         $builder = new TreeBuilder();
-        $routing = $builder->root('routing');
+        $twig    = $builder->root('twig');
         {
-            $routing->children()->scalarNode('path');
-            $routing->children()->scalarNode('cache_dir')->defaultValue(null);
-            $routing->children()->variableNode('namespaces')->beforeNormalization()->ifString()->then(
-                function ($v) {
-                    return [$v];
-                }
-            );
+            $twig->children()->scalarNode('template_dir');
+            $twig->children()->scalarNode('cache_dir')->defaultValue(null);
         }
 
         return $builder;

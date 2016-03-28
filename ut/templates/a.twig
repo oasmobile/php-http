@@ -1,0 +1,41 @@
+<html>
+<body>
+{{ lala }}
+
+<br/>
+haha
+<br/>
+{% set var = "X<BR/>U" %}
+{% set var_js = "var b=2; if (1 <b) { alert('123'); }" %}
+<div id="div_foo" style="background-color: aquamarine; width: 200px; height: 200px;">
+    {% block foo %}
+        DEFAULT FOO
+    {% endblock %}
+    {{ var | escape }}
+    <script type="text/javascript">
+        var aaa = '{{ var_js | escape('js')|raw }}';
+        console.log(aaa);
+        eval(aaa);
+    </script>
+</div>
+<div id="div_side" style="background-color: #ff5157; width: 200px; height: 200px;">
+    {% block sidebar %}
+        DEFAULT SIDE
+    {% endblock %}
+</div>
+
+{% for i in range(0, 4) %}
+    <p>
+        {% set bb = i %}
+        {% include "b.twig" %}
+    </p>
+{% endfor %}
+
+{#{% if app['security.authorization_checker'].isGranted('roo') %}#}
+{% if is_granted('role_a') %}
+    jljl
+{% endif %}
+
+{% include "footer.twig" %}
+</body>
+</html>

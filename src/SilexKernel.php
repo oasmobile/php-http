@@ -8,6 +8,7 @@
 
 namespace Oasis\Mlib\Http;
 
+use InvalidArgumentException;
 use Oasis\Mlib\Http\Configuration\ConfigurationValidationTrait;
 use Oasis\Mlib\Http\Configuration\HttpConfiguration;
 use Oasis\Mlib\Http\Middlewares\MiddlewareInterface;
@@ -15,6 +16,7 @@ use Oasis\Mlib\Http\ServiceProviders\Cors\CrossOriginResourceSharingProvider;
 use Oasis\Mlib\Http\ServiceProviders\Routing\CacheableRouterProvider;
 use Oasis\Mlib\Http\ServiceProviders\Routing\CacheableRouterUrlGeneratorProvider;
 use Oasis\Mlib\Http\ServiceProviders\Security\SimpleSecurityProvider;
+use Oasis\Mlib\Http\ServiceProviders\Twig\SimpleTwigServiceProvider;
 use Oasis\Mlib\Logging\MLogging;
 use Oasis\Mlib\Utils\ArrayDataProvider;
 use Oasis\Mlib\Utils\DataProviderInterface;
@@ -32,6 +34,7 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Twig_Environment;
 
 /**
  * Class SilexKernel
@@ -48,35 +51,53 @@ use Symfony\Component\Security\Core\User\UserInterface;
 class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
 {
     use ConfigurationValidationTrait;
+    use SilexApp\TwigTrait;
 
     /** @var  ArrayDataProvider */
     protected $httpDataProvider;
     /** @var bool */
     protected $isDebug = true;
+    /** @var string|null */
+    protected $cacheDir = null;
     
     public function __construct(array $httpConfig, $isDebug)
     {
         parent::__construct();
 
-        $this['logger'] = MLogging::getLogger();
-
         $this->httpDataProvider = $this->processConfiguration($httpConfig, new HttpConfiguration());
         $this->isDebug          = $isDebug;
-        
+        $this->cacheDir         = $this->httpDataProvider->getOptional('cache_dir');
+
+        $this['logger'] = MLogging::getLogger();
+        $this['debug']  = $this->isDebug;
+
         $this->register(new ServiceControllerServiceProvider());
 
+        // providers with built-in support
         if ($routingConfig = $this->httpDataProvider->getOptional('routing', DataProviderInterface::ARRAY_TYPE, [])) {
+            if ($this->cacheDir) {
+                $routingConfig = array_merge(['cache_dir' => $this->cacheDir], $routingConfig);
+            }
             $this->register($routerProvider = new CacheableRouterProvider($routingConfig, $this->isDebug));
             $this->register(new CacheableRouterUrlGeneratorProvider($routerProvider));
+        }
+
+        if ($twigConfig = $this->httpDataProvider->getOptional('twig', DataProviderInterface::ARRAY_TYPE, [])) {
+            if ($this->cacheDir) {
+                $twigConfig = array_merge(['cache_dir' => $this->cacheDir], $twigConfig);
+            }
+            $this->register(new SimpleTwigServiceProvider($twigConfig));
         }
 
         if ($securityConfig = $this->httpDataProvider->getOptional('security', DataProviderInterface::ARRAY_TYPE, [])) {
             $this->register(new SimpleSecurityProvider($securityConfig));
         }
+
         if ($corsConfig = $this->httpDataProvider->getOptional('cors', DataProviderInterface::ARRAY_TYPE, [])) {
             $this->register(new CrossOriginResourceSharingProvider($corsConfig));
         }
 
+        // other configuration settings
         if ($viewHandlersConfig = $this->httpDataProvider->getOptional(
             'view_handlers',
             DataProviderInterface::MIXED_TYPE
@@ -209,6 +230,26 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
         if (false !== ($priority = $middleware->getAfterPriority())) {
             $this->after([$middleware, 'after'], $priority, $middleware->onlyForMasterRequest());
         }
+    }
+
+    /**
+     * Returns a closure that calls the service definition every time it is called. Hence acting as a
+     * factory provider. Object returned by service definition is not unique in any scope. This is different
+     * compared against share()
+     *
+     * @param callable $callable A service definition to create object
+     *
+     * @return Closure The wrapped closure
+     */
+    public static function factory($callable)
+    {
+        if (!is_object($callable) || !method_exists($callable, '__invoke')) {
+            throw new InvalidArgumentException('Service definition is not a Closure or invokable object.');
+        }
+
+        return function ($c) use ($callable) {
+            return $callable($c);
+        };
     }
 
     function __set($name, $value)
@@ -346,5 +387,13 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
         else {
             return $token->getUser();
         }
+    }
+
+    /**
+     * @return Twig_Environment|null
+     */
+    public function getTwig()
+    {
+        return $this['twig'];
     }
 }

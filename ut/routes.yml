@@ -11,6 +11,10 @@ secured:
     prefix: secured/
     resource: "secured.routes.yml"
 
+twig:
+    prefix: twig/
+    resource: "twig.routes.yml"
+
 domain.test.localhost:
     path: /domain
     host: localhost

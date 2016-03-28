@@ -30,6 +30,7 @@ $users = [
 ];
 
 $config = [
+    'cache_dir'      => sys_get_temp_dir() . "/oasis-http-ut",
     'routing'        => [
         'path'       => __DIR__ . "/routes.yml",
         'namespaces' => [

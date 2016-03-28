@@ -24,7 +24,9 @@ class HttpConfiguration implements ConfigurationInterface
         $builder = new TreeBuilder();
         $http    = $builder->root('http');
         {
+            $http->children()->scalarNode('cache_dir')->defaultValue(null);
             $http->children()->variableNode('routing');
+            $http->children()->variableNode('twig');
             $http->children()->variableNode('security');
             $http->children()->variableNode('cors');
             $http->children()->variableNode('view_handlers');

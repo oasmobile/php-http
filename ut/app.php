@@ -8,10 +8,8 @@
 use Oasis\Mlib\Http\ErrorHandlers\JsonErrorHandler;
 use Oasis\Mlib\Http\SilexKernel;
 use Oasis\Mlib\Http\Views\JsonViewHandler;
-use Oasis\Mlib\Logging\MLogging;
-
 $config              = [
-    'routing' => [
+    'routing'   => [
         'path'       => __DIR__ . "/routes.yml",
         'namespaces' => [
             'Oasis\\Mlib\\Http\\Ut\\Controllers\\',

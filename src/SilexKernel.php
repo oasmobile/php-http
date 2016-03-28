@@ -344,6 +344,19 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
         }
     }
 
+    public function getCacheDirectories()
+    {
+        $ret = [$this->cacheDir];
+        if ($cacheDir = $this->httpDataProvider->getOptional('routing.cache_dir')) {
+            $ret[] = $cacheDir;
+        }
+        if ($cacheDir = $this->httpDataProvider->getOptional('twig.cache_dir')) {
+            $ret[] = $cacheDir;
+        }
+
+        return $ret;
+    }
+
     /**
      * Checks if the attributes are granted against the current authentication token and optionally supplied object.
      *

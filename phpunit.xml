@@ -9,7 +9,10 @@
             <file>ut/SilexKernelTest.php</file>
             <file>ut/SilexKernelWebTest.php</file>
             <file>ut/CrossOriginResourceSharingTest.php</file>
+        </testsuite>
+        <testsuite name="twig">
             <file>ut/TwigServiceProviderTest.php</file>
+            <file>ut/TwigServiceProviderConfigurationTest.php</file>
         </testsuite>
         <testsuite name="security">
             <file>ut/SecurityServiceProviderTest.php</file>

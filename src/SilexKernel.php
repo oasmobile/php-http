@@ -52,6 +52,7 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
 {
     use ConfigurationValidationTrait;
     use SilexApp\TwigTrait;
+    use SilexApp\UrlGeneratorTrait;
 
     /** @var  ArrayDataProvider */
     protected $httpDataProvider;

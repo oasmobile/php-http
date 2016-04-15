@@ -56,7 +56,8 @@ abstract class AbstractSimplePreAuthenticationPolicy implements AuthenticationPo
             $app['security.token_storage'],
             $app['security.authentication_manager'],
             $firewallName,
-            $this->getPreAuthenticator()
+            $this->getPreAuthenticator(),
+            $app['logger']
         );
     }
 

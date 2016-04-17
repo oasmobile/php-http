@@ -70,7 +70,7 @@ abstract class AbstractSimplePreAuthenticationPolicy implements AuthenticationPo
      */
     public function getEntryPoint(Application $app, $name, $options)
     {
-        return null;
+        return new NullEntryPoint();
     }
 
     /**

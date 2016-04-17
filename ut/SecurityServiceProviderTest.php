@@ -85,6 +85,10 @@ class SecurityServiceProviderTest extends WebTestCase
         $this->assertEquals(Response::HTTP_FOUND, $response->getStatusCode());
         $this->assertTrue($response->headers->has('Location'));
         $this->assertStringEndsWith('/secured/fadmin/test', $response->headers->get('Location'));
+
+        $client->request('GET', '/secured/fadmin/test');
+        $response = $client->getResponse();
+        $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
     }
 
     public function testPreAuth()

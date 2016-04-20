@@ -59,3 +59,7 @@ param.slug:
         _controller: TestController::paramSlug
     requirements:
         slug: .*
+param.injected:
+    path: "/param/injected"
+    defaults:
+        _controller: TestController::paramInjected

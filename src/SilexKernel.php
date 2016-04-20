@@ -47,33 +47,46 @@ use Twig_Environment;
  * @property-write array $middlewares
  * @property-write array $view_handlers
  * @property-write array $error_handlers
+ * @property-write array $injected_args
  */
 class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
 {
     use ConfigurationValidationTrait;
     use SilexApp\TwigTrait;
     use SilexApp\UrlGeneratorTrait;
-
+    
     /** @var  ArrayDataProvider */
     protected $httpDataProvider;
     /** @var bool */
     protected $isDebug = true;
     /** @var string|null */
-    protected $cacheDir = null;
+    protected $cacheDir               = null;
+    protected $controllerInjectedArgs = [];
     
     public function __construct(array $httpConfig, $isDebug)
     {
         parent::__construct();
-
+        
         $this->httpDataProvider = $this->processConfiguration($httpConfig, new HttpConfiguration());
         $this->isDebug          = $isDebug;
         $this->cacheDir         = $this->httpDataProvider->getOptional('cache_dir');
-
+        
         $this['logger'] = MLogging::getLogger();
         $this['debug']  = $this->isDebug;
-
+        
+        $this['resolver']                 = $this->share(
+            function () {
+                return new ExtendedControllerResolver($this, $this['logger'], $this['resolver_auto_injections']);
+            }
+        );
+        $this['resolver_auto_injections'] = $this->share(
+            function () {
+                return $this->controllerInjectedArgs;
+            }
+        );
+        
         $this->register(new ServiceControllerServiceProvider());
-
+        
         // providers with built-in support
         if ($routingConfig = $this->httpDataProvider->getOptional('routing', DataProviderInterface::ARRAY_TYPE, [])) {
             if ($this->cacheDir) {
@@ -82,22 +95,22 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
             $this->register($routerProvider = new CacheableRouterProvider($routingConfig, $this->isDebug));
             $this->register(new CacheableRouterUrlGeneratorProvider($routerProvider));
         }
-
+        
         if ($twigConfig = $this->httpDataProvider->getOptional('twig', DataProviderInterface::ARRAY_TYPE, [])) {
             if ($this->cacheDir) {
                 $twigConfig = array_merge(['cache_dir' => $this->cacheDir], $twigConfig);
             }
             $this->register(new SimpleTwigServiceProvider($twigConfig));
         }
-
+        
         if ($securityConfig = $this->httpDataProvider->getOptional('security', DataProviderInterface::ARRAY_TYPE, [])) {
             $this->register(new SimpleSecurityProvider($securityConfig));
         }
-
+        
         if ($corsConfig = $this->httpDataProvider->getOptional('cors', DataProviderInterface::ARRAY_TYPE, [])) {
             $this->register(new CrossOriginResourceSharingProvider($corsConfig));
         }
-
+        
         // other configuration settings
         if ($viewHandlersConfig = $this->httpDataProvider->getOptional(
             'view_handlers',
@@ -127,8 +140,20 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
         ) {
             $this->service_providers = $providersConfig;
         }
+        if ($injectedArgs = $this->httpDataProvider->getOptional(
+            'injected_args',
+            DataProviderInterface::MIXED_TYPE
+        )
+        ) {
+            $this->injected_args = $injectedArgs;
+        }
     }
-
+    
+    public function addControllerInjectedArg($object)
+    {
+        $this->controllerInjectedArgs[] = $object;
+    }
+    
     /**
      * @override Overrides parent function to disable ensureResponse if exception is not handled
      *
@@ -139,7 +164,7 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
     {
         $this->on(KernelEvents::EXCEPTION, new ExtendedExceptionListnerWrapper($this, $callback), $priority);
     }
-
+    
     /**
      * @override Overrides parent function to enable before middleware for SUB_REQUEST
      *
@@ -155,14 +180,14 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
     public function before($callback, $priority = 0, $masterRequestOnly = true)
     {
         $app = $this;
-
+        
         $this->on(
             KernelEvents::REQUEST,
             function (GetResponseEvent $event) use ($callback, $app, $masterRequestOnly) {
                 if ($masterRequestOnly && HttpKernelInterface::MASTER_REQUEST !== $event->getRequestType()) {
                     return;
                 }
-
+                
                 /** @var CallbackResolver $resolver */
                 $resolver = $app['callback_resolver'];
                 $ret      = call_user_func(
@@ -170,7 +195,7 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
                     $event->getRequest(),
                     $app
                 );
-
+                
                 if ($ret instanceof Response) {
                     $event->setResponse($ret);
                 }
@@ -178,7 +203,7 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
             $priority
         );
     }
-
+    
     /**
      * @override Overrides parent function to enable before middleware for SUB_REQUEST
      *
@@ -194,14 +219,14 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
     public function after($callback, $priority = 0, $masterRequestOnly = true)
     {
         $app = $this;
-
+        
         $this->on(
             KernelEvents::RESPONSE,
             function (FilterResponseEvent $event) use ($callback, $app, $masterRequestOnly) {
                 if ($masterRequestOnly && HttpKernelInterface::MASTER_REQUEST !== $event->getRequestType()) {
                     return;
                 }
-
+                
                 /** @var CallbackResolver $resolver */
                 $resolver = $app['callback_resolver'];
                 $response = call_user_func(
@@ -222,7 +247,7 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
             $priority
         );
     }
-
+    
     public function addMiddleware(MiddlewareInterface $middleware)
     {
         if (false !== ($priority = $middleware->getBeforePriority())) {
@@ -232,7 +257,7 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
             $this->after([$middleware, 'after'], $priority, $middleware->onlyForMasterRequest());
         }
     }
-
+    
     /**
      * Returns a closure that calls the service definition every time it is called. Hence acting as a
      * factory provider. Object returned by service definition is not unique in any scope. This is different
@@ -247,12 +272,12 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
         if (!is_object($callable) || !method_exists($callable, '__invoke')) {
             throw new InvalidArgumentException('Service definition is not a Closure or invokable object.');
         }
-
+        
         return function ($c) use ($callable) {
             return $callable($c);
         };
     }
-
+    
     function __set($name, $value)
     {
         if (!is_array($value)) {
@@ -340,11 +365,17 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
                 }
             }
                 break;
+            case 'injected_args': {
+                foreach ($value as $arg) {
+                    $this->addControllerInjectedArg($arg);
+                }
+            }
+                break;
             default:
                 throw new \LogicException("Invalid property $name set to SilexKernel");
         }
     }
-
+    
     public function getCacheDirectories()
     {
         $ret = [];
@@ -357,10 +388,10 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
         if ($cacheDir = $this->httpDataProvider->getOptional('twig.cache_dir')) {
             $ret[] = $cacheDir;
         }
-
+        
         return $ret;
     }
-
+    
     /**
      * Checks if the attributes are granted against the current authentication token and optionally supplied object.
      *
@@ -380,7 +411,7 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
             return false;
         }
     }
-
+    
     /**
      * @return null|TokenInterface
      */
@@ -388,10 +419,10 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
     {
         /** @var TokenStorageInterface $tokenStorage */
         $tokenStorage = $this['security.token_storage'];
-
+        
         return $tokenStorage->getToken();
     }
-
+    
     /**
      * @return UserInterface|null
      */
@@ -405,7 +436,7 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
             return $token->getUser();
         }
     }
-
+    
     /**
      * @return Twig_Environment|null
      */

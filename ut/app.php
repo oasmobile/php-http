@@ -8,8 +8,9 @@
 use Oasis\Mlib\Http\ErrorHandlers\JsonErrorHandler;
 use Oasis\Mlib\Http\SilexKernel;
 use Oasis\Mlib\Http\Views\JsonViewHandler;
+
 $config              = [
-    'routing'   => [
+    'routing' => [
         'path'       => __DIR__ . "/routes.yml",
         'namespaces' => [
             'Oasis\\Mlib\\Http\\Ut\\Controllers\\',
@@ -23,5 +24,7 @@ $app->view_handlers  = [
 $app->error_handlers = [
     new JsonErrorHandler(),
 ];
+//$app->addControllerInjectedArg(new JsonViewHandler());
+$app->injected_args = [new JsonViewHandler()];
 
 return $app;

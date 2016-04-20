@@ -1,4 +1,5 @@
 <?php
+use Oasis\Mlib\Http\Views\JsonViewHandler;
 use Silex\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
@@ -108,5 +109,16 @@ class SilexKernelWebTest extends WebTestCase
         $this->assertEquals('Oasis\\Mlib\\Http\\Ut\\Controllers\\TestController::paramSlug()', $json['called']);
         $this->assertEquals('moi/hei', $json['slug']);
 
+    }
+
+    public function testInjectedArg()
+    {
+        $client = $this->createClient(['HTTP_HOST' => "naruto.baidu.com"]);
+        $client->request('GET', '/param/injected');
+        $response = $client->getResponse();
+        $json     = json_decode($response->getContent(), true);
+        $this->assertTrue(is_array($json));
+        $this->assertEquals('Oasis\\Mlib\\Http\\Ut\\Controllers\\TestController::paramInjected()', $json['called']);
+        $this->assertEquals(JsonViewHandler::class, $json['handler']);
     }
 }

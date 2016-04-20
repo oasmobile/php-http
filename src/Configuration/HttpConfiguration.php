@@ -31,6 +31,7 @@ class HttpConfiguration implements ConfigurationInterface
             $http->children()->variableNode('cors');
             $http->children()->variableNode('view_handlers');
             $http->children()->variableNode('error_handlers');
+            $http->children()->variableNode('injected_args');
             $http->children()->variableNode('middlewares');
             $http->children()->variableNode('providers');
         }

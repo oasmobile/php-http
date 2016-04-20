@@ -8,6 +8,8 @@
 
 namespace Oasis\Mlib\Http\Ut\Controllers;
 
+use Oasis\Mlib\Http\Views\JsonViewHandler;
+
 class TestController
 {
     public function home()
@@ -58,7 +60,15 @@ class TestController
     {
         return [
             'called' => $this->createTestString(__CLASS__, __FUNCTION__),
-            'slug'     => $slug,
+            'slug'   => $slug,
+        ];
+    }
+
+    public function paramInjected(JsonViewHandler $handler)
+    {
+        return [
+            'called'  => $this->createTestString(__CLASS__, __FUNCTION__),
+            'handler' => get_class($handler),
         ];
     }
 

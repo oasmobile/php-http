@@ -12,6 +12,7 @@ use InvalidArgumentException;
 use Oasis\Mlib\Http\Configuration\ConfigurationValidationTrait;
 use Oasis\Mlib\Http\Configuration\HttpConfiguration;
 use Oasis\Mlib\Http\Middlewares\MiddlewareInterface;
+use Oasis\Mlib\Http\ServiceProviders\Cookie\SimpleCookieProvider;
 use Oasis\Mlib\Http\ServiceProviders\Cors\CrossOriginResourceSharingProvider;
 use Oasis\Mlib\Http\ServiceProviders\Routing\CacheableRouterProvider;
 use Oasis\Mlib\Http\ServiceProviders\Routing\CacheableRouterUrlGeneratorProvider;
@@ -86,6 +87,7 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
         );
         
         $this->register(new ServiceControllerServiceProvider());
+        $this->register(new SimpleCookieProvider());
         
         // providers with built-in support
         if ($routingConfig = $this->httpDataProvider->getOptional('routing', DataProviderInterface::ARRAY_TYPE, [])) {

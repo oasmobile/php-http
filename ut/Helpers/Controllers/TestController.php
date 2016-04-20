@@ -8,7 +8,10 @@
 
 namespace Oasis\Mlib\Http\Ut\Controllers;
 
+use Oasis\Mlib\Http\ServiceProviders\Cookie\ResponseCookieContainer;
 use Oasis\Mlib\Http\Views\JsonViewHandler;
+use Symfony\Component\HttpFoundation\Cookie;
+use Symfony\Component\HttpFoundation\Request;
 
 class TestController
 {
@@ -69,6 +72,23 @@ class TestController
         return [
             'called'  => $this->createTestString(__CLASS__, __FUNCTION__),
             'handler' => get_class($handler),
+        ];
+    }
+
+    public function cookieSetter(ResponseCookieContainer $cookies)
+    {
+        $cookies->addCookie(new Cookie('name', 'John'));
+
+        return [
+            'called' => $this->createTestString(__CLASS__, __FUNCTION__),
+        ];
+    }
+
+    public function cookieChecker(Request $request)
+    {
+        return [
+            'called' => $this->createTestString(__CLASS__, __FUNCTION__),
+            'name'   => $request->cookies->get('name'),
         ];
     }
 

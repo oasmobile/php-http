@@ -121,4 +121,18 @@ class SilexKernelWebTest extends WebTestCase
         $this->assertEquals('Oasis\\Mlib\\Http\\Ut\\Controllers\\TestController::paramInjected()', $json['called']);
         $this->assertEquals(JsonViewHandler::class, $json['handler']);
     }
+
+    public function testCookieContainer()
+    {
+        $client = $this->createClient();
+        $client->request('GET', '/cookie/set');
+        $response = $client->getResponse();
+        $client->request('GET', '/cookie/check');
+        $response = $client->getResponse();
+        $json = json_decode($response->getContent(), true);
+        $this->assertTrue(is_array($json));
+        $this->assertEquals('Oasis\\Mlib\\Http\\Ut\\Controllers\\TestController::cookieChecker()', $json['called']);
+        $this->assertEquals('John', $json['name']);
+
+    }
 }

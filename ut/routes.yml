@@ -63,3 +63,13 @@ param.injected:
     path: "/param/injected"
     defaults:
         _controller: TestController::paramInjected
+
+
+cookie.setter:
+    path: "cookie/set"
+    defaults:
+        _controller: TestController::cookieSetter
+cookie.checker:
+    path: "cookie/check"
+    defaults:
+        _controller: TestController::cookieChecker

@@ -12,6 +12,7 @@ use Oasis\Mlib\Http\Configuration\ConfigurationValidationTrait;
 use Oasis\Mlib\Http\Configuration\CrossOriginResourceSharingConfiguration;
 use Oasis\Mlib\Utils\DataProviderInterface;
 use Oasis\Mlib\Utils\StringUtils;
+use Symfony\Component\HttpFoundation\Request;
 
 class CrossOriginResourceSharingStrategy
 {
@@ -58,8 +59,10 @@ class CrossOriginResourceSharingStrategy
         $this->path = trim($this->path, '*');
     }
 
-    public function match($path)
+    public function match(Request $request)
     {
+        $path = $request->getPathInfo();
+
         if ($path === $this->path) {
             return true;
         }

@@ -100,9 +100,8 @@ class CrossOriginResourceSharingProvider implements ServiceProviderInterface
             return;
         }
 
-        $path = $request->getPathInfo();
         foreach ($this->strategies as $strategy) {
-            if ($strategy->match($path)) {
+            if ($strategy->match($request)) {
                 $this->activeStrategy = $strategy;
                 break;
             }

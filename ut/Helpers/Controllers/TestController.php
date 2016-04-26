@@ -9,6 +9,7 @@
 namespace Oasis\Mlib\Http\Ut\Controllers;
 
 use Oasis\Mlib\Http\ServiceProviders\Cookie\ResponseCookieContainer;
+use Oasis\Mlib\Http\Views\AbstractSmartViewHandler;
 use Oasis\Mlib\Http\Views\JsonViewHandler;
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\Request;
@@ -68,6 +69,14 @@ class TestController
     }
 
     public function paramInjected(JsonViewHandler $handler)
+    {
+        return [
+            'called'  => $this->createTestString(__CLASS__, __FUNCTION__),
+            'handler' => get_class($handler),
+        ];
+    }
+
+    public function paramInjectedWithInheritedClass(AbstractSmartViewHandler $handler)
     {
         return [
             'called'  => $this->createTestString(__CLASS__, __FUNCTION__),

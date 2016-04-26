@@ -114,11 +114,19 @@ class SilexKernelWebTest extends WebTestCase
     public function testInjectedArg()
     {
         $client = $this->createClient(['HTTP_HOST' => "naruto.baidu.com"]);
+
         $client->request('GET', '/param/injected');
         $response = $client->getResponse();
         $json     = json_decode($response->getContent(), true);
         $this->assertTrue(is_array($json));
         $this->assertEquals('Oasis\\Mlib\\Http\\Ut\\Controllers\\TestController::paramInjected()', $json['called']);
+        $this->assertEquals(JsonViewHandler::class, $json['handler']);
+
+        $client->request('GET', '/param/injected2');
+        $response = $client->getResponse();
+        $json     = json_decode($response->getContent(), true);
+        $this->assertTrue(is_array($json));
+        $this->assertEquals('Oasis\\Mlib\\Http\\Ut\\Controllers\\TestController::paramInjectedWithInheritedClass()', $json['called']);
         $this->assertEquals(JsonViewHandler::class, $json['handler']);
     }
 

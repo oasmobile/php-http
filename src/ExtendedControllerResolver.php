@@ -34,10 +34,22 @@ class ExtendedControllerResolver extends ControllerResolver
         /** @var \ReflectionParameter $param */
         foreach ($parameters as $param) {
             if ($param->getClass()) {
-                if (($classname = $param->getClass()->getName())
-                    && array_key_exists($classname, $this->mappingParameters)
-                ) {
-                    $request->attributes->set($param->getName(), $this->mappingParameters[$classname]);
+                $classname = $param->getClass()->getName();
+
+                $found = array_key_exists($classname, $this->mappingParameters) ?
+                    $this->mappingParameters[$classname] :
+                    null;
+                if (!$found) {
+                    foreach ($this->mappingParameters as $value) {
+                        if ($value instanceof $classname) {
+                            $found = $value;
+                            break;
+                        }
+                    }
+                }
+
+                if ($found) {
+                    $request->attributes->set($param->getName(), $found);
                 }
             }
         }

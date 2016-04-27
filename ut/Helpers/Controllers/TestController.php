@@ -8,9 +8,11 @@
 
 namespace Oasis\Mlib\Http\Ut\Controllers;
 
+use Oasis\Mlib\Http\ChainedParameterBagDataProvider;
 use Oasis\Mlib\Http\ServiceProviders\Cookie\ResponseCookieContainer;
 use Oasis\Mlib\Http\Views\AbstractSmartViewHandler;
 use Oasis\Mlib\Http\Views\JsonViewHandler;
+use Oasis\Mlib\Utils\DataProviderInterface;
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -81,6 +83,23 @@ class TestController
         return [
             'called'  => $this->createTestString(__CLASS__, __FUNCTION__),
             'handler' => get_class($handler),
+        ];
+    }
+
+    public function paramChained($id, Request $request)
+    {
+        $chainedBag = new ChainedParameterBagDataProvider($request->attributes, $request->query, $request->request);
+
+        $name   = $chainedBag->getMandatory('name');
+        $age    = $chainedBag->getMandatory('age', DataProviderInterface::INT_TYPE);
+        $salary = $chainedBag->getOptional('salary', DataProviderInterface::FLOAT_TYPE, 999.99);
+
+        return [
+            'called' => $this->createTestString(__CLASS__, __FUNCTION__),
+            'id'     => $id,
+            'name'   => $name,
+            'age'    => $age,
+            'salary' => $salary,
         ];
     }
 

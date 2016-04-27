@@ -111,6 +111,44 @@ class SilexKernelWebTest extends WebTestCase
 
     }
 
+    public function testParameterRetrieval()
+    {
+        $client = $this->createClient();
+        $client->request(
+            'GET',
+            '/param/chained/30',
+            [
+                'name' => 'John',
+                'age'  => 80,
+            ]
+        );
+        $response = $client->getResponse();
+        $json     = json_decode($response->getContent(), true);
+        $this->assertTrue(is_array($json));
+        $this->assertEquals('Oasis\\Mlib\\Http\\Ut\\Controllers\\TestController::paramChained()', $json['called']);
+        $this->assertEquals('30', $json['id']);
+        $this->assertEquals('John', $json['name']);
+        $this->assertEquals(80, $json['age']);
+        $this->assertEquals(999.99, $json['salary']);
+
+        $client->request(
+            'POST',
+            '/param/chained/30?id=9&name=Ali',
+            [
+                'name' => 'John',
+                'age'  => 80,
+            ]
+        );
+        $response = $client->getResponse();
+        $json     = json_decode($response->getContent(), true);
+        $this->assertTrue(is_array($json));
+        $this->assertEquals('30', $json['id']);
+        $this->assertEquals('Ali', $json['name']);
+        $this->assertEquals(80, $json['age']);
+        $this->assertEquals(999.99, $json['salary']);
+
+    }
+
     public function testInjectedArg()
     {
         $client = $this->createClient(['HTTP_HOST' => "naruto.baidu.com"]);
@@ -126,7 +164,10 @@ class SilexKernelWebTest extends WebTestCase
         $response = $client->getResponse();
         $json     = json_decode($response->getContent(), true);
         $this->assertTrue(is_array($json));
-        $this->assertEquals('Oasis\\Mlib\\Http\\Ut\\Controllers\\TestController::paramInjectedWithInheritedClass()', $json['called']);
+        $this->assertEquals(
+            'Oasis\\Mlib\\Http\\Ut\\Controllers\\TestController::paramInjectedWithInheritedClass()',
+            $json['called']
+        );
         $this->assertEquals(JsonViewHandler::class, $json['handler']);
     }
 
@@ -137,7 +178,7 @@ class SilexKernelWebTest extends WebTestCase
         $response = $client->getResponse();
         $client->request('GET', '/cookie/check');
         $response = $client->getResponse();
-        $json = json_decode($response->getContent(), true);
+        $json     = json_decode($response->getContent(), true);
         $this->assertTrue(is_array($json));
         $this->assertEquals('Oasis\\Mlib\\Http\\Ut\\Controllers\\TestController::cookieChecker()', $json['called']);
         $this->assertEquals('John', $json['name']);

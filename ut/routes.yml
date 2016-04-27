@@ -68,6 +68,10 @@ param.injected2:
     defaults:
         _controller: TestController::paramInjectedWithInheritedClass
 
+param.chained:
+    path: "/param/chained/{id}"
+    defaults:
+        _controller: TestController::paramChained
 
 cookie.setter:
     path: "cookie/set"

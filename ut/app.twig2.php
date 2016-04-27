@@ -12,6 +12,7 @@ use Oasis\Mlib\Http\ErrorHandlers\JsonErrorHandler;
 use Oasis\Mlib\Http\SilexKernel;
 use Oasis\Mlib\Http\Ut\Security\TestApiUserProvider;
 use Oasis\Mlib\Http\Ut\Security\TestAuthenticationPolicy;
+use Oasis\Mlib\Http\Ut\TwigHelper;
 use Oasis\Mlib\Http\Views\JsonViewHandler;
 use Silex\Provider\SessionServiceProvider;
 use Symfony\Component\HttpFoundation\RequestMatcher;
@@ -40,6 +41,9 @@ $config = [
     'twig'           => [
         "template_dir" => __DIR__ . "/templates",
         "cache_dir"    => "/tmp/twig_cache",
+        "globals"      => [
+            "helper" => new TwigHelper(),
+        ],
     ],
     'security'       => [
         'policies'       => [

@@ -39,5 +39,8 @@ class TwigServiceProviderTest extends WebTestCase
 
         // include testing
         $this->assertContains('THIS IS FOOTER', $crawler->filter('div#div_footer')->text());
+
+        // global var testing
+        $this->assertContains('great nba game', $crawler->filter('div#div_footer')->text());
     }
 }

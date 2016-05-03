@@ -36,7 +36,7 @@ abstract class AbstractSimplePreAuthenticationPolicy implements AuthenticationPo
     {
         return new SimpleAuthenticationProvider(
             $this->getPreAuthenticator(),
-            $app['security.user_provider.' . $firewallName],
+            $this->getUserProvider($app, $firewallName),
             $firewallName
         );
     }
@@ -73,9 +73,14 @@ abstract class AbstractSimplePreAuthenticationPolicy implements AuthenticationPo
         return new NullEntryPoint();
     }
 
+    protected function getUserProvider(Application $app, $firewallName)
+    {
+        return $app['security.user_provider.' . $firewallName];
+    }
+
     /**
      * @return SimplePreAuthenticatorInterface
      */
-    abstract public function getPreAuthenticator();
+    abstract protected function getPreAuthenticator();
 
 }

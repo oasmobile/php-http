@@ -11,7 +11,6 @@ namespace Oasis\Mlib\Http\ServiceProviders\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Authentication\Token\PreAuthenticatedToken;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
-use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 use Symfony\Component\Security\Http\Authentication\SimplePreAuthenticatorInterface;
@@ -29,16 +28,16 @@ abstract class AbstractSimplePreAuthenticator implements SimplePreAuthenticatorI
 
     public function authenticateToken(TokenInterface $token, UserProviderInterface $userProvider, $providerKey)
     {
-        $user = $this->loadUserByToken($token, $userProvider);
+        if (!$userProvider instanceof SimplePreAuthenticateUserProviderInterface) {
+            throw new \InvalidArgumentException(
+                "User provider must implement " . SimplePreAuthenticateUserProviderInterface::class
+            );
+        }
 
-        $roles = $user->getRoles();
+        $credentials = $token->getCredentials();
+        $user = $userProvider->authenticateAndGetUser($credentials);
 
-        return new PreAuthenticatedToken(
-            $user,
-            $token->getCredentials(),
-            $providerKey,
-            $roles
-        );
+        return $this->createAuthenticatedToken($user, $credentials, $providerKey);
     }
 
     public function supportsToken(TokenInterface $token, $providerKey)
@@ -60,24 +59,27 @@ abstract class AbstractSimplePreAuthenticator implements SimplePreAuthenticatorI
      *
      * @return string
      */
-    public function getUsernameFromRequest(/** @noinspection PhpUnusedParameterInspection */
+    protected function getUsernameFromRequest(/** @noinspection PhpUnusedParameterInspection */
         Request $request)
     {
         return "anon.";
     }
 
     /**
+     * Creates an authenticated token upon authentication success.
      *
-     * Load a user identified by the given token, from the given user provider
+     * Inherited class can override this method to provide their own pre-authenticated token implementation
      *
-     * @param TokenInterface        $token
-     * @param UserProviderInterface $userProvider
+     * @param string|UserInterface $user        The user
+     * @param mixed                $credentials The user credentials
+     * @param string               $providerKey The provider key
      *
-     * @return UserInterface
-     *
-     * @throws UsernameNotFoundException if a user cannot be loaded by the specified token, this exception is thrown
+     * @return PreAuthenticatedToken
      */
-    abstract public function loadUserByToken(TokenInterface $token, UserProviderInterface $userProvider);
+    protected function createAuthenticatedToken($user, $credentials, $providerKey)
+    {
+        return new PreAuthenticatedToken($user, $credentials, $providerKey, $user->getRoles());
+    }
 
     /**
      * Parse the given request, and extract the credential information from the request

@@ -8,6 +8,7 @@
 
 namespace Oasis\Mlib\Http\ServiceProviders\Cors;
 
+use Oasis\Mlib\Http\SilexKernel;
 use Oasis\Mlib\Http\Views\PrefilightResponse;
 use Silex\Application;
 use Silex\ServiceProviderInterface;
@@ -101,7 +102,7 @@ class CrossOriginResourceSharingProvider implements ServiceProviderInterface
         }
 
         foreach ($this->strategies as $strategy) {
-            if ($strategy->match($request)) {
+            if ($strategy->matches($request)) {
                 $this->activeStrategy = $strategy;
                 break;
             }
@@ -147,9 +148,12 @@ class CrossOriginResourceSharingProvider implements ServiceProviderInterface
         }
     }
 
-    public function onResponse(Request $request, Response $response)
+    public function onResponse(Request $request, Response $response, SilexKernel $kernel)
     {
         if ($this->activeStrategy) {
+
+            $this->activeStrategy->setSender($kernel->getUser());
+
             // This function will process according to spec https://www.w3.org/TR/cors/#resource-processing-model
 
             if ($response instanceof PrefilightResponse) {

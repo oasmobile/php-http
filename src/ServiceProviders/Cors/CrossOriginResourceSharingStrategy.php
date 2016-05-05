@@ -11,8 +11,9 @@ namespace Oasis\Mlib\Http\ServiceProviders\Cors;
 use Oasis\Mlib\Http\Configuration\ConfigurationValidationTrait;
 use Oasis\Mlib\Http\Configuration\CrossOriginResourceSharingConfiguration;
 use Oasis\Mlib\Utils\DataProviderInterface;
-use Oasis\Mlib\Utils\StringUtils;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestMatcher;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 class CrossOriginResourceSharingStrategy
 {
@@ -28,68 +29,63 @@ class CrossOriginResourceSharingStrategy
 
     use ConfigurationValidationTrait;
 
-    protected $path                   = "/";
-    protected $pathEndsWithWildcard   = false;
-    protected $pathStartsWithWildcard = false;
-    protected $pathPattern            = "#^.*\$#";
-    protected $originsAllowed         = [];
-    protected $headersAllowed         = [];
-    protected $headersExposed         = [];
-    protected $maxAge                 = 0;
-    protected $credentialsAllowed     = false;
+    /** @var RequestMatcher */
+    protected $matcher            = null;
+    protected $originsAllowed     = [];
+    protected $headersAllowed     = [];
+    protected $headersExposed     = [];
+    protected $maxAge             = 0;
+    protected $credentialsAllowed = false;
 
     protected $routingAttributes = [];
+    /** @var  UserInterface */
+    protected $sender;
 
     function __construct(array $configuration)
     {
         $dp = $this->processConfiguration($configuration, new CrossOriginResourceSharingConfiguration());
 
-        $this->path               = $dp->getMandatory('path');
+        $pattern                  = $dp->getMandatory('pattern', DataProviderInterface::MIXED_TYPE);
         $this->originsAllowed     = $dp->getMandatory('origins', DataProviderInterface::ARRAY_TYPE);
         $this->headersAllowed     = $dp->getOptional('headers', DataProviderInterface::ARRAY_TYPE, []);
         $this->headersExposed     = $dp->getOptional('headers_exposed', DataProviderInterface::ARRAY_TYPE, []);
         $this->maxAge             = $dp->getOptional('max_age', DataProviderInterface::INT_TYPE, 86400);
         $this->credentialsAllowed = $dp->getOptional('credentials_allowed', DataProviderInterface::BOOL_TYPE, false);
 
-        $this->pathPattern = '#^' . addcslashes($this->path, '\\#') . '$#';
-        if (StringUtils::stringStartsWith($this->path, "*")) {
-            $this->pathStartsWithWildcard = true;
+        if (is_string($pattern)) {
+            if ($pattern == "*") {
+                $this->matcher = new RequestMatcher('.*');
+            }
+            else {
+                $this->matcher = new RequestMatcher($pattern);
+            }
         }
-        if (StringUtils::stringEndsWith($this->path, "*")) {
-            $this->pathEndsWithWildcard = true;
-        }
-        $this->path = trim($this->path, '*');
-    }
-
-    public function match(Request $request)
-    {
-        $path = $request->getPathInfo();
-
-        if ($path === $this->path) {
-            return true;
-        }
-
-        if (@preg_match($this->pathPattern, $path)) {
-            return true;
-        }
-
-        if ($this->pathStartsWithWildcard && $this->pathEndsWithWildcard) {
-            return $this->path === '' || strpos($path, $this->path) !== false;
-        }
-        elseif ($this->pathStartsWithWildcard) {
-            return StringUtils::stringEndsWith($path, $this->path);
-        }
-        elseif ($this->pathEndsWithWildcard) {
-            return StringUtils::stringStartsWith($path, $this->path);
+        elseif ($pattern instanceof RequestMatcher) {
+            $this->matcher = $pattern;
         }
         else {
-            return false;
+            throw new \InvalidArgumentException(
+                "Unrecognized type of pattern for CORS strategy. type = " . get_class($pattern)
+            );
         }
+    }
+
+    public function matches(Request $request)
+    {
+        return $this->matcher->matches($request);
     }
 
     public function setRoutingAttributes(array $attributes)
     {
         $this->routingAttributes = $attributes;
+    }
+
+    /**
+     * @param UserInterface|null $sender
+     */
+    public function setSender($sender)
+    {
+        $this->sender = $sender;
     }
 
     public function isOriginAllowed($origin)

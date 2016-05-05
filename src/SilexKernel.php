@@ -404,12 +404,16 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
      */
     public function isGranted($attributes, $object = null)
     {
+        // TODO: should we throw an exception ?
+        if (!$this->offsetExists('security.authorization_checker')) {
+            return false;
+        }
+        
         $checker = $this['security.authorization_checker'];
         if ($checker instanceof AuthorizationCheckerInterface) {
             return $checker->isGranted($attributes, $object);
         }
         else {
-            // TODO: should we throw an exception?
             return false;
         }
     }
@@ -419,10 +423,17 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
      */
     public function getToken()
     {
-        /** @var TokenStorageInterface $tokenStorage */
-        $tokenStorage = $this['security.token_storage'];
+        if (!$this->offsetExists('security.token_storage')) {
+            return null;
+        }
         
-        return $tokenStorage->getToken();
+        $tokenStorage = $this['security.token_storage'];
+        if ($tokenStorage instanceof TokenStorageInterface) {
+            return $tokenStorage->getToken();
+        }
+        else {
+            return null;
+        }
     }
     
     /**
@@ -431,11 +442,11 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
     public function getUser()
     {
         $token = $this->getToken();
-        if (is_null($token)) {
-            return null;
+        if ($token instanceof TokenInterface) {
+            return $token->getUser();
         }
         else {
-            return $token->getUser();
+            return null;
         }
     }
     

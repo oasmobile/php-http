@@ -15,7 +15,7 @@ $app->service_providers = [
         [
             //new CrossOriginResourceSharingStrategy(
             [
-                'path'    => '/cors/*',
+                'pattern'    => '/cors/.*',
                 'origins' => ['localhost', 'baidu.com', "cors.oasis.mlib.com"],
                 'headers' => ['CUSTOM_HEADER', 'custom_header2', 'CUSTOM_HEADER3', 'CUSTOM_HEADER4'],
             ]
@@ -23,7 +23,7 @@ $app->service_providers = [
             ,
             new CrossOriginResourceSharingStrategy(
                 [
-                    'path'                => '*',
+                    'pattern'                => '*',
                     'origins'             => '*',
                     'credentials_allowed' => true,
                     'headers_exposed'     => ['name', 'job', 'content-types'],

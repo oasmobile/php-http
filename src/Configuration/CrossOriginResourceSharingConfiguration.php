@@ -24,7 +24,7 @@ class CrossOriginResourceSharingConfiguration implements ConfigurationInterface
         $builder = new TreeBuilder();
         $cors    = $builder->root('cors');
         {
-            $cors->children()->scalarNode('path')->isRequired();
+            $cors->children()->scalarNode('pattern')->isRequired();
             $cors->children()->variableNode('origins')->beforeNormalization()->ifString()->then(
                 function ($v) {
                     return [$v];

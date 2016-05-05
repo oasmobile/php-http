@@ -38,6 +38,8 @@ class CrossOriginResourceSharingStrategy
     protected $maxAge                 = 0;
     protected $credentialsAllowed     = false;
 
+    protected $routingAttributes = [];
+
     function __construct(array $configuration)
     {
         $dp = $this->processConfiguration($configuration, new CrossOriginResourceSharingConfiguration());
@@ -83,6 +85,11 @@ class CrossOriginResourceSharingStrategy
         else {
             return false;
         }
+    }
+
+    public function setRoutingAttributes(array $attributes)
+    {
+        $this->routingAttributes = $attributes;
     }
 
     public function isOriginAllowed($origin)

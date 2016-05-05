@@ -116,16 +116,17 @@ class CrossOriginResourceSharingProvider implements ServiceProviderInterface
 
     public function onPostRouting(Request $request)
     {
-        if ($this->activeStrategy
-            && $this->isPreflight
-            && $request->attributes->has('_controller')
-        ) {
-            return new PrefilightResponse([$request->headers->get(static::HEADER_REQUEST_METHOD)]);
+        if ($this->activeStrategy) {
+            $this->activeStrategy->setRoutingAttributes($request->attributes->all());
+
+            if ($this->isPreflight && $request->attributes->has('_controller')) {
+                return new PrefilightResponse([$request->headers->get(static::HEADER_REQUEST_METHOD)]);
+            }
         }
 
         return null;
     }
-    //
+    
     //public function onMethodNotAllowed(MethodNotAllowedException $e)
     //{
     //    if ($this->activeStrategy && $this->isPreflight) {

@@ -1,4 +1,5 @@
 <?php
+use Oasis\Mlib\Http\SilexKernel;
 use Oasis\Mlib\Http\Views\JsonViewHandler;
 use Silex\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
@@ -20,7 +21,16 @@ class SilexKernelWebTest extends WebTestCase
      */
     public function createApplication()
     {
-        return require __DIR__ . '/app.php';
+        /** @var SilexKernel $app */
+        $app = require __DIR__ . '/app.php';
+        $app->addExtraParameters(
+            [
+                'app.config1' => 'one',
+                'app.config2' => 'two',
+            ]
+        );
+
+        return $app;
     }
 
     public function testHomeRoute()
@@ -81,6 +91,19 @@ class SilexKernelWebTest extends WebTestCase
         $this->assertEquals('Oasis\\Mlib\\Http\\Ut\\Controllers\\TestController::paramDomain()', $json['called']);
         $this->assertEquals('naruto', $json['game']);
 
+    }
+
+    public function testParameterFromConfig()
+    {
+        $client = $this->createClient(['HTTP_HOST' => "naruto.baidu.com"]);
+        $client->request('GET', '/param/config-value');
+        $response = $client->getResponse();
+        $json     = json_decode($response->getContent(), true);
+        $this->assertTrue(is_array($json));
+        $this->assertEquals('Oasis\\Mlib\\Http\\Ut\\Controllers\\TestController::paramConfigValue()', $json['called']);
+        $this->assertEquals('one', $json['one']);
+        $this->assertEquals('two', $json['two']);
+        $this->assertEquals('onetwo', $json['three']);
     }
 
     public function testParameterMatching()

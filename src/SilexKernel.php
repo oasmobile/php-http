@@ -63,6 +63,7 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
     /** @var string|null */
     protected $cacheDir               = null;
     protected $controllerInjectedArgs = [];
+    protected $extraParameters        = [];
     
     public function __construct(array $httpConfig, $isDebug)
     {
@@ -392,6 +393,24 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
         }
         
         return $ret;
+    }
+
+    public function addExtraParameters($extras)
+    {
+        $this->extraParameters = array_merge($this->extraParameters, $extras);
+    }
+
+    public function getParameter($key, $default = null)
+    {
+        if ($this->offsetExists($key)) {
+            return $this[$key];
+        }
+        elseif (array_key_exists($key, $this->extraParameters)) {
+            return $this->extraParameters[$key];
+        }
+        else {
+            return $default;
+        }
     }
     
     /**

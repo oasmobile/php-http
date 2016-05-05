@@ -46,6 +46,16 @@ class TestController
         ];
     }
 
+    public function paramConfigValue($one, $two, $three)
+    {
+        return [
+            'called' => $this->createTestString(__CLASS__, __FUNCTION__),
+            'one'    => $one,
+            'two'    => $two,
+            'three'  => $three,
+        ];
+    }
+
     public function paramDomain($game)
     {
         return [

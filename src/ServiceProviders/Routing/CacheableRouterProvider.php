@@ -10,6 +10,7 @@ namespace Oasis\Mlib\Http\ServiceProviders\Routing;
 
 use Oasis\Mlib\Http\Configuration\CacheableRouterConfiguration;
 use Oasis\Mlib\Http\Configuration\ConfigurationValidationTrait;
+use Oasis\Mlib\Http\SilexKernel;
 use Oasis\Mlib\Utils\DataProviderInterface;
 use Silex\Application;
 use Silex\ServiceProviderInterface;
@@ -17,6 +18,7 @@ use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Config\Resource\FileResource;
 use Symfony\Component\Routing\Loader\YamlFileLoader;
 use Symfony\Component\Routing\RequestContext;
+use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\Router;
 
 class CacheableRouterProvider implements ServiceProviderInterface
@@ -30,6 +32,9 @@ class CacheableRouterProvider implements ServiceProviderInterface
     protected $cacheDir             = null;
     protected $isDebug              = false;
     protected $controllerNamespaces = [];
+
+    /** @var  SilexKernel */
+    protected $kernel;
 
     public function __construct(array $configuration, $isDebug)
     {
@@ -73,6 +78,8 @@ class CacheableRouterProvider implements ServiceProviderInterface
                 return $newMatcher;
             }
         );
+
+        $this->kernel = $app;
     }
 
     /**
@@ -98,11 +105,11 @@ class CacheableRouterProvider implements ServiceProviderInterface
                 $routerPath = dirname($routerPath);
             }
 
-            $cacheDir     = strcasecmp($this->cacheDir, "false") == 0 ? null :
+            $cacheDir              = strcasecmp($this->cacheDir, "false") == 0 ? null :
                 ($this->cacheDir ? : $routerPath . "/cache");
             $matcherCacheClassname = "ProjectUrlMatcher_" . md5(realpath($cacheDir));
-            $locator      = new FileLocator([$routerPath]);
-            $this->router = new Router(
+            $locator               = new FileLocator([$routerPath]);
+            $this->router          = new Router(
                 new YamlFileLoader($locator),
                 $routerFile,
                 [
@@ -112,7 +119,26 @@ class CacheableRouterProvider implements ServiceProviderInterface
                 ],
                 $requestContext
             );
-            $this->router->getRouteCollection()->addResource(new FileResource(__FILE__));
+            $collection            = $this->router->getRouteCollection();
+            /** @var Route $route */
+            foreach ($collection as $route) {
+                $defaults = $route->getDefaults();
+                foreach ($defaults as $name => $value) {
+                    $offset = 0;
+                    while (preg_match('#(%([^%].*?)%)#', $value, $matches, 0, $offset)) {
+                        $key         = $matches[2];
+                        $replacement = $this->kernel->getParameter($key);
+                        if ($replacement === null) {
+                            $offset += strlen($key + 2);
+                            continue;
+                        }
+                        $value = preg_replace("/" . preg_quote($matches[1], '/') . "/", $replacement, $value, 1);
+                    }
+                    $value = preg_replace('#%%#', '%', $value);
+                    $route->setDefault($name, $value);
+                }
+            }
+            $collection->addResource(new FileResource(__FILE__));
         }
 
         return $this->router;

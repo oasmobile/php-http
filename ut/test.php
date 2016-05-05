@@ -6,19 +6,25 @@
  * Time: 16:53
  */
 
-use Oasis\Mlib\Http\SilexKernel;
-use Symfony\Component\HttpFoundation\Request;
-
 /** @noinspection PhpIncludeInspection */
 require_once __DIR__ . "/bootstrap.php";
 
-/** @var SilexKernel $app */
-$app = require __DIR__ . "/app.security2.php";
+$replacements = [
+    'app.data' => 'abc',
+    'job.nice' => 'great',
+];
+$value        = "%app.data%%%%job.nice%%app.data%%%%%%%";
+$offset       = 0;
+while (preg_match('#(%([^%].*?)%)#', $value, $matches, 0, $offset)) {
+    $key = $matches[2];
+    if (!array_key_exists($key, $replacements)) {
+        $offset += strlen($key + 2);
+        continue;
+    }
+    $value = preg_replace("/" . preg_quote($matches[1], '/') . "/", $replacements[$key], $value, 1);
+    var_dump($value);
+}
+$value = preg_replace('#%%#', '%', $value);
+var_dump($value);
+//var_dump($matches);
 
-$app->run(Request::create("/secured/admin"));
-
-///** @var SilexKernel $app */
-//$app = require __DIR__ . "/app.security.php";
-//
-//$app->run(Request::create("/secured/admin"));
-var_dump($app->getCacheDirectories());

@@ -8,6 +8,7 @@ haha
 {% set var = "X<BR/>U" %}
 {% set var_js = "var b=2; if (1 <b) { alert('123'); }" %}
 <div id="div_foo" style="background-color: aquamarine; width: 200px; height: 200px;">
+    {{ asset('/pics/cool.jpg', 3) }}
     {% block foo %}
         DEFAULT FOO
     {% endblock %}

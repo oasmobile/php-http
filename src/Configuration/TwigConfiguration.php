@@ -26,6 +26,7 @@ class TwigConfiguration implements ConfigurationInterface
         {
             $twig->children()->scalarNode('template_dir');
             $twig->children()->scalarNode('cache_dir')->defaultValue(null);
+            $twig->children()->scalarNode('asset_base')->defaultValue('');
             $twig->children()->variableNode('globals')->defaultValue([]);
         }
 

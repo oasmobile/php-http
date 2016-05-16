@@ -23,6 +23,7 @@ class SimpleTwigServiceProvider extends TwigServiceProvider
 
     protected $templateDir;
     protected $cacheDir;
+    protected $assetBase;
 
     protected $globalVariables = [];
 
@@ -31,6 +32,7 @@ class SimpleTwigServiceProvider extends TwigServiceProvider
         $this->twigDataProvider = $this->processConfiguration($twigConfiguration, new TwigConfiguration());
         $this->templateDir      = $this->twigDataProvider->getMandatory('template_dir');
         $this->cacheDir         = $this->twigDataProvider->getOptional('cache_dir');
+        $this->assetBase        = $this->twigDataProvider->getOptional('asset_base');
         $this->globalVariables  = $this->twigDataProvider->getOptional(
             'globals',
             DataProviderInterface::ARRAY_TYPE,
@@ -55,6 +57,19 @@ class SimpleTwigServiceProvider extends TwigServiceProvider
                 foreach ($this->globalVariables as $k => $v) {
                     $twig->addGlobal($k, $v);
                 }
+                $twig->addFunction(
+                    new \Twig_SimpleFunction(
+                        'asset',
+                        function ($assetFile, $version = '') {
+                            $url = $this->assetBase . $assetFile;
+                            if ($version !== '') {
+                                $url .= "?v=$version";
+                            }
+
+                            return $url;
+                        }
+                    )
+                );
 
                 return $twig;
             }

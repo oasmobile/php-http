@@ -17,6 +17,7 @@ $app->register(
         [
             "template_dir" => __DIR__ . "/templates",
             "cache_dir"    => "/tmp/twig_cache",
+            "asset_base" => "http://163.com/img",
             "globals"      => [
                 "helper" => new TwigHelper(),
             ],

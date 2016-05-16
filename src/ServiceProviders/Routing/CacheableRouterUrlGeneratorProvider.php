@@ -27,22 +27,24 @@ class CacheableRouterUrlGeneratorProvider extends UrlGeneratorServiceProvider
     {
         parent::register($app);
 
-        $app->extend(
-            'url_generator',
-            function ($generator, $c) {
-                /** @var RequestContext $context */
-                $context = $c['request_context'];
+        $app['url_generator'] = $app->share(
+            $app->extend(
+                'url_generator',
+                function ($generator, $c) {
+                    /** @var RequestContext $context */
+                    $context = $c['request_context'];
 
-                $router       = $this->routerProvider->getRouter($context);
-                $newGenerator = new UrlGenerator($router->getRouteCollection(), $context);
+                    $router       = $this->routerProvider->getRouter($context);
+                    $newGenerator = new UrlGenerator($router->getRouteCollection(), $context);
 
-                return new GroupUrlGenerator(
-                    [
-                        $newGenerator,
-                        $generator,
-                    ]
-                );
-            }
+                    return new GroupUrlGenerator(
+                        [
+                            $newGenerator,
+                            $generator,
+                        ]
+                    );
+                }
+            )
         );
     }
     

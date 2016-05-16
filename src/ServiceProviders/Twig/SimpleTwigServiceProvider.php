@@ -48,31 +48,33 @@ class SimpleTwigServiceProvider extends TwigServiceProvider
         if ($this->cacheDir) {
             $app['twig.options'] = array_replace($app['twig.options'], ['cache' => $this->cacheDir]);
         }
-        $app->extend(
-            'twig',
-            function ($twig, $c) {
-                /** @var \Twig_Environment $twig */
-                $twig->addGlobal('http', $c);
+        $app['twig'] = $app->share(
+            $app->extend(
+                'twig',
+                function ($twig, $c) {
+                    /** @var \Twig_Environment $twig */
+                    $twig->addGlobal('http', $c);
 
-                foreach ($this->globalVariables as $k => $v) {
-                    $twig->addGlobal($k, $v);
-                }
-                $twig->addFunction(
-                    new \Twig_SimpleFunction(
-                        'asset',
-                        function ($assetFile, $version = '') {
-                            $url = $this->assetBase . $assetFile;
-                            if ($version !== '') {
-                                $url .= "?v=$version";
+                    foreach ($this->globalVariables as $k => $v) {
+                        $twig->addGlobal($k, $v);
+                    }
+                    $twig->addFunction(
+                        new \Twig_SimpleFunction(
+                            'asset',
+                            function ($assetFile, $version = '') {
+                                $url = $this->assetBase . $assetFile;
+                                if ($version !== '') {
+                                    $url .= "?v=$version";
+                                }
+
+                                return $url;
                             }
+                        )
+                    );
 
-                            return $url;
-                        }
-                    )
-                );
-
-                return $twig;
-            }
+                    return $twig;
+                }
+            )
         );
     }
 

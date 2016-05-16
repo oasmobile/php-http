@@ -59,24 +59,26 @@ class CacheableRouterProvider implements ServiceProviderInterface
      */
     public function register(Application $app)
     {
-        $app->extend(
-            'url_matcher',
-            function ($urlMatcher, $c) {
-                $context = $c['request_context'];
+        $app['url_matcher'] = $app->share(
+            $app->extend(
+                'url_matcher',
+                function ($urlMatcher, $c) {
+                    $context = $c['request_context'];
 
-                $newMatcher = new GroupUrlMatcher(
-                    $context,
-                    [
-                        new CacheableRouterUrlMatcherWrapper(
-                            $this->getRouter($context)->getMatcher(),
-                            $this->controllerNamespaces
-                        ),
-                        $urlMatcher,
-                    ]
-                );
+                    $newMatcher = new GroupUrlMatcher(
+                        $context,
+                        [
+                            new CacheableRouterUrlMatcherWrapper(
+                                $this->getRouter($context)->getMatcher(),
+                                $this->controllerNamespaces
+                            ),
+                            $urlMatcher,
+                        ]
+                    );
 
-                return $newMatcher;
-            }
+                    return $newMatcher;
+                }
+            )
         );
 
         $this->kernel = $app;

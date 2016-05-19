@@ -37,9 +37,8 @@ class CrossOriginResourceSharingStrategy
     protected $maxAge             = 0;
     protected $credentialsAllowed = false;
 
-    protected $routingAttributes = [];
-    /** @var  UserInterface */
-    protected $sender;
+    /** @var  Request|null */
+    protected $request;
 
     function __construct(array $configuration)
     {
@@ -72,20 +71,16 @@ class CrossOriginResourceSharingStrategy
 
     public function matches(Request $request)
     {
-        return $this->matcher->matches($request);
-    }
+        if ($this->matcher->matches($request)) {
+            $this->request = $request;
 
-    public function setRoutingAttributes(array $attributes)
-    {
-        $this->routingAttributes = $attributes;
-    }
+            return true;
+        }
+        else {
+            $this->request = null;
 
-    /**
-     * @param UserInterface|null $sender
-     */
-    public function setSender($sender)
-    {
-        $this->sender = $sender;
+            return false;
+        }
     }
 
     public function isOriginAllowed($origin)

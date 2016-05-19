@@ -8,7 +8,6 @@
 
 namespace Oasis\Mlib\Http\ServiceProviders\Cors;
 
-use Oasis\Mlib\Http\SilexKernel;
 use Oasis\Mlib\Http\Views\PrefilightResponse;
 use Silex\Application;
 use Silex\ServiceProviderInterface;
@@ -47,7 +46,8 @@ class CrossOriginResourceSharingProvider implements ServiceProviderInterface
     protected $strategies = [];
     /** @var  CrossOriginResourceSharingStrategy */
     protected $activeStrategy = null;
-    protected $isPreflight    = false;
+    /** @var PrefilightResponse|null */
+    protected $preFlightResponse = null;
     
     /**
      * CrossOriginResourceSharingProvider constructor.
@@ -104,8 +104,8 @@ class CrossOriginResourceSharingProvider implements ServiceProviderInterface
     
     public function onPreRouting(Request $request)
     {
-        $this->activeStrategy = null;
-        $this->isPreflight    = false;
+        $this->activeStrategy    = null;
+        $this->preFlightResponse = null;
         
         if (!$request->headers->has(static::HEADER_REQUEST_ORIGIN)) {
             return;
@@ -118,21 +118,23 @@ class CrossOriginResourceSharingProvider implements ServiceProviderInterface
             }
         }
         
+        if (!$this->activeStrategy) {
+            return;
+        }
+        
         if ($request->getMethod() === "OPTIONS"
             && $request->headers->has(static::HEADER_REQUEST_METHOD)
         ) {
-            $this->isPreflight = true;
+            $this->preFlightResponse = new PrefilightResponse();
         }
     }
     
     public function onPostRouting(Request $request)
     {
-        if ($this->activeStrategy) {
-            $this->activeStrategy->setRoutingAttributes($request->attributes->all());
+        if ($this->preFlightResponse) {
+            $this->preFlightResponse->addAllowedMethod($request->headers->get(static::HEADER_REQUEST_METHOD));
             
-            if ($this->isPreflight && $request->attributes->has('_controller')) {
-                return new PrefilightResponse([$request->headers->get(static::HEADER_REQUEST_METHOD)]);
-            }
+            return $this->preFlightResponse;
         }
         
         return null;
@@ -150,20 +152,21 @@ class CrossOriginResourceSharingProvider implements ServiceProviderInterface
     
     public function onMethodNotAllowedHttp(MethodNotAllowedHttpException $e)
     {
-        if ($this->activeStrategy && $this->isPreflight) {
-            return new PrefilightResponse(explode(', ', $e->getHeaders()['Allow']));
+        if ($this->preFlightResponse) {
+            foreach (explode(', ', $e->getHeaders()['Allow']) as $method) {
+                $this->preFlightResponse->addAllowedMethod($method);
+            }
+            
+            return $this->preFlightResponse;
         }
         else {
             return null;
         }
     }
     
-    public function onResponse(Request $request, Response $response, SilexKernel $kernel)
+    public function onResponse(Request $request, Response $response)
     {
         if ($this->activeStrategy) {
-            
-            $this->activeStrategy->setSender($kernel->getUser());
-            
             // This function will process according to spec https://www.w3.org/TR/cors/#resource-processing-model
             
             if ($response instanceof PrefilightResponse) {

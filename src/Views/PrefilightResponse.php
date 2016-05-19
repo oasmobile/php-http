@@ -8,6 +8,7 @@
 
 namespace Oasis\Mlib\Http\Views;
 
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class PrefilightResponse extends Response
@@ -16,10 +17,9 @@ class PrefilightResponse extends Response
 
     protected $frozen = false;
 
-    public function __construct(array $allowedMethods)
+    public function __construct()
     {
         parent::__construct('', static::HTTP_NO_CONTENT, ['X-Status-Code' => static::HTTP_NO_CONTENT]);
-        $this->allowedMethods = $allowedMethods;
     }
 
     /**
@@ -28,6 +28,11 @@ class PrefilightResponse extends Response
     public function getAllowedMethods()
     {
         return $this->allowedMethods;
+    }
+
+    public function addAllowedMethod($method)
+    {
+        $this->allowedMethods[] = $method;
     }
 
     /**

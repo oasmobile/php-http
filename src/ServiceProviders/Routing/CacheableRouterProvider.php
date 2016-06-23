@@ -16,7 +16,6 @@ use Silex\Application;
 use Silex\ServiceProviderInterface;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Config\Resource\FileResource;
-use Symfony\Component\Routing\Loader\YamlFileLoader;
 use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\Router;
@@ -112,7 +111,8 @@ class CacheableRouterProvider implements ServiceProviderInterface
             $matcherCacheClassname = "ProjectUrlMatcher_" . md5(realpath($cacheDir));
             $locator               = new FileLocator([$routerPath]);
             $this->router          = new Router(
-                new YamlFileLoader($locator),
+            //new YamlFileLoader($locator),
+                new InheritableYamlFileLoader($locator),
                 $routerFile,
                 [
                     'cache_dir'           => $cacheDir,

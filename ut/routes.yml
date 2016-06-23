@@ -6,6 +6,8 @@ home:
 sub:
     prefix: sub/
     resource: "subroutes.yml"
+    defaults:
+        name: papa
 
 secured:
     prefix: secured/

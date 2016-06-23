@@ -8,11 +8,15 @@
 
 namespace Oasis\Mlib\Http\Ut\Controllers;
 
+use Symfony\Component\HttpFoundation\Request;
+
 class SubTestController extends TestController
 {
-    public function home() {
+    public function sub(Request $request)
+    {
         return [
-            'called' => $this->createTestString(__CLASS__, __FUNCTION__),
+            'attributes' => $request->attributes->all(),
+            'called'     => $this->createTestString(__CLASS__, __FUNCTION__),
         ];
     }
 }

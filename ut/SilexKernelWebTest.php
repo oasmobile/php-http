@@ -78,7 +78,8 @@ class SilexKernelWebTest extends WebTestCase
         $response = $client->getResponse();
         $json     = json_decode($response->getContent(), true);
         $this->assertTrue(is_array($json));
-        $this->assertEquals('Oasis\\Mlib\\Http\\Ut\\Controllers\\SubTestController::home()', $json['called']);
+        $this->assertEquals('mama', $json['attributes']['name']);
+        $this->assertEquals('Oasis\\Mlib\\Http\\Ut\\Controllers\\SubTestController::sub()', $json['called']);
     }
 
     public function testDomainMatching()

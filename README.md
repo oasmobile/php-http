@@ -2,7 +2,7 @@
 
 **oasis/http** is a composer component that provides a simple yet useful
 framework for building web applications. This component is an extension
-to the widely used [Silex micro-framework] [Silex]. And as [Silex]
+to the widely used [Silex micro-framework] [Silex]. And same as [Silex]
 states, **oasis/http** is also a micro-framework standing on the
 shoulder of giants: [Silex] , [Symfony] and [Pimple] .
 
@@ -11,7 +11,7 @@ shoulder of giants: [Silex] , [Symfony] and [Pimple] .
 Install the latest version with command below:
 
 ```bash
-$ composer require **oasis/http**
+$ composer require oasis/http
 ```
 
 ### Web Server Configuration
@@ -425,6 +425,13 @@ $config = [
 // initialize SilexKernel with $config
 
 ```
+
+> **NOTE**: If the error handler returns `null`, the same `\Exception`
+> object and code will be passed into the next error handler. However,
+> any non `null` return value will cause the error handling phase to
+> end, and the returned value will either be sent back to client (in
+> case its a valid `Symfony\Component\HttpFoundation\Response` object),
+> or be passed into the [view handling phase](#view-handler).
 
 ##### Injected Arguments
 

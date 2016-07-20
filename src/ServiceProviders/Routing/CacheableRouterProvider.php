@@ -126,6 +126,9 @@ class CacheableRouterProvider implements ServiceProviderInterface
             foreach ($collection as $route) {
                 $defaults = $route->getDefaults();
                 foreach ($defaults as $name => $value) {
+                    if (!is_string($value)) {
+                        continue;
+                    }
                     $offset = 0;
                     while (preg_match('#(%([^%].*?)%)#', $value, $matches, 0, $offset)) {
                         $key         = $matches[2];

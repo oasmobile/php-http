@@ -305,5 +305,20 @@ $config = [
 ];
 ```
 
+### 8. After authentication
+
+Once our `SilexKernel` has been bootstrapped, and once a request has been processed through the security module, we can access the following information easily:
+```php
+<?php
+
+use Oasis\Mlib\Http\SilexKernel;
+
+/** @var SilexKernel $kernel */
+$kernel->getToken(); // get TokenInterface object
+$kernel->getToken()->getRoles(); // all sender roles, NOTE: getToken() may return null
+$kernel->isGranted("ROLE_ADMIN"); // test if certain role is granted
+$kernel->getUser(); // get the user authenticated and provided by user provider
+
+```
 [oasis/http]: ../README.md
 [symfony/security]: http://symfony.com/doc/current/components/security/introduction.html "Symfony Security Component"

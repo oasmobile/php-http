@@ -8,6 +8,7 @@ mastered. We will go through all of them in this document one by one:
 - [Placeholder](#placeholder)
 - [Requirements](#requirements)
 - [Importing Resources](#importing-resources)
+- [Caching and Debuging](#caching-and-debugging)
 
 ### Attributes
 
@@ -37,7 +38,7 @@ if ($request->attributes->has('user')) {
 ### Placeholder
 
 Placeholder is probably a must feature in any kind of smart routing.
-There is no exception in **[oasis/http](../README.md)** either.
+There is no exception in **[oasis/http]** either.
 
 To create a placeholder, simply surround the desired placeholder name
 with curly braces, and then put the placeholder into the `path` or
@@ -216,4 +217,15 @@ From the example above:
 - Resource importing is done recursively, so that prefixes are prepended recursively too (i.e. "/user/2/cart/checkout" is a perfectly working path, while "/2/cart/" or "/checkout" is not)
 - Attributes imported can override what is defined outside, e.g. in route "user.cart.index", the "component" attribute has the value "user.cart" which is defined in "routes/user.yml", rather than the value "user" which is defined in "routes.yml"
 
+### Caching and Debugging
+
+Unlike [Silex], **[oasis/http]** offers the ability to cache routes defined in yaml files. In debugging, we may also wonder how the routes are matched (or not matched). So, what actully happens during the routing phase?
+
+At first, the kernel will try to find out if a cached url matcher exists. This matcher normally resides at the root of the caching directory and is named like "ProjectUrlMatcher_698cad18956c48dea950b166a7a64ddf.php". In this file, a class with the same name, extending `Symfony\Component\Routing\Matcher\UrlMatcher`, is defined.
+
+In the url matcher, there is an overriden method, called `match()`, and this is where all the magic take place in. To debug, we can set a breakpoint at the beginning of this function, and follow how a route is found, or why a 404/405 exception is thrown.
+
+
+
 [Silex]: http://silex.sensiolabs.org/ "Silex Micro-Framework"
+[oasis/http]: ../README.md

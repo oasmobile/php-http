@@ -225,7 +225,7 @@ At first, the kernel will try to find out if a cached url matcher exists. This m
 
 In the url matcher, there is an overriden method, called `match()`, and this is where all the magic take place in. To debug, we can set a breakpoint at the beginning of this function, and follow how a route is found, or why a 404/405 exception is thrown.
 
-> **NOTE**: although it is declared that the cached url matcher will invalidate and be regenerated whenever routing yamls or related PHP codes change, some times, we may notice unexpected behavior like changes do not reflect in execution. It is worth a try to remove this url matcher file, or maybe everything under the cache directory, so that program will start from a cleaner environment.
+> **NOTE**: although it is claimed that the cached url matcher will invalidate and be regenerated whenever routing yamls or related PHP codes change, some times, we may notice unexpected behavior like changes do not reflect in execution. It is worth a try to remove this url matcher file, or maybe everything under the cache directory, so that program will start from a cleaner environment.
 
 [Silex]: http://silex.sensiolabs.org/ "Silex Micro-Framework"
 [oasis/http]: ../README.md

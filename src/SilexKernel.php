@@ -104,8 +104,9 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
             if ($this->cacheDir) {
                 $twigConfig = array_merge(['cache_dir' => $this->cacheDir], $twigConfig);
             }
-            $this->register(new SimpleTwigServiceProvider($twigConfig));
         }
+        $this['twig.config'] = $twigConfig;
+        $this->register(new SimpleTwigServiceProvider());
         
         if ($securityConfig = $this->httpDataProvider->getOptional('security', DataProviderInterface::ARRAY_TYPE, [])) {
             $this->register(new SimpleSecurityProvider($securityConfig));

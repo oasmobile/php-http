@@ -17,44 +17,31 @@ use Silex\Provider\TwigServiceProvider;
 class SimpleTwigServiceProvider extends TwigServiceProvider
 {
     use ConfigurationValidationTrait;
-
+    
     /** @var  DataProviderInterface */
     protected $twigDataProvider;
-
+    
     protected $templateDir;
     protected $cacheDir;
     protected $assetBase;
-
+    
     protected $globalVariables = [];
-
-    public function __construct(array $twigConfiguration)
+    
+    public function __construct()
     {
-        $this->twigDataProvider = $this->processConfiguration($twigConfiguration, new TwigConfiguration());
-        $this->templateDir      = $this->twigDataProvider->getMandatory('template_dir');
-        $this->cacheDir         = $this->twigDataProvider->getOptional('cache_dir');
-        $this->assetBase        = $this->twigDataProvider->getOptional('asset_base');
-        $this->globalVariables  = $this->twigDataProvider->getOptional(
-            'globals',
-            DataProviderInterface::ARRAY_TYPE,
-            []
-        );
     }
-
+    
     public function register(Application $app)
     {
         parent::register($app);
-
-        $app['twig.path'] = $this->templateDir;
-        if ($this->cacheDir) {
-            $app['twig.options'] = array_replace($app['twig.options'], ['cache' => $this->cacheDir]);
-        }
+        
         $app['twig'] = $app->share(
             $app->extend(
                 'twig',
                 function ($twig, $c) {
                     /** @var \Twig_Environment $twig */
                     $twig->addGlobal('http', $c);
-
+                    
                     foreach ($this->globalVariables as $k => $v) {
                         $twig->addGlobal($k, $v);
                     }
@@ -66,16 +53,39 @@ class SimpleTwigServiceProvider extends TwigServiceProvider
                                 if ($version !== '') {
                                     $url .= "?v=$version";
                                 }
-
+                                
                                 return $url;
                             }
                         )
                     );
-
+                    
                     return $twig;
                 }
             )
         );
     }
-
+    
+    public function boot(Application $app)
+    {
+        if (!$app['twig.config']) {
+            return;
+        }
+        
+        $this->twigDataProvider = $this->processConfiguration($app['twig.config'], new TwigConfiguration());
+        $this->templateDir      = $this->twigDataProvider->getMandatory('template_dir');
+        $this->cacheDir         = $this->twigDataProvider->getOptional('cache_dir');
+        $this->assetBase        = $this->twigDataProvider->getOptional('asset_base');
+        $this->globalVariables  = $this->twigDataProvider->getOptional(
+            'globals',
+            DataProviderInterface::ARRAY_TYPE,
+            []
+        );
+        if ($this->cacheDir) {
+            $app['twig.options'] = array_replace($app['twig.options'], ['cache' => $this->cacheDir]);
+        }
+        $app['twig.path'] = $this->templateDir;
+        
+        parent::boot($app);
+    }
+    
 }

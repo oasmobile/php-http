@@ -19,22 +19,31 @@ use Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface
 class SimpleSecurityProvider extends SecurityServiceProvider
 {
     use ConfigurationValidationTrait;
-
+    
     /** @var FirewallInterface[]|array */
     protected $firewalls = [];
-
+    
     /** @var AccessRuleInterface[]|array */
     protected $accessRules = [];
-
+    
     /** @var AuthenticationPolicyInterface[] */
     protected $authPolicies = [];
-
+    
     protected $roleHierarchy = [];
-
-    public function __construct(array $securityConfiguration = [])
+    
+    public function __construct()
     {
-        if ($securityConfiguration) {
-            $dp = $this->processConfiguration($securityConfiguration, new SecurityConfiguration());
+    }
+    
+    public function register(Application $app)
+    {
+        parent::register($app);
+    }
+    
+    public function boot(Application $app)
+    {
+        if ($app['security.config']) {
+            $dp = $this->processConfiguration($app['security.config'], new SecurityConfiguration());
             if ($policies = $dp->getOptional('policies', DataProviderInterface::ARRAY_TYPE, [])) {
                 foreach ($policies as $name => $policy) {
                     if ($policy instanceof AuthenticationPolicyInterface) {
@@ -55,24 +64,18 @@ class SimpleSecurityProvider extends SecurityServiceProvider
                 }
             }
             if ($roleHierarchy = $dp->getOptional('role_hierarchy', DataProviderInterface::ARRAY_TYPE, [])) {
-                foreach ($roleHierarchy as $parent => $children)
-                {
+                foreach ($roleHierarchy as $parent => $children) {
                     $this->addRoleHierarchy($parent, $children);
                 }
             }
         }
-    }
-
-    public function register(Application $app)
-    {
-        parent::register($app);
-
+    
         $app['security.role_hierarchy'] = $this->getRoleHierarchy();
-
+    
         foreach ($this->authPolicies as $policyName => $policy) {
             $this->installAuthenticationFactory($policyName, $policy, $app);
         }
-
+    
         $firewallSetting = [];
         foreach ($this->firewalls as $firewallName => $firewall) {
             if ($firewall instanceof FirewallInterface) {
@@ -83,7 +86,7 @@ class SimpleSecurityProvider extends SecurityServiceProvider
             }
         }
         $app['security.firewalls'] = $firewallSetting;
-
+    
         $rulesSetting = [];
         foreach ($this->accessRules as $rule) {
             if ($rule instanceof AccessRuleInterface) {
@@ -98,18 +101,20 @@ class SimpleSecurityProvider extends SecurityServiceProvider
             }
         }
         $app['security.access_rules'] = $rulesSetting;
+        parent::boot($app);
+    
     }
-
+    
     public function addAuthenticationPolicy($policyName, AuthenticationPolicyInterface $policy)
     {
         $this->authPolicies[$policyName] = $policy;
     }
-
+    
     public function addFirewall($firewallName, $firewall)
     {
         $this->firewalls[$firewallName] = $firewall;
     }
-
+    
     /**
      * @param AccessRuleInterface|array $rule
      */
@@ -117,7 +122,7 @@ class SimpleSecurityProvider extends SecurityServiceProvider
     {
         $this->accessRules[] = $rule;
     }
-
+    
     protected function installAuthenticationFactory($policyName,
                                                     AuthenticationPolicyInterface $policy,
                                                     Application $app)
@@ -125,7 +130,7 @@ class SimpleSecurityProvider extends SecurityServiceProvider
         $factoryName       = 'security.authentication_listener.factory.' . $policyName;
         $app[$factoryName] = $app->protect(
             function ($firewallName, $options) use ($policyName, $policy, $app) {
-
+                
                 $authProviderId = 'security.authentication_provider.' . $firewallName . '.' . $policyName;
                 if (!isset($app[$authProviderId])) {
                     $app[$authProviderId] = $app->share(
@@ -142,7 +147,7 @@ class SimpleSecurityProvider extends SecurityServiceProvider
                         }
                     );
                 }
-
+                
                 $authListenerId = 'security.authentication_listener.' . $firewallName . '.' . $policyName;
                 if (!isset($app[$authListenerId])) {
                     $app[$authListenerId] = $app->share(
@@ -155,7 +160,7 @@ class SimpleSecurityProvider extends SecurityServiceProvider
                         }
                     );
                 }
-
+                
                 $entryId = 'security.entry_point.' . $firewallName;
                 if (!isset($app[$entryId])) {
                     $app[$entryId] = $app->share(
@@ -164,13 +169,13 @@ class SimpleSecurityProvider extends SecurityServiceProvider
                             if (!$entryPoint instanceof AuthenticationEntryPointInterface) {
                                 $entryPoint = new NullEntryPoint();
                             }
-
+                            
                             return $entryPoint;
                         }
                     );
-
+                    
                 }
-
+                
                 return [
                     $authProviderId,
                     $authListenerId,
@@ -180,7 +185,7 @@ class SimpleSecurityProvider extends SecurityServiceProvider
             }
         );
     }
-
+    
     protected function parseFirewall(FirewallInterface $firewall,
         /** @noinspection PhpUnusedParameterInspection */
                                      Application $app)
@@ -190,10 +195,10 @@ class SimpleSecurityProvider extends SecurityServiceProvider
         $setting['users']     = $firewall->getUserProvider();
         $setting['stateless'] = $firewall->isStateless();
         $setting              = array_merge($setting, $firewall->getOtherSettings());
-
+        
         return $setting;
     }
-
+    
     /**
      * @return array
      */
@@ -201,12 +206,12 @@ class SimpleSecurityProvider extends SecurityServiceProvider
     {
         return $this->roleHierarchy;
     }
-
+    
     public function addRoleHierarchy($role, $children)
     {
         $old = isset($this->roleHierarchy[$role]) ? $this->roleHierarchy[$role] : [];
         $old = array_merge($old, (array)$children);
-
+        
         $this->roleHierarchy[$role] = $old;
     }
 }

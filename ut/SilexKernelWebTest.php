@@ -102,7 +102,7 @@ class SilexKernelWebTest extends WebTestCase
         $json     = json_decode($response->getContent(), true);
         $this->assertTrue(is_array($json));
         $this->assertEquals('Oasis\\Mlib\\Http\\Ut\\Controllers\\TestController::paramConfigValue()', $json['called']);
-        $this->assertEquals('one', $json['one']);
+        $this->assertEquals('one', $json['one'], $response->getContent());
         $this->assertEquals('two', $json['two']);
         $this->assertEquals('onetwo', $json['three']);
     }

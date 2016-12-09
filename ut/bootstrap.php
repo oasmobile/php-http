@@ -19,5 +19,5 @@ error_reporting(E_ALL);
 //Debug::enable(E_ALL ^ ~E_NOTICE);
 
 (new LocalFileHandler('/tmp'))->install();
-(new ConsoleHandler())->install();
-MLogging::setMinLogLevel(Logger::CRITICAL);
+//(new ConsoleHandler())->install();
+//MLogging::setMinLogLevel(Logger::CRITICAL);

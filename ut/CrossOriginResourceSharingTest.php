@@ -22,7 +22,7 @@ class CrossOriginResourceSharingTest extends WebTestCase
     {
         return require __DIR__ . '/app.cors.php';
     }
-
+    
     public function testPreflightOnExistingRoute()
     {
         $client = $this->createClient();
@@ -37,14 +37,14 @@ class CrossOriginResourceSharingTest extends WebTestCase
             ]
         );
         $response = $client->getResponse();
-        $this->assertEmpty($response->getContent());
+        $this->assertEmpty($response->getContent(), $response->getContent());
         $this->assertEquals(Response::HTTP_NO_CONTENT, $response->getStatusCode());
         $this->assertTrue($response->headers->has(CrossOriginResourceSharingProvider::HEADER_ALLOW_ORIGIN));
         $this->assertTrue($response->headers->has(CrossOriginResourceSharingProvider::HEADER_ALLOW_METHODS));
         $this->assertTrue($response->headers->has(CrossOriginResourceSharingProvider::HEADER_MAX_AGE));
         $this->assertEquals(86400, $response->headers->get(CrossOriginResourceSharingProvider::HEADER_MAX_AGE));
     }
-
+    
     public function testPreflightOnNotFoundRoute()
     {
         $client = $this->createClient();
@@ -61,7 +61,7 @@ class CrossOriginResourceSharingTest extends WebTestCase
         $response = $client->getResponse();
         $this->assertEquals(Response::HTTP_NOT_FOUND, $response->getStatusCode());
     }
-
+    
     public function testPrefilightOnAllowedOrigin()
     {
         $client = $this->createClient();
@@ -80,7 +80,7 @@ class CrossOriginResourceSharingTest extends WebTestCase
         $this->assertTrue($response->headers->has(CrossOriginResourceSharingProvider::HEADER_ALLOW_ORIGIN));
         $this->assertTrue($response->headers->has(CrossOriginResourceSharingProvider::HEADER_VARY));
     }
-
+    
     public function testPrefilightOnNotAllowedOrigin()
     {
         $client = $this->createClient();
@@ -98,7 +98,7 @@ class CrossOriginResourceSharingTest extends WebTestCase
         $this->assertEquals(Response::HTTP_NO_CONTENT, $response->getStatusCode());
         $this->assertFalse($response->headers->has(CrossOriginResourceSharingProvider::HEADER_ALLOW_ORIGIN));
     }
-
+    
     public function testPrefilightOnLimitedAllowedMethod()
     {
         $client = $this->createClient();
@@ -118,7 +118,7 @@ class CrossOriginResourceSharingTest extends WebTestCase
         $this->assertTrue($response->headers->has(CrossOriginResourceSharingProvider::HEADER_ALLOW_METHODS));
         $this->assertContains('PUT', $response->headers->get(CrossOriginResourceSharingProvider::HEADER_ALLOW_METHODS));
     }
-
+    
     public function testPrefilightOnNotAllowedMethod()
     {
         $client = $this->createClient();
@@ -137,7 +137,7 @@ class CrossOriginResourceSharingTest extends WebTestCase
         $this->assertFalse($response->headers->has(CrossOriginResourceSharingProvider::HEADER_ALLOW_ORIGIN));
         $this->assertFalse($response->headers->has(CrossOriginResourceSharingProvider::HEADER_ALLOW_METHODS));
     }
-
+    
     public function testPrefilightOnAllowedHeader()
     {
         $client = $this->createClient();
@@ -159,7 +159,7 @@ class CrossOriginResourceSharingTest extends WebTestCase
         $this->assertTrue($response->headers->has(CrossOriginResourceSharingProvider::HEADER_ALLOW_METHODS));
         $this->assertTrue($response->headers->has(CrossOriginResourceSharingProvider::HEADER_ALLOW_HEADERS));
     }
-
+    
     public function testPrefilightOnNotAllowedHeader()
     {
         $client = $this->createClient();
@@ -169,8 +169,8 @@ class CrossOriginResourceSharingTest extends WebTestCase
             [],
             [],
             [
-                "HTTP_" . CrossOriginResourceSharingProvider::HEADER_REQUEST_ORIGIN => 'baidu.com',
-                "HTTP_" . CrossOriginResourceSharingProvider::HEADER_REQUEST_METHOD => 'PUT',
+                "HTTP_" . CrossOriginResourceSharingProvider::HEADER_REQUEST_ORIGIN  => 'baidu.com',
+                "HTTP_" . CrossOriginResourceSharingProvider::HEADER_REQUEST_METHOD  => 'PUT',
                 "HTTP_" . CrossOriginResourceSharingProvider::HEADER_REQUEST_HEADERS => 'CUSTOM_HEADER, NO_SUCH_HEADER',
             ]
         );
@@ -180,7 +180,7 @@ class CrossOriginResourceSharingTest extends WebTestCase
         $this->assertFalse($response->headers->has(CrossOriginResourceSharingProvider::HEADER_ALLOW_METHODS));
         $this->assertFalse($response->headers->has(CrossOriginResourceSharingProvider::HEADER_ALLOW_HEADERS));
     }
-
+    
     public function testPrefilightOnCredentials()
     {
         $client = $this->createClient();
@@ -208,7 +208,7 @@ class CrossOriginResourceSharingTest extends WebTestCase
         );
         $this->assertNotContains('*', $response->headers->get(CrossOriginResourceSharingProvider::HEADER_ALLOW_ORIGIN));
     }
-
+    
     public function testNormalRequestAfterPreflight()
     {
         $client = $this->createClient();
@@ -227,7 +227,7 @@ class CrossOriginResourceSharingTest extends WebTestCase
         $this->assertFalse($response->headers->has(CrossOriginResourceSharingProvider::HEADER_ALLOW_METHODS));
         $this->assertFalse($response->headers->has(CrossOriginResourceSharingProvider::HEADER_ALLOW_HEADERS));
     }
-
+    
     public function testExposedHeadersAfterPreflight()
     {
         $client = $this->createClient();

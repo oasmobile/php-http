@@ -41,7 +41,7 @@ class CrossOriginResourceSharingAdvancedTest extends WebTestCase
             ]
         );
         $response = $client->getResponse();
-        $this->assertEmpty($response->getContent());
+        $this->assertEmpty($response->getContent(), $response->getContent());
         $this->assertEquals(Response::HTTP_NO_CONTENT, $response->getStatusCode());
         $this->assertTrue($response->headers->has(CrossOriginResourceSharingProvider::HEADER_ALLOW_ORIGIN));
         $this->assertEquals($origin, $response->headers->get(CrossOriginResourceSharingProvider::HEADER_ALLOW_ORIGIN));

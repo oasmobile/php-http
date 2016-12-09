@@ -51,22 +51,9 @@ class CrossOriginResourceSharingProvider implements ServiceProviderInterface
     
     /**
      * CrossOriginResourceSharingProvider constructor.
-     *
-     * @param CrossOriginResourceSharingStrategy[] $strategies
      */
-    public function __construct(array $strategies)
+    public function __construct()
     {
-        foreach ($strategies as &$strategy) {
-            if (is_array($strategy)) {
-                $strategy = new CrossOriginResourceSharingStrategy($strategy);
-            }
-            elseif (!$strategy instanceof CrossOriginResourceSharingStrategy) {
-                throw new \InvalidArgumentException(
-                    static::class . " must be constructed with array of " . CrossOriginResourceSharingStrategy::class
-                );
-            }
-        }
-        $this->strategies = $strategies;
     }
     
     /**
@@ -92,6 +79,18 @@ class CrossOriginResourceSharingProvider implements ServiceProviderInterface
      */
     public function boot(Application $app)
     {
+        $this->strategies = $app['cors.strategies'];
+        foreach ($this->strategies as &$strategy) {
+            if (is_array($strategy)) {
+                $strategy = new CrossOriginResourceSharingStrategy($strategy);
+            }
+            elseif (!$strategy instanceof CrossOriginResourceSharingStrategy) {
+                throw new \InvalidArgumentException(
+                    static::class . " must be constructed with array of " . CrossOriginResourceSharingStrategy::class
+                );
+            }
+        }
+        
         if (self::KERNEL_ROUTING_PRIORITY - self::KERNEL_FIREWALL_PRIORITY < 2) {
             throw new \LogicException("there must be one empty priority slot between routing and firewall!");
         }

@@ -92,24 +92,24 @@ $app->service_providers = [
 ];
 $app->service_providers = [
     new CrossOriginResourceSharingProvider(
-        [
-            //new CrossOriginResourceSharingStrategy(
-            [
-                'pattern' => '/secured/madmin/.*',
-                'origins' => ['localhost', 'baidu.com', "cors.oasis.mlib.com"],
-                'headers' => ['CUSTOM_HEADER', 'custom_header2', 'CUSTOM_HEADER3', 'CUSTOM_HEADER4'],
-            ]
-            //),
-            ,
-            //new CrossOriginResourceSharingStrategy(
-            //    [
-            //        'pattern'             => '*',
-            //        'origins'             => '*',
-            //        'credentials_allowed' => true,
-            //        'headers_exposed'     => ['name', 'job', 'content-types'],
-            //    ]
-            //),
-        ]
     ),
+];
+$app['cors.strategies'] = [
+    //new CrossOriginResourceSharingStrategy(
+    [
+        'pattern' => '/secured/madmin/.*',
+        'origins' => ['localhost', 'baidu.com', "cors.oasis.mlib.com"],
+        'headers' => ['CUSTOM_HEADER', 'custom_header2', 'CUSTOM_HEADER3', 'CUSTOM_HEADER4'],
+    ]
+    //),
+    ,
+    //new CrossOriginResourceSharingStrategy(
+    //    [
+    //        'pattern'             => '*',
+    //        'origins'             => '*',
+    //        'credentials_allowed' => true,
+    //        'headers_exposed'     => ['name', 'job', 'content-types'],
+    //    ]
+    //),
 ];
 return $app;

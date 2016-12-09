@@ -26,12 +26,6 @@ class CacheableRouterProvider implements ServiceProviderInterface
     
     /** @var Router */
     protected $router;
-    /** @var  DataProviderInterface */
-    protected $configDataProvider;
-    protected $cacheDir             = null;
-    protected $isDebug              = false;
-    protected $controllerNamespaces = [];
-    
     /** @var  SilexKernel */
     protected $kernel;
     
@@ -49,8 +43,8 @@ class CacheableRouterProvider implements ServiceProviderInterface
      */
     public function register(Application $app)
     {
-        $this->kernel       = $app;
-        $app['url_matcher'] = $app->share(
+        $this->kernel                        = $app;
+        $app['url_matcher']                  = $app->share(
             $app->extend(
                 'url_matcher',
                 function ($urlMatcher, $c) {
@@ -61,7 +55,7 @@ class CacheableRouterProvider implements ServiceProviderInterface
                         [
                             new CacheableRouterUrlMatcherWrapper(
                                 $this->getRouter($context)->getMatcher(),
-                                $this->controllerNamespaces
+                                $c['routing.config.namespaces']
                             ),
                             $urlMatcher,
                         ]
@@ -71,9 +65,33 @@ class CacheableRouterProvider implements ServiceProviderInterface
                 }
             )
         );
-        $app['router']      = $app->share(
+        $app['router']                       = $app->share(
             function ($app) {
                 return $this->getRouter($app['request_context']);
+            }
+        );
+        $app['routing.config.data_provider'] = $app->share(
+            function ($app) {
+                $routingConfig = $app['routing.config'];
+                
+                return $this->processConfiguration(
+                    $routingConfig,
+                    new CacheableRouterConfiguration()
+                );
+            }
+        );
+        $app['routing.config.namespaces']    = $app->share(
+            function () {
+                return $this->getConfigDataProvider()->getOptional(
+                    'namespaces',
+                    DataProviderInterface::ARRAY_TYPE,
+                    []
+                );
+            }
+        );
+        $app['routing.config.cache_dir']     = $app->share(
+            function () {
+                return $this->getConfigDataProvider()->getOptional('cache_dir');
             }
         );
     }
@@ -89,21 +107,12 @@ class CacheableRouterProvider implements ServiceProviderInterface
      */
     public function boot(Application $app)
     {
-        $routingConfig = $app['routing.config'];
-        
-        if (!$routingConfig) {
-            return;
-        }
-        
-        $this->configDataProvider = $this->processConfiguration($routingConfig, new CacheableRouterConfiguration());
-        
-        $this->controllerNamespaces = $this->configDataProvider->getOptional(
-            'namespaces',
-            DataProviderInterface::ARRAY_TYPE,
-            []
-        );
-        $this->cacheDir             = $this->configDataProvider->getOptional('cache_dir');
-        $this->isDebug              = $app['debug'];
+    }
+    
+    /** @return DataProviderInterface */
+    public function getConfigDataProvider()
+    {
+        return $this->kernel['routing.config.data_provider'];
     }
     
     /**
@@ -114,19 +123,21 @@ class CacheableRouterProvider implements ServiceProviderInterface
     public function getRouter(RequestContext $requestContext)
     {
         if (!$this->router) {
-            if (!$this->configDataProvider) {
-                throw new \LogicException("Cannot use CacheableRouterProvider because 'routing.config' not configured.");
+            if (!$this->getConfigDataProvider()) {
+                throw new \LogicException(
+                    "Cannot use CacheableRouterProvider because 'routing.config' not configured."
+                );
             }
             
             $routerFile = 'routes.yml';
-            $routerPath = $this->configDataProvider->getMandatory('path');
+            $routerPath = $this->getConfigDataProvider()->getMandatory('path');
             if (!is_dir($routerPath)) {
                 $routerFile = basename($routerPath);
                 $routerPath = dirname($routerPath);
             }
             
-            $cacheDir              = strcasecmp($this->cacheDir, "false") == 0 ? null :
-                ($this->cacheDir ? : $routerPath . "/cache");
+            $cacheDir              = strcasecmp($this->kernel['routing.config.cache_dir'], "false") == 0 ? null :
+                ($this->kernel['routing.config.cache_dir'] ? : $routerPath . "/cache");
             $matcherCacheClassname = "ProjectUrlMatcher_" . md5(realpath($cacheDir));
             $locator               = new FileLocator([$routerPath]);
             $this->router          = new Router(
@@ -136,7 +147,7 @@ class CacheableRouterProvider implements ServiceProviderInterface
                 [
                     'cache_dir'           => $cacheDir,
                     'matcher_cache_class' => $matcherCacheClassname,
-                    "debug"               => $this->isDebug,
+                    "debug"               => $this->kernel['debug'],
                 ],
                 $requestContext
             );

@@ -23,7 +23,7 @@ use Symfony\Component\Routing\Router;
 class CacheableRouterProvider implements ServiceProviderInterface
 {
     use ConfigurationValidationTrait;
-
+    
     /** @var Router */
     protected $router;
     /** @var  DataProviderInterface */
@@ -31,21 +31,12 @@ class CacheableRouterProvider implements ServiceProviderInterface
     protected $cacheDir             = null;
     protected $isDebug              = false;
     protected $controllerNamespaces = [];
-
+    
     /** @var  SilexKernel */
     protected $kernel;
-
-    public function __construct(array $configuration, $isDebug)
+    
+    public function __construct()
     {
-        $this->configDataProvider = $this->processConfiguration($configuration, new CacheableRouterConfiguration());
-
-        $this->controllerNamespaces = $this->configDataProvider->getOptional(
-            'namespaces',
-            DataProviderInterface::ARRAY_TYPE,
-            []
-        );
-        $this->cacheDir             = $this->configDataProvider->getOptional('cache_dir');
-        $this->isDebug              = $isDebug;
     }
     
     /**
@@ -58,12 +49,13 @@ class CacheableRouterProvider implements ServiceProviderInterface
      */
     public function register(Application $app)
     {
+        $this->kernel       = $app;
         $app['url_matcher'] = $app->share(
             $app->extend(
                 'url_matcher',
                 function ($urlMatcher, $c) {
                     $context = $c['request_context'];
-
+                    
                     $newMatcher = new GroupUrlMatcher(
                         $context,
                         [
@@ -74,15 +66,18 @@ class CacheableRouterProvider implements ServiceProviderInterface
                             $urlMatcher,
                         ]
                     );
-
+                    
                     return $newMatcher;
                 }
             )
         );
-
-        $this->kernel = $app;
+        $app['router']      = $app->share(
+            function ($app) {
+                return $this->getRouter($app['request_context']);
+            }
+        );
     }
-
+    
     /**
      * Bootstraps the application.
      *
@@ -94,18 +89,42 @@ class CacheableRouterProvider implements ServiceProviderInterface
      */
     public function boot(Application $app)
     {
+        $routingConfig = $app['routing'];
+        
+        if (!$routingConfig) {
+            return;
+        }
+        
+        $this->configDataProvider = $this->processConfiguration($routingConfig, new CacheableRouterConfiguration());
+        
+        $this->controllerNamespaces = $this->configDataProvider->getOptional(
+            'namespaces',
+            DataProviderInterface::ARRAY_TYPE,
+            []
+        );
+        $this->cacheDir             = $this->configDataProvider->getOptional('cache_dir');
+        $this->isDebug              = $app['debug'];
     }
-
+    
+    /**
+     * @param RequestContext $requestContext
+     *
+     * @return Router
+     */
     public function getRouter(RequestContext $requestContext)
     {
         if (!$this->router) {
+            if (!$this->configDataProvider) {
+                throw new \LogicException("Cannot use CacheableRouterProvider because 'routing' not configured.");
+            }
+            
             $routerFile = 'routes.yml';
             $routerPath = $this->configDataProvider->getMandatory('path');
             if (!is_dir($routerPath)) {
                 $routerFile = basename($routerPath);
                 $routerPath = dirname($routerPath);
             }
-
+            
             $cacheDir              = strcasecmp($this->cacheDir, "false") == 0 ? null :
                 ($this->cacheDir ? : $routerPath . "/cache");
             $matcherCacheClassname = "ProjectUrlMatcher_" . md5(realpath($cacheDir));
@@ -145,7 +164,7 @@ class CacheableRouterProvider implements ServiceProviderInterface
             }
             $collection->addResource(new FileResource(__FILE__));
         }
-
+        
         return $this->router;
     }
 }

@@ -95,9 +95,10 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
             if ($this->cacheDir) {
                 $routingConfig = array_merge(['cache_dir' => $this->cacheDir], $routingConfig);
             }
-            $this->register($routerProvider = new CacheableRouterProvider($routingConfig, $this->isDebug));
-            $this->register(new CacheableRouterUrlGeneratorProvider($routerProvider));
         }
+        $this['routing'] = $routingConfig;
+        $this->register(new CacheableRouterProvider());
+        $this->register(new CacheableRouterUrlGeneratorProvider());
         
         if ($twigConfig = $this->httpDataProvider->getOptional('twig', DataProviderInterface::ARRAY_TYPE, [])) {
             if ($this->cacheDir) {
@@ -394,12 +395,12 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
         
         return $ret;
     }
-
+    
     public function addExtraParameters($extras)
     {
         $this->extraParameters = array_merge($this->extraParameters, $extras);
     }
-
+    
     public function getParameter($key, $default = null)
     {
         if ($this->offsetExists($key)) {

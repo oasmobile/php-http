@@ -96,7 +96,7 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
                 $routingConfig = array_merge(['cache_dir' => $this->cacheDir], $routingConfig);
             }
         }
-        $this['routing'] = $routingConfig;
+        $this['routing.config'] = $routingConfig;
         $this->register(new CacheableRouterProvider());
         $this->register(new CacheableRouterUrlGeneratorProvider());
         
@@ -108,9 +108,12 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
         $this['twig.config'] = $twigConfig;
         $this->register(new SimpleTwigServiceProvider());
         
-        if ($securityConfig = $this->httpDataProvider->getOptional('security', DataProviderInterface::ARRAY_TYPE, [])) {
-            $this->register(new SimpleSecurityProvider($securityConfig));
-        }
+        $this['security.config'] = $this->httpDataProvider->getOptional(
+            'security',
+            DataProviderInterface::ARRAY_TYPE,
+            []
+        );
+        $this->register(new SimpleSecurityProvider($this['security.config']));
         
         if ($corsConfig = $this->httpDataProvider->getOptional('cors', DataProviderInterface::ARRAY_TYPE, [])) {
             $this->register(new CrossOriginResourceSharingProvider($corsConfig));

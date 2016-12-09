@@ -89,7 +89,7 @@ class CacheableRouterProvider implements ServiceProviderInterface
      */
     public function boot(Application $app)
     {
-        $routingConfig = $app['routing'];
+        $routingConfig = $app['routing.config'];
         
         if (!$routingConfig) {
             return;
@@ -115,7 +115,7 @@ class CacheableRouterProvider implements ServiceProviderInterface
     {
         if (!$this->router) {
             if (!$this->configDataProvider) {
-                throw new \LogicException("Cannot use CacheableRouterProvider because 'routing' not configured.");
+                throw new \LogicException("Cannot use CacheableRouterProvider because 'routing.config' not configured.");
             }
             
             $routerFile = 'routes.yml';

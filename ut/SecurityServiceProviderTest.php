@@ -47,7 +47,7 @@ class SecurityServiceProviderTest extends WebTestCase
         );
         $client->request('GET', '/secured/admin');
         $response = $client->getResponse();
-        $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
+        $this->assertEquals(Response::HTTP_OK, $response->getStatusCode(), $response->getContent());
     }
 
     public function testFormAuth()

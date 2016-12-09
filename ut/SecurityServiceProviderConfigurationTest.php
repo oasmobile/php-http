@@ -1,6 +1,7 @@
 <?php
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
+
+require_once "SecurityServiceProviderTest.php";
 
 /**
  * Created by PhpStorm.
@@ -19,9 +20,9 @@ class SecurityServiceProviderConfigurationTest extends SecurityServiceProviderTe
     public function createApplication()
     {
         $app = require __DIR__ . "/app.security2.php";
-
+        
         $app['session.test'] = true;
-
+        
         return $app;
     }
 }

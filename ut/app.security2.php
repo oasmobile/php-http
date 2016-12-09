@@ -43,11 +43,11 @@ $config = [
         ],
         'firewalls'      => [
             'minhao.admin' => [
-                "pattern"  => "^/secured/madmin",
-                "policies" => [
+                "pattern"   => "^/secured/madmin",
+                "policies"  => [
                     "mauth" => true,
                 ],
-                "users"    => new TestApiUserProvider(),
+                "users"     => new TestApiUserProvider(),
             ],
             "admin"        => [
                 "pattern"  => "^/secured/admin",

@@ -6,15 +6,18 @@
  * Time: 10:57
  */
 use Composer\Autoload\ClassLoader;
+use Monolog\Logger;
+use Oasis\Mlib\Logging\ConsoleHandler;
 use Oasis\Mlib\Logging\LocalFileHandler;
-use Symfony\Component\Debug\Debug;
+use Oasis\Mlib\Logging\MLogging;
 
 /** @var ClassLoader $loader */
-$loader = require_once __DIR__ . "/../vendor/autoload.php";
+$loader = require __DIR__ . "/../vendor/autoload.php";
 $loader->addPsr4('Oasis\\Mlib\\Http\\Ut\\', __DIR__ . "/Helpers");
 
 error_reporting(E_ALL);
 //Debug::enable(E_ALL ^ ~E_NOTICE);
 
 (new LocalFileHandler('/tmp'))->install();
-
+(new ConsoleHandler())->install();
+MLogging::setMinLogLevel(Logger::CRITICAL);

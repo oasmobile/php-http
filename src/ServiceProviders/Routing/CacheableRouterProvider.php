@@ -112,6 +112,10 @@ class CacheableRouterProvider implements ServiceProviderInterface
     /** @return DataProviderInterface */
     public function getConfigDataProvider()
     {
+        if (!$this->kernel) {
+            throw new \LogicException("Cannot get config data provider before registration");
+        }
+        
         return $this->kernel['routing.config.data_provider'];
     }
     

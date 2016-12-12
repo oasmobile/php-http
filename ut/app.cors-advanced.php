@@ -41,7 +41,7 @@ $testFirewall = new SimpleFirewall(
             "mauth" => true,
         ],
         "users"    => new TestApiUserProvider(),
-
+    
     ]
 );
 
@@ -50,20 +50,22 @@ $provider->addAuthenticationPolicy('mauth', $secPolicy);
 $provider->addFirewall(
     "admin",
     [
-        "pattern" => "^/secured/admin",
-        "http"    => true,
-        "users"   => $users,
+        "pattern"  => "^/secured/admin",
+        "policies" => ["http" => true],
+        "users"    => $users,
     ]
 );
 $provider->addFirewall(
     "form.admin",
     [
-        "pattern" => "^/secured/fadmin",
-        "form"    => [
-            "login_path" => "/secured/flogin",
-            "check_path" => "/secured/fadmin/check",
+        "pattern"  => "^/secured/fadmin",
+        "policies" => [
+            "form" => [
+                "login_path" => "/secured/flogin",
+                "check_path" => "/secured/fadmin/check",
+            ],
         ],
-        "users"   => $users,
+        "users"    => $users,
     ]
 );
 $provider->addFirewall("minhao.admin", $testFirewall);
@@ -91,8 +93,7 @@ $app->service_providers = [
     new SessionServiceProvider(),
 ];
 $app->service_providers = [
-    new CrossOriginResourceSharingProvider(
-    ),
+    new CrossOriginResourceSharingProvider(),
 ];
 $app['cors.strategies'] = [
     //new CrossOriginResourceSharingStrategy(

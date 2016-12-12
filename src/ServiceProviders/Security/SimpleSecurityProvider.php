@@ -10,6 +10,7 @@ namespace Oasis\Mlib\Http\ServiceProviders\Security;
 
 use Oasis\Mlib\Http\Configuration\ConfigurationValidationTrait;
 use Oasis\Mlib\Http\Configuration\SecurityConfiguration;
+use Oasis\Mlib\Http\SilexKernel;
 use Oasis\Mlib\Utils\DataProviderInterface;
 use Silex\Application;
 use Silex\Provider\SecurityServiceProvider;
@@ -20,89 +21,32 @@ class SimpleSecurityProvider extends SecurityServiceProvider
 {
     use ConfigurationValidationTrait;
     
+    /** @var SilexKernel */
+    protected $kernel = null;
+    
+    // --- start of intermediate variables holding config data ---
+    
     /** @var FirewallInterface[]|array */
     protected $firewalls = [];
-    
     /** @var AccessRuleInterface[]|array */
     protected $accessRules = [];
-    
     /** @var AuthenticationPolicyInterface[] */
     protected $authPolicies = [];
-    
+    /** @var array */
     protected $roleHierarchy = [];
+    
+    // --- end of intermidate variables ---
     
     public function __construct()
     {
     }
     
-    public function register(Application $app)
+    /**
+     * @param AccessRuleInterface|array $rule
+     */
+    public function addAccessRule($rule)
     {
-        parent::register($app);
-    }
-    
-    public function boot(Application $app)
-    {
-        if ($app['security.config']) {
-            $dp = $this->processConfiguration($app['security.config'], new SecurityConfiguration());
-            if ($policies = $dp->getOptional('policies', DataProviderInterface::ARRAY_TYPE, [])) {
-                foreach ($policies as $name => $policy) {
-                    if ($policy instanceof AuthenticationPolicyInterface) {
-                        $this->addAuthenticationPolicy($name, $policy);
-                    }
-                }
-            }
-            if ($firewalls = $dp->getOptional('firewalls', DataProviderInterface::ARRAY_TYPE, [])) {
-                foreach ($firewalls as $name => $firewallData) {
-                    $firewall = new SimpleFirewall($firewallData);
-                    $this->addFirewall($name, $firewall);
-                }
-            }
-            if ($accessRules = $dp->getOptional('access_rules', DataProviderInterface::ARRAY_TYPE, [])) {
-                foreach ($accessRules as $name => $ruleData) {
-                    $rule = new SimpleAccessRule($ruleData);
-                    $this->addAccessRule($rule);
-                }
-            }
-            if ($roleHierarchy = $dp->getOptional('role_hierarchy', DataProviderInterface::ARRAY_TYPE, [])) {
-                foreach ($roleHierarchy as $parent => $children) {
-                    $this->addRoleHierarchy($parent, $children);
-                }
-            }
-        }
-    
-        $app['security.role_hierarchy'] = $this->getRoleHierarchy();
-    
-        foreach ($this->authPolicies as $policyName => $policy) {
-            $this->installAuthenticationFactory($policyName, $policy, $app);
-        }
-    
-        $firewallSetting = [];
-        foreach ($this->firewalls as $firewallName => $firewall) {
-            if ($firewall instanceof FirewallInterface) {
-                $firewallSetting[$firewallName] = $this->parseFirewall($firewall, $app);
-            }
-            else {
-                $firewallSetting[$firewallName] = $firewall;
-            }
-        }
-        $app['security.firewalls'] = $firewallSetting;
-    
-        $rulesSetting = [];
-        foreach ($this->accessRules as $rule) {
-            if ($rule instanceof AccessRuleInterface) {
-                $rulesSetting[] = [
-                    $rule->getPattern(),
-                    $rule->getRequiredRoles(),
-                    $rule->getRequiredChannel(),
-                ];
-            }
-            else {
-                $rulesSetting[] = $rule;
-            }
-        }
-        $app['security.access_rules'] = $rulesSetting;
-        parent::boot($app);
-    
+        $this->accessRules[] = $rule;
     }
     
     public function addAuthenticationPolicy($policyName, AuthenticationPolicyInterface $policy)
@@ -115,12 +59,140 @@ class SimpleSecurityProvider extends SecurityServiceProvider
         $this->firewalls[$firewallName] = $firewall;
     }
     
-    /**
-     * @param AccessRuleInterface|array $rule
-     */
-    public function addAccessRule($rule)
+    public function addRoleHierarchy($role, $children)
     {
-        $this->accessRules[] = $rule;
+        $old = isset($this->roleHierarchy[$role]) ? $this->roleHierarchy[$role] : [];
+        $old = array_merge($old, (array)$children);
+        
+        $this->roleHierarchy[$role] = $old;
+    }
+    
+    public function boot(Application $app)
+    {
+        // install additional policies
+        foreach ($app['security.config.policies'] as $policyName => $policy) {
+            $this->installAuthenticationFactory($policyName, $policy, $app);
+        }
+        
+        $firewallSetting = [];
+        foreach ($app['security.config.firewalls'] as $firewallName => $firewall) {
+            if (!$firewall instanceof FirewallInterface) {
+                $firewall = new SimpleFirewall($firewall);
+            }
+            $firewallSetting[$firewallName] = $this->parseFirewall($firewall, $app);
+        }
+        $app['security.firewalls'] = $firewallSetting;
+        
+        $rulesSetting = [];
+        foreach ($app['security.config.access_rules'] as $rule) {
+            if (!$rule instanceof AccessRuleInterface) {
+                $rule = new SimpleAccessRule($rule);
+            }
+            $rulesSetting[] = [
+                $rule->getPattern(),
+                $rule->getRequiredRoles(),
+                $rule->getRequiredChannel(),
+            ];
+        }
+        $app['security.access_rules'] = $rulesSetting;
+        
+        $rolesSetting = [];
+        foreach ($app['security.config.role_hierarchy'] as $parentName => $children) {
+            $old = isset($rolesSetting[$parentName]) ? $rolesSetting[$parentName] : [];
+            $old = array_merge($old, (array)$children);
+            
+            $rolesSetting[$parentName] = $old;
+        }
+        $app['security.role_hierarchy'] = $rolesSetting;
+        
+        parent::boot($app);
+        
+    }
+    
+    public function register(Application $app)
+    {
+        $this->kernel = $app;
+        
+        $app['security.config.data_provider']  = $app->share(
+            function ($app) {
+                $config = isset($app['security.config']) ? $app['security.config'] : [];
+                if ($this->authPolicies) {
+                    $config['policies'] = array_merge(
+                        isset($config['policies']) ? $config['policies'] : [],
+                        $this->authPolicies
+                    );
+                }
+                if ($this->firewalls) {
+                    $config['firewalls'] = array_merge(
+                        isset($config['firewalls']) ? $config['firewalls'] : [],
+                        $this->firewalls
+                    );
+                }
+                if ($this->accessRules) {
+                    $config['access_rules'] = array_merge(
+                        isset($config['access_rules']) ? $config['access_rules'] : [],
+                        $this->accessRules
+                    );
+                }
+                if ($this->authPolicies) {
+                    $config['role_hierarchy'] = array_merge(
+                        isset($config['role_hierarchy']) ? $config['role_hierarchy'] : [],
+                        $this->roleHierarchy
+                    );
+                }
+                
+                $dp = $this->processConfiguration($config, new SecurityConfiguration());
+                
+                return $dp;
+            }
+        );
+        $app['security.config.policies']       = $app->share(
+            function () {
+                return $this->getConfigDataProvider()->getOptional(
+                    'policies',
+                    DataProviderInterface::ARRAY_TYPE,
+                    []
+                );
+            }
+        );
+        $app['security.config.firewalls']      = $app->share(
+            function () {
+                return $this->getConfigDataProvider()->getOptional(
+                    'firewalls',
+                    DataProviderInterface::ARRAY_TYPE,
+                    []
+                );
+            }
+        );
+        $app['security.config.access_rules']   = $app->share(
+            function () {
+                return $this->getConfigDataProvider()->getOptional(
+                    'access_rules',
+                    DataProviderInterface::ARRAY_TYPE,
+                    []
+                );
+            }
+        );
+        $app['security.config.role_hierarchy'] = $app->share(
+            function () {
+                return $this->getConfigDataProvider()->getOptional(
+                    'role_hierarchy',
+                    DataProviderInterface::ARRAY_TYPE,
+                    []
+                );
+            }
+        );
+        parent::register($app);
+    }
+    
+    /** @return DataProviderInterface */
+    public function getConfigDataProvider()
+    {
+        if (!$this->kernel) {
+            throw new \LogicException("Cannot get config data provider before registration");
+        }
+        
+        return $this->kernel['security.config.data_provider'];
     }
     
     protected function installAuthenticationFactory($policyName,
@@ -186,6 +258,15 @@ class SimpleSecurityProvider extends SecurityServiceProvider
         );
     }
     
+    /**
+     *
+     * Parses firewall into silex compatible array data
+     *
+     * @param FirewallInterface $firewall
+     * @param Application       $app
+     *
+     * @return array
+     */
     protected function parseFirewall(FirewallInterface $firewall,
         /** @noinspection PhpUnusedParameterInspection */
                                      Application $app)
@@ -199,19 +280,4 @@ class SimpleSecurityProvider extends SecurityServiceProvider
         return $setting;
     }
     
-    /**
-     * @return array
-     */
-    public function getRoleHierarchy()
-    {
-        return $this->roleHierarchy;
-    }
-    
-    public function addRoleHierarchy($role, $children)
-    {
-        $old = isset($this->roleHierarchy[$role]) ? $this->roleHierarchy[$role] : [];
-        $old = array_merge($old, (array)$children);
-        
-        $this->roleHierarchy[$role] = $old;
-    }
 }

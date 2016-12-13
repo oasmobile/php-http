@@ -8,14 +8,13 @@
 
 namespace Oasis\Mlib\Http\ServiceProviders\Cors;
 
+use Oasis\Mlib\Http\SilexKernel;
 use Oasis\Mlib\Http\Views\PrefilightResponse;
 use Silex\Application;
 use Silex\ServiceProviderInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\EventListener\RouterListener;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
-use Symfony\Component\Security\Http\Firewall;
 
 class CrossOriginResourceSharingProvider implements ServiceProviderInterface
 {
@@ -36,11 +35,6 @@ class CrossOriginResourceSharingProvider implements ServiceProviderInterface
         'POST',
         'GET',
     ];
-    
-    /** @see RouterListener */
-    const KERNEL_ROUTING_PRIORITY = 32;
-    /** @see Firewall */
-    const KERNEL_FIREWALL_PRIORITY = 9;
     
     /** @var  CrossOriginResourceSharingStrategy[] */
     protected $strategies = [];
@@ -91,16 +85,21 @@ class CrossOriginResourceSharingProvider implements ServiceProviderInterface
             }
         }
         
-        if (self::KERNEL_ROUTING_PRIORITY - self::KERNEL_FIREWALL_PRIORITY < 2) {
-            throw new \LogicException("there must be one empty priority slot between routing and firewall!");
-        }
-        $app->before([$this, 'onPreRouting'], self::KERNEL_ROUTING_PRIORITY + 1);
-        $app->before([$this, 'onPostRouting'], (self::KERNEL_ROUTING_PRIORITY - self::KERNEL_FIREWALL_PRIORITY) / 2);
+        $app->before([$this, 'onPreRouting'], SilexKernel::BEFORE_PRIORITY_ROUTING + 1);
+        $app->before([$this, 'onPostRouting'], SilexKernel::BEFORE_PRIORITY_CORS_PREFLIGHT);
         $app->after([$this, 'onResponse'], Application::LATE_EVENT);
         //$app->error([$this, 'onMethodNotAllowed'], Application::EARLY_EVENT);
         $app->error([$this, 'onMethodNotAllowedHttp'], Application::EARLY_EVENT);
     }
     
+    /**
+     *
+     * Finds out active CORS strategy for the request.
+     *
+     * Also decides if the request is a Pre-Flight request
+     *
+     * @param Request $request
+     */
     public function onPreRouting(Request $request)
     {
         $this->activeStrategy    = null;

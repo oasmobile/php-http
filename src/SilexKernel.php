@@ -29,12 +29,14 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
+use Symfony\Component\HttpKernel\EventListener\RouterListener;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Http\Firewall;
 use Twig_Environment;
 
 /**
@@ -55,6 +57,18 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
     use ConfigurationValidationTrait;
     use SilexApp\TwigTrait;
     use SilexApp\UrlGeneratorTrait;
+    
+    const BEFORE_PRIORITY_EARLIEST = self::EARLY_EVENT;
+    /** @see RouterListener */
+    const BEFORE_PRIORITY_ROUTING = 32;
+    /** @see CrossOriginResourceSharingProvider */
+    const BEFORE_PRIORITY_CORS_PREFLIGHT = 20;
+    /** @see Firewall */
+    const BEFORE_PRIORITY_FIREWALL = 8;
+    const BEFORE_PRIORITY_LATEST   = self::LATE_EVENT;
+    
+    const AFTER_PRIORITY_EARLIEST  = self::EARLY_EVENT;
+    const AFTER_PRIORITY_LATEST    = self::LATE_EVENT;
     
     /** @var  ArrayDataProvider */
     protected $httpDataProvider;

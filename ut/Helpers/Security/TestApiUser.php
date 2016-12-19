@@ -14,13 +14,13 @@ class TestApiUser implements UserInterface, \JsonSerializable
 {
     protected $username;
     protected $roles;
-
+    
     public function __construct($username, $roles)
     {
         $this->roles    = $roles;
         $this->username = $username;
     }
-
+    
     /**
      * Returns the roles granted to the user.
      *
@@ -41,7 +41,7 @@ class TestApiUser implements UserInterface, \JsonSerializable
     {
         return $this->roles;
     }
-
+    
     /**
      * Returns the password used to authenticate the user.
      *
@@ -52,8 +52,9 @@ class TestApiUser implements UserInterface, \JsonSerializable
      */
     public function getPassword()
     {
+        return '';
     }
-
+    
     /**
      * Returns the salt that was originally used to encode the password.
      *
@@ -63,8 +64,9 @@ class TestApiUser implements UserInterface, \JsonSerializable
      */
     public function getSalt()
     {
+        return null;
     }
-
+    
     /**
      * Returns the username used to authenticate the user.
      *
@@ -74,7 +76,7 @@ class TestApiUser implements UserInterface, \JsonSerializable
     {
         return $this->username;
     }
-
+    
     /**
      * Removes sensitive data from the user.
      *
@@ -84,7 +86,7 @@ class TestApiUser implements UserInterface, \JsonSerializable
     public function eraseCredentials()
     {
     }
-
+    
     /**
      * Specify data which should be serialized to JSON
      *

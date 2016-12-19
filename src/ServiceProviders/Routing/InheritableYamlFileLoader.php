@@ -9,7 +9,6 @@
 namespace Oasis\Mlib\Http\ServiceProviders\Routing;
 
 use Symfony\Component\Routing\Loader\YamlFileLoader;
-use Symfony\Component\Routing\RouteCollection;
 
 class InheritableYamlFileLoader extends YamlFileLoader
 {
@@ -21,7 +20,7 @@ class InheritableYamlFileLoader extends YamlFileLoader
     //
     //    $collection->addCollection($inheritableCollection);
     //}
-
+    
     public function import($resource, $type = null, $ignoreErrors = false, $sourceResource = null)
     {
         return new InheritableRouteCollection(parent::import($resource, $type, $ignoreErrors, $sourceResource));

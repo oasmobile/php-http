@@ -10,7 +10,6 @@ use Composer\Autoload\ClassLoader;
 use Oasis\Mlib\Http\ErrorHandlers\JsonErrorHandler;
 use Oasis\Mlib\Http\SilexKernel;
 use Oasis\Mlib\Http\Views\JsonViewHandler;
-use Silex\Provider\UrlGeneratorServiceProvider;
 
 /** @var ClassLoader $loader */
 $loader = require_once __DIR__ . "/../vendor/autoload.php";

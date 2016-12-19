@@ -18,12 +18,12 @@ class SimpleCookieProvider implements ServiceProviderInterface
 {
     /** @var ResponseCookieContainer */
     protected $cookieContainer;
-
+    
     public function __construct()
     {
         $this->cookieContainer = new ResponseCookieContainer();
     }
-
+    
     /**
      * Registers services on the given app.
      *
@@ -35,7 +35,7 @@ class SimpleCookieProvider implements ServiceProviderInterface
     public function register(Application $app)
     {
     }
-
+    
     /**
      * Bootstraps the application.
      *
@@ -50,8 +50,9 @@ class SimpleCookieProvider implements ServiceProviderInterface
         if (!$app instanceof SilexKernel) {
             throw new \LogicException(static::class . " can only be used with " . SilexKernel::class);
         }
-
+        
         $app->addControllerInjectedArg($this->cookieContainer);
+        /** @noinspection PhpUnusedParameterInspection */
         $app->after(
             function (Request $request, Response $response) {
                 foreach ($this->cookieContainer->getCookies() as $cookie) {

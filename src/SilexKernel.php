@@ -24,6 +24,7 @@ use Oasis\Mlib\Utils\DataProviderInterface;
 use Silex\Application as SilexApp;
 use Silex\CallbackResolver;
 use Silex\Provider\ServiceControllerServiceProvider;
+use Silex\Provider\UrlGeneratorServiceProvider;
 use Silex\ServiceProviderInterface;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\HttpFoundation\Response;
@@ -67,8 +68,8 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
     const BEFORE_PRIORITY_FIREWALL = 8;
     const BEFORE_PRIORITY_LATEST   = self::LATE_EVENT;
     
-    const AFTER_PRIORITY_EARLIEST  = self::EARLY_EVENT;
-    const AFTER_PRIORITY_LATEST    = self::LATE_EVENT;
+    const AFTER_PRIORITY_EARLIEST = self::EARLY_EVENT;
+    const AFTER_PRIORITY_LATEST   = self::LATE_EVENT;
     
     /** @var  ArrayDataProvider */
     protected $httpDataProvider;
@@ -303,6 +304,9 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
         if ($this['routing.config']) {
             $this->register(new CacheableRouterProvider());
             $this->register(new CacheableRouterUrlGeneratorProvider());
+        }
+        else {
+            $this->register(new UrlGeneratorServiceProvider());
         }
         if ($this['twig.config']) {
             $this->register(new SimpleTwigServiceProvider());

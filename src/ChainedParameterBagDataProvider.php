@@ -10,13 +10,12 @@ namespace Oasis\Mlib\Http;
 
 use Oasis\Mlib\Utils\AbstractDataProvider;
 use Symfony\Component\HttpFoundation\ParameterBag;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class ChainedParameterBagDataProvider extends AbstractDataProvider
 {
     /** @var ParameterBag[] */
     protected $bags;
-
+    
     public function __construct(...$bags)
     {
         foreach ($bags as $bag) {
@@ -26,7 +25,7 @@ class ChainedParameterBagDataProvider extends AbstractDataProvider
         }
         $this->bags = $bags;
     }
-
+    
     /**
      * @param string $key the key to be used to read a value from the data provider
      *
@@ -38,8 +37,10 @@ class ChainedParameterBagDataProvider extends AbstractDataProvider
             if (!$bag->has($key)) {
                 continue;
             }
-
+            
             return $bag->get($key);
         }
+        
+        return null;
     }
 }

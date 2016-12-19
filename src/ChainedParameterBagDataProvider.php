@@ -9,18 +9,21 @@
 namespace Oasis\Mlib\Http;
 
 use Oasis\Mlib\Utils\AbstractDataProvider;
+use Symfony\Component\HttpFoundation\HeaderBag;
 use Symfony\Component\HttpFoundation\ParameterBag;
 
 class ChainedParameterBagDataProvider extends AbstractDataProvider
 {
-    /** @var ParameterBag[] */
+    /** @var ParameterBag[]|HeaderBag[] */
     protected $bags;
     
     public function __construct(...$bags)
     {
         foreach ($bags as $bag) {
-            if (!$bag instanceof ParameterBag) {
-                throw new \InvalidArgumentException("Only ParameterBag object can be chained.");
+            if (!$bag instanceof ParameterBag
+                && !$bag instanceof HeaderBag
+            ) {
+                throw new \InvalidArgumentException("Only ParameterBag|HeaderBag object can be chained.");
             }
         }
         $this->bags = $bags;
@@ -38,7 +41,29 @@ class ChainedParameterBagDataProvider extends AbstractDataProvider
                 continue;
             }
             
-            return $bag->get($key);
+            if ($bag instanceof ParameterBag) {
+                $value = $bag->get($key);
+            }
+            elseif ($bag instanceof HeaderBag) {
+                // when header is presented only once, string value is returned, otherwise, array value is returned
+                $value = $bag->get($key, null, false);
+                if (is_array($value)) {
+                    if (count($value) == 1) {
+                        $value = $value[0];
+                    }
+                    elseif (count($value) == 0) {
+                        $value = null;
+                    }
+                    else {
+                        // $value = $value;
+                    }
+                }
+            }
+            else {
+                throw new \LogicException("Bag type invalid!");
+            }
+            
+            return $value;
         }
         
         return null;

@@ -36,6 +36,7 @@ use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
+use Symfony\Component\Security\Core\Exception\AuthenticationCredentialsNotFoundException;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Http\Firewall;
 use Twig_Environment;
@@ -461,14 +462,21 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
      */
     public function isGranted($attributes, $object = null)
     {
-        // TODO: should we throw an exception ?
         if (!$this->offsetExists('security.authorization_checker')) {
             return false;
         }
         
         $checker = $this['security.authorization_checker'];
         if ($checker instanceof AuthorizationCheckerInterface) {
-            return $checker->isGranted($attributes, $object);
+            try {
+                return $checker->isGranted($attributes, $object);
+            } catch (AuthenticationCredentialsNotFoundException $e) {
+                // authentication not found is considered not granted,
+                // there is no need to throw an exception out in this case
+                mdebug("Authentication credential not found, isGranted will return false. msg = %s", $e->getMessage());
+                
+                return false;
+            }
         }
         else {
             return false;

@@ -164,115 +164,6 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
         }
     }
     
-    public function addControllerInjectedArg($object)
-    {
-        $this->controllerInjectedArgs[] = $object;
-    }
-    
-    /**
-     * @override Overrides parent function to disable ensureResponse if exception is not handled
-     *
-     * @param mixed $callback
-     * @param int   $priority
-     */
-    public function error($callback, $priority = -8)
-    {
-        $this->on(KernelEvents::EXCEPTION, new ExtendedExceptionListnerWrapper($this, $callback), $priority);
-    }
-    
-    /**
-     * @override Overrides parent function to enable before middleware for SUB_REQUEST
-     *
-     * Registers a before filter.
-     *
-     * Before filters are run before any route has been matched.
-     *
-     * @param mixed $callback          Before filter callback
-     * @param int   $priority          The higher this value, the earlier an event
-     *                                 listener will be triggered in the chain (defaults to 0)
-     * @param bool  $masterRequestOnly If this middleware is only applicable for Master Request
-     */
-    public function before($callback, $priority = 0, $masterRequestOnly = true)
-    {
-        $app = $this;
-        
-        $this->on(
-            KernelEvents::REQUEST,
-            function (GetResponseEvent $event) use ($callback, $app, $masterRequestOnly) {
-                if ($masterRequestOnly && HttpKernelInterface::MASTER_REQUEST !== $event->getRequestType()) {
-                    return;
-                }
-                
-                /** @var CallbackResolver $resolver */
-                $resolver = $app['callback_resolver'];
-                $ret      = call_user_func(
-                    $resolver->resolveCallback($callback),
-                    $event->getRequest(),
-                    $app
-                );
-                
-                if ($ret instanceof Response) {
-                    $event->setResponse($ret);
-                }
-            },
-            $priority
-        );
-    }
-    
-    /**
-     * @override Overrides parent function to enable before middleware for SUB_REQUEST
-     *
-     * Registers an after filter.
-     *
-     * After filters are run after the controller has been executed.
-     *
-     * @param mixed $callback          After filter callback
-     * @param int   $priority          The higher this value, the earlier an event
-     *                                 listener will be triggered in the chain (defaults to 0)
-     * @param bool  $masterRequestOnly If this middleware is only applicable for Master Request
-     */
-    public function after($callback, $priority = 0, $masterRequestOnly = true)
-    {
-        $app = $this;
-        
-        $this->on(
-            KernelEvents::RESPONSE,
-            function (FilterResponseEvent $event) use ($callback, $app, $masterRequestOnly) {
-                if ($masterRequestOnly && HttpKernelInterface::MASTER_REQUEST !== $event->getRequestType()) {
-                    return;
-                }
-                
-                /** @var CallbackResolver $resolver */
-                $resolver = $app['callback_resolver'];
-                $response = call_user_func(
-                    $resolver->resolveCallback($callback),
-                    $event->getRequest(),
-                    $event->getResponse(),
-                    $app
-                );
-                if ($response instanceof Response) {
-                    $event->setResponse($response);
-                }
-                elseif (null !== $response) {
-                    throw new \RuntimeException(
-                        'An after middleware returned an invalid response value. Must return null or an instance of Response.'
-                    );
-                }
-            },
-            $priority
-        );
-    }
-    
-    public function addMiddleware(MiddlewareInterface $middleware)
-    {
-        if (false !== ($priority = $middleware->getBeforePriority())) {
-            $this->before([$middleware, 'before'], $priority, $middleware->onlyForMasterRequest());
-        }
-        if (false !== ($priority = $middleware->getAfterPriority())) {
-            $this->after([$middleware, 'after'], $priority, $middleware->onlyForMasterRequest());
-        }
-    }
-    
     /**
      * Returns a closure that calls the service definition every time it is called. Hence acting as a
      * factory provider. Object returned by service definition is not unique in any scope. This is different
@@ -291,33 +182,6 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
         return function ($c) use ($callable) {
             return $callable($c);
         };
-    }
-    
-    public function boot()
-    {
-        if ($this->booted) {
-            return;
-        }
-        
-        $this->register(new ServiceControllerServiceProvider());
-        $this->register(new SimpleCookieProvider());
-        $this->register(new CrossOriginResourceSharingProvider());
-        if ($this['routing.config']) {
-            $this->register(new CacheableRouterProvider());
-            $this->register(new CacheableRouterUrlGeneratorProvider());
-        }
-        else {
-            $this->register(new UrlGeneratorServiceProvider());
-        }
-        if ($this['twig.config']) {
-            $this->register(new SimpleTwigServiceProvider());
-        }
-        if ($this['security.config']) {
-            // registering security provider without config will make twig provider fail
-            $this->register(new SimpleSecurityProvider());
-        }
-        
-        parent::boot(); // TODO: Change the autogenerated stub
     }
     
     function __set($name, $value)
@@ -418,20 +282,9 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
         }
     }
     
-    public function getCacheDirectories()
+    public function addControllerInjectedArg($object)
     {
-        $ret = [];
-        if ($this->cacheDir) {
-            $ret[] = $this->cacheDir;
-        }
-        if ($cacheDir = $this->httpDataProvider->getOptional('routing.cache_dir')) {
-            $ret[] = $cacheDir;
-        }
-        if ($cacheDir = $this->httpDataProvider->getOptional('twig.cache_dir')) {
-            $ret[] = $cacheDir;
-        }
-        
-        return $ret;
+        $this->controllerInjectedArgs[] = $object;
     }
     
     public function addExtraParameters($extras)
@@ -439,17 +292,135 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
         $this->extraParameters = array_merge($this->extraParameters, $extras);
     }
     
-    public function getParameter($key, $default = null)
+    public function addMiddleware(MiddlewareInterface $middleware)
     {
-        if ($this->offsetExists($key)) {
-            return $this[$key];
+        if (false !== ($priority = $middleware->getBeforePriority())) {
+            $this->before([$middleware, 'before'], $priority, $middleware->onlyForMasterRequest());
         }
-        elseif (array_key_exists($key, $this->extraParameters)) {
-            return $this->extraParameters[$key];
+        if (false !== ($priority = $middleware->getAfterPriority())) {
+            $this->after([$middleware, 'after'], $priority, $middleware->onlyForMasterRequest());
+        }
+    }
+    
+    /**
+     * @override Overrides parent function to enable before middleware for SUB_REQUEST
+     *
+     * Registers an after filter.
+     *
+     * After filters are run after the controller has been executed.
+     *
+     * @param mixed $callback          After filter callback
+     * @param int   $priority          The higher this value, the earlier an event
+     *                                 listener will be triggered in the chain (defaults to 0)
+     * @param bool  $masterRequestOnly If this middleware is only applicable for Master Request
+     */
+    public function after($callback, $priority = 0, $masterRequestOnly = true)
+    {
+        $app = $this;
+        
+        $this->on(
+            KernelEvents::RESPONSE,
+            function (FilterResponseEvent $event) use ($callback, $app, $masterRequestOnly) {
+                if ($masterRequestOnly && HttpKernelInterface::MASTER_REQUEST !== $event->getRequestType()) {
+                    return;
+                }
+                
+                /** @var CallbackResolver $resolver */
+                $resolver = $app['callback_resolver'];
+                $response = call_user_func(
+                    $resolver->resolveCallback($callback),
+                    $event->getRequest(),
+                    $event->getResponse(),
+                    $app
+                );
+                if ($response instanceof Response) {
+                    $event->setResponse($response);
+                }
+                elseif (null !== $response) {
+                    throw new \RuntimeException(
+                        'An after middleware returned an invalid response value. Must return null or an instance of Response.'
+                    );
+                }
+            },
+            $priority
+        );
+    }
+    
+    /**
+     * @override Overrides parent function to enable before middleware for SUB_REQUEST
+     *
+     * Registers a before filter.
+     *
+     * Before filters are run before any route has been matched.
+     *
+     * @param mixed $callback          Before filter callback
+     * @param int   $priority          The higher this value, the earlier an event
+     *                                 listener will be triggered in the chain (defaults to 0)
+     * @param bool  $masterRequestOnly If this middleware is only applicable for Master Request
+     */
+    public function before($callback, $priority = 0, $masterRequestOnly = true)
+    {
+        $app = $this;
+        
+        $this->on(
+            KernelEvents::REQUEST,
+            function (GetResponseEvent $event) use ($callback, $app, $masterRequestOnly) {
+                if ($masterRequestOnly && HttpKernelInterface::MASTER_REQUEST !== $event->getRequestType()) {
+                    return;
+                }
+                
+                /** @var CallbackResolver $resolver */
+                $resolver = $app['callback_resolver'];
+                $ret      = call_user_func(
+                    $resolver->resolveCallback($callback),
+                    $event->getRequest(),
+                    $app
+                );
+                
+                if ($ret instanceof Response) {
+                    $event->setResponse($ret);
+                }
+            },
+            $priority
+        );
+    }
+    
+    public function boot()
+    {
+        if ($this->booted) {
+            return;
+        }
+        
+        $this->register(new ServiceControllerServiceProvider());
+        $this->register(new SimpleCookieProvider());
+        $this->register(new CrossOriginResourceSharingProvider());
+        if ($this['routing.config']) {
+            $this->register(new CacheableRouterProvider());
+            $this->register(new CacheableRouterUrlGeneratorProvider());
         }
         else {
-            return $default;
+            $this->register(new UrlGeneratorServiceProvider());
         }
+        if ($this['twig.config']) {
+            $this->register(new SimpleTwigServiceProvider());
+        }
+        if ($this['security.config']) {
+            // registering security provider without config will make twig provider fail
+            $this->register(new SimpleSecurityProvider());
+        }
+        
+        parent::boot(); // TODO: Change the autogenerated stub
+    }
+    
+    /**
+     * @override Overrides parent function to disable ensureResponse if exception is not handled
+     *
+     * @param mixed $callback
+     * @param int   $priority
+     */
+    public function error($callback, $priority = -8)
+    {
+        $this->on(KernelEvents::EXCEPTION, new ExtendedExceptionListnerWrapper($this, $callback), $priority);
     }
     
     /**
@@ -483,6 +454,35 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
         }
     }
     
+    public function getCacheDirectories()
+    {
+        $ret = [];
+        if ($this->cacheDir) {
+            $ret[] = $this->cacheDir;
+        }
+        if ($cacheDir = $this->httpDataProvider->getOptional('routing.cache_dir')) {
+            $ret[] = $cacheDir;
+        }
+        if ($cacheDir = $this->httpDataProvider->getOptional('twig.cache_dir')) {
+            $ret[] = $cacheDir;
+        }
+        
+        return $ret;
+    }
+    
+    public function getParameter($key, $default = null)
+    {
+        if ($this->offsetExists($key)) {
+            return $this[$key];
+        }
+        elseif (array_key_exists($key, $this->extraParameters)) {
+            return $this->extraParameters[$key];
+        }
+        else {
+            return $default;
+        }
+    }
+    
     /**
      * @return null|TokenInterface
      */
@@ -502,6 +502,14 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
     }
     
     /**
+     * @return Twig_Environment|null
+     */
+    public function getTwig()
+    {
+        return $this['twig'];
+    }
+    
+    /**
      * @return UserInterface|null
      */
     public function getUser()
@@ -513,13 +521,5 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
         else {
             return null;
         }
-    }
-    
-    /**
-     * @return Twig_Environment|null
-     */
-    public function getTwig()
-    {
-        return $this['twig'];
     }
 }

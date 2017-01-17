@@ -506,7 +506,12 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
      */
     public function getTwig()
     {
-        return $this['twig'];
+        if (isset($this['twig'])) {
+            return $this['twig'];
+        }
+        else {
+            return null;
+        }
     }
     
     /**

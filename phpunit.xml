@@ -8,6 +8,7 @@
         <testsuite name="all">
             <file>ut/SilexKernelTest.php</file>
             <file>ut/SilexKernelWebTest.php</file>
+            <file>ut/FallbackViewHandlerTest.php</file>
             <file>ut/CrossOriginResourceSharingTest.php</file>
             <file>ut/CrossOriginResourceSharingAdvancedTest.php</file>
         </testsuite>
@@ -18,6 +19,9 @@
         <testsuite name="security">
             <file>ut/SecurityServiceProviderTest.php</file>
             <file>ut/SecurityServiceProviderConfigurationTest.php</file>
+        </testsuite>
+        <testsuite name="exceptions">
+            <file>ut/HttpExceptionTest.php</file>
         </testsuite>
     </testsuites>
 </phpunit>

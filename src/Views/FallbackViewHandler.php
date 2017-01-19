@@ -23,8 +23,17 @@ class FallbackViewHandler
      */
     protected $rendererResolver;
     
-    public function __construct(SilexKernel $silexKernel, ResponseRendererResolverInterface $rendererResolver)
+    /**
+     * FallbackViewHandler constructor.
+     *
+     * @param SilexKernel                       $silexKernel
+     * @param ResponseRendererResolverInterface $rendererResolver
+     */
+    public function __construct(SilexKernel $silexKernel, $rendererResolver = null)
     {
+        if ($rendererResolver == null) {
+            $rendererResolver = new RouteBasedResponseRendererResolver();
+        }
         $this->silexKernel      = $silexKernel;
         $this->rendererResolver = $rendererResolver;
     }

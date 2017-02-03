@@ -1,6 +1,8 @@
 <?php
 use Oasis\Mlib\Http\SilexKernel;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Created by PhpStorm.
@@ -14,7 +16,7 @@ class SilexKernelTest extends PHPUnit_Framework_TestCase
     {
         require __DIR__ . '/app.php';
     }
-
+    
     public function testCreationWithWrongConfiguration()
     {
         $config = [
@@ -25,9 +27,37 @@ class SilexKernelTest extends PHPUnit_Framework_TestCase
                 ],
             ],
         ];
-
+        
         $this->expectException(InvalidConfigurationException::class);
-
+        
         new SilexKernel($config, true);
+    }
+    
+    public function testSlowRequest()
+    {
+        $config                        = [
+        ];
+        $slowCalled                    = false;
+        $app                           = new SilexKernel($config, true);
+        $app['slow_request_threshold'] = 300;
+        $app['slow_request_handler']   = $app->protect(
+            function (Request $request, $start, $sent, $end) use (&$slowCalled) {
+                $this->assertEquals('/abc', $request->getPathInfo());
+                $this->assertLessThan($end, $start);
+                $this->assertLessThan($sent, $start);
+                $this->assertLessThan($end, $sent);
+                $slowCalled = true;
+            }
+        );
+        $app->get(
+            '/abc',
+            function () {
+                usleep(400000);
+                
+                return new Response('');
+            }
+        );
+        $app->run(Request::create("/abc"));
+        $this->assertTrue($slowCalled);
     }
 }

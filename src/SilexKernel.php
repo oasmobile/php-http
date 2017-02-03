@@ -27,6 +27,7 @@ use Silex\Provider\ServiceControllerServiceProvider;
 use Silex\Provider\UrlGeneratorServiceProvider;
 use Silex\ServiceProviderInterface;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
@@ -100,6 +101,31 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
         $this['resolver_auto_injections'] = $this->share(
             function () {
                 return $this->controllerInjectedArgs;
+            }
+        );
+        
+        /*
+         * Minimum number of milliseconds required to consider a request slow request
+         */
+        $this['slow_request_threshold'] = 5000;
+        /*
+         * A handler which will be called when a request is considered slow request
+         *
+         * Signature: $slowHandler(Request $request, $startTime, $responseSentTime, $endTime)
+         *
+         * All time values are in seconds (float)
+         */
+        $this['slow_request_handler'] = $this->protect(
+            function (Request $request,
+                      $startTime,
+                      $responseSentTime,
+                      $endTime) {
+                mwarning(
+                    "Slow request encountered, total = %.3f, http = %.3f, url = %s",
+                    ($endTime - $startTime),
+                    ($responseSentTime - $startTime),
+                    $request->getUri()
+                );
             }
         );
         
@@ -454,6 +480,27 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
         }
     }
     
+    public function run(Request $request = null)
+    {
+        $startTime = microtime(true);
+        
+        if (null === $request) {
+            $request = Request::createFromGlobals();
+        }
+        
+        $response = $this->handle($request);
+        $response->send();
+        $responseSentTime = microtime(true);
+        
+        $this->terminate($request, $response);
+        
+        $endTime = microtime(true);
+        
+        if ($endTime - $startTime > $this['slow_request_threshold'] / 1000) {
+            call_user_func($this['slow_request_handler'], $request, $startTime, $responseSentTime, $endTime);
+        }
+    }
+    
     public function getCacheDirectories()
     {
         $ret = [];
@@ -527,4 +574,5 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
             return null;
         }
     }
+    
 }

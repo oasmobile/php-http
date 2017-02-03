@@ -18,12 +18,19 @@ class ExceptionWrapper
         mtrace($e, "Fallback handling exception: ");
         
         $caughtException = new WrappedExceptionInfo($e, $code);
-        
-        if ($e instanceof DataValidationException) {
-            $caughtException->setCode(Response::HTTP_BAD_REQUEST);
-            $caughtException->setAttribute('key', $e->getFieldName());
-        }
+        $this->furtherProcessException($caughtException, $e);
         
         return $caughtException;
+    }
+    
+    protected function furtherProcessException(WrappedExceptionInfo $info, \Exception $e)
+    {
+        switch (true) {
+            case ($e instanceof DataValidationException):
+                $info->setCode(Response::HTTP_BAD_REQUEST);
+                $info->setAttribute('key', $e->getFieldName());
+                break;
+        }
+        
     }
 }

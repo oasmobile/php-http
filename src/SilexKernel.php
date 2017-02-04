@@ -90,8 +90,10 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
         $this->isDebug          = $isDebug;
         $this->cacheDir         = $this->httpDataProvider->getOptional('cache_dir');
         
-        $this['logger'] = MLogging::getLogger();
-        $this['debug']  = $this->isDebug;
+        if ($isDebug) {
+            $this['logger'] = MLogging::getLogger();
+        }
+        $this['debug'] = $this->isDebug;
         
         $this['resolver']                 = $this->share(
             function () {

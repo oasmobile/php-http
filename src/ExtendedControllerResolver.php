@@ -16,11 +16,11 @@ use Symfony\Component\HttpFoundation\Request;
 class ExtendedControllerResolver extends ControllerResolver
 {
     protected $mappingParameters = [];
-
-    public function __construct(Application $app, LoggerInterface $logger, $autoParameters)
+    
+    public function __construct(Application $app, $autoParameters, LoggerInterface $logger = null)
     {
         parent::__construct($app, $logger);
-
+        
         foreach ($autoParameters as $parameter) {
             if (!is_object($parameter)) {
                 throw new \InvalidArgumentException("Auto parameter should be an object.");
@@ -28,14 +28,14 @@ class ExtendedControllerResolver extends ControllerResolver
             $this->mappingParameters[get_class($parameter)] = $parameter;
         }
     }
-
+    
     protected function doGetArguments(Request $request, $controller, array $parameters)
     {
         /** @var \ReflectionParameter $param */
         foreach ($parameters as $param) {
             if ($param->getClass()) {
                 $classname = $param->getClass()->getName();
-
+                
                 $found = array_key_exists($classname, $this->mappingParameters) ?
                     $this->mappingParameters[$classname] :
                     null;
@@ -47,13 +47,13 @@ class ExtendedControllerResolver extends ControllerResolver
                         }
                     }
                 }
-
+                
                 if ($found) {
                     $request->attributes->set($param->getName(), $found);
                 }
             }
         }
-
+        
         return parent::doGetArguments($request, $controller, $parameters);
     }
 }

@@ -17,6 +17,15 @@ class SilexKernelTest extends PHPUnit_Framework_TestCase
         require __DIR__ . '/app.php';
     }
     
+    public function testProductionMode()
+    {
+        $config = [
+            
+        ];
+        $kernel = new SilexKernel($config, false);
+        $kernel['resolver'];
+    }
+    
     public function testCreationWithWrongConfiguration()
     {
         $config = [

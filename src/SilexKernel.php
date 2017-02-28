@@ -97,7 +97,7 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
         
         $this['resolver']                 = $this->share(
             function () {
-                return new ExtendedControllerResolver($this, $this['logger'], $this['resolver_auto_injections']);
+                return new ExtendedControllerResolver($this, $this['resolver_auto_injections'], $this['logger']);
             }
         );
         $this['resolver_auto_injections'] = $this->share(

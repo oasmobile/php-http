@@ -9,6 +9,7 @@
 namespace Oasis\Mlib\Http\ErrorHandlers;
 
 use Oasis\Mlib\Utils\Exceptions\DataValidationException;
+use Oasis\Mlib\Utils\Exceptions\ExistenceViolationException;
 use Symfony\Component\HttpFoundation\Response;
 
 class ExceptionWrapper
@@ -26,6 +27,10 @@ class ExceptionWrapper
     protected function furtherProcessException(WrappedExceptionInfo $info, \Exception $e)
     {
         switch (true) {
+            case ($e instanceof ExistenceViolationException):
+                $info->setCode(Response::HTTP_NOT_FOUND);
+                $info->setAttribute('key', $e->getFieldName());
+                break;
             case ($e instanceof DataValidationException):
                 $info->setCode(Response::HTTP_BAD_REQUEST);
                 $info->setAttribute('key', $e->getFieldName());

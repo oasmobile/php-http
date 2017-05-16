@@ -14,11 +14,11 @@ use Symfony\Component\HttpFoundation\Response;
 
 class ExceptionWrapper
 {
-    function __invoke(\Exception $e, $code)
+    function __invoke(\Exception $e, $httpStatusCode)
     {
         mtrace($e, "Fallback handling exception: ");
         
-        $caughtException = new WrappedExceptionInfo($e, $code);
+        $caughtException = new WrappedExceptionInfo($e, $httpStatusCode);
         $this->furtherProcessException($caughtException, $e);
         
         return $caughtException;

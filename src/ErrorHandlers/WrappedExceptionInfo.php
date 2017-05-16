@@ -22,14 +22,28 @@ class WrappedExceptionInfo implements \JsonSerializable
     protected $originalCode;
     protected $attributes = [];
     
-    public function __construct(\Exception $exception, $code)
+    public function __construct(\Exception $exception, $httpStatusCode)
     {
         $this->exception          = $exception;
         $this->shortExceptionType = (new \ReflectionClass($exception))->getShortName();
-        $this->code               = $this->originalCode = $code;
+        $this->code               = $this->originalCode = $httpStatusCode;
         if ($this->code == 0) {
             $this->code = Response::HTTP_INTERNAL_SERVER_ERROR;
         }
+    }
+    
+    public function __toArray($rich = false)
+    {
+        $ret = [
+            'code'      => $this->getCode(),
+            'exception' => $this->serializeException($this->getException()),
+            'extra'     => $this->getAttributes(),
+        ];
+        if ($rich) {
+            $ret['trace'] = $this->getException()->getTrace();
+        }
+        
+        return $ret;
     }
     
     /**
@@ -43,25 +57,6 @@ class WrappedExceptionInfo implements \JsonSerializable
     function jsonSerialize()
     {
         return $this->__toArray();
-    }
-    
-    public function __toArray($rich = false)
-    {
-        $ret = [
-            'code'      => $this->getCode(),
-            'exception' => [
-                'type'    => $this->getShortExceptionType(),
-                'message' => $this->getException()->getMessage(),
-                'file'    => $this->getException()->getFile(),
-                'line'    => $this->getException()->getLine(),
-            ],
-            'extra'     => $this->getAttributes(),
-        ];
-        if ($rich) {
-            $ret['trace'] = $this->getException()->getTrace();
-        }
-        
-        return $ret;
     }
     
     public function getAttribute($key)
@@ -120,5 +115,23 @@ class WrappedExceptionInfo implements \JsonSerializable
     public function setAttribute($key, $value)
     {
         $this->attributes[$key] = $value;
+    }
+    
+    protected function serializeException(\Exception $e)
+    {
+        $ret = [
+            'type'    => (new \ReflectionClass($e))->getShortName(),
+            'message' => $e->getMessage(),
+            'file'    => $e->getFile(),
+            'line'    => $e->getLine(),
+        ];
+        if ($e->getCode() != 0) {
+            $ret['code'] = $e->getCode();
+        }
+        if ($e->getPrevious() instanceof \Exception) {
+            $ret['previous'] = $this->serializeException($e->getPrevious());
+        }
+        
+        return $ret;
     }
 }

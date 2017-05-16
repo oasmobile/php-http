@@ -170,7 +170,7 @@ class CacheableRouterProvider implements ServiceProviderInterface
                         $key         = $matches[2];
                         $replacement = $this->kernel->getParameter($key);
                         if ($replacement === null) {
-                            $offset += strlen($key + 2);
+                            $offset += strlen($key) + 2;
                             continue;
                         }
                         $value = preg_replace("/" . preg_quote($matches[1], '/') . "/", $replacement, $value, 1);

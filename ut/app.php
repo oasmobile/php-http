@@ -25,6 +25,10 @@ $app->error_handlers = [
     new JsonErrorHandler(),
 ];
 //$app->addControllerInjectedArg(new JsonViewHandler());
-$app->injected_args = [new JsonViewHandler()];
-
+$app->injected_args   = [new JsonViewHandler()];
+$app->trusted_proxies = [
+    '127.0.0.1',
+    '1.2.3.4',
+    '5.6.7.8/16',
+];
 return $app;

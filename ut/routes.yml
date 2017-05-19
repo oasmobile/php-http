@@ -84,6 +84,11 @@ param.chained:
     defaults:
         _controller: TestController::paramChained
 
+proxy.test:
+    path: "/proxy/test"
+    defaults:
+        _controller: TestController::proxyTest
+
 cookie.setter:
     path: "cookie/set"
     defaults:

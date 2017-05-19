@@ -29,10 +29,10 @@ class SilexKernelWebTest extends WebTestCase
                 'app.config2' => 'two',
             ]
         );
-
+        
         return $app;
     }
-
+    
     public function testHomeRoute()
     {
         $client = $this->createClient();
@@ -42,7 +42,7 @@ class SilexKernelWebTest extends WebTestCase
         $this->assertTrue(is_array($json));
         $this->assertEquals('Oasis\\Mlib\\Http\\Ut\\Controllers\\TestController::home()', $json['called']);
     }
-
+    
     public function testNotFoundRoute()
     {
         $client = $this->createClient();
@@ -53,7 +53,7 @@ class SilexKernelWebTest extends WebTestCase
         $this->assertTrue(is_array($json));
         $this->assertTrue(isset($json['code']), $response->getContent());
     }
-
+    
     public function testHostBasedRoutes()
     {
         $client = $this->createClient(['HTTP_HOST' => 'localhost']);
@@ -62,7 +62,7 @@ class SilexKernelWebTest extends WebTestCase
         $json     = json_decode($response->getContent(), true);
         $this->assertTrue(is_array($json));
         $this->assertEquals('Oasis\\Mlib\\Http\\Ut\\Controllers\\TestController::domainLocalhost()', $json['called']);
-
+        
         $client = $this->createClient(['HTTP_HOST' => 'baidu.com']);
         $client->request('GET', '/domain');
         $response = $client->getResponse();
@@ -70,7 +70,7 @@ class SilexKernelWebTest extends WebTestCase
         $this->assertTrue(is_array($json));
         $this->assertEquals('Oasis\\Mlib\\Http\\Ut\\Controllers\\TestController::domainBaidu()', $json['called']);
     }
-
+    
     public function testSubRoutes()
     {
         $client = $this->createClient();
@@ -81,7 +81,7 @@ class SilexKernelWebTest extends WebTestCase
         $this->assertEquals('mama', $json['attributes']['name']);
         $this->assertEquals('Oasis\\Mlib\\Http\\Ut\\Controllers\\SubTestController::sub()', $json['called']);
     }
-
+    
     public function testDomainMatching()
     {
         $client = $this->createClient(['HTTP_HOST' => "naruto.baidu.com"]);
@@ -91,9 +91,9 @@ class SilexKernelWebTest extends WebTestCase
         $this->assertTrue(is_array($json));
         $this->assertEquals('Oasis\\Mlib\\Http\\Ut\\Controllers\\TestController::paramDomain()', $json['called']);
         $this->assertEquals('naruto', $json['game']);
-
+        
     }
-
+    
     public function testParameterFromConfig()
     {
         $client = $this->createClient(['HTTP_HOST' => "naruto.baidu.com"]);
@@ -106,7 +106,7 @@ class SilexKernelWebTest extends WebTestCase
         $this->assertEquals('two', $json['two']);
         $this->assertEquals('onetwo', $json['three']);
     }
-
+    
     public function testParameterMatching()
     {
         $client = $this->createClient(['HTTP_HOST' => "naruto.baidu.com"]);
@@ -116,7 +116,7 @@ class SilexKernelWebTest extends WebTestCase
         $this->assertTrue(is_array($json));
         $this->assertEquals('Oasis\\Mlib\\Http\\Ut\\Controllers\\TestController::paramId()', $json['called']);
         $this->assertEquals('29', $json['id']);
-
+        
         $client = $this->createClient(['HTTP_HOST' => "naruto.baidu.com"]);
         $client->request('GET', '/param/id/moi');
         $response = $client->getResponse();
@@ -124,7 +124,7 @@ class SilexKernelWebTest extends WebTestCase
         $this->assertTrue(is_array($json));
         $this->assertEquals('Oasis\\Mlib\\Http\\Ut\\Controllers\\TestController::paramSlug()', $json['called']);
         $this->assertEquals('moi', $json['slug']);
-
+        
         $client = $this->createClient(['HTTP_HOST' => "naruto.baidu.com"]);
         $client->request('GET', '/param/id/moi/hei');
         $response = $client->getResponse();
@@ -132,9 +132,9 @@ class SilexKernelWebTest extends WebTestCase
         $this->assertTrue(is_array($json));
         $this->assertEquals('Oasis\\Mlib\\Http\\Ut\\Controllers\\TestController::paramSlug()', $json['called']);
         $this->assertEquals('moi/hei', $json['slug']);
-
+        
     }
-
+    
     public function testParameterRetrieval()
     {
         $client = $this->createClient();
@@ -154,7 +154,7 @@ class SilexKernelWebTest extends WebTestCase
         $this->assertEquals('John', $json['name']);
         $this->assertEquals(80, $json['age']);
         $this->assertEquals(999.99, $json['salary']);
-
+        
         $client->request(
             'POST',
             '/param/chained/30?id=9&name=Ali',
@@ -170,20 +170,20 @@ class SilexKernelWebTest extends WebTestCase
         $this->assertEquals('Ali', $json['name']);
         $this->assertEquals(80, $json['age']);
         $this->assertEquals(999.99, $json['salary']);
-
+        
     }
-
+    
     public function testInjectedArg()
     {
         $client = $this->createClient(['HTTP_HOST' => "naruto.baidu.com"]);
-
+        
         $client->request('GET', '/param/injected');
         $response = $client->getResponse();
         $json     = json_decode($response->getContent(), true);
         $this->assertTrue(is_array($json));
         $this->assertEquals('Oasis\\Mlib\\Http\\Ut\\Controllers\\TestController::paramInjected()', $json['called']);
         $this->assertEquals(JsonViewHandler::class, $json['handler']);
-
+        
         $client->request('GET', '/param/injected2');
         $response = $client->getResponse();
         $json     = json_decode($response->getContent(), true);
@@ -194,7 +194,68 @@ class SilexKernelWebTest extends WebTestCase
         );
         $this->assertEquals(JsonViewHandler::class, $json['handler']);
     }
-
+    
+    public function testTrustedProxies()
+    {
+        $client    = $this->createClient();
+        $forwarded = "1.2.3.5";
+        $client->request('GET', '/proxy/test', [], [], ["HTTP_X_FORWARDED_FOR" => $forwarded]);
+        $response = $client->getResponse();
+        $json     = json_decode($response->getContent(), true);
+        $this->assertTrue(is_array($json));
+        $this->assertEquals('1.2.3.5', $json['from'], $response->getContent());
+        
+        $forwarded = "1.2.3.5, 1.2.3.4";
+        $client->request('GET', '/proxy/test', [], [], ["HTTP_X_FORWARDED_FOR" => $forwarded]);
+        $response = $client->getResponse();
+        $json     = json_decode($response->getContent(), true);
+        $this->assertTrue(is_array($json));
+        $this->assertEquals('1.2.3.5', $json['from'], $response->getContent());
+        $forwarded = "1.2.3.4, 1.2.3.5";
+        $client->request('GET', '/proxy/test', [], [], ["HTTP_X_FORWARDED_FOR" => $forwarded]);
+        $response = $client->getResponse();
+        $json     = json_decode($response->getContent(), true);
+        $this->assertTrue(is_array($json));
+        $this->assertEquals('1.2.3.5', $json['from'], $response->getContent());
+        $forwarded = "1.2.3.3, 1.2.3.4, 1.2.3.5";
+        $client->request('GET', '/proxy/test', [], [], ["HTTP_X_FORWARDED_FOR" => $forwarded]);
+        $response = $client->getResponse();
+        $json     = json_decode($response->getContent(), true);
+        $this->assertTrue(is_array($json));
+        $this->assertEquals('1.2.3.5', $json['from'], $response->getContent());
+        $forwarded = "1.2.3.2, 1.2.3.3, 1.2.3.4";
+        $client->request('GET', '/proxy/test', [], [], ["HTTP_X_FORWARDED_FOR" => $forwarded]);
+        $response = $client->getResponse();
+        $json     = json_decode($response->getContent(), true);
+        $this->assertTrue(is_array($json));
+        $this->assertEquals('1.2.3.3', $json['from'], $response->getContent());
+        
+        $forwarded = "1.2.3.2, 1.2.3.3, 5.6.7.8";
+        $client->request('GET', '/proxy/test', [], [], ["HTTP_X_FORWARDED_FOR" => $forwarded]);
+        $response = $client->getResponse();
+        $json     = json_decode($response->getContent(), true);
+        $this->assertTrue(is_array($json));
+        $this->assertEquals('1.2.3.3', $json['from'], $response->getContent());
+        $forwarded = "1.2.3.2, 1.2.3.3, 5.6.7.88";
+        $client->request('GET', '/proxy/test', [], [], ["HTTP_X_FORWARDED_FOR" => $forwarded]);
+        $response = $client->getResponse();
+        $json     = json_decode($response->getContent(), true);
+        $this->assertTrue(is_array($json));
+        $this->assertEquals('1.2.3.3', $json['from'], $response->getContent());
+        $forwarded = "1.2.3.2, 1.2.3.3, 5.6.77.88";
+        $client->request('GET', '/proxy/test', [], [], ["HTTP_X_FORWARDED_FOR" => $forwarded]);
+        $response = $client->getResponse();
+        $json     = json_decode($response->getContent(), true);
+        $this->assertTrue(is_array($json));
+        $this->assertEquals('1.2.3.3', $json['from'], $response->getContent());
+        $forwarded = "1.2.3.2, 1.2.3.3, 5.66.77.88";
+        $client->request('GET', '/proxy/test', [], [], ["HTTP_X_FORWARDED_FOR" => $forwarded]);
+        $response = $client->getResponse();
+        $json     = json_decode($response->getContent(), true);
+        $this->assertTrue(is_array($json));
+        $this->assertEquals('5.66.77.88', $json['from'], $response->getContent());
+    }
+    
     public function testCookieContainer()
     {
         $client = $this->createClient();
@@ -206,6 +267,6 @@ class SilexKernelWebTest extends WebTestCase
         $this->assertTrue(is_array($json));
         $this->assertEquals('Oasis\\Mlib\\Http\\Ut\\Controllers\\TestController::cookieChecker()', $json['called']);
         $this->assertEquals('John', $json['name']);
-
+        
     }
 }

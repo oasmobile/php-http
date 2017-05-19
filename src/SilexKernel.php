@@ -54,6 +54,7 @@ use Twig_Environment;
  * @property-write array $view_handlers
  * @property-write array $error_handlers
  * @property-write array $injected_args
+ * @property-write array $trusted_proxies
  */
 class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
 {
@@ -218,6 +219,10 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
             $value = [$value];
         }
         switch ($name) {
+            case 'trusted_proxies' : {
+                Request::setTrustedProxies($value);
+            }
+                break;
             case 'service_providers': {
                 if (sizeof(
                         $providers = array_filter(

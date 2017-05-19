@@ -25,6 +25,7 @@ class HttpConfiguration implements ConfigurationInterface
         $http    = $builder->root('http');
         {
             $http->children()->scalarNode('cache_dir')->defaultValue(null);
+            $http->children()->variableNode('trusted_proxies');
             $http->children()->variableNode('routing');
             $http->children()->variableNode('twig');
             $http->children()->variableNode('security');

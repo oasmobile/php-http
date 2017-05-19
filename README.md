@@ -69,6 +69,7 @@ The bootstrap configuration can be categorized into the following parts:
 - [view_handlers](#view-handler)
 - [error_handlers](#error-handler)
 - [injected_args](#injected-arguments)
+- [trusted_proxies](#trusted-proxies)
 
 ##### Routing
 
@@ -484,6 +485,13 @@ object and the current request
 
 > **NOTE**: the order of arguments in the controller doesn't matter,
 > only their types matter
+
+##### Trusted Proxies
+
+When trying to get the IP address of a request, we always need to filter certain addresses acting as trusted proxies. These proxies forwards the real sender's IP in the HTTP header X-Forwarded-For in a reverse order (i.e. nearest address in the end). We can use the `trusted_proxies` setting to specify what addresses should be considered trusted.
+
+The format of `trusted_proxies` is an array of IP addresses. In addition, you can use CIDR notations in place of IP addresses if you would like to trust a subnet of IP addresses.
+
 
 [Silex]: http://silex.sensiolabs.org/ "Silex Micro-Framework"
 [Symfony]: https://symfony.com/components "Symfony Components"

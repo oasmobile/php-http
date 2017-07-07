@@ -156,6 +156,13 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
         $this['cors.strategies'] = $this->httpDataProvider->getOptional('cors', DataProviderInterface::ARRAY_TYPE, []);
         
         // other configuration settings
+        if ($trustedProxiesConfig = $this->httpDataProvider->getOptional(
+            'trusted_proxies',
+            DataProviderInterface::MIXED_TYPE
+        )
+        ) {
+            $this->trusted_proxies = $trustedProxiesConfig;
+        }
         if ($viewHandlersConfig = $this->httpDataProvider->getOptional(
             'view_handlers',
             DataProviderInterface::MIXED_TYPE

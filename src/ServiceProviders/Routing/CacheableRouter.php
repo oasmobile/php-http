@@ -71,6 +71,7 @@ class CacheableRouter extends Router
                 }
             }
             $collection->addResource(new FileResource(__FILE__));
+            $this->isParamReplaced = true;
         }
         
         return $collection;

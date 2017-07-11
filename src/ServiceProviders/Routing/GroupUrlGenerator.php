@@ -86,7 +86,9 @@ class GroupUrlGenerator implements UrlGeneratorInterface
         foreach ($this->generators as $generator) {
             $found++;
             try {
-                $generator->setContext($this->getContext());
+                if ($this->getContext()) {
+                    $generator->setContext($this->getContext());
+                }
                 
                 return $generator->generate($name, $parameters, $referenceType);
             } catch (RouteNotFoundException $e) {

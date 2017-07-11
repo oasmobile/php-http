@@ -138,21 +138,24 @@ class CacheableRouterProvider implements ServiceProviderInterface
                 $routerPath = dirname($routerPath);
             }
             
-            $cacheDir              = strcasecmp($this->kernel['routing.config.cache_dir'], "false") == 0 ? null :
+            $cacheDir                = strcasecmp($this->kernel['routing.config.cache_dir'], "false") == 0 ? null :
                 ($this->kernel['routing.config.cache_dir'] ? : $routerPath . "/cache");
-            $matcherCacheClassname = "ProjectUrlMatcher_" . md5(
-                    realpath($cacheDir) . "/" . realpath($routerPath) . "/" . $routerFile
-                );
-            $locator               = new FileLocator([$routerPath]);
-            $this->router          = new CacheableRouter(
+            $hash                    = md5(
+                realpath($cacheDir) . "/" . realpath($routerPath) . "/" . $routerFile
+            );
+            $matcherCacheClassname   = "ProjectUrlMatcher_$hash";
+            $generatorCacheClassname = "ProjectUrlGenerator_$hash";
+            $locator                 = new FileLocator([$routerPath]);
+            $this->router            = new CacheableRouter(
                 $this->kernel,
                 //new YamlFileLoader($locator),
                 new InheritableYamlFileLoader($locator),
                 $routerFile,
                 [
-                    'cache_dir'           => $cacheDir,
-                    'matcher_cache_class' => $matcherCacheClassname,
-                    "debug"               => $this->kernel['debug'],
+                    'cache_dir'             => $cacheDir,
+                    'matcher_cache_class'   => $matcherCacheClassname,
+                    'generator_cache_class' => $generatorCacheClassname,
+                    "debug"                 => $this->kernel['debug'],
                 ],
                 $requestContext
             );

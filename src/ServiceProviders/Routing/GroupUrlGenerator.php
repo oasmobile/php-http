@@ -18,10 +18,10 @@ class GroupUrlGenerator implements UrlGeneratorInterface
 {
     /** @var  UrlGeneratorInterface[] */
     protected $generators;
-
+    
     /** @var  RequestContext */
     protected $context;
-
+    
     /**
      * GroupUrlGenerator constructor.
      *
@@ -41,7 +41,7 @@ class GroupUrlGenerator implements UrlGeneratorInterface
     {
         $this->context = $context;
     }
-
+    
     /**
      * Gets the request context.
      *
@@ -51,7 +51,7 @@ class GroupUrlGenerator implements UrlGeneratorInterface
     {
         return $this->context;
     }
-
+    
     /**
      * Generates a URL or path for a specific route based on the given parameters.
      *
@@ -82,10 +82,12 @@ class GroupUrlGenerator implements UrlGeneratorInterface
     {
         $total = sizeof($this->generators);
         $found = 0;
-
+        
         foreach ($this->generators as $generator) {
             $found++;
             try {
+                $generator->setContext($this->getContext());
+                
                 return $generator->generate($name, $parameters, $referenceType);
             } catch (RouteNotFoundException $e) {
                 if ($found == $total) {
@@ -94,7 +96,7 @@ class GroupUrlGenerator implements UrlGeneratorInterface
                 }
             }
         }
-
+        
         throw new RouteNotFoundException("Cannot find route named '$name'");
     }
 }

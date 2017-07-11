@@ -11,7 +11,6 @@ namespace Oasis\Mlib\Http\ServiceProviders\Routing;
 use Oasis\Mlib\Http\SilexKernel;
 use Silex\Application;
 use Silex\Provider\UrlGeneratorServiceProvider;
-use Symfony\Component\Routing\Generator\UrlGenerator;
 use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\Router;
 
@@ -32,10 +31,12 @@ class CacheableRouterUrlGeneratorProvider extends UrlGeneratorServiceProvider
                     /** @var SilexKernel $kernel */
                     
                     /** @var RequestContext $context */
-                    $context = $kernel['request_context'];
+                    //$context = $kernel['request_context'];
                     /** @var Router $router */
                     $router       = $kernel['router'];
-                    $newGenerator = new UrlGenerator($router->getRouteCollection(), $context);
+                    $newGenerator = $router->getGenerator();
+                    
+                    //$newGenerator = new UrlGenerator($router->getRouteCollection(), $context);
                     
                     return new GroupUrlGenerator(
                         [

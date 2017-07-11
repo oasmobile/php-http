@@ -15,9 +15,7 @@ use Oasis\Mlib\Utils\DataProviderInterface;
 use Silex\Application;
 use Silex\ServiceProviderInterface;
 use Symfony\Component\Config\FileLocator;
-use Symfony\Component\Config\Resource\FileResource;
 use Symfony\Component\Routing\RequestContext;
-use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\Router;
 
 class CacheableRouterProvider implements ServiceProviderInterface
@@ -146,8 +144,9 @@ class CacheableRouterProvider implements ServiceProviderInterface
                     realpath($cacheDir) . "/" . realpath($routerPath) . "/" . $routerFile
                 );
             $locator               = new FileLocator([$routerPath]);
-            $this->router          = new Router(
-            //new YamlFileLoader($locator),
+            $this->router          = new CacheableRouter(
+                $this->kernel,
+                //new YamlFileLoader($locator),
                 new InheritableYamlFileLoader($locator),
                 $routerFile,
                 [
@@ -157,29 +156,6 @@ class CacheableRouterProvider implements ServiceProviderInterface
                 ],
                 $requestContext
             );
-            $collection            = $this->router->getRouteCollection();
-            /** @var Route $route */
-            foreach ($collection as $route) {
-                $defaults = $route->getDefaults();
-                foreach ($defaults as $name => $value) {
-                    if (!is_string($value)) {
-                        continue;
-                    }
-                    $offset = 0;
-                    while (preg_match('#(%([^%].*?)%)#', $value, $matches, 0, $offset)) {
-                        $key         = $matches[2];
-                        $replacement = $this->kernel->getParameter($key);
-                        if ($replacement === null) {
-                            $offset += strlen($key) + 2;
-                            continue;
-                        }
-                        $value = preg_replace("/" . preg_quote($matches[1], '/') . "/", $replacement, $value, 1);
-                    }
-                    $value = preg_replace('#%%#', '%', $value);
-                    $route->setDefault($name, $value);
-                }
-            }
-            $collection->addResource(new FileResource(__FILE__));
         }
         
         return $this->router;

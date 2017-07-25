@@ -8,7 +8,7 @@
 
 namespace Oasis\Mlib\Http\ServiceProviders\Security;
 
-use Silex\Application;
+use Pimple\Container;
 use Symfony\Component\Security\Core\Authentication\Provider\AuthenticationProviderInterface;
 use Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface;
 use Symfony\Component\Security\Http\Firewall\ListenerInterface;
@@ -21,37 +21,37 @@ interface AuthenticationPolicyInterface
     const AUTH_TYPE_HTTP        = "http";
     const AUTH_TYPE_REMEMBER_ME = "remember_me";
     const AUTH_TYPE_ANONYMOUS   = "anonymous";
-
+    
     public function getAuthenticationType();
-
+    
     /**
      * If string is returned, it must be either "anonymous" or "dao"
      *
-     * @param Application $app
+     * @param Container   $app
      * @param             $firewallName
      * @param             $options
      *
      * @return string|AuthenticationProviderInterface
      */
-    public function getAuthenticationProvider(Application $app, $firewallName, $options);
-
+    public function getAuthenticationProvider(Container $app, $firewallName, $options);
+    
     /**
-     * @param Application                    $app
+     * @param Container                      $app
      * @param                                $firewallName
      * @param                                $options
      *
      * @return ListenerInterface
      */
-    public function getAuthenticationListener(Application $app,
+    public function getAuthenticationListener(Container $app,
                                               $firewallName,
                                               $options);
-
+    
     /**
-     * @param Application $app
+     * @param Container   $app
      * @param             $name
      * @param             $options
      *
      * @return AuthenticationEntryPointInterface
      */
-    public function getEntryPoint(Application $app, $name, $options);
+    public function getEntryPoint(Container $app, $name, $options);
 }

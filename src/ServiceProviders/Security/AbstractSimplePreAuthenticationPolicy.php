@@ -8,7 +8,7 @@
 
 namespace Oasis\Mlib\Http\ServiceProviders\Security;
 
-use Silex\Application;
+use Pimple\Container;
 use Symfony\Component\Security\Core\Authentication\Provider\AuthenticationProviderInterface;
 use Symfony\Component\Security\Core\Authentication\Provider\SimpleAuthenticationProvider;
 use Symfony\Component\Security\Http\Authentication\SimplePreAuthenticatorInterface;
@@ -22,17 +22,17 @@ abstract class AbstractSimplePreAuthenticationPolicy implements AuthenticationPo
     {
         return self::AUTH_TYPE_PRE_AUTH;
     }
-
+    
     /**
      * If string is returned, it must be either "anonymous" or "dao"
      *
-     * @param Application $app
+     * @param Container   $app
      * @param             $firewallName
      * @param             $options
      *
      * @return string|AuthenticationProviderInterface
      */
-    public function getAuthenticationProvider(Application $app, $firewallName, $options)
+    public function getAuthenticationProvider(Container $app, $firewallName, $options)
     {
         return new SimpleAuthenticationProvider(
             $this->getPreAuthenticator(),
@@ -40,15 +40,15 @@ abstract class AbstractSimplePreAuthenticationPolicy implements AuthenticationPo
             $firewallName
         );
     }
-
+    
     /**
-     * @param Application                    $app
+     * @param Container                      $app
      * @param                                $firewallName
      * @param                                $options
      *
      * @return ListenerInterface
      */
-    public function getAuthenticationListener(Application $app,
+    public function getAuthenticationListener(Container $app,
                                               $firewallName,
                                               $options)
     {
@@ -60,27 +60,27 @@ abstract class AbstractSimplePreAuthenticationPolicy implements AuthenticationPo
             $app['logger']
         );
     }
-
+    
     /**
-     * @param Application $app
+     * @param Container   $app
      * @param             $name
      * @param             $options
      *
      * @return AuthenticationEntryPointInterface
      */
-    public function getEntryPoint(Application $app, $name, $options)
+    public function getEntryPoint(Container $app, $name, $options)
     {
         return new NullEntryPoint();
     }
-
-    protected function getUserProvider(Application $app, $firewallName)
+    
+    protected function getUserProvider(Container $app, $firewallName)
     {
         return $app['security.user_provider.' . $firewallName];
     }
-
+    
     /**
      * @return SimplePreAuthenticatorInterface
      */
     abstract protected function getPreAuthenticator();
-
+    
 }

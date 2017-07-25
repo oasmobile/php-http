@@ -21,12 +21,17 @@ require_once __DIR__ . '/bootstrap.php';
 $users = [
     "admin"  => [
         "ROLE_ADMIN",
-        "Eti36Ru/pWG6WfoIPiDFUBxUuyvgMA4L8+LLuGbGyqV9ATuT9brCWPchBqX5vFTF+DgntacecW+sSGD+GZts2A==",
+
+        // this is for BCrypt encoder, which is default for silex 2
+        '$2y$10$EY4SlT0KGCg4066H23gBYuKorAu0b/oSvrlMj4yaGHo50QQsXTOU2',
+
+        // this is for MessageDigestPasswordEncoder, which is default for silex 1.3
+        //"Eti36Ru/pWG6WfoIPiDFUBxUuyvgMA4L8+LLuGbGyqV9ATuT9brCWPchBqX5vFTF+DgntacecW+sSGD+GZts2A==",
     ],
-    "admin2" => [
-        "ROLE_ADMIN",
-        "5FZ2Z8QIkA7UTZ4BYkoC+GsReLf569mSKDsfods6LYQ8t+a8EW9oaircfMpmaLbPBh4FOBiiFyLfuZmTSUwzZg==",
-    ],
+    //"admin2" => [
+    //    "ROLE_ADMIN",
+    //    "5FZ2Z8QIkA7UTZ4BYkoC+GsReLf569mSKDsfods6LYQ8t+a8EW9oaircfMpmaLbPBh4FOBiiFyLfuZmTSUwzZg==",
+    //],
 ];
 
 $config = [

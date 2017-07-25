@@ -8,24 +8,21 @@
 
 namespace Oasis\Mlib\Http;
 
-use InvalidArgumentException;
 use Oasis\Mlib\Http\Configuration\ConfigurationValidationTrait;
 use Oasis\Mlib\Http\Configuration\HttpConfiguration;
 use Oasis\Mlib\Http\Middlewares\MiddlewareInterface;
 use Oasis\Mlib\Http\ServiceProviders\Cookie\SimpleCookieProvider;
 use Oasis\Mlib\Http\ServiceProviders\Cors\CrossOriginResourceSharingProvider;
 use Oasis\Mlib\Http\ServiceProviders\Routing\CacheableRouterProvider;
-use Oasis\Mlib\Http\ServiceProviders\Routing\CacheableRouterUrlGeneratorProvider;
 use Oasis\Mlib\Http\ServiceProviders\Security\SimpleSecurityProvider;
 use Oasis\Mlib\Http\ServiceProviders\Twig\SimpleTwigServiceProvider;
 use Oasis\Mlib\Logging\MLogging;
 use Oasis\Mlib\Utils\ArrayDataProvider;
 use Oasis\Mlib\Utils\DataProviderInterface;
+use Pimple\ServiceProviderInterface;
 use Silex\Application as SilexApp;
 use Silex\CallbackResolver;
 use Silex\Provider\ServiceControllerServiceProvider;
-use Silex\Provider\UrlGeneratorServiceProvider;
-use Silex\ServiceProviderInterface;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -96,14 +93,21 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
         }
         $this['debug'] = $this->isDebug;
         
-        $this['resolver']                 = $this->share(
-            function () {
-                return new ExtendedControllerResolver($this, $this['resolver_auto_injections'], $this['logger']);
-            }
-        );
-        $this['resolver_auto_injections'] = $this->share(
+        $this['resolver_auto_injections'] = $this->factory(
             function () {
                 return $this->controllerInjectedArgs;
+            }
+        );
+        /** @noinspection PhpUnusedParameterInspection */
+        $this['argument_value_resolvers'] = $this->extend(
+            'argument_value_resolvers',
+            function (array $resolvers, $app) {
+                $resolvers = \array_merge(
+                    [new ExtendedArgumentValueResolver($this['resolver_auto_injections'])],
+                    $resolvers
+                );
+                
+                return $resolvers;
             }
         );
         
@@ -198,26 +202,6 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
         ) {
             $this->injected_args = $injectedArgs;
         }
-    }
-    
-    /**
-     * Returns a closure that calls the service definition every time it is called. Hence acting as a
-     * factory provider. Object returned by service definition is not unique in any scope. This is different
-     * compared against share()
-     *
-     * @param callable $callable A service definition to create object
-     *
-     * @return callable The wrapped closure
-     */
-    public static function factory($callable)
-    {
-        if (!is_object($callable) || !method_exists($callable, '__invoke')) {
-            throw new InvalidArgumentException('Service definition is not a Closure or invokable object.');
-        }
-        
-        return function ($c) use ($callable) {
-            return $callable($c);
-        };
     }
     
     function __set($name, $value)
@@ -436,10 +420,6 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
         $this->register(new CrossOriginResourceSharingProvider());
         if ($this['routing.config']) {
             $this->register(new CacheableRouterProvider());
-            $this->register(new CacheableRouterUrlGeneratorProvider());
-        }
-        else {
-            $this->register(new UrlGeneratorServiceProvider());
         }
         if ($this['twig.config']) {
             $this->register(new SimpleTwigServiceProvider());

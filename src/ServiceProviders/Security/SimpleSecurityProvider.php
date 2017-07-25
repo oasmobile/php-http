@@ -12,8 +12,10 @@ use Oasis\Mlib\Http\Configuration\ConfigurationValidationTrait;
 use Oasis\Mlib\Http\Configuration\SecurityConfiguration;
 use Oasis\Mlib\Http\SilexKernel;
 use Oasis\Mlib\Utils\DataProviderInterface;
+use Pimple\Container;
 use Silex\Application;
 use Silex\Provider\SecurityServiceProvider;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Security\Core\Authentication\Provider\AuthenticationProviderInterface;
 use Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface;
 
@@ -67,7 +69,7 @@ class SimpleSecurityProvider extends SecurityServiceProvider
         $this->roleHierarchy[$role] = $old;
     }
     
-    public function boot(Application $app)
+    public function subscribe(Container $app, EventDispatcherInterface $dispatcher)
     {
         // install additional policies
         foreach ($app['security.config.policies'] as $policyName => $policy) {
@@ -105,15 +107,20 @@ class SimpleSecurityProvider extends SecurityServiceProvider
         }
         $app['security.role_hierarchy'] = $rolesSetting;
         
+        parent::subscribe($app, $dispatcher);
+    }
+    
+    public function boot(Application $app)
+    {
         parent::boot($app);
         
     }
     
-    public function register(Application $app)
+    public function register(Container $app)
     {
         $this->kernel = $app;
         
-        $app['security.config.data_provider']  = $app->share(
+        $app['security.config.data_provider']  = $app->factory(
             function ($app) {
                 $config = isset($app['security.config']) ? $app['security.config'] : [];
                 if ($this->authPolicies) {
@@ -146,7 +153,7 @@ class SimpleSecurityProvider extends SecurityServiceProvider
                 return $dp;
             }
         );
-        $app['security.config.policies']       = $app->share(
+        $app['security.config.policies']       = $app->factory(
             function () {
                 return $this->getConfigDataProvider()->getOptional(
                     'policies',
@@ -155,7 +162,7 @@ class SimpleSecurityProvider extends SecurityServiceProvider
                 );
             }
         );
-        $app['security.config.firewalls']      = $app->share(
+        $app['security.config.firewalls']      = $app->factory(
             function () {
                 return $this->getConfigDataProvider()->getOptional(
                     'firewalls',
@@ -164,7 +171,7 @@ class SimpleSecurityProvider extends SecurityServiceProvider
                 );
             }
         );
-        $app['security.config.access_rules']   = $app->share(
+        $app['security.config.access_rules']   = $app->factory(
             function () {
                 return $this->getConfigDataProvider()->getOptional(
                     'access_rules',
@@ -173,7 +180,7 @@ class SimpleSecurityProvider extends SecurityServiceProvider
                 );
             }
         );
-        $app['security.config.role_hierarchy'] = $app->share(
+        $app['security.config.role_hierarchy'] = $app->factory(
             function () {
                 return $this->getConfigDataProvider()->getOptional(
                     'role_hierarchy',
@@ -197,7 +204,7 @@ class SimpleSecurityProvider extends SecurityServiceProvider
     
     protected function installAuthenticationFactory($policyName,
                                                     AuthenticationPolicyInterface $policy,
-                                                    Application $app)
+                                                    Container $app)
     {
         $factoryName       = 'security.authentication_listener.factory.' . $policyName;
         $app[$factoryName] = $app->protect(
@@ -205,7 +212,7 @@ class SimpleSecurityProvider extends SecurityServiceProvider
                 
                 $authProviderId = 'security.authentication_provider.' . $firewallName . '.' . $policyName;
                 if (!isset($app[$authProviderId])) {
-                    $app[$authProviderId] = $app->share(
+                    $app[$authProviderId] = $app->factory(
                         function () use ($policy, $app, $firewallName, $options) {
                             $provider = $policy->getAuthenticationProvider($app, $firewallName, $options);
                             if ($provider instanceof AuthenticationProviderInterface) {
@@ -222,7 +229,7 @@ class SimpleSecurityProvider extends SecurityServiceProvider
                 
                 $authListenerId = 'security.authentication_listener.' . $firewallName . '.' . $policyName;
                 if (!isset($app[$authListenerId])) {
-                    $app[$authListenerId] = $app->share(
+                    $app[$authListenerId] = $app->factory(
                         function () use ($policy, $app, $firewallName, $options) {
                             return $policy->getAuthenticationListener(
                                 $app,
@@ -235,7 +242,7 @@ class SimpleSecurityProvider extends SecurityServiceProvider
                 
                 $entryId = 'security.entry_point.' . $firewallName;
                 if (!isset($app[$entryId])) {
-                    $app[$entryId] = $app->share(
+                    $app[$entryId] = $app->factory(
                         function () use ($policy, $app, $firewallName, $options) {
                             $entryPoint = $policy->getEntryPoint($app, $firewallName, $options);
                             if (!$entryPoint instanceof AuthenticationEntryPointInterface) {
@@ -263,13 +270,13 @@ class SimpleSecurityProvider extends SecurityServiceProvider
      * Parses firewall into silex compatible array data
      *
      * @param FirewallInterface $firewall
-     * @param Application       $app
+     * @param Container         $app
      *
      * @return array
      */
     protected function parseFirewall(FirewallInterface $firewall,
         /** @noinspection PhpUnusedParameterInspection */
-                                     Application $app)
+                                     Container $app)
     {
         $setting              = $firewall->getPolicies();
         $setting['pattern']   = $firewall->getPattern();

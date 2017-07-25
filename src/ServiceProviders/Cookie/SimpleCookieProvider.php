@@ -9,12 +9,14 @@
 namespace Oasis\Mlib\Http\ServiceProviders\Cookie;
 
 use Oasis\Mlib\Http\SilexKernel;
+use Pimple\Container;
+use Pimple\ServiceProviderInterface;
+use Silex\Api\BootableProviderInterface;
 use Silex\Application;
-use Silex\ServiceProviderInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class SimpleCookieProvider implements ServiceProviderInterface
+class SimpleCookieProvider implements ServiceProviderInterface, BootableProviderInterface
 {
     /** @var ResponseCookieContainer */
     protected $cookieContainer;
@@ -30,9 +32,9 @@ class SimpleCookieProvider implements ServiceProviderInterface
      * This method should only be used to configure services and parameters.
      * It should not get services.
      *
-     * @param Application $app
+     * @param Container $app
      */
-    public function register(Application $app)
+    public function register(Container $app)
     {
     }
     

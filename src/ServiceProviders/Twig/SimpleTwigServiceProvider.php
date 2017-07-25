@@ -11,10 +11,13 @@ namespace Oasis\Mlib\Http\ServiceProviders\Twig;
 use Oasis\Mlib\Http\Configuration\ConfigurationValidationTrait;
 use Oasis\Mlib\Http\Configuration\TwigConfiguration;
 use Oasis\Mlib\Utils\DataProviderInterface;
+use Pimple\Container;
+use Silex\Api\BootableProviderInterface;
 use Silex\Application;
 use Silex\Provider\TwigServiceProvider;
 
 class SimpleTwigServiceProvider extends TwigServiceProvider
+    implements BootableProviderInterface
 {
     use ConfigurationValidationTrait;
     
@@ -31,16 +34,14 @@ class SimpleTwigServiceProvider extends TwigServiceProvider
             $app['twig.options'] = array_replace($app['twig.options'], ['cache' => $app['twig.config.cache_dir']]);
         }
         $app['twig.path'] = $app['twig.config.template_dir'];
-        
-        parent::boot($app);
     }
     
-    public function register(Application $app)
+    public function register(Container $app)
     {
         $this->kernel = $app;
         parent::register($app);
         
-        $app['twig'] = $app->share(
+        $app['twig'] = $app->factory(
             $app->extend(
                 'twig',
                 function ($twig, $c) {
@@ -69,27 +70,27 @@ class SimpleTwigServiceProvider extends TwigServiceProvider
             )
         );
         
-        $app['twig.config.data_provider'] = $app->share(
+        $app['twig.config.data_provider'] = $app->factory(
             function ($app) {
                 return $this->processConfiguration($app['twig.config'], new TwigConfiguration());
             }
         );
-        $app['twig.config.template_dir']  = $app->share(
+        $app['twig.config.template_dir']  = $app->factory(
             function () {
                 return $this->getConfigDataProvider()->getMandatory('template_dir');
             }
         );
-        $app['twig.config.cache_dir']     = $app->share(
+        $app['twig.config.cache_dir']     = $app->factory(
             function () {
                 return $this->getConfigDataProvider()->getOptional('cache_dir');
             }
         );
-        $app['twig.config.asset_base']    = $app->share(
+        $app['twig.config.asset_base']    = $app->factory(
             function () {
                 return $this->getConfigDataProvider()->getOptional('asset_base');
             }
         );
-        $app['twig.config.global_vars']   = $app->share(
+        $app['twig.config.global_vars']   = $app->factory(
             function () {
                 return $this->getConfigDataProvider()->getOptional(
                     'globals',

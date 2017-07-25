@@ -10,11 +10,12 @@ namespace Oasis\Mlib\Http\ErrorHandlers;
 
 use Oasis\Mlib\Utils\Exceptions\DataValidationException;
 use Oasis\Mlib\Utils\Exceptions\ExistenceViolationException;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class ExceptionWrapper
 {
-    function __invoke(\Exception $e, $httpStatusCode)
+    function __invoke(\Exception $e, Request $request, $httpStatusCode)
     {
         mtrace($e, "Fallback handling exception: ");
         

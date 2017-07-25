@@ -10,6 +10,8 @@ use Oasis\Mlib\Http\ErrorHandlers\WrappedExceptionInfo;
 /** @noinspection PhpIncludeInspection */
 require_once __DIR__ . "/bootstrap.php";
 
-$a = new WrappedExceptionInfo(new RuntimeException('ld'), 400);
-var_dump((array)$a);
+$hashed = password_hash('1234', PASSWORD_DEFAULT);
+var_dump($hashed);
+
+var_dump(password_verify('1234', $hashed));
 

@@ -41,64 +41,52 @@ class SimpleTwigServiceProvider extends TwigServiceProvider
         $this->kernel = $app;
         parent::register($app);
         
-        $app['twig'] = $app->factory(
-            $app->extend(
-                'twig',
-                function ($twig, $c) {
-                    /** @var \Twig_Environment $twig */
-                    $twig->addGlobal('http', $c);
-                    
-                    foreach ($c['twig.config.global_vars'] as $k => $v) {
-                        $twig->addGlobal($k, $v);
-                    }
-                    $twig->addFunction(
-                        new \Twig_SimpleFunction(
-                            'asset',
-                            function ($assetFile, $version = '') use ($c) {
-                                $url = $c['twig.config.asset_base'] . $assetFile;
-                                if ($version !== '') {
-                                    $url .= "?v=$version";
-                                }
-                                
-                                return $url;
-                            }
-                        )
-                    );
-                    
-                    return $twig;
+        $app['twig'] = $app->extend(
+            'twig',
+            function ($twig, $c) {
+                /** @var \Twig_Environment $twig */
+                $twig->addGlobal('http', $c);
+                
+                foreach ($c['twig.config.global_vars'] as $k => $v) {
+                    $twig->addGlobal($k, $v);
                 }
-            )
+                $twig->addFunction(
+                    new \Twig_SimpleFunction(
+                        'asset',
+                        function ($assetFile, $version = '') use ($c) {
+                            $url = $c['twig.config.asset_base'] . $assetFile;
+                            if ($version !== '') {
+                                $url .= "?v=$version";
+                            }
+                            
+                            return $url;
+                        }
+                    )
+                );
+                
+                return $twig;
+            }
         );
         
-        $app['twig.config.data_provider'] = $app->factory(
-            function ($app) {
-                return $this->processConfiguration($app['twig.config'], new TwigConfiguration());
-            }
-        );
-        $app['twig.config.template_dir']  = $app->factory(
-            function () {
-                return $this->getConfigDataProvider()->getMandatory('template_dir');
-            }
-        );
-        $app['twig.config.cache_dir']     = $app->factory(
-            function () {
-                return $this->getConfigDataProvider()->getOptional('cache_dir');
-            }
-        );
-        $app['twig.config.asset_base']    = $app->factory(
-            function () {
-                return $this->getConfigDataProvider()->getOptional('asset_base');
-            }
-        );
-        $app['twig.config.global_vars']   = $app->factory(
-            function () {
-                return $this->getConfigDataProvider()->getOptional(
-                    'globals',
-                    DataProviderInterface::ARRAY_TYPE,
-                    []
-                );
-            }
-        );
+        $app['twig.config.data_provider'] = function ($app) {
+            return $this->processConfiguration($app['twig.config'], new TwigConfiguration());
+        };
+        $app['twig.config.template_dir']  = function () {
+            return $this->getConfigDataProvider()->getMandatory('template_dir');
+        };
+        $app['twig.config.cache_dir']     = function () {
+            return $this->getConfigDataProvider()->getOptional('cache_dir');
+        };
+        $app['twig.config.asset_base']    = function () {
+            return $this->getConfigDataProvider()->getOptional('asset_base');
+        };
+        $app['twig.config.global_vars']   = function () {
+            return $this->getConfigDataProvider()->getOptional(
+                'globals',
+                DataProviderInterface::ARRAY_TYPE,
+                []
+            );
+        };
         
     }
     

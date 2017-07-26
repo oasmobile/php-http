@@ -42,79 +42,67 @@ class CacheableRouterProvider implements ServiceProviderInterface
     public function register(Container $app)
     {
         $this->kernel                        = $app;
-        $app['request_matcher']              = $app->factory(
-            $app->extend(
-                'request_matcher',
-                function ($urlMatcher, $c) {
-                    $context = $c['request_context'];
-                    
-                    $newMatcher = new GroupUrlMatcher(
-                        $context,
-                        [
-                            new CacheableRouterUrlMatcherWrapper(
-                                $this->getRouter($context)->getMatcher(),
-                                $c['routing.config.namespaces']
-                            ),
-                            $urlMatcher,
-                        ]
-                    );
-                    
-                    return $newMatcher;
-                }
-            )
-        );
-        $app['url_generator']                = $app->factory(
-            $app->extend(
-                'url_generator',
-                function ($generator, $kernel) {
-                    /** @var SilexKernel $kernel */
-                    
-                    /** @var RequestContext $context */
-                    //$context = $kernel['request_context'];
-                    /** @var Router $router */
-                    $router       = $kernel['router'];
-                    $newGenerator = $router->getGenerator();
-                    
-                    //$newGenerator = new UrlGenerator($router->getRouteCollection(), $context);
-                    
-                    return new GroupUrlGenerator(
-                        [
-                            $newGenerator,
-                            $generator,
-                        ]
-                    );
-                }
-            )
-        );
-        $app['router']                       = $app->factory(
-            function ($app) {
-                return $this->getRouter($app['request_context']);
-            }
-        );
-        $app['routing.config.data_provider'] = $app->factory(
-            function ($app) {
-                $routingConfig = $app['routing.config'];
+        $app['request_matcher']              = $app->extend(
+            'request_matcher',
+            function ($urlMatcher, $c) {
+                $context = $c['request_context'];
                 
-                return $this->processConfiguration(
-                    $routingConfig,
-                    new CacheableRouterConfiguration()
+                $newMatcher = new GroupUrlMatcher(
+                    $context,
+                    [
+                        new CacheableRouterUrlMatcherWrapper(
+                            $this->getRouter($context)->getMatcher(),
+                            $c['routing.config.namespaces']
+                        ),
+                        $urlMatcher,
+                    ]
+                );
+                
+                return $newMatcher;
+            }
+        );
+        $app['url_generator']                = $app->extend(
+            'url_generator',
+            function ($generator, $kernel) {
+                /** @var SilexKernel $kernel */
+                
+                /** @var RequestContext $context */
+                //$context = $kernel['request_context'];
+                /** @var Router $router */
+                $router       = $kernel['router'];
+                $newGenerator = $router->getGenerator();
+                
+                //$newGenerator = new UrlGenerator($router->getRouteCollection(), $context);
+                
+                return new GroupUrlGenerator(
+                    [
+                        $newGenerator,
+                        $generator,
+                    ]
                 );
             }
         );
-        $app['routing.config.namespaces']    = $app->factory(
-            function () {
-                return $this->getConfigDataProvider()->getOptional(
-                    'namespaces',
-                    DataProviderInterface::ARRAY_TYPE,
-                    []
-                );
-            }
-        );
-        $app['routing.config.cache_dir']     = $app->factory(
-            function () {
-                return $this->getConfigDataProvider()->getOptional('cache_dir');
-            }
-        );
+        $app['router']                       = function ($app) {
+            return $this->getRouter($app['request_context']);
+        };
+        $app['routing.config.data_provider'] = function ($app) {
+            $routingConfig = $app['routing.config'];
+            
+            return $this->processConfiguration(
+                $routingConfig,
+                new CacheableRouterConfiguration()
+            );
+        };
+        $app['routing.config.namespaces']    = function () {
+            return $this->getConfigDataProvider()->getOptional(
+                'namespaces',
+                DataProviderInterface::ARRAY_TYPE,
+                []
+            );
+        };
+        $app['routing.config.cache_dir']     = function () {
+            return $this->getConfigDataProvider()->getOptional('cache_dir');
+        };
     }
     
     /** @return DataProviderInterface */

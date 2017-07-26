@@ -25,6 +25,7 @@ use Silex\CallbackResolver;
 use Silex\Provider\ServiceControllerServiceProvider;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
@@ -92,6 +93,17 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
             $this['logger'] = MLogging::getLogger();
         }
         $this['debug'] = $this->isDebug;
+        
+        if (!isset($this['request'])) {
+            $this['request'] = $this->factory(
+                function ($app) {
+                    /** @var RequestStack $stack */
+                    $stack = $app['request_stack'];
+                    
+                    return $stack->getCurrentRequest();
+                }
+            );
+        }
         
         $this['resolver_auto_injections'] = function () {
             return $this->controllerInjectedArgs;

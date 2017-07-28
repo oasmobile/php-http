@@ -12,8 +12,8 @@ use Oasis\Mlib\Http\Configuration\CacheableRouterConfiguration;
 use Oasis\Mlib\Http\Configuration\ConfigurationValidationTrait;
 use Oasis\Mlib\Http\SilexKernel;
 use Oasis\Mlib\Utils\DataProviderInterface;
-use Silex\Application;
-use Silex\ServiceProviderInterface;
+use Pimple\Container;
+use Pimple\ServiceProviderInterface;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\Router;
@@ -37,74 +37,72 @@ class CacheableRouterProvider implements ServiceProviderInterface
      * This method should only be used to configure services and parameters.
      * It should not get services.
      *
-     * @param Application $app
+     * @param Container $app
      */
-    public function register(Application $app)
+    public function register(Container $app)
     {
         $this->kernel                        = $app;
-        $app['url_matcher']                  = $app->share(
-            $app->extend(
-                'url_matcher',
-                function ($urlMatcher, $c) {
-                    $context = $c['request_context'];
-                    
-                    $newMatcher = new GroupUrlMatcher(
-                        $context,
-                        [
-                            new CacheableRouterUrlMatcherWrapper(
-                                $this->getRouter($context)->getMatcher(),
-                                $c['routing.config.namespaces']
-                            ),
-                            $urlMatcher,
-                        ]
-                    );
-                    
-                    return $newMatcher;
-                }
-            )
-        );
-        $app['router']                       = $app->share(
-            function ($app) {
-                return $this->getRouter($app['request_context']);
-            }
-        );
-        $app['routing.config.data_provider'] = $app->share(
-            function ($app) {
-                $routingConfig = $app['routing.config'];
+        $app['request_matcher']              = $app->extend(
+            'request_matcher',
+            function ($urlMatcher, $c) {
+                $context = $c['request_context'];
                 
-                return $this->processConfiguration(
-                    $routingConfig,
-                    new CacheableRouterConfiguration()
+                $newMatcher = new GroupUrlMatcher(
+                    $context,
+                    [
+                        new CacheableRouterUrlMatcherWrapper(
+                            $this->getRouter($context)->getMatcher(),
+                            $c['routing.config.namespaces']
+                        ),
+                        $urlMatcher,
+                    ]
+                );
+                
+                return $newMatcher;
+            }
+        );
+        $app['url_generator']                = $app->extend(
+            'url_generator',
+            function ($generator, $kernel) {
+                /** @var SilexKernel $kernel */
+                
+                /** @var RequestContext $context */
+                //$context = $kernel['request_context'];
+                /** @var Router $router */
+                $router       = $kernel['router'];
+                $newGenerator = $router->getGenerator();
+                
+                //$newGenerator = new UrlGenerator($router->getRouteCollection(), $context);
+                
+                return new GroupUrlGenerator(
+                    [
+                        $newGenerator,
+                        $generator,
+                    ]
                 );
             }
         );
-        $app['routing.config.namespaces']    = $app->share(
-            function () {
-                return $this->getConfigDataProvider()->getOptional(
-                    'namespaces',
-                    DataProviderInterface::ARRAY_TYPE,
-                    []
-                );
-            }
-        );
-        $app['routing.config.cache_dir']     = $app->share(
-            function () {
-                return $this->getConfigDataProvider()->getOptional('cache_dir');
-            }
-        );
-    }
-    
-    /**
-     * Bootstraps the application.
-     *
-     * This method is called after all services are registered
-     * and should be used for "dynamic" configuration (whenever
-     * a service must be requested).
-     *
-     * @param Application $app
-     */
-    public function boot(Application $app)
-    {
+        $app['router']                       = function ($app) {
+            return $this->getRouter($app['request_context']);
+        };
+        $app['routing.config.data_provider'] = function ($app) {
+            $routingConfig = $app['routing.config'];
+            
+            return $this->processConfiguration(
+                $routingConfig,
+                new CacheableRouterConfiguration()
+            );
+        };
+        $app['routing.config.namespaces']    = function () {
+            return $this->getConfigDataProvider()->getOptional(
+                'namespaces',
+                DataProviderInterface::ARRAY_TYPE,
+                []
+            );
+        };
+        $app['routing.config.cache_dir']     = function () {
+            return $this->getConfigDataProvider()->getOptional('cache_dir');
+        };
     }
     
     /** @return DataProviderInterface */

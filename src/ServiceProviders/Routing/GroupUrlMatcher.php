@@ -8,18 +8,20 @@
 
 namespace Oasis\Mlib\Http\ServiceProviders\Routing;
 
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Exception\MethodNotAllowedException;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
+use Symfony\Component\Routing\Matcher\RequestMatcherInterface;
 use Symfony\Component\Routing\Matcher\UrlMatcherInterface;
 use Symfony\Component\Routing\RequestContext;
 
-class GroupUrlMatcher implements UrlMatcherInterface
+class GroupUrlMatcher implements UrlMatcherInterface, RequestMatcherInterface
 {
     /** @var  RequestContext */
     protected $context;
     /** @var  UrlMatcherInterface[] */
     protected $matchers;
-
+    
     /**
      * GroupUrlMatcher constructor.
      *
@@ -33,7 +35,7 @@ class GroupUrlMatcher implements UrlMatcherInterface
         $this->context  = $context;
         $this->matchers = $matchers;
     }
-
+    
     /**
      * Sets the request context.
      *
@@ -43,7 +45,7 @@ class GroupUrlMatcher implements UrlMatcherInterface
     {
         $this->context = $context;
     }
-
+    
     /**
      * Gets the request context.
      *
@@ -53,7 +55,7 @@ class GroupUrlMatcher implements UrlMatcherInterface
     {
         return $this->context;
     }
-
+    
     /**
      * Tries to match a URL path with a set of routes.
      *
@@ -75,7 +77,7 @@ class GroupUrlMatcher implements UrlMatcherInterface
             $matched++;
             try {
                 $result = $matcher->match($pathinfo);
-
+                
                 // matched
                 return $result;
             } catch (ResourceNotFoundException $e) {
@@ -85,7 +87,31 @@ class GroupUrlMatcher implements UrlMatcherInterface
                 }
             }
         }
-
+        
         throw new ResourceNotFoundException("Cannot find route for $pathinfo");
+    }
+    
+    /**
+     * Tries to match a request with a set of routes.
+     *
+     * If the matcher can not find information, it must throw one of the exceptions documented
+     * below.
+     *
+     * @param Request $request The request to match
+     *
+     * @return array An array of parameters
+     *
+     * @throws ResourceNotFoundException If no matching resource could be found
+     * @throws MethodNotAllowedException If a matching resource was found but the request method is not allowed
+     */
+    public function matchRequest(Request $request)
+    {
+        $this->request = $request;
+        
+        $ret = $this->match($request->getPathInfo());
+        
+        $this->request = null;
+        
+        return $ret;
     }
 }

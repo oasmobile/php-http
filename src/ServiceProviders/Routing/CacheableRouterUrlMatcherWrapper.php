@@ -19,13 +19,13 @@ class CacheableRouterUrlMatcherWrapper implements UrlMatcherInterface
     protected $other;
     /** @var  array */
     protected $namespaces;
-
+    
     public function __construct(UrlMatcherInterface $other, array $namespaces)
     {
         $this->other      = $other;
         $this->namespaces = $namespaces;
     }
-
+    
     /**
      * Sets the request context.
      *
@@ -35,7 +35,7 @@ class CacheableRouterUrlMatcherWrapper implements UrlMatcherInterface
     {
         $this->other->setContext($context);
     }
-
+    
     /**
      * Gets the request context.
      *
@@ -45,7 +45,7 @@ class CacheableRouterUrlMatcherWrapper implements UrlMatcherInterface
     {
         return $this->other->getContext();
     }
-
+    
     /**
      * Tries to match a URL path with a set of routes.
      *
@@ -61,8 +61,9 @@ class CacheableRouterUrlMatcherWrapper implements UrlMatcherInterface
      */
     public function match($pathinfo)
     {
+        /** @var string[] $result */
         $result = $this->other->match($pathinfo);
-
+        
         if (strpos($result['_controller'], "::") !== false) {
             // check if we should prepend controller namespace
             /** @noinspection PhpUnusedLocalVariableInspection */
@@ -79,8 +80,8 @@ class CacheableRouterUrlMatcherWrapper implements UrlMatcherInterface
                 }
             }
         }
-
+        
         return $result;
-
+        
     }
 }

@@ -12,8 +12,10 @@ use Oasis\Mlib\Http\Configuration\ConfigurationValidationTrait;
 use Oasis\Mlib\Http\Configuration\SecurityConfiguration;
 use Oasis\Mlib\Http\SilexKernel;
 use Oasis\Mlib\Utils\DataProviderInterface;
+use Pimple\Container;
 use Silex\Application;
 use Silex\Provider\SecurityServiceProvider;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Security\Core\Authentication\Provider\AuthenticationProviderInterface;
 use Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface;
 
@@ -67,7 +69,7 @@ class SimpleSecurityProvider extends SecurityServiceProvider
         $this->roleHierarchy[$role] = $old;
     }
     
-    public function boot(Application $app)
+    public function subscribe(Container $app, EventDispatcherInterface $dispatcher)
     {
         // install additional policies
         foreach ($app['security.config.policies'] as $policyName => $policy) {
@@ -105,83 +107,78 @@ class SimpleSecurityProvider extends SecurityServiceProvider
         }
         $app['security.role_hierarchy'] = $rolesSetting;
         
+        parent::subscribe($app, $dispatcher);
+    }
+    
+    public function boot(Application $app)
+    {
         parent::boot($app);
         
     }
     
-    public function register(Application $app)
+    public function register(Container $app)
     {
         $this->kernel = $app;
         
-        $app['security.config.data_provider']  = $app->share(
-            function ($app) {
-                $config = isset($app['security.config']) ? $app['security.config'] : [];
-                if ($this->authPolicies) {
-                    $config['policies'] = array_merge(
-                        isset($config['policies']) ? $config['policies'] : [],
-                        $this->authPolicies
-                    );
-                }
-                if ($this->firewalls) {
-                    $config['firewalls'] = array_merge(
-                        isset($config['firewalls']) ? $config['firewalls'] : [],
-                        $this->firewalls
-                    );
-                }
-                if ($this->accessRules) {
-                    $config['access_rules'] = array_merge(
-                        isset($config['access_rules']) ? $config['access_rules'] : [],
-                        $this->accessRules
-                    );
-                }
-                if ($this->authPolicies) {
-                    $config['role_hierarchy'] = array_merge(
-                        isset($config['role_hierarchy']) ? $config['role_hierarchy'] : [],
-                        $this->roleHierarchy
-                    );
-                }
-                
-                $dp = $this->processConfiguration($config, new SecurityConfiguration());
-                
-                return $dp;
-            }
-        );
-        $app['security.config.policies']       = $app->share(
-            function () {
-                return $this->getConfigDataProvider()->getOptional(
-                    'policies',
-                    DataProviderInterface::ARRAY_TYPE,
-                    []
+        $app['security.config.data_provider']  = function ($app) {
+            $config = isset($app['security.config']) ? $app['security.config'] : [];
+            if ($this->authPolicies) {
+                $config['policies'] = array_merge(
+                    isset($config['policies']) ? $config['policies'] : [],
+                    $this->authPolicies
                 );
             }
-        );
-        $app['security.config.firewalls']      = $app->share(
-            function () {
-                return $this->getConfigDataProvider()->getOptional(
-                    'firewalls',
-                    DataProviderInterface::ARRAY_TYPE,
-                    []
+            if ($this->firewalls) {
+                $config['firewalls'] = array_merge(
+                    isset($config['firewalls']) ? $config['firewalls'] : [],
+                    $this->firewalls
                 );
             }
-        );
-        $app['security.config.access_rules']   = $app->share(
-            function () {
-                return $this->getConfigDataProvider()->getOptional(
-                    'access_rules',
-                    DataProviderInterface::ARRAY_TYPE,
-                    []
+            if ($this->accessRules) {
+                $config['access_rules'] = array_merge(
+                    isset($config['access_rules']) ? $config['access_rules'] : [],
+                    $this->accessRules
                 );
             }
-        );
-        $app['security.config.role_hierarchy'] = $app->share(
-            function () {
-                return $this->getConfigDataProvider()->getOptional(
-                    'role_hierarchy',
-                    DataProviderInterface::ARRAY_TYPE,
-                    []
+            if ($this->authPolicies) {
+                $config['role_hierarchy'] = array_merge(
+                    isset($config['role_hierarchy']) ? $config['role_hierarchy'] : [],
+                    $this->roleHierarchy
                 );
             }
-        );
+            
+            $dp = $this->processConfiguration($config, new SecurityConfiguration());
+            
+            return $dp;
+        };
+        $app['security.config.policies']       = function () {
+            return $this->getConfigDataProvider()->getOptional(
+                'policies',
+                DataProviderInterface::ARRAY_TYPE,
+                []
+            );
+        };
+        $app['security.config.firewalls']      = function () {
+            return $this->getConfigDataProvider()->getOptional(
+                'firewalls',
+                DataProviderInterface::ARRAY_TYPE,
+                []
+            );
+        };
+        $app['security.config.access_rules']   = function () {
+            return $this->getConfigDataProvider()->getOptional(
+                'access_rules',
+                DataProviderInterface::ARRAY_TYPE,
+                []
+            );
+        };
+        $app['security.config.role_hierarchy'] = function () {
+            return $this->getConfigDataProvider()->getOptional(
+                'role_hierarchy',
+                DataProviderInterface::ARRAY_TYPE,
+                []
+            );
+        };
         parent::register($app);
     }
     
@@ -197,7 +194,7 @@ class SimpleSecurityProvider extends SecurityServiceProvider
     
     protected function installAuthenticationFactory($policyName,
                                                     AuthenticationPolicyInterface $policy,
-                                                    Application $app)
+                                                    Container $app)
     {
         $factoryName       = 'security.authentication_listener.factory.' . $policyName;
         $app[$factoryName] = $app->protect(
@@ -205,46 +202,40 @@ class SimpleSecurityProvider extends SecurityServiceProvider
                 
                 $authProviderId = 'security.authentication_provider.' . $firewallName . '.' . $policyName;
                 if (!isset($app[$authProviderId])) {
-                    $app[$authProviderId] = $app->share(
-                        function () use ($policy, $app, $firewallName, $options) {
-                            $provider = $policy->getAuthenticationProvider($app, $firewallName, $options);
-                            if ($provider instanceof AuthenticationProviderInterface) {
-                                return $provider;
-                            }
-                            else {
-                                return $app['security.authentication_provider.' . $provider . '._proto'](
-                                    $firewallName
-                                );
-                            }
+                    $app[$authProviderId] = function () use ($policy, $app, $firewallName, $options) {
+                        $provider = $policy->getAuthenticationProvider($app, $firewallName, $options);
+                        if ($provider instanceof AuthenticationProviderInterface) {
+                            return $provider;
                         }
-                    );
+                        else {
+                            return $app['security.authentication_provider.' . $provider . '._proto'](
+                                $firewallName
+                            );
+                        }
+                    };
                 }
                 
                 $authListenerId = 'security.authentication_listener.' . $firewallName . '.' . $policyName;
                 if (!isset($app[$authListenerId])) {
-                    $app[$authListenerId] = $app->share(
-                        function () use ($policy, $app, $firewallName, $options) {
-                            return $policy->getAuthenticationListener(
-                                $app,
-                                $firewallName,
-                                $options
-                            );
-                        }
-                    );
+                    $app[$authListenerId] = function () use ($policy, $app, $firewallName, $options) {
+                        return $policy->getAuthenticationListener(
+                            $app,
+                            $firewallName,
+                            $options
+                        );
+                    };
                 }
                 
                 $entryId = 'security.entry_point.' . $firewallName;
                 if (!isset($app[$entryId])) {
-                    $app[$entryId] = $app->share(
-                        function () use ($policy, $app, $firewallName, $options) {
-                            $entryPoint = $policy->getEntryPoint($app, $firewallName, $options);
-                            if (!$entryPoint instanceof AuthenticationEntryPointInterface) {
-                                $entryPoint = new NullEntryPoint();
-                            }
-                            
-                            return $entryPoint;
+                    $app[$entryId] = function () use ($policy, $app, $firewallName, $options) {
+                        $entryPoint = $policy->getEntryPoint($app, $firewallName, $options);
+                        if (!$entryPoint instanceof AuthenticationEntryPointInterface) {
+                            $entryPoint = new NullEntryPoint();
                         }
-                    );
+                        
+                        return $entryPoint;
+                    };
                     
                 }
                 
@@ -263,13 +254,13 @@ class SimpleSecurityProvider extends SecurityServiceProvider
      * Parses firewall into silex compatible array data
      *
      * @param FirewallInterface $firewall
-     * @param Application       $app
+     * @param Container         $app
      *
      * @return array
      */
     protected function parseFirewall(FirewallInterface $firewall,
         /** @noinspection PhpUnusedParameterInspection */
-                                     Application $app)
+                                     Container $app)
     {
         $setting              = $firewall->getPolicies();
         $setting['pattern']   = $firewall->getPattern();

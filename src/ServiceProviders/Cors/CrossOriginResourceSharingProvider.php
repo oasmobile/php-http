@@ -10,13 +10,15 @@ namespace Oasis\Mlib\Http\ServiceProviders\Cors;
 
 use Oasis\Mlib\Http\SilexKernel;
 use Oasis\Mlib\Http\Views\PrefilightResponse;
+use Pimple\Container;
+use Pimple\ServiceProviderInterface;
+use Silex\Api\BootableProviderInterface;
 use Silex\Application;
-use Silex\ServiceProviderInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 
-class CrossOriginResourceSharingProvider implements ServiceProviderInterface
+class CrossOriginResourceSharingProvider implements ServiceProviderInterface, BootableProviderInterface
 {
     const HEADER_REQUEST_ORIGIN  = "Origin";
     const HEADER_REQUEST_METHOD  = "Access-Control-Request-Method";
@@ -56,9 +58,9 @@ class CrossOriginResourceSharingProvider implements ServiceProviderInterface
      * This method should only be used to configure services and parameters.
      * It should not get services.
      *
-     * @param Application $app
+     * @param Container $app
      */
-    public function register(Application $app)
+    public function register(Container $app)
     {
     }
     

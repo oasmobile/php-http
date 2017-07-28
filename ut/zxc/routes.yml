@@ -2,7 +2,7 @@ home:
     path: "{lang}/"
     host: "{game}.test.oasgames.com"
     defaults:
-        _controller: Oasis\Mlib\Http\Ut\ZxcController::home
+        _controller: Oasis\Mlib\Http\Test\Helpers\ZxcController::home
 
 
 play:

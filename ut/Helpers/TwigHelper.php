@@ -6,7 +6,7 @@
  * Time: 19:08
  */
 
-namespace Oasis\Mlib\Http\Ut;
+namespace Oasis\Mlib\Http\Test\Helpers;
 
 class TwigHelper
 {

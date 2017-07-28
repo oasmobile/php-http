@@ -6,7 +6,7 @@
  * Time: 14:17
  */
 
-namespace Oasis\Mlib\Http\Ut\Controllers;
+namespace Oasis\Mlib\Http\Test\Helpers\Controllers;
 
 use Symfony\Component\HttpFoundation\Request;
 

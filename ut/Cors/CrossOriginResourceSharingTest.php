@@ -1,4 +1,7 @@
 <?php
+
+namespace Oasis\Mlib\Http\Test\Cors;
+
 use Oasis\Mlib\Http\ServiceProviders\Cors\CrossOriginResourceSharingProvider;
 use Silex\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;

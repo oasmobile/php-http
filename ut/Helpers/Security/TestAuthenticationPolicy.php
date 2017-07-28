@@ -6,7 +6,7 @@
  * Time: 15:58
  */
 
-namespace Oasis\Mlib\Http\Ut\Security;
+namespace Oasis\Mlib\Http\Test\Helpers\Security;
 
 use Oasis\Mlib\Http\ServiceProviders\Security\AbstractSimplePreAuthenticationPolicy;
 use Silex\Application;

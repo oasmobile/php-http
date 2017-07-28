@@ -6,7 +6,7 @@
  * Time: 17:43
  */
 
-namespace Oasis\Mlib\Http\Ut\Controllers;
+namespace Oasis\Mlib\Http\Test\Helpers\Controllers;
 
 class FallbackController
 {

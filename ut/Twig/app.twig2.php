@@ -10,36 +10,37 @@
  */
 use Oasis\Mlib\Http\ErrorHandlers\JsonErrorHandler;
 use Oasis\Mlib\Http\SilexKernel;
-use Oasis\Mlib\Http\Ut\Security\TestApiUserProvider;
-use Oasis\Mlib\Http\Ut\Security\TestAuthenticationPolicy;
+use Oasis\Mlib\Http\Test\Helpers\Security\TestApiUserProvider;
+use Oasis\Mlib\Http\Test\Helpers\Security\TestAuthenticationPolicy;
+use Oasis\Mlib\Http\Test\Helpers\TwigHelper;
 use Oasis\Mlib\Http\Views\JsonViewHandler;
 use Silex\Provider\SessionServiceProvider;
 use Symfony\Component\HttpFoundation\RequestMatcher;
 
-require_once __DIR__ . '/bootstrap.php';
-
 $users = [
     "admin"  => [
         "ROLE_ADMIN",
-
-        // this is for BCrypt encoder, which is default for silex 2
-        '$2y$10$EY4SlT0KGCg4066H23gBYuKorAu0b/oSvrlMj4yaGHo50QQsXTOU2',
-
-        // this is for MessageDigestPasswordEncoder, which is default for silex 1.3
-        //"Eti36Ru/pWG6WfoIPiDFUBxUuyvgMA4L8+LLuGbGyqV9ATuT9brCWPchBqX5vFTF+DgntacecW+sSGD+GZts2A==",
+        "Eti36Ru/pWG6WfoIPiDFUBxUuyvgMA4L8+LLuGbGyqV9ATuT9brCWPchBqX5vFTF+DgntacecW+sSGD+GZts2A==",
     ],
-    //"admin2" => [
-    //    "ROLE_ADMIN",
-    //    "5FZ2Z8QIkA7UTZ4BYkoC+GsReLf569mSKDsfods6LYQ8t+a8EW9oaircfMpmaLbPBh4FOBiiFyLfuZmTSUwzZg==",
-    //],
+    "admin2" => [
+        "ROLE_ADMIN",
+        "5FZ2Z8QIkA7UTZ4BYkoC+GsReLf569mSKDsfods6LYQ8t+a8EW9oaircfMpmaLbPBh4FOBiiFyLfuZmTSUwzZg==",
+    ],
 ];
 
 $config = [
     'cache_dir'      => sys_get_temp_dir() . "/oasis-http-ut",
     'routing'        => [
-        'path'       => __DIR__ . "/routes.yml",
+        'path'       => __DIR__ . "/../routes.yml",
         'namespaces' => [
-            'Oasis\\Mlib\\Http\\Ut\\Controllers\\',
+            'Oasis\\Mlib\\Http\\Test\\Helpers\\Controllers\\',
+        ],
+    ],
+    'twig'           => [
+        "template_dir" => __DIR__ . "/templates",
+        "cache_dir"    => "/tmp/twig_cache",
+        "globals"      => [
+            "helper" => new TwigHelper(),
         ],
     ],
     'security'       => [
@@ -48,11 +49,11 @@ $config = [
         ],
         'firewalls'      => [
             'minhao.admin' => [
-                "pattern"   => "^/secured/madmin",
-                "policies"  => [
+                "pattern"  => "^/secured/madmin",
+                "policies" => [
                     "mauth" => true,
                 ],
-                "users"     => new TestApiUserProvider(),
+                "users"    => new TestApiUserProvider(),
             ],
             "admin"        => [
                 "pattern"  => "^/secured/admin",

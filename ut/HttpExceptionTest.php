@@ -1,7 +1,7 @@
 <?php
 use Oasis\Mlib\Http\ErrorHandlers\ExceptionWrapper;
 use Oasis\Mlib\Http\SilexKernel;
-use Oasis\Mlib\Http\Ut\Controllers\ExceptionTestController;
+use Oasis\Mlib\Http\Test\Helpers\Controllers\ExceptionTestController;
 use Oasis\Mlib\Http\Views\FallbackViewHandler;
 use Oasis\Mlib\Http\Views\RouteBasedResponseRendererResolver;
 use Silex\WebTestCase;

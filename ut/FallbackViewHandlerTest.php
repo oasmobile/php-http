@@ -26,7 +26,7 @@ class FallbackViewHandlerTest extends WebTestCase
             'routing' => [
                 'path'       => __DIR__ . "/fallback-test.routes.yml",
                 'namespaces' => [
-                    'Oasis\\Mlib\\Http\\Ut\\Controllers\\',
+                    'Oasis\\Mlib\\Http\\Test\\Helpers\\Controllers\\',
                 ],
             ],
         ];

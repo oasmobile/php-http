@@ -1,5 +1,7 @@
 <?php
 
+namespace Oasis\Mlib\Http\Test\Twig;
+
 /**
  * Created by PhpStorm.
  * User: minhao

@@ -6,7 +6,7 @@
  * Time: 14:15
  */
 
-namespace Oasis\Mlib\Http\Ut\Controllers;
+namespace Oasis\Mlib\Http\Test\Helpers\Controllers;
 
 use Oasis\Mlib\Http\SilexKernel;
 

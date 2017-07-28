@@ -6,7 +6,7 @@
  * Time: 21:06
  */
 
-namespace Oasis\Mlib\Http\Ut\Security;
+namespace Oasis\Mlib\Http\Test\Helpers\Security;
 
 use Oasis\Mlib\Http\ServiceProviders\Security\AbstractSimplePreAuthenticateUserProvider;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;

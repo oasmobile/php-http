@@ -1,4 +1,7 @@
 <?php
+
+namespace Oasis\Mlib\Http\Test\Security;
+
 use Silex\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
@@ -20,12 +23,12 @@ class SecurityServiceProviderTest extends WebTestCase
     public function createApplication()
     {
         $app = require __DIR__ . "/app.security.php";
-
+        
         $app['session.test'] = true;
-
+        
         return $app;
     }
-
+    
     public function testBasicAuth()
     {
         //$this->markTestSkipped();
@@ -38,7 +41,7 @@ class SecurityServiceProviderTest extends WebTestCase
         $client->request('GET', '/secured/admin');
         $response = $client->getResponse();
         $this->assertEquals(Response::HTTP_UNAUTHORIZED, $response->getStatusCode());
-
+        
         $client = $this->createClient(
             [
                 'PHP_AUTH_USER' => "admin",
@@ -49,7 +52,7 @@ class SecurityServiceProviderTest extends WebTestCase
         $response = $client->getResponse();
         $this->assertEquals(Response::HTTP_OK, $response->getStatusCode(), $response->getContent());
     }
-
+    
     public function testFormAuth()
     {
         //$this->markTestSkipped();
@@ -59,7 +62,7 @@ class SecurityServiceProviderTest extends WebTestCase
         $this->assertEquals(Response::HTTP_FOUND, $response->getStatusCode());
         $this->assertTrue($response->headers->has('Location'));
         $this->assertStringEndsWith('/secured/flogin', $response->headers->get('Location'));
-
+        
         $client->request(
             'POST',
             '/secured/fadmin/check',
@@ -72,7 +75,7 @@ class SecurityServiceProviderTest extends WebTestCase
         $this->assertEquals(Response::HTTP_FOUND, $response->getStatusCode());
         $this->assertTrue($response->headers->has('Location'));
         $this->assertStringEndsWith('/secured/flogin', $response->headers->get('Location'));
-
+        
         $client->request(
             'POST',
             '/secured/fadmin/check',
@@ -85,12 +88,12 @@ class SecurityServiceProviderTest extends WebTestCase
         $this->assertEquals(Response::HTTP_FOUND, $response->getStatusCode());
         $this->assertTrue($response->headers->has('Location'));
         $this->assertStringEndsWith('/secured/fadmin/test', $response->headers->get('Location'));
-
+        
         $client->request('GET', '/secured/fadmin/test');
         $response = $client->getResponse();
         $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
     }
-
+    
     public function testPreAuth()
     {
         //$this->markTestSkipped();
@@ -101,7 +104,7 @@ class SecurityServiceProviderTest extends WebTestCase
         );
         $response = $client->getResponse();
         $this->assertEquals(Response::HTTP_FORBIDDEN, $response->getStatusCode());
-
+        
         $client->request(
             'GET',
             '/secured/madmin',
@@ -111,7 +114,7 @@ class SecurityServiceProviderTest extends WebTestCase
         );
         $response = $client->getResponse();
         $this->assertEquals(Response::HTTP_FORBIDDEN, $response->getStatusCode());
-
+        
         $client->request(
             'GET',
             '/secured/madmin',
@@ -123,10 +126,10 @@ class SecurityServiceProviderTest extends WebTestCase
         $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
         $json = json_decode($response->getContent(), true);
         $this->assertTrue(is_array($json));
-        $this->assertEquals('Oasis\\Mlib\\Http\\Ut\\Controllers\\AuthController::madmin()', $json['called']);
+        $this->assertEquals('Oasis\\Mlib\\Http\\Test\\Helpers\\Controllers\\AuthController::madmin()', $json['called']);
         $this->assertEquals(true, $json['admin']);
     }
-
+    
     public function testAccessRuleOk()
     {
         $client = $this->createClient();
@@ -141,11 +144,11 @@ class SecurityServiceProviderTest extends WebTestCase
         $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
         $json = json_decode($response->getContent(), true);
         $this->assertTrue(is_array($json));
-        $this->assertEquals('Oasis\\Mlib\\Http\\Ut\\Controllers\\AuthController::madminParent()', $json['called']);
+        $this->assertEquals('Oasis\\Mlib\\Http\\Test\\Helpers\\Controllers\\AuthController::madminParent()', $json['called']);
         $this->assertEquals('parent', $json['user']);
-
+        
     }
-
+    
     public function testAccessRuleOnHostWithRole()
     {
         $client = $this->createClient();
@@ -158,9 +161,9 @@ class SecurityServiceProviderTest extends WebTestCase
         );
         $response = $client->getResponse();
         $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
-
+        
     }
-
+    
     public function testAccessRuleOnHostNoRole()
     {
         $client = $this->createClient(['HTTP_HOST' => "baida.com"]);
@@ -173,9 +176,9 @@ class SecurityServiceProviderTest extends WebTestCase
         );
         $response = $client->getResponse();
         $this->assertEquals(Response::HTTP_FORBIDDEN, $response->getStatusCode());
-
+        
     }
-
+    
     public function testAccessRuleWithRoleHierarchy()
     {
         $client = $this->createClient();
@@ -190,7 +193,7 @@ class SecurityServiceProviderTest extends WebTestCase
         $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
         $json = json_decode($response->getContent(), true);
         $this->assertTrue(is_array($json));
-        $this->assertEquals('Oasis\\Mlib\\Http\\Ut\\Controllers\\AuthController::madminChild()', $json['called']);
+        $this->assertEquals('Oasis\\Mlib\\Http\\Test\\Helpers\\Controllers\\AuthController::madminChild()', $json['called']);
         $this->assertEquals('parent', $json['user']);
     }
 }

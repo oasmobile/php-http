@@ -9,19 +9,24 @@
             <file>ut/SilexKernelTest.php</file>
             <file>ut/SilexKernelWebTest.php</file>
             <file>ut/FallbackViewHandlerTest.php</file>
-            <file>ut/CrossOriginResourceSharingTest.php</file>
-            <file>ut/CrossOriginResourceSharingAdvancedTest.php</file>
-        </testsuite>
-        <testsuite name="twig">
-            <file>ut/TwigServiceProviderTest.php</file>
-            <file>ut/TwigServiceProviderConfigurationTest.php</file>
-        </testsuite>
-        <testsuite name="security">
-            <file>ut/SecurityServiceProviderTest.php</file>
-            <file>ut/SecurityServiceProviderConfigurationTest.php</file>
         </testsuite>
         <testsuite name="exceptions">
             <file>ut/HttpExceptionTest.php</file>
+        </testsuite>
+        <testsuite name="cors">
+            <file>ut/Cors/CrossOriginResourceSharingTest.php</file>
+            <file>ut/Cors/CrossOriginResourceSharingAdvancedTest.php</file>
+        </testsuite>
+        <testsuite name="security">
+            <file>ut/Security/SecurityServiceProviderTest.php</file>
+            <file>ut/Security/SecurityServiceProviderConfigurationTest.php</file>
+        </testsuite>
+        <testsuite name="twig">
+            <file>ut/Twig/TwigServiceProviderTest.php</file>
+            <file>ut/Twig/TwigServiceProviderConfigurationTest.php</file>
+        </testsuite>
+        <testsuite name="aws">
+            <file>ut/AwsTests/ElbTrustedProxyTest.php</file>
         </testsuite>
     </testsuites>
 </phpunit>

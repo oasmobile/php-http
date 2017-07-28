@@ -9,7 +9,7 @@
 use Oasis\Mlib\Http\ServiceProviders\Cors\CrossOriginResourceSharingProvider;
 use Oasis\Mlib\Http\ServiceProviders\Cors\CrossOriginResourceSharingStrategy;
 
-$app                    = require __DIR__ . "/app.php";
+$app                    = require __DIR__ . "/../app.php";
 $app->service_providers = [
     new CrossOriginResourceSharingProvider(),
 ];

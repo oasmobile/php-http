@@ -13,7 +13,7 @@ $config              = [
     'routing' => [
         'path'       => __DIR__ . "/routes.yml",
         'namespaces' => [
-            'Oasis\\Mlib\\Http\\Ut\\Controllers\\',
+            'Oasis\\Mlib\\Http\\Test\\Helpers\\Controllers\\',
         ],
     ],
 ];

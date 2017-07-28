@@ -6,7 +6,7 @@
  * Time: 00:02
  */
 
-namespace Oasis\Mlib\Http\Ut\Security;
+namespace Oasis\Mlib\Http\Test\Helpers\Security;
 
 use Oasis\Mlib\Http\ServiceProviders\Security\SimpleAccessRule;
 use Symfony\Component\Routing\Matcher\RequestMatcherInterface;

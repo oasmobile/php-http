@@ -1,3 +1,0 @@
-routing:
-    path: routes.yml
-    namespaces: Oasis\Mlib\Http\Ut

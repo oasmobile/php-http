@@ -1,5 +1,5 @@
 <?php
-namespace Oasis\Mlib\Http\Ut\Controllers;
+namespace Oasis\Mlib\Http\Test\Helpers\Controllers;
 
 /**
  * Created by PhpStorm.

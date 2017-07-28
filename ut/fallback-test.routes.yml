@@ -1,21 +1,21 @@
 fallback.panel.ok:
     path: panel/ok
     defaults:
-        _controller: \Oasis\Mlib\Http\Ut\Controllers\FallbackController::okAction
+        _controller: \Oasis\Mlib\Http\Test\Helpers\Controllers\FallbackController::okAction
 
 fallback.panel.error:
     path: panel/error
     defaults:
-        _controller: \Oasis\Mlib\Http\Ut\Controllers\FallbackController::errorAction
+        _controller: \Oasis\Mlib\Http\Test\Helpers\Controllers\FallbackController::errorAction
         
 fallback.api.ok:
     path: api/ok
     defaults:
-        _controller: \Oasis\Mlib\Http\Ut\Controllers\FallbackController::okAction
+        _controller: \Oasis\Mlib\Http\Test\Helpers\Controllers\FallbackController::okAction
         _format: api
         
 fallback.api.error:
     path: api/error
     defaults:
-        _controller: \Oasis\Mlib\Http\Ut\Controllers\FallbackController::errorAction
+        _controller: \Oasis\Mlib\Http\Test\Helpers\Controllers\FallbackController::errorAction
         _format: json

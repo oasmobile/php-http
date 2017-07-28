@@ -11,11 +11,17 @@ sub:
 
 secured:
     prefix: secured/
-    resource: "secured.routes.yml"
+    resource: "Security/secured.routes.yml"
 
 twig:
     prefix: twig/
-    resource: "twig.routes.yml"
+    resource: "Twig/twig.routes.yml"
+
+aws:
+    prefix: aws/
+    resource: "AwsTests/aws.routes.yml"
+
+
 
 domain.test.localhost:
     path: /domain
@@ -45,9 +51,9 @@ param.config_value:
     host: "{game}.baidu.com"
     defaults:
         _controller: TestController::paramConfigValue
-        one: %app.config1%
-        two: %app.config2%
-        three: %app.config1%%app.config2%
+        one: "%app.config1%"
+        two: "%app.config2%"
+        three: "%app.config1%%app.config2%"
 
 param.domain:
     path: /param/domain

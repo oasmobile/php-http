@@ -6,10 +6,10 @@
  * Time: 11:53
  */
 use Oasis\Mlib\Http\SilexKernel;
-use Oasis\Mlib\Http\Ut\TwigHelper;
+use Oasis\Mlib\Http\Test\Helpers\TwigHelper;
 
 /** @var SilexKernel $app */
-$app = require __DIR__ . "/app.security.php";
+$app = require __DIR__ . "/../Security/app.security.php";
 
 $app['twig.config'] = [
     "template_dir" => __DIR__ . "/templates",

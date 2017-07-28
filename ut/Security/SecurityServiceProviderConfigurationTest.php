@@ -1,4 +1,6 @@
 <?php
+namespace Oasis\Mlib\Http\Test\Security;
+
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 
 require_once "SecurityServiceProviderTest.php";

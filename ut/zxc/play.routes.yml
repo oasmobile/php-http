@@ -2,4 +2,4 @@ play.server:
     path: server/
     host: "{game}.test.oasgames.com"
     defaults:
-        _controller: Oasis\Mlib\Http\Ut\ZxcController::playServer
+        _controller: Oasis\Mlib\Http\Test\Helpers\ZxcController::playServer

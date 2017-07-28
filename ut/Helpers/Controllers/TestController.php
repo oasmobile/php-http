@@ -6,7 +6,7 @@
  * Time: 11:17
  */
 
-namespace Oasis\Mlib\Http\Ut\Controllers;
+namespace Oasis\Mlib\Http\Test\Helpers\Controllers;
 
 use Oasis\Mlib\Http\ChainedParameterBagDataProvider;
 use Oasis\Mlib\Http\ServiceProviders\Cookie\ResponseCookieContainer;

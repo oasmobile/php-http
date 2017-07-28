@@ -13,14 +13,14 @@ use Oasis\Mlib\Http\Views\JsonViewHandler;
 
 /** @var ClassLoader $loader */
 $loader = require_once __DIR__ . "/../vendor/autoload.php";
-$loader->addPsr4("Oasis\\Mlib\\Http\\Ut\\", __DIR__);
+$loader->addPsr4("Oasis\\Mlib\\Http\\Test\\Helpers\\", __DIR__);
 $loader->register();
 
 $config = [
     "routing" =>
         [
             "path"       => __DIR__ . "/zxc/routes.yml",
-            "namespaces" => ["Oasis\\Mlib\\Http\\Ut\\"],
+            "namespaces" => ["Oasis\\Mlib\\Http\\Test\\Helpers\\"],
         ],
 ];
 

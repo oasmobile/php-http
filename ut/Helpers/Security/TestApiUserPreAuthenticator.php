@@ -6,7 +6,7 @@
  * Time: 21:21
  */
 
-namespace Oasis\Mlib\Http\Ut\Security;
+namespace Oasis\Mlib\Http\Test\Helpers\Security;
 
 use Oasis\Mlib\Http\ServiceProviders\Security\AbstractSimplePreAuthenticator;
 use Symfony\Component\HttpFoundation\Request;

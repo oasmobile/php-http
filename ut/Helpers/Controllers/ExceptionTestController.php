@@ -6,7 +6,7 @@
  * Time: 11:55
  */
 
-namespace Oasis\Mlib\Http\Ut\Controllers;
+namespace Oasis\Mlib\Http\Test\Helpers\Controllers;
 
 use Oasis\Mlib\Http\Exceptions\UniquenessViolationHttpException;
 

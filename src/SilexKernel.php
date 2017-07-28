@@ -53,6 +53,7 @@ use Twig_Environment;
  * @property-write array $error_handlers
  * @property-write array $injected_args
  * @property-write array $trusted_proxies
+ * @property-write array $trusted_header_set
  */
 class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
 {
@@ -177,6 +178,13 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
         ) {
             $this->trusted_proxies = $trustedProxiesConfig;
         }
+        if ($trustedHeaderSet = $this->httpDataProvider->getOptional(
+            'trusted_header_set',
+            DataProviderInterface::MIXED_TYPE
+        )
+        ) {
+            $this->trusted_header_set = $trustedHeaderSet;
+        }
         if ($viewHandlersConfig = $this->httpDataProvider->getOptional(
             'view_handlers',
             DataProviderInterface::MIXED_TYPE
@@ -221,7 +229,15 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
         }
         switch ($name) {
             case 'trusted_proxies' : {
-                Request::setTrustedProxies($value);
+                Request::setTrustedProxies($value, Request::getTrustedHeaderSet());
+            }
+                break;
+            case 'trusted_header_set' : {
+                $headerSet = \current($value);
+                if (\is_string($headerSet) && \constant(Request::class . "::" . $headerSet) !== null) {
+                    $headerSet = \constant(Request::class . "::" . $headerSet);
+                }
+                Request::setTrustedProxies(Request::getTrustedProxies(), $headerSet);
             }
                 break;
             case 'service_providers': {

@@ -21,7 +21,11 @@ aws:
     prefix: aws/
     resource: "AwsTests/aws.routes.yml"
 
-
+httponly.test:
+    path: /httponly
+    schemes: http
+    defaults:
+        _controller: TestController::home
 
 domain.test.localhost:
     path: /domain

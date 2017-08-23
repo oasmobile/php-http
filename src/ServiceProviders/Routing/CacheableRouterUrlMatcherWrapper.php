@@ -64,7 +64,7 @@ class CacheableRouterUrlMatcherWrapper implements UrlMatcherInterface
         /** @var string[] $result */
         $result = $this->other->match($pathinfo);
         
-        if (strpos($result['_controller'], "::") !== false) {
+        if (\is_string($result['_controller']) && strpos($result['_controller'], "::") !== false) {
             // check if we should prepend controller namespace
             /** @noinspection PhpUnusedLocalVariableInspection */
             list($className, $methodName) = explode("::", $result['_controller'], 2);

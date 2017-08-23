@@ -10,6 +10,7 @@ namespace Oasis\Mlib\Http\ServiceProviders\Routing;
 
 use Oasis\Mlib\Http\SilexKernel;
 use Psr\Log\LoggerInterface;
+use Silex\Provider\Routing\RedirectableUrlMatcher;
 use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\Config\Resource\FileResource;
 use Symfony\Component\Routing\RequestContext;

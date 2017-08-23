@@ -14,6 +14,7 @@ use Oasis\Mlib\Http\SilexKernel;
 use Oasis\Mlib\Utils\DataProviderInterface;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
+use Silex\Provider\Routing\RedirectableUrlMatcher;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\Router;
@@ -153,6 +154,7 @@ class CacheableRouterProvider implements ServiceProviderInterface
                     'cache_dir'             => $cacheDir,
                     'matcher_cache_class'   => $matcherCacheClassname,
                     'generator_cache_class' => $generatorCacheClassname,
+                    'matcher_base_class'    => RedirectableUrlMatcher::class,
                     "debug"                 => $this->kernel['debug'],
                 ],
                 $requestContext

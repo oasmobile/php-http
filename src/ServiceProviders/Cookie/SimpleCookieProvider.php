@@ -54,9 +54,10 @@ class SimpleCookieProvider implements ServiceProviderInterface, BootableProvider
         }
         
         $app->addControllerInjectedArg($this->cookieContainer);
-        /** @noinspection PhpUnusedParameterInspection */
         $app->after(
-            function (Request $request, Response $response) {
+            function (/** @noinspection PhpUnusedParameterInspection */
+                Request $request,
+                Response $response) {
                 foreach ($this->cookieContainer->getCookies() as $cookie) {
                     $response->headers->setCookie($cookie);
                 }

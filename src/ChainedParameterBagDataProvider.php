@@ -54,6 +54,7 @@ class ChainedParameterBagDataProvider extends AbstractDataProvider
                     elseif (count($value) == 0) {
                         $value = null;
                     }
+                    /** @noinspection PhpStatementHasEmptyBodyInspection */
                     else {
                         // $value = $value;
                     }

@@ -2,3 +2,7 @@ aws.on_elb_forwarded:
     path: /
     defaults:
         _controller: \Oasis\Mlib\Http\Test\Helpers\Controllers\AwsController::onElbForwarded
+aws.report_ip:
+    path: /ip
+    defaults:
+        _controller: \Oasis\Mlib\Http\Test\Helpers\Controllers\AwsController::reportIp

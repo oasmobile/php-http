@@ -492,6 +492,15 @@ When trying to get the IP address of a request, we always need to filter certain
 
 The format of `trusted_proxies` is an array of IP addresses. In addition, you can use CIDR notations in place of IP addresses if you would like to trust a subnet of IP addresses.
 
+###### AWS ELB Trusted Proxies
+
+In case your server is behind an AWS ELB, you should trust the REMOTE_ADDR variable as a trusted proxy, as this is the ELB IP.
+
+To make things easier, there is a shortcut setting called `behind_elb`, which defaults to `false`. If this setting is set to `true`, the direct IP set in REMOTE_ADDR will be considered trusted, and ignored when getting IP address from request.
+
+###### AWS Cloudfront Trusted Proxies
+
+There is a setting named `trust_cloudfront_ips`, which defaults to `false`. If this parameter is set to `true`, all AWS cloudfront ips will also be considered as trusted proxies. As a result, getClientIp() on a request will return the first IP address reaching AWS CloudFront
 
 [Silex]: http://silex.sensiolabs.org/ "Silex Micro-Framework"
 [Symfony]: https://symfony.com/components "Symfony Components"

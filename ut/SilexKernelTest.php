@@ -1,5 +1,7 @@
 <?php
+
 use Oasis\Mlib\Http\SilexKernel;
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -10,7 +12,7 @@ use Symfony\Component\HttpFoundation\Response;
  * Date: 2016-03-08
  * Time: 11:01
  */
-class SilexKernelTest extends PHPUnit_Framework_TestCase
+class SilexKernelTest extends TestCase
 {
     public function testCreationWithOkConfig()
     {
@@ -20,7 +22,7 @@ class SilexKernelTest extends PHPUnit_Framework_TestCase
     public function testProductionMode()
     {
         $config = [
-            
+        
         ];
         $kernel = new SilexKernel($config, false);
         $kernel['resolver'];

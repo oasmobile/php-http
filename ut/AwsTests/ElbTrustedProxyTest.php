@@ -8,6 +8,7 @@
 
 namespace AwsTests;
 
+use GuzzleHttp\Client;
 use Silex\WebTestCase;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 
@@ -21,6 +22,54 @@ class ElbTrustedProxyTest extends WebTestCase
     public function createApplication()
     {
         return require __DIR__ . "/elb.php";
+    }
+    
+    public function testCloudfrontTrustedIps()
+    {
+        $guzzle   = new Client();
+        $response = $guzzle->request('GET', 'https://ip-ranges.amazonaws.com/ip-ranges.json');
+        $awsIps   = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
+        $this->assertArrayHasKey('prefixes', $awsIps);
+        foreach ($awsIps['prefixes'] as $info) {
+            if (\array_key_exists('ip_prefix', $info) && $info['service'] == "CLOUDFRONT") {
+                list($cfIp,) = \explode('/', $info['ip_prefix']);
+                $client = $this->createClient();
+                $client->request(
+                    'GET',
+                    '/aws/ip',
+                    [],
+                    [],
+                    [
+                        'REMOTE_ADDR'          => '1.2.2.2',
+                        'HTTP_X_FORWARDED_FOR' => '9.8.7.6, $cfIp',
+                    ]
+                );
+                $response = $client->getResponse();
+                $json     = \GuzzleHttp\json_decode($response->getContent(), true);
+                $this->assertEquals('9.8.7.6', $json['ip']);
+                //break;
+            }
+        }
+        
+    }
+    
+    public function testBehindElb()
+    {
+        $client = $this->createClient();
+        $client->request(
+            'GET',
+            '/aws/ip',
+            [],
+            [],
+            [
+                'REMOTE_ADDR'          => '1.2.2.2',
+                'HTTP_X_FORWARDED_FOR' => '9.7.8.9',
+            ]
+        );
+        $response = $client->getResponse();
+        $json     = \GuzzleHttp\json_decode($response->getContent(), true);
+        $this->assertEquals('9.7.8.9', $json['ip']);
+        
     }
     
     public function testHttpsForwardByElb()

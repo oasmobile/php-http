@@ -5,12 +5,14 @@
  * Date: 2016-03-08
  * Time: 17:09
  */
+
 use Oasis\Mlib\Http\ErrorHandlers\JsonErrorHandler;
 use Oasis\Mlib\Http\SilexKernel;
 use Oasis\Mlib\Http\Views\JsonViewHandler;
 
 $config              = [
-    'routing' => [
+    'cache_dir'            => __DIR__ . '/cache',
+    'routing'              => [
         'path'       => __DIR__ . "/routes.yml",
         'namespaces' => [
             'Oasis\\Mlib\\Http\\Test\\Helpers\\Controllers\\',

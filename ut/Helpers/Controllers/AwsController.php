@@ -21,4 +21,10 @@ class AwsController
             'https' => $request->isSecure(),
         ];
     }
+    
+    public function reportIp(Request $request) {
+        return [
+            'ip' => $request->getClientIp()
+        ];
+    }
 }

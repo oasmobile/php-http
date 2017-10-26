@@ -25,6 +25,8 @@ class HttpConfiguration implements ConfigurationInterface
         $http    = $builder->root('http');
         {
             $http->children()->scalarNode('cache_dir')->defaultValue(null);
+            $http->children()->booleanNode('behind_elb')->defaultValue(false);
+            $http->children()->booleanNode('trust_cloudfront_ips')->defaultValue(false);
             $http->children()->variableNode('trusted_proxies');
             $http->children()->variableNode('trusted_header_set');
             $http->children()->variableNode('routing');

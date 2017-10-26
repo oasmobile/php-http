@@ -459,68 +459,7 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
             // registering security provider without config will make twig provider fail
             $this->register(new SimpleSecurityProvider());
         }
-        if ($this->httpDataProvider->getMandatory(
-            'trust_cloudfront_ips',
-            DataProviderInterface::BOOL_TYPE
-        )) {
-            $this->setCloudfrontTrustedProxies();
-        }
         parent::boot();
-    }
-    
-    protected function setCloudfrontTrustedProxies()
-    {
-        $awsIps = [];
-        if ($this->cacheDir) {
-            $cacheFilename = $this->cacheDir . "/aws.ips";
-            if (\file_exists($cacheFilename)) {
-                $content = \file_get_contents($cacheFilename);
-                $awsIps  = \GuzzleHttp\json_decode($content, true);
-                if (isset($awsIps['expire_at']) && time() > $awsIps['expire_at']) {
-                    $awsIps = [];
-                }
-            }
-        }
-        if (!\array_key_exists('prefixes', $awsIps)) {
-            $guzzleClient = new Client(
-                [
-                    'base_uri' => 'https://ip-ranges.amazonaws.com/',
-                    'timeout'  => 5.0,
-                ]
-            );
-            $awsResponse  = $guzzleClient->request('GET', 'ip-ranges.json');
-            if ($awsResponse->getStatusCode() != Response::HTTP_OK) {
-                \merror(
-                    "Cannot get ip-ranges from aws server, response = %s %s, %s",
-                    $awsResponse->getStatusCode(),
-                    $awsResponse->getReasonPhrase(),
-                    $awsResponse->getBody()->getContents()
-                );
-            }
-            else {
-                $content = $awsResponse->getBody()->getContents();
-                $awsIps  = \GuzzleHttp\json_decode($content, true);
-                if ($this->cacheDir && \is_writable($this->cacheDir)) {
-                    $cacheFilename       = $this->cacheDir . "/aws.ips";
-                    $awsIps['expire_at'] = time() + 86400;
-                    \file_put_contents(
-                        $cacheFilename,
-                        \GuzzleHttp\json_encode($awsIps, \JSON_PRETTY_PRINT),
-                        \LOCK_EX
-                    );
-                }
-            }
-        }
-        
-        if (\is_array($awsIps) && \array_key_exists('prefixes', $awsIps)) {
-            $trustedCloudfrontIps = [];
-            foreach ($awsIps['prefixes'] as $info) {
-                if (\array_key_exists('ip_prefix', $info) && $info['service'] == "CLOUDFRONT") {
-                    $trustedCloudfrontIps[] = $info['ip_prefix']; // ipv4 only
-                }
-            }
-            Request::setTrustedProxies(\array_merge(Request::getTrustedProxies(), $trustedCloudfrontIps));
-        }
     }
     
     /**
@@ -532,6 +471,27 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
     public function error($callback, $priority = -8)
     {
         $this->on(KernelEvents::EXCEPTION, new ExtendedExceptionListnerWrapper($this, $callback), $priority);
+    }
+    
+    public function handle(Request $request, $type = HttpKernelInterface::MASTER_REQUEST, $catch = true)
+    {
+        if ($this->httpDataProvider->getMandatory(
+            'behind_elb',
+            DataProviderInterface::BOOL_TYPE
+        )) {
+            $trustedProxies   = Request::getTrustedProxies();
+            $trustedProxies[] = $request->server->get('REMOTE_ADDR');
+            Request::setTrustedProxies($trustedProxies);
+        }
+        
+        if ($this->httpDataProvider->getMandatory(
+            'trust_cloudfront_ips',
+            DataProviderInterface::BOOL_TYPE
+        )) {
+            $this->setCloudfrontTrustedProxies();
+        }
+        
+        return parent::handle($request, $type, $catch);
     }
     
     /**
@@ -585,20 +545,6 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
         if ($endTime - $startTime > $this['slow_request_threshold'] / 1000) {
             call_user_func($this['slow_request_handler'], $request, $startTime, $responseSentTime, $endTime);
         }
-    }
-    
-    public function handle(Request $request, $type = HttpKernelInterface::MASTER_REQUEST, $catch = true)
-    {
-        if ($this->httpDataProvider->getMandatory(
-            'behind_elb',
-            DataProviderInterface::BOOL_TYPE
-        )) {
-            $trustedProxies   = Request::getTrustedProxies();
-            $trustedProxies[] = $request->server->get('REMOTE_ADDR');
-            Request::setTrustedProxies($trustedProxies);
-        }
-        
-        return parent::handle($request, $type, $catch);
     }
     
     public function getCacheDirectories()
@@ -672,6 +618,61 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
         }
         else {
             return null;
+        }
+    }
+    
+    protected function setCloudfrontTrustedProxies()
+    {
+        $awsIps = [];
+        if ($this->cacheDir) {
+            $cacheFilename = $this->cacheDir . "/aws.ips";
+            if (\file_exists($cacheFilename)) {
+                $content = \file_get_contents($cacheFilename);
+                $awsIps  = \GuzzleHttp\json_decode($content, true);
+                if (isset($awsIps['expire_at']) && time() > $awsIps['expire_at']) {
+                    $awsIps = [];
+                }
+            }
+        }
+        if (!\array_key_exists('prefixes', $awsIps)) {
+            $guzzleClient = new Client(
+                [
+                    'base_uri' => 'https://ip-ranges.amazonaws.com/',
+                    'timeout'  => 5.0,
+                ]
+            );
+            $awsResponse  = $guzzleClient->request('GET', 'ip-ranges.json');
+            if ($awsResponse->getStatusCode() != Response::HTTP_OK) {
+                \merror(
+                    "Cannot get ip-ranges from aws server, response = %s %s, %s",
+                    $awsResponse->getStatusCode(),
+                    $awsResponse->getReasonPhrase(),
+                    $awsResponse->getBody()->getContents()
+                );
+            }
+            else {
+                $content = $awsResponse->getBody()->getContents();
+                $awsIps  = \GuzzleHttp\json_decode($content, true);
+                if ($this->cacheDir && \is_writable($this->cacheDir)) {
+                    $cacheFilename       = $this->cacheDir . "/aws.ips";
+                    $awsIps['expire_at'] = time() + 86400;
+                    \file_put_contents(
+                        $cacheFilename,
+                        \GuzzleHttp\json_encode($awsIps, \JSON_PRETTY_PRINT),
+                        \LOCK_EX
+                    );
+                }
+            }
+        }
+        
+        if (\is_array($awsIps) && \array_key_exists('prefixes', $awsIps)) {
+            $trustedCloudfrontIps = [];
+            foreach ($awsIps['prefixes'] as $info) {
+                if (\array_key_exists('ip_prefix', $info) && $info['service'] == "CLOUDFRONT") {
+                    $trustedCloudfrontIps[] = $info['ip_prefix']; // ipv4 only
+                }
+            }
+            Request::setTrustedProxies(\array_merge(Request::getTrustedProxies(), $trustedCloudfrontIps));
         }
     }
     

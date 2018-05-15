@@ -6,6 +6,7 @@
  * Time: 16:53
  */
 use Oasis\Mlib\Http\ErrorHandlers\WrappedExceptionInfo;
+use Symfony\Component\HttpFoundation\Request;
 
 /** @noinspection PhpIncludeInspection */
 require_once __DIR__ . "/bootstrap.php";
@@ -15,3 +16,6 @@ var_dump($hashed);
 
 var_dump(password_verify('1234', $hashed));
 
+
+
+Request::setTrustedProxies(array_merge(Request::getTrustedProxies(), [$_SERVER['REMOTE_ADDR']]));

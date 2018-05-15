@@ -24,7 +24,10 @@ class CrossOriginResourceSharingAdvancedTest extends WebTestCase
     {
         return require __DIR__ . '/app.cors-advanced.php';
     }
-
+    
+    /**
+     * @runInSeparateProcess
+     */
     public function testPreflightWhenAccessIsDeniedRoute()
     {
         $origin   = 'http://baidu.com';

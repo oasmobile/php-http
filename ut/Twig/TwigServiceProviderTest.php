@@ -24,6 +24,9 @@ class TwigServiceProviderTest extends WebTestCase
         return require __DIR__ . "/app.twig.php";
     }
     
+    /**
+     * @runInSeparateProcess
+     */
     public function testBasicTemplate()
     {
         $client = $this->createClient();

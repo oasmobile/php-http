@@ -65,7 +65,7 @@ class DefaultHtmlRenderer implements ResponseRendererInterface
                 $templateName = sprintf("%d.twig", $exceptionInfo->getCode());
                 
                 $response = new Response(
-                    $twig->render($templateName, $exceptionInfo->__toArray($silexKernel['debug']))
+                    $twig->render($templateName, $exceptionInfo->toArray($silexKernel['debug']))
                 );
             } catch (\Twig_Error_Loader $e) {
                 $response = $this->renderOnSuccess($exceptionInfo->jsonSerialize(), $silexKernel);

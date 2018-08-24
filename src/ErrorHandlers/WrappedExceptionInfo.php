@@ -21,6 +21,7 @@ class WrappedExceptionInfo implements \JsonSerializable
     /** @var  int */
     protected $originalCode;
     protected $attributes = [];
+
     
     public function __construct(\Exception $exception, $httpStatusCode)
     {
@@ -32,7 +33,7 @@ class WrappedExceptionInfo implements \JsonSerializable
         }
     }
     
-    public function __toArray($rich = false)
+    public function toArray($rich = false)
     {
         $ret = [
             'code'      => $this->getCode(),
@@ -56,7 +57,7 @@ class WrappedExceptionInfo implements \JsonSerializable
      */
     function jsonSerialize()
     {
-        return $this->__toArray();
+        return $this->toArray();
     }
     
     public function getAttribute($key)

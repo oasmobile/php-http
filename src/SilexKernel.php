@@ -488,7 +488,7 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
         )) {
             $trustedProxies   = Request::getTrustedProxies();
             $trustedProxies[] = $request->server->get('REMOTE_ADDR');
-            Request::setTrustedProxies($trustedProxies);
+            Request::setTrustedProxies($trustedProxies,Request::HEADER_X_FORWARDED_FOR);
         }
         
         if ($this->httpDataProvider->getMandatory(

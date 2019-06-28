@@ -12,8 +12,8 @@ use Oasis\Mlib\Http\ErrorHandlers\JsonErrorHandler;
 use Oasis\Mlib\Http\SilexKernel;
 use Oasis\Mlib\Http\Test\Helpers\Security\TestApiUserProvider;
 use Oasis\Mlib\Http\Test\Helpers\Security\TestAuthenticationPolicy;
+use Oasis\Mlib\Http\Test\Security\SessionServiceProvider;
 use Oasis\Mlib\Http\Views\JsonViewHandler;
-use Silex\Provider\SessionServiceProvider;
 use Symfony\Component\HttpFoundation\RequestMatcher;
 
 $users = [

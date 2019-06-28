@@ -488,7 +488,7 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
         )) {
             $trustedProxies   = Request::getTrustedProxies();
             $trustedProxies[] = $request->server->get('REMOTE_ADDR');
-            Request::setTrustedProxies($trustedProxies,Request::HEADER_X_FORWARDED_FOR);
+            Request::setTrustedProxies($trustedProxies, Request::HEADER_X_FORWARDED_ALL);
         }
         
         if ($this->httpDataProvider->getMandatory(
@@ -690,7 +690,8 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
                         $trustedCloudfrontIps[] = $info['ip_prefix']; // ipv4 only
                     }
                 }
-                Request::setTrustedProxies(\array_merge(Request::getTrustedProxies(), $trustedCloudfrontIps));
+                Request::setTrustedProxies(\array_merge(Request::getTrustedProxies(), $trustedCloudfrontIps),
+                                           Request::HEADER_X_FORWARDED_ALL);
             }
             
         } catch (\Throwable $throwable) {

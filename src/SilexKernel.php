@@ -110,6 +110,7 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
         $this['resolver_auto_injections'] = function () {
             return $this->controllerInjectedArgs;
         };
+        /** @noinspection PhpUnusedParameterInspection */
         $this['argument_value_resolvers'] = $this->extend(
             'argument_value_resolvers',
             function (array $resolvers,

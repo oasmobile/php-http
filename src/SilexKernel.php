@@ -230,107 +230,114 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
             $value = [$value];
         }
         switch ($name) {
-            case 'trusted_proxies' : {
-                Request::setTrustedProxies(
-                    \array_merge(Request::getTrustedProxies(), $value),
-                    Request::getTrustedHeaderSet()
-                );
-            }
-                break;
-            case 'trusted_header_set' : {
-                $headerSet = \current($value);
-                if (\is_string($headerSet) && \constant(Request::class . "::" . $headerSet) !== null) {
-                    $headerSet = \constant(Request::class . "::" . $headerSet);
+            case 'trusted_proxies' :
+                {
+                    Request::setTrustedProxies(
+                        \array_merge(Request::getTrustedProxies(), $value),
+                        Request::getTrustedHeaderSet()
+                    );
                 }
-                Request::setTrustedProxies(Request::getTrustedProxies(), $headerSet);
-            }
                 break;
-            case 'service_providers': {
-                if (sizeof(
-                        $providers = array_filter(
-                            $value,
-                            function ($v) {
-                                return ($v instanceof ServiceProviderInterface
-                                        || (is_array($v)
-                                            && sizeof($v) == 2
-                                            && $v[0] instanceof ServiceProviderInterface
-                                        )
-                                );
-                            }
-                        )
-                    ) != sizeof($value)
-                ) {
-                    throw new InvalidConfigurationException("$name must be an array of ServiceProvider");
-                };
-                foreach ($providers as $provider) {
-                    if ($provider instanceof ServiceProviderInterface) {
-                        $this->register($provider);
+            case 'trusted_header_set' :
+                {
+                    $headerSet = \current($value);
+                    if (\is_string($headerSet) && \constant(Request::class . "::" . $headerSet) !== null) {
+                        $headerSet = \constant(Request::class . "::" . $headerSet);
                     }
-                    else {
-                        $this->register($provider[0], $provider[1]);
+                    Request::setTrustedProxies(Request::getTrustedProxies(), $headerSet);
+                }
+                break;
+            case 'service_providers':
+                {
+                    if (sizeof(
+                            $providers = array_filter(
+                                $value,
+                                function ($v) {
+                                    return ($v instanceof ServiceProviderInterface
+                                            || (is_array($v)
+                                                && sizeof($v) == 2
+                                                && $v[0] instanceof ServiceProviderInterface
+                                            )
+                                    );
+                                }
+                            )
+                        ) != sizeof($value)
+                    ) {
+                        throw new InvalidConfigurationException("$name must be an array of ServiceProvider");
+                    };
+                    foreach ($providers as $provider) {
+                        if ($provider instanceof ServiceProviderInterface) {
+                            $this->register($provider);
+                        }
+                        else {
+                            $this->register($provider[0], $provider[1]);
+                        }
                     }
                 }
-            }
                 break;
-            case 'middlewares': {
-                if (sizeof(
-                        $middlewares = array_filter(
-                            $value,
-                            function ($v) {
-                                return $v instanceof MiddlewareInterface;
-                            }
-                        )
-                    ) != sizeof($value)
-                ) {
-                    throw new InvalidConfigurationException("$name must be an array of Middleware");
-                };
-                /** @var MiddlewareInterface $provider */
-                foreach ($middlewares as $middleware) {
-                    $this->addMiddleware($middleware);
+            case 'middlewares':
+                {
+                    if (sizeof(
+                            $middlewares = array_filter(
+                                $value,
+                                function ($v) {
+                                    return $v instanceof MiddlewareInterface;
+                                }
+                            )
+                        ) != sizeof($value)
+                    ) {
+                        throw new InvalidConfigurationException("$name must be an array of Middleware");
+                    };
+                    /** @var MiddlewareInterface $provider */
+                    foreach ($middlewares as $middleware) {
+                        $this->addMiddleware($middleware);
+                    }
                 }
-            }
                 break;
-            case 'view_handlers': {
-                if (sizeof(
-                        $viewHandlers = array_filter(
-                            $value,
-                            function ($v) {
-                                return is_callable($v);
-                            }
-                        )
-                    ) != sizeof($value)
-                ) {
-                    throw new InvalidConfigurationException("$name must be an array of Callable");
-                };
-                /** @var callable $viewHandler */
-                foreach ($viewHandlers as $viewHandler) {
-                    $this->view($viewHandler);
+            case 'view_handlers':
+                {
+                    if (sizeof(
+                            $viewHandlers = array_filter(
+                                $value,
+                                function ($v) {
+                                    return is_callable($v);
+                                }
+                            )
+                        ) != sizeof($value)
+                    ) {
+                        throw new InvalidConfigurationException("$name must be an array of Callable");
+                    };
+                    /** @var callable $viewHandler */
+                    foreach ($viewHandlers as $viewHandler) {
+                        $this->view($viewHandler);
+                    }
                 }
-            }
                 break;
-            case 'error_handlers': {
-                if (sizeof(
-                        $errorHandlers = array_filter(
-                            $value,
-                            function ($v) {
-                                return is_callable($v);
-                            }
-                        )
-                    ) != sizeof($value)
-                ) {
-                    throw new InvalidConfigurationException("$name must be an array of Callable");
-                };
-                /** @var callable $errorHandler */
-                foreach ($errorHandlers as $errorHandler) {
-                    $this->error($errorHandler);
+            case 'error_handlers':
+                {
+                    if (sizeof(
+                            $errorHandlers = array_filter(
+                                $value,
+                                function ($v) {
+                                    return is_callable($v);
+                                }
+                            )
+                        ) != sizeof($value)
+                    ) {
+                        throw new InvalidConfigurationException("$name must be an array of Callable");
+                    };
+                    /** @var callable $errorHandler */
+                    foreach ($errorHandlers as $errorHandler) {
+                        $this->error($errorHandler);
+                    }
                 }
-            }
                 break;
-            case 'injected_args': {
-                foreach ($value as $arg) {
-                    $this->addControllerInjectedArg($arg);
+            case 'injected_args':
+                {
+                    foreach ($value as $arg) {
+                        $this->addControllerInjectedArg($arg);
+                    }
                 }
-            }
                 break;
             default:
                 throw new \LogicException("Invalid property $name set to SilexKernel");
@@ -623,56 +630,71 @@ class SilexKernel extends SilexApp implements AuthorizationCheckerInterface
     
     protected function setCloudfrontTrustedProxies()
     {
-        $awsIps = [];
-        if ($this->cacheDir) {
-            $cacheFilename = $this->cacheDir . "/aws.ips";
-            if (\file_exists($cacheFilename)) {
-                $content = \file_get_contents($cacheFilename);
-                $awsIps  = \GuzzleHttp\json_decode($content, true);
-                if (isset($awsIps['expire_at']) && time() > $awsIps['expire_at']) {
-                    $awsIps = [];
+        try {
+            $awsIps = [];
+            if ($this->cacheDir) {
+                $cacheFilename = $this->cacheDir . "/aws.ips";
+                if (\file_exists($cacheFilename)) {
+                    $content = \file_get_contents($cacheFilename);
+                    try {
+                        $awsIps = \GuzzleHttp\json_decode($content, true);
+                        if (isset($awsIps['expire_at']) && time() > $awsIps['expire_at']) {
+                            $awsIps = [];
+                        }
+                    } catch (\Throwable $throwable) {
+                        \merror(
+                            "Error while processing cached ip file, exception = %s, file content = %s",
+                            $throwable->getMessage(),
+                            $content
+                        );
+                        $awsIps = [];
+                    }
                 }
             }
-        }
-        if (!\array_key_exists('prefixes', $awsIps)) {
-            $guzzleClient = new Client(
-                [
-                    'base_uri' => 'https://ip-ranges.amazonaws.com/',
-                    'timeout'  => 5.0,
-                ]
-            );
-            $awsResponse  = $guzzleClient->request('GET', 'ip-ranges.json');
-            if ($awsResponse->getStatusCode() != Response::HTTP_OK) {
-                \merror(
-                    "Cannot get ip-ranges from aws server, response = %s %s, %s",
-                    $awsResponse->getStatusCode(),
-                    $awsResponse->getReasonPhrase(),
-                    $awsResponse->getBody()->getContents()
+    
+            if (!\array_key_exists('prefixes', $awsIps)) {
+                $guzzleClient = new Client(
+                    [
+                        'base_uri' => 'https://ip-ranges.amazonaws.com/',
+                        'timeout'  => 5.0,
+                    ]
                 );
-            }
-            else {
-                $content = $awsResponse->getBody()->getContents();
-                $awsIps  = \GuzzleHttp\json_decode($content, true);
-                if ($this->cacheDir && \is_writable($this->cacheDir)) {
-                    $cacheFilename       = $this->cacheDir . "/aws.ips";
-                    $awsIps['expire_at'] = time() + 86400;
-                    \file_put_contents(
-                        $cacheFilename,
-                        \GuzzleHttp\json_encode($awsIps, \JSON_PRETTY_PRINT),
-                        \LOCK_EX
+                $awsResponse  = $guzzleClient->request('GET', 'ip-ranges.json');
+                if ($awsResponse->getStatusCode() != Response::HTTP_OK) {
+                    \merror(
+                        "Cannot get ip-ranges from aws server, response = %s %s, %s",
+                        $awsResponse->getStatusCode(),
+                        $awsResponse->getReasonPhrase(),
+                        $awsResponse->getBody()->getContents()
                     );
                 }
-            }
-        }
-        
-        if (\is_array($awsIps) && \array_key_exists('prefixes', $awsIps)) {
-            $trustedCloudfrontIps = [];
-            foreach ($awsIps['prefixes'] as $info) {
-                if (\array_key_exists('ip_prefix', $info) && $info['service'] == "CLOUDFRONT") {
-                    $trustedCloudfrontIps[] = $info['ip_prefix']; // ipv4 only
+                else {
+                    $content = $awsResponse->getBody()->getContents();
+                    $awsIps  = \GuzzleHttp\json_decode($content, true);
+                    if ($this->cacheDir && \is_writable($this->cacheDir)) {
+                        $cacheFilename       = $this->cacheDir . "/aws.ips";
+                        $awsIps['expire_at'] = time() + 86400;
+                        \file_put_contents(
+                            $cacheFilename,
+                            \GuzzleHttp\json_encode($awsIps, \JSON_PRETTY_PRINT),
+                            \LOCK_EX
+                        );
+                    }
                 }
             }
-            Request::setTrustedProxies(\array_merge(Request::getTrustedProxies(), $trustedCloudfrontIps));
+    
+            if (\is_array($awsIps) && \array_key_exists('prefixes', $awsIps)) {
+                $trustedCloudfrontIps = [];
+                foreach ($awsIps['prefixes'] as $info) {
+                    if (\array_key_exists('ip_prefix', $info) && $info['service'] == "CLOUDFRONT") {
+                        $trustedCloudfrontIps[] = $info['ip_prefix']; // ipv4 only
+                    }
+                }
+                Request::setTrustedProxies(\array_merge(Request::getTrustedProxies(), $trustedCloudfrontIps));
+            }
+            
+        } catch (\Throwable $throwable) {
+            \merror("Error while setting aws trusted proxies, exception = %s", $throwable->getMessage());
         }
     }
     

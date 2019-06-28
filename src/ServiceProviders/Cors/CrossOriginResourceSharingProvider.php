@@ -16,6 +16,7 @@ use Silex\Api\BootableProviderInterface;
 use Silex\Application;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 
 class CrossOriginResourceSharingProvider implements ServiceProviderInterface, BootableProviderInterface
@@ -149,14 +150,28 @@ class CrossOriginResourceSharingProvider implements ServiceProviderInterface, Bo
     //        return null;
     //    }
     //}
-    
-    public function onMethodNotAllowedHttp(MethodNotAllowedHttpException $e)
+
+    /**
+     * @param \Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException $e
+     * @param                                                                       $request
+     * @param                                                                       $code
+     * @param \Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent      $event
+     *
+     * @return null|\Oasis\Mlib\Http\Views\PrefilightResponse
+     */
+    public function onMethodNotAllowedHttp(MethodNotAllowedHttpException $e,
+        /** @noinspection PhpUnusedParameterInspection */
+                                           $request,
+        /** @noinspection PhpUnusedParameterInspection */
+                                           $code,
+                                           GetResponseForExceptionEvent $event)
     {
         if ($this->preFlightResponse) {
             foreach (explode(', ', $e->getHeaders()['Allow']) as $method) {
                 $this->preFlightResponse->addAllowedMethod($method);
             }
-            
+
+            $event->allowCustomResponseCode();
             return $this->preFlightResponse;
         }
         else {

@@ -11,7 +11,7 @@ use Oasis\Mlib\Http\SilexKernel;
 use Oasis\Mlib\Http\Test\Helpers\Security\TestAccessRule;
 use Oasis\Mlib\Http\Test\Helpers\Security\TestApiUserProvider;
 use Oasis\Mlib\Http\Test\Helpers\Security\TestAuthenticationPolicy;
-use Silex\Provider\SessionServiceProvider;
+use Oasis\Mlib\Http\Test\Security\SessionServiceProvider;
 use Symfony\Component\HttpFoundation\RequestMatcher;
 
 $users = [

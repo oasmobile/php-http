@@ -1373,16 +1373,16 @@
         },
         {
             "name": "symfony/http-foundation",
-            "version": "v4.2.7",
+            "version": "v4.2.12",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/http-foundation.git",
-                "reference": "6ebbe61f48069033225c9d3fa7eb5ed116d766d6"
+                "reference": "2ae778ff4a1f8baba7724db1ca977ada3b796749"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/http-foundation/zipball/6ebbe61f48069033225c9d3fa7eb5ed116d766d6",
-                "reference": "6ebbe61f48069033225c9d3fa7eb5ed116d766d6",
+                "url": "https://api.github.com/repos/symfony/http-foundation/zipball/2ae778ff4a1f8baba7724db1ca977ada3b796749",
+                "reference": "2ae778ff4a1f8baba7724db1ca977ada3b796749",
                 "shasum": ""
             },
             "require": {
@@ -1423,7 +1423,7 @@
             ],
             "description": "Symfony HttpFoundation Component",
             "homepage": "https://symfony.com",
-            "time": "2019-04-17T14:56:00+00:00"
+            "time": "2019-11-11T12:54:47+00:00"
         },
         {
             "name": "symfony/http-kernel",
@@ -1574,16 +1574,16 @@
         },
         {
             "name": "symfony/intl",
-            "version": "v4.2.7",
+            "version": "v4.4.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/intl.git",
-                "reference": "6361d2168db3ef9203eeb565f05c1108dd04f796"
+                "reference": "727fed5372915b5ea5e8177070f5e7e547063f24"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/intl/zipball/6361d2168db3ef9203eeb565f05c1108dd04f796",
-                "reference": "6361d2168db3ef9203eeb565f05c1108dd04f796",
+                "url": "https://api.github.com/repos/symfony/intl/zipball/727fed5372915b5ea5e8177070f5e7e547063f24",
+                "reference": "727fed5372915b5ea5e8177070f5e7e547063f24",
                 "shasum": ""
             },
             "require": {
@@ -1591,7 +1591,7 @@
                 "symfony/polyfill-intl-icu": "~1.0"
             },
             "require-dev": {
-                "symfony/filesystem": "~3.4|~4.0"
+                "symfony/filesystem": "^3.4|^4.0|^5.0"
             },
             "suggest": {
                 "ext-intl": "to use the component with locales other than \"en\""
@@ -1599,7 +1599,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "4.2-dev"
+                    "dev-master": "4.4-dev"
                 }
             },
             "autoload": {
@@ -1645,27 +1645,27 @@
                 "l10n",
                 "localization"
             ],
-            "time": "2019-04-01T07:32:59+00:00"
+            "time": "2019-11-26T23:16:41+00:00"
         },
         {
             "name": "symfony/polyfill",
-            "version": "v1.11.0",
+            "version": "v1.13.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill.git",
-                "reference": "0d4b1ade474991fb1d629e45f94b4c49cd58c4d7"
+                "reference": "166bf89d41b02a269701e7a315db335711149d4d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill/zipball/0d4b1ade474991fb1d629e45f94b4c49cd58c4d7",
-                "reference": "0d4b1ade474991fb1d629e45f94b4c49cd58c4d7",
+                "url": "https://api.github.com/repos/symfony/polyfill/zipball/166bf89d41b02a269701e7a315db335711149d4d",
+                "reference": "166bf89d41b02a269701e7a315db335711149d4d",
                 "shasum": ""
             },
             "require": {
                 "ircmaxell/password-compat": "~1.0",
                 "paragonie/random_compat": "~1.0|~2.0|~9.99",
                 "php": ">=5.3.3",
-                "symfony/intl": "~2.3|~3.0|~4.0"
+                "symfony/intl": "~2.3|~3.0|~4.0|~5.0"
             },
             "replace": {
                 "symfony/polyfill-apcu": "self.version",
@@ -1684,7 +1684,9 @@
                 "symfony/polyfill-php71": "self.version",
                 "symfony/polyfill-php72": "self.version",
                 "symfony/polyfill-php73": "self.version",
+                "symfony/polyfill-php74": "self.version",
                 "symfony/polyfill-util": "self.version",
+                "symfony/polyfill-uuid": "self.version",
                 "symfony/polyfill-xml": "self.version"
             },
             "require-dev": {
@@ -1693,7 +1695,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.11-dev"
+                    "dev-master": "1.13-dev"
                 }
             },
             "autoload": {
@@ -1710,6 +1712,8 @@
                     "src/Php71/bootstrap.php",
                     "src/Php72/bootstrap.php",
                     "src/Php73/bootstrap.php",
+                    "src/Php74/bootstrap.php",
+                    "src/Uuid/bootstrap.php",
                     "src/Iconv/bootstrap.php",
                     "src/Intl/Grapheme/bootstrap.php",
                     "src/Intl/Idn/bootstrap.php",
@@ -1748,7 +1752,7 @@
                 "polyfill",
                 "shim"
             ],
-            "time": "2019-03-22T08:05:47+00:00"
+            "time": "2019-11-30T09:00:48+00:00"
         },
         {
             "name": "symfony/property-access",

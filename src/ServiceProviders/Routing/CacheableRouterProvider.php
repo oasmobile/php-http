@@ -152,9 +152,9 @@ class CacheableRouterProvider implements ServiceProviderInterface
                 $routerFile,
                 [
                     'cache_dir'             => $cacheDir,
-                    'matcher_cache_class'   => $matcherCacheClassname,
-                    'generator_cache_class' => $generatorCacheClassname,
-                    'matcher_base_class'    => RedirectableUrlMatcher::class,
+                    //'matcher_cache_class'   => $matcherCacheClassname,
+                    //'generator_cache_class' => $generatorCacheClassname,
+                    //'matcher_base_class'    => RedirectableUrlMatcher::class,
                     "debug"                 => $this->kernel['debug'],
                 ],
                 $requestContext

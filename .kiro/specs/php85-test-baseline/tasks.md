@@ -84,16 +84,16 @@
   - [x] 10.2 分析 `src/ServiceProviders/Cors/` 所有未覆盖分支，在 `ut/Cors/CrossOriginResourceSharingTest.php` 和 `ut/Cors/CrossOriginResourceSharingAdvancedTest.php` 中补充 test method：多策略优先级、credentials、headers_exposed、非 preflight（Ref: Requirement 12, AC 2）
   - [x] 10.3 Checkpoint: 运行 `vendor/bin/phpunit --testsuite all`（含新增 + 现有），全部通过且无 warning，commit
 
-- [-] 11. 现有测试场景补充（R12）— Security + Twig + Aws
+- [x] 11. 现有测试场景补充（R12）— Security + Twig + Aws
   - [x] 11.1 分析 `src/ServiceProviders/Security/` 所有未覆盖分支，在 `ut/Security/SecurityServiceProviderTest.php` 中补充 test method：认证失败路径、AccessRule 边界、Role Hierarchy 多层（Ref: Requirement 12, AC 3）
   - [x] 11.2 分析 `src/ServiceProviders/Twig/` 所有未覆盖分支，在 `ut/Twig/TwigServiceProviderTest.php` 中补充 test method：globals 变体、asset_base、无 cache_dir（Ref: Requirement 12, AC 4）
   - [x] 11.3 分析 AWS 相关代码所有未覆盖分支，在 `ut/AwsTests/ElbTrustedProxyTest.php` 中补充 test method：behind_elb、trust_cloudfront_ips、两者同时（Ref: Requirement 12, AC 5）
-  - [-] 11.4 Checkpoint: 运行 `vendor/bin/phpunit`（全量），全部通过且无 warning，commit
+  - [x] 11.4 Checkpoint: 运行 `vendor/bin/phpunit`（全量），全部通过且无 warning，commit
 
-- [ ] 12. 手工测试
-  - [ ] 12.1 编排手工测试脚本，验证测试套件的完整性：确认所有新增 suite 可独立运行、`all` suite 包含所有测试、各 suite 无遗漏文件
-  - [ ] 12.2 手工验证集成测试的 app 配置文件与现有 `app.php`、`app.security.php` 等不冲突
-  - [ ] 12.3 Checkpoint: 手工测试全部通过，记录测试结果，commit
+- [-] 12. 手工测试
+  - [x] 12.1 编排手工测试脚本，验证测试套件的完整性：确认所有新增 suite 可独立运行、`all` suite 包含所有测试、各 suite 无遗漏文件
+  - [x] 12.2 手工验证集成测试的 app 配置文件与现有 `app.php`、`app.security.php` 等不冲突
+  - [-] 12.3 Checkpoint: 手工测试全部通过，记录测试结果，commit
 
 - [ ] 13. Code Review
   - [ ] 13.1 委托 `code-reviewer` sub-agent 对当前分支的所有变更进行 code review

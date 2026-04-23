@@ -50,21 +50,21 @@
   - [x] 5.8 将 7 个测试文件注册到 `phpunit.xml` 的 `routing` suite 和 `all` suite（Ref: Requirement 13, AC 1–2）
   - [x] 5.9 Checkpoint: 运行 `vendor/bin/phpunit --testsuite routing`，全部通过且无 warning，commit
 
-- [-] 6. P1 — Cookie + Middlewares + NullEntryPoint 单元测试（R5, R6, R7）
+- [x] 6. P1 — Cookie + Middlewares + NullEntryPoint 单元测试（R5, R6, R7）
   - [x] 6.1 创建 `ut/Cookie/ResponseCookieContainerTest.php`：addCookie/getCookies、多次累积、初始空数组（Ref: Requirement 5, AC 1）
   - [x] 6.2 创建 `ut/Cookie/SimpleCookieProviderTest.php`：非 SilexKernel 抛 LogicException、boot 注册 after middleware（Ref: Requirement 5, AC 2）
   - [x] 6.3 创建 `ut/Middlewares/AbstractMiddlewareTest.php`，使用 `TestMiddleware` Test_Double：`onlyForMasterRequest()` 默认 true、`getAfterPriority()` 默认 LATE_EVENT、`getBeforePriority()` 默认 EARLY_EVENT（Ref: Requirement 6, AC 1）
   - [x] 6.4 创建 `ut/Security/NullEntryPointTest.php`：传入 AuthenticationException 抛 AccessDeniedHttpException（含 message）、不传异常抛 AccessDeniedHttpException（'Access Denied'）（Ref: Requirement 7, AC 1）
   - [x] 6.5 将 4 个测试文件注册到 `phpunit.xml` 对应 suite（`cookie`、`middlewares`、`security`）和 `all` suite（Ref: Requirement 13, AC 1–2）
-  - [-] 6.6 Checkpoint: 运行 `vendor/bin/phpunit --testsuite cookie --testsuite middlewares`，全部通过且无 warning；运行 `vendor/bin/phpunit --testsuite security` 确认新增 + 现有测试全部通过，commit
+  - [x] 6.6 Checkpoint: 运行 `vendor/bin/phpunit --testsuite cookie --testsuite middlewares`，全部通过且无 warning；运行 `vendor/bin/phpunit --testsuite security` 确认新增 + 现有测试全部通过，commit
 
-- [ ] 7. P2 — 独立模块单元测试（R8）
-  - [ ] 7.1 创建 `ut/Misc/ExtendedArgumentValueResolverTest.php`：构造非对象抛异常、`supports()` 精确匹配/instanceof 匹配/不存在类/无匹配、`resolve()` 精确/instanceof yield（Ref: Requirement 8, AC 1）
-  - [ ] 7.2 创建 `ut/Misc/ExtendedExceptionListnerWrapperTest.php`：response null + event 无 response 不调 parent、response 非 null 调 parent。使用 Reflection 或 test subclass 访问 protected 方法（Ref: Requirement 8, AC 2）
-  - [ ] 7.3 创建 `ut/Misc/ChainedParameterBagDataProviderTest.php`：构造非法参数抛异常、bag 顺序优先级、ParameterBag get()、HeaderBag 单值/多值/零值、所有 bag 无 key 返回 null（Ref: Requirement 8, AC 3）
-  - [ ] 7.4 创建 `ut/Misc/UniquenessViolationHttpExceptionTest.php`：getStatusCode() 400、getMessage()、getPrevious()（Ref: Requirement 8, AC 4）
-  - [ ] 7.5 将 4 个测试文件注册到 `phpunit.xml` 的 `misc` suite 和 `all` suite（Ref: Requirement 13, AC 1–2）
-  - [ ] 7.6 Checkpoint: 运行 `vendor/bin/phpunit --testsuite misc`，全部通过且无 warning，commit
+- [-] 7. P2 — 独立模块单元测试（R8）
+  - [-] 7.1 创建 `ut/Misc/ExtendedArgumentValueResolverTest.php`：构造非对象抛异常、`supports()` 精确匹配/instanceof 匹配/不存在类/无匹配、`resolve()` 精确/instanceof yield（Ref: Requirement 8, AC 1）
+  - [-] 7.2 创建 `ut/Misc/ExtendedExceptionListnerWrapperTest.php`：response null + event 无 response 不调 parent、response 非 null 调 parent。使用 Reflection 或 test subclass 访问 protected 方法（Ref: Requirement 8, AC 2）
+  - [-] 7.3 创建 `ut/Misc/ChainedParameterBagDataProviderTest.php`：构造非法参数抛异常、bag 顺序优先级、ParameterBag get()、HeaderBag 单值/多值/零值、所有 bag 无 key 返回 null（Ref: Requirement 8, AC 3）
+  - [-] 7.4 创建 `ut/Misc/UniquenessViolationHttpExceptionTest.php`：getStatusCode() 400、getMessage()、getPrevious()（Ref: Requirement 8, AC 4）
+  - [-] 7.5 将 4 个测试文件注册到 `phpunit.xml` 的 `misc` suite 和 `all` suite（Ref: Requirement 13, AC 1–2）
+  - [-] 7.6 Checkpoint: 运行 `vendor/bin/phpunit --testsuite misc`，全部通过且无 warning，commit
 
 - [ ] 8. 集成测试基础设施（R9–R11 前置）
   - [ ] 8.1 创建 `ut/Integration/integration.routes.yml`：定义集成测试所需的路由（含 secured 路由、cookie 路由、middleware 测试路由）（Ref: Requirement 9–11 前置）

@@ -37,6 +37,10 @@
             <file>ut/Cookie/SimpleCookieProviderTest.php</file>
             <file>ut/Middlewares/AbstractMiddlewareTest.php</file>
             <file>ut/Security/NullEntryPointTest.php</file>
+            <file>ut/Misc/ExtendedArgumentValueResolverTest.php</file>
+            <file>ut/Misc/ExtendedExceptionListnerWrapperTest.php</file>
+            <file>ut/Misc/ChainedParameterBagDataProviderTest.php</file>
+            <file>ut/Misc/UniquenessViolationHttpExceptionTest.php</file>
         </testsuite>
         <testsuite name="exceptions">
             <file>ut/HttpExceptionTest.php</file>
@@ -97,6 +101,10 @@
             <file>ut/Middlewares/AbstractMiddlewareTest.php</file>
         </testsuite>
         <testsuite name="misc">
+            <file>ut/Misc/ExtendedArgumentValueResolverTest.php</file>
+            <file>ut/Misc/ExtendedExceptionListnerWrapperTest.php</file>
+            <file>ut/Misc/ChainedParameterBagDataProviderTest.php</file>
+            <file>ut/Misc/UniquenessViolationHttpExceptionTest.php</file>
         </testsuite>
         <testsuite name="integration">
         </testsuite>

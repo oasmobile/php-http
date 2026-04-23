@@ -20,6 +20,12 @@
             <file>ut/Configuration/SimpleAccessRuleConfigurationTest.php</file>
             <file>ut/Configuration/SimpleFirewallConfigurationTest.php</file>
             <file>ut/Configuration/ConfigurationValidationTraitTest.php</file>
+            <file>ut/Views/AbstractSmartViewHandlerTest.php</file>
+            <file>ut/Views/JsonViewHandlerTest.php</file>
+            <file>ut/Views/DefaultHtmlRendererTest.php</file>
+            <file>ut/Views/JsonApiRendererTest.php</file>
+            <file>ut/Views/PrefilightResponseTest.php</file>
+            <file>ut/Views/RouteBasedResponseRendererResolverTest.php</file>
         </testsuite>
         <testsuite name="exceptions">
             <file>ut/HttpExceptionTest.php</file>
@@ -55,6 +61,12 @@
             <file>ut/Configuration/ConfigurationValidationTraitTest.php</file>
         </testsuite>
         <testsuite name="views">
+            <file>ut/Views/AbstractSmartViewHandlerTest.php</file>
+            <file>ut/Views/JsonViewHandlerTest.php</file>
+            <file>ut/Views/DefaultHtmlRendererTest.php</file>
+            <file>ut/Views/JsonApiRendererTest.php</file>
+            <file>ut/Views/PrefilightResponseTest.php</file>
+            <file>ut/Views/RouteBasedResponseRendererResolverTest.php</file>
         </testsuite>
         <testsuite name="routing">
         </testsuite>

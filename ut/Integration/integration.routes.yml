@@ -1,0 +1,48 @@
+# Integration test routes
+# Used by: SecurityAuthenticationFlowIntegrationTest, SilexKernelCrossCommunityIntegrationTest
+
+# --- Security integration test routes (R10) ---
+
+integration.secured.admin:
+    path: /integration/secured/admin
+    defaults:
+        _controller: IntegrationController::securedAdmin
+
+integration.secured.user:
+    path: /integration/secured/user
+    defaults:
+        _controller: IntegrationController::securedUser
+
+integration.secured.parent:
+    path: /integration/secured/parent
+    defaults:
+        _controller: IntegrationController::securedParent
+
+integration.secured.child:
+    path: /integration/secured/child
+    defaults:
+        _controller: IntegrationController::securedChild
+
+integration.public:
+    path: /integration/public
+    defaults:
+        _controller: IntegrationController::publicAction
+
+# --- Cookie integration test routes (R11 AC 1) ---
+
+integration.cookie.set:
+    path: /integration/cookie/set
+    defaults:
+        _controller: IntegrationController::cookieSet
+
+integration.cookie.check:
+    path: /integration/cookie/check
+    defaults:
+        _controller: IntegrationController::cookieCheck
+
+# --- Middleware integration test routes (R11 AC 2) ---
+
+integration.middleware.test:
+    path: /integration/middleware/test
+    defaults:
+        _controller: IntegrationController::middlewareTest

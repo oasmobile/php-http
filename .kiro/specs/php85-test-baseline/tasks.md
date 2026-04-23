@@ -58,33 +58,33 @@
   - [x] 6.5 将 4 个测试文件注册到 `phpunit.xml` 对应 suite（`cookie`、`middlewares`、`security`）和 `all` suite（Ref: Requirement 13, AC 1–2）
   - [x] 6.6 Checkpoint: 运行 `vendor/bin/phpunit --testsuite cookie --testsuite middlewares`，全部通过且无 warning；运行 `vendor/bin/phpunit --testsuite security` 确认新增 + 现有测试全部通过，commit
 
-- [-] 7. P2 — 独立模块单元测试（R8）
-  - [-] 7.1 创建 `ut/Misc/ExtendedArgumentValueResolverTest.php`：构造非对象抛异常、`supports()` 精确匹配/instanceof 匹配/不存在类/无匹配、`resolve()` 精确/instanceof yield（Ref: Requirement 8, AC 1）
-  - [-] 7.2 创建 `ut/Misc/ExtendedExceptionListnerWrapperTest.php`：response null + event 无 response 不调 parent、response 非 null 调 parent。使用 Reflection 或 test subclass 访问 protected 方法（Ref: Requirement 8, AC 2）
-  - [-] 7.3 创建 `ut/Misc/ChainedParameterBagDataProviderTest.php`：构造非法参数抛异常、bag 顺序优先级、ParameterBag get()、HeaderBag 单值/多值/零值、所有 bag 无 key 返回 null（Ref: Requirement 8, AC 3）
-  - [-] 7.4 创建 `ut/Misc/UniquenessViolationHttpExceptionTest.php`：getStatusCode() 400、getMessage()、getPrevious()（Ref: Requirement 8, AC 4）
-  - [-] 7.5 将 4 个测试文件注册到 `phpunit.xml` 的 `misc` suite 和 `all` suite（Ref: Requirement 13, AC 1–2）
-  - [-] 7.6 Checkpoint: 运行 `vendor/bin/phpunit --testsuite misc`，全部通过且无 warning，commit
+- [x] 7. P2 — 独立模块单元测试（R8）
+  - [x] 7.1 创建 `ut/Misc/ExtendedArgumentValueResolverTest.php`：构造非对象抛异常、`supports()` 精确匹配/instanceof 匹配/不存在类/无匹配、`resolve()` 精确/instanceof yield（Ref: Requirement 8, AC 1）
+  - [x] 7.2 创建 `ut/Misc/ExtendedExceptionListnerWrapperTest.php`：response null + event 无 response 不调 parent、response 非 null 调 parent。使用 Reflection 或 test subclass 访问 protected 方法（Ref: Requirement 8, AC 2）
+  - [x] 7.3 创建 `ut/Misc/ChainedParameterBagDataProviderTest.php`：构造非法参数抛异常、bag 顺序优先级、ParameterBag get()、HeaderBag 单值/多值/零值、所有 bag 无 key 返回 null（Ref: Requirement 8, AC 3）
+  - [x] 7.4 创建 `ut/Misc/UniquenessViolationHttpExceptionTest.php`：getStatusCode() 400、getMessage()、getPrevious()（Ref: Requirement 8, AC 4）
+  - [x] 7.5 将 4 个测试文件注册到 `phpunit.xml` 的 `misc` suite 和 `all` suite（Ref: Requirement 13, AC 1–2）
+  - [x] 7.6 Checkpoint: 运行 `vendor/bin/phpunit --testsuite misc`，全部通过且无 warning，commit
 
-- [ ] 8. 集成测试基础设施（R9–R11 前置）
-  - [ ] 8.1 创建 `ut/Integration/integration.routes.yml`：定义集成测试所需的路由（含 secured 路由、cookie 路由、middleware 测试路由）（Ref: Requirement 9–11 前置）
-  - [ ] 8.2 创建 `ut/Integration/app.integration-security.php`：Security_Authentication_Flow 集成测试的 SilexKernel 配置，包含完整的 Policy → Firewall → AccessRule → Role Hierarchy 配置（Ref: Requirement 10 前置）
-  - [ ] 8.3 创建 `ut/Integration/app.integration-kernel.php`：SilexKernel 跨社区集成测试的 SilexKernel 配置，包含 Cookie provider + Middleware + 基本路由（Ref: Requirement 11 前置）
-  - [ ] 8.4 Checkpoint: 确认配置文件语法正确（PHP 文件无 parse error，YAML 文件格式正确），commit
+- [-] 8. 集成测试基础设施（R9–R11 前置）
+  - [x] 8.1 创建 `ut/Integration/integration.routes.yml`：定义集成测试所需的路由（含 secured 路由、cookie 路由、middleware 测试路由）（Ref: Requirement 9–11 前置）
+  - [x] 8.2 创建 `ut/Integration/app.integration-security.php`：Security_Authentication_Flow 集成测试的 SilexKernel 配置，包含完整的 Policy → Firewall → AccessRule → Role Hierarchy 配置（Ref: Requirement 10 前置）
+  - [x] 8.3 创建 `ut/Integration/app.integration-kernel.php`：SilexKernel 跨社区集成测试的 SilexKernel 配置，包含 Cookie provider + Middleware + 基本路由（Ref: Requirement 11 前置）
+  - [-] 8.4 Checkpoint: 确认配置文件语法正确（PHP 文件无 parse error，YAML 文件格式正确），commit
 
-- [ ] 9. 集成测试 — Bootstrap Configuration + Security Flow + 跨社区（R9, R10, R11）
+- [~] 9. 集成测试 — Bootstrap Configuration + Security Flow + 跨社区（R9, R10, R11）
   - [ ] 9.1 创建 `ut/Integration/BootstrapConfigurationIntegrationTest.php`（继承 `TestCase`），在测试方法内直接构造 SilexKernel，分别验证 routing/security/cors/twig/middlewares 配置后的 provider 注册和行为（Ref: Requirement 9, AC 1–5）
   - [ ] 9.2 创建 `ut/Integration/SecurityAuthenticationFlowIntegrationTest.php`（继承 `WebTestCase`），使用 `app.integration-security.php`，验证完整认证授权链路、认证失败、403、Role Hierarchy（Ref: Requirement 10, AC 1–4）
   - [ ] 9.3 创建 `ut/Integration/SilexKernelCrossCommunityIntegrationTest.php`（继承 `WebTestCase`），使用 `app.integration-kernel.php`，验证 Cookie 写入 response、Middleware 执行顺序、配置校验（Ref: Requirement 11, AC 1–3）
   - [ ] 9.4 将 3 个测试文件注册到 `phpunit.xml` 的 `integration` suite 和 `all` suite（Ref: Requirement 13, AC 1–2）
   - [ ] 9.5 Checkpoint: 运行 `vendor/bin/phpunit --testsuite integration`，全部通过且无 warning，commit
 
-- [ ] 10. 现有测试场景补充（R12）— SilexKernel + Cors
+- [~] 10. 现有测试场景补充（R12）— SilexKernel + Cors
   - [ ] 10.1 分析 `src/SilexKernel.php` 所有未覆盖分支，在 `ut/SilexKernelTest.php` 和 `ut/SilexKernelWebTest.php` 中补充 test method：`__set()` magic properties、`handle()` ELB/CloudFront、`boot()` middleware 注册、getters 各状态、`isGranted()`、`getCacheDirectories()`（Ref: Requirement 12, AC 1）
   - [ ] 10.2 分析 `src/ServiceProviders/Cors/` 所有未覆盖分支，在 `ut/Cors/CrossOriginResourceSharingTest.php` 和 `ut/Cors/CrossOriginResourceSharingAdvancedTest.php` 中补充 test method：多策略优先级、credentials、headers_exposed、非 preflight（Ref: Requirement 12, AC 2）
   - [ ] 10.3 Checkpoint: 运行 `vendor/bin/phpunit --testsuite all`（含新增 + 现有），全部通过且无 warning，commit
 
-- [ ] 11. 现有测试场景补充（R12）— Security + Twig + Aws
+- [~] 11. 现有测试场景补充（R12）— Security + Twig + Aws
   - [ ] 11.1 分析 `src/ServiceProviders/Security/` 所有未覆盖分支，在 `ut/Security/SecurityServiceProviderTest.php` 中补充 test method：认证失败路径、AccessRule 边界、Role Hierarchy 多层（Ref: Requirement 12, AC 3）
   - [ ] 11.2 分析 `src/ServiceProviders/Twig/` 所有未覆盖分支，在 `ut/Twig/TwigServiceProviderTest.php` 中补充 test method：globals 变体、asset_base、无 cache_dir（Ref: Requirement 12, AC 4）
   - [ ] 11.3 分析 AWS 相关代码所有未覆盖分支，在 `ut/AwsTests/ElbTrustedProxyTest.php` 中补充 test method：behind_elb、trust_cloudfront_ips、两者同时（Ref: Requirement 12, AC 5）

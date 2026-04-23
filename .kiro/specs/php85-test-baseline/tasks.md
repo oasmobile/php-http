@@ -39,7 +39,7 @@
   - [x] 4.7 将 6 个测试文件注册到 `phpunit.xml` 的 `views` suite 和 `all` suite（Ref: Requirement 13, AC 1–2）
   - [x] 4.8 Checkpoint: 运行 `vendor/bin/phpunit --testsuite views`，全部通过且无 warning，commit
 
-- [-] 5. P1 — Routing 单元测试（R4）
+- [x] 5. P1 — Routing 单元测试（R4）
   - [x] 5.1 创建 `ut/Routing/GroupUrlMatcherTest.php`：首个 matcher 成功、fallback 到下一个、全部失败抛异常、`matchRequest()` 委托、context 管理（Ref: Requirement 4, AC 1）
   - [x] 5.2 创建 `ut/Routing/GroupUrlGeneratorTest.php`：首个 generator 成功、fallback、全部失败、context 传递、context 管理（Ref: Requirement 4, AC 2）
   - [x] 5.3 创建 `ut/Routing/CacheableRouterUrlMatcherWrapperTest.php`：委托 match、namespace 前缀、类已存在不修改、context 委托（Ref: Requirement 4, AC 3）
@@ -48,15 +48,15 @@
   - [x] 5.6 创建 `ut/Routing/CacheableRouterTest.php`：`%param%` 替换、参数不存在保留、`%%` 转义、只替换一次。使用 mock SilexKernel 和 LoaderInterface（Ref: Requirement 4, AC 6）
   - [x] 5.7 创建 `ut/Routing/CacheableRouterProviderTest.php`：`register()` 注册服务、`getConfigDataProvider()` 注册前抛异常（Ref: Requirement 4, AC 7）
   - [x] 5.8 将 7 个测试文件注册到 `phpunit.xml` 的 `routing` suite 和 `all` suite（Ref: Requirement 13, AC 1–2）
-  - [-] 5.9 Checkpoint: 运行 `vendor/bin/phpunit --testsuite routing`，全部通过且无 warning，commit
+  - [x] 5.9 Checkpoint: 运行 `vendor/bin/phpunit --testsuite routing`，全部通过且无 warning，commit
 
-- [ ] 6. P1 — Cookie + Middlewares + NullEntryPoint 单元测试（R5, R6, R7）
-  - [ ] 6.1 创建 `ut/Cookie/ResponseCookieContainerTest.php`：addCookie/getCookies、多次累积、初始空数组（Ref: Requirement 5, AC 1）
-  - [ ] 6.2 创建 `ut/Cookie/SimpleCookieProviderTest.php`：非 SilexKernel 抛 LogicException、boot 注册 after middleware（Ref: Requirement 5, AC 2）
-  - [ ] 6.3 创建 `ut/Middlewares/AbstractMiddlewareTest.php`，使用 `TestMiddleware` Test_Double：`onlyForMasterRequest()` 默认 true、`getAfterPriority()` 默认 LATE_EVENT、`getBeforePriority()` 默认 EARLY_EVENT（Ref: Requirement 6, AC 1）
-  - [ ] 6.4 创建 `ut/Security/NullEntryPointTest.php`：传入 AuthenticationException 抛 AccessDeniedHttpException（含 message）、不传异常抛 AccessDeniedHttpException（'Access Denied'）（Ref: Requirement 7, AC 1）
-  - [ ] 6.5 将 4 个测试文件注册到 `phpunit.xml` 对应 suite（`cookie`、`middlewares`、`security`）和 `all` suite（Ref: Requirement 13, AC 1–2）
-  - [ ] 6.6 Checkpoint: 运行 `vendor/bin/phpunit --testsuite cookie --testsuite middlewares`，全部通过且无 warning；运行 `vendor/bin/phpunit --testsuite security` 确认新增 + 现有测试全部通过，commit
+- [-] 6. P1 — Cookie + Middlewares + NullEntryPoint 单元测试（R5, R6, R7）
+  - [x] 6.1 创建 `ut/Cookie/ResponseCookieContainerTest.php`：addCookie/getCookies、多次累积、初始空数组（Ref: Requirement 5, AC 1）
+  - [x] 6.2 创建 `ut/Cookie/SimpleCookieProviderTest.php`：非 SilexKernel 抛 LogicException、boot 注册 after middleware（Ref: Requirement 5, AC 2）
+  - [x] 6.3 创建 `ut/Middlewares/AbstractMiddlewareTest.php`，使用 `TestMiddleware` Test_Double：`onlyForMasterRequest()` 默认 true、`getAfterPriority()` 默认 LATE_EVENT、`getBeforePriority()` 默认 EARLY_EVENT（Ref: Requirement 6, AC 1）
+  - [x] 6.4 创建 `ut/Security/NullEntryPointTest.php`：传入 AuthenticationException 抛 AccessDeniedHttpException（含 message）、不传异常抛 AccessDeniedHttpException（'Access Denied'）（Ref: Requirement 7, AC 1）
+  - [x] 6.5 将 4 个测试文件注册到 `phpunit.xml` 对应 suite（`cookie`、`middlewares`、`security`）和 `all` suite（Ref: Requirement 13, AC 1–2）
+  - [-] 6.6 Checkpoint: 运行 `vendor/bin/phpunit --testsuite cookie --testsuite middlewares`，全部通过且无 warning；运行 `vendor/bin/phpunit --testsuite security` 确认新增 + 现有测试全部通过，commit
 
 - [ ] 7. P2 — 独立模块单元测试（R8）
   - [ ] 7.1 创建 `ut/Misc/ExtendedArgumentValueResolverTest.php`：构造非对象抛异常、`supports()` 精确匹配/instanceof 匹配/不存在类/无匹配、`resolve()` 精确/instanceof yield（Ref: Requirement 8, AC 1）

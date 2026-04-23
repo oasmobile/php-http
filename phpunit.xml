@@ -33,6 +33,10 @@
             <file>ut/Routing/InheritableYamlFileLoaderTest.php</file>
             <file>ut/Routing/CacheableRouterTest.php</file>
             <file>ut/Routing/CacheableRouterProviderTest.php</file>
+            <file>ut/Cookie/ResponseCookieContainerTest.php</file>
+            <file>ut/Cookie/SimpleCookieProviderTest.php</file>
+            <file>ut/Middlewares/AbstractMiddlewareTest.php</file>
+            <file>ut/Security/NullEntryPointTest.php</file>
         </testsuite>
         <testsuite name="exceptions">
             <file>ut/HttpExceptionTest.php</file>
@@ -44,6 +48,7 @@
         <testsuite name="security">
             <file>ut/Security/SecurityServiceProviderTest.php</file>
             <file>ut/Security/SecurityServiceProviderConfigurationTest.php</file>
+            <file>ut/Security/NullEntryPointTest.php</file>
         </testsuite>
         <testsuite name="twig">
             <file>ut/Twig/TwigServiceProviderTest.php</file>
@@ -85,8 +90,11 @@
             <file>ut/Routing/CacheableRouterProviderTest.php</file>
         </testsuite>
         <testsuite name="cookie">
+            <file>ut/Cookie/ResponseCookieContainerTest.php</file>
+            <file>ut/Cookie/SimpleCookieProviderTest.php</file>
         </testsuite>
         <testsuite name="middlewares">
+            <file>ut/Middlewares/AbstractMiddlewareTest.php</file>
         </testsuite>
         <testsuite name="misc">
         </testsuite>

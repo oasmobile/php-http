@@ -4,15 +4,15 @@
 
 ## Tasks
 
-- [ ] 1. 基础设施：phpunit.xml 空 suite 结构 + Helper 文件
-  - [ ] 1.1 在 `phpunit.xml` 中创建 8 个空 suite（`error-handlers`、`configuration`、`views`、`routing`、`cookie`、`middlewares`、`misc`、`integration`），暂不添加文件。现有 suite 结构不变（Ref: Requirement 13, AC 1）
-  - [ ] 1.2 创建 `ut/Helpers/Views/ConcreteSmartViewHandler.php`：`AbstractSmartViewHandler` 的 concrete Test_Double，将 `shouldHandle()` 暴露为 public，`getCompatibleTypes()` 返回可配置的类型列表（Ref: Requirement 3, AC 1 前置）
-  - [ ] 1.3 创建 `ut/Helpers/Middlewares/TestMiddleware.php`：`AbstractMiddleware` 的 concrete Test_Double，实现 `before()` / `after()` 方法，记录调用信息（Ref: Requirement 6, AC 1 前置）
-  - [ ] 1.4 Checkpoint: 运行 `vendor/bin/phpunit`，确认现有测试全部通过且无 warning，commit
+- [x] 1. 基础设施：phpunit.xml 空 suite 结构 + Helper 文件
+  - [x] 1.1 在 `phpunit.xml` 中创建 8 个空 suite（`error-handlers`、`configuration`、`views`、`routing`、`cookie`、`middlewares`、`misc`、`integration`），暂不添加文件。现有 suite 结构不变（Ref: Requirement 13, AC 1）
+  - [x] 1.2 创建 `ut/Helpers/Views/ConcreteSmartViewHandler.php`：`AbstractSmartViewHandler` 的 concrete Test_Double，将 `shouldHandle()` 暴露为 public，`getCompatibleTypes()` 返回可配置的类型列表（Ref: Requirement 3, AC 1 前置）
+  - [x] 1.3 创建 `ut/Helpers/Middlewares/TestMiddleware.php`：`AbstractMiddleware` 的 concrete Test_Double，实现 `before()` / `after()` 方法，记录调用信息（Ref: Requirement 6, AC 1 前置）
+  - [x] 1.4 Checkpoint: 运行 `vendor/bin/phpunit`，确认现有测试全部通过且无 warning，commit
 
-- [ ] 2. P0 — ErrorHandlers 单元测试（R1）
-  - [ ] 2.1 创建 `ut/ErrorHandlers/WrappedExceptionInfoTest.php`，覆盖所有场景：构造函数（正常 code / code=0 转 500）、`toArray()` normal/rich mode、`jsonSerialize()`、`getAttribute()`/`setAttribute()`、`getAttributes()`、`getCode()`/`setCode()`、`getOriginalCode()`、`getShortExceptionType()`、`serializeException()` 嵌套 previous 链、exception code 0 vs 非 0（Ref: Requirement 1, AC 1）
-  - [ ] 2.2 创建 `ut/ErrorHandlers/ExceptionWrapperTest.php`，覆盖所有场景：基本包装、`ExistenceViolationException`（404 + key）、`DataValidationException`（400 + key）、普通 Exception（保持原始 code）。直接引用 `oasis/utils` 外部异常类（Ref: Requirement 1, AC 2）
+- [-] 2. P0 — ErrorHandlers 单元测试（R1）
+  - [-] 2.1 创建 `ut/ErrorHandlers/WrappedExceptionInfoTest.php`，覆盖所有场景：构造函数（正常 code / code=0 转 500）、`toArray()` normal/rich mode、`jsonSerialize()`、`getAttribute()`/`setAttribute()`、`getAttributes()`、`getCode()`/`setCode()`、`getOriginalCode()`、`getShortExceptionType()`、`serializeException()` 嵌套 previous 链、exception code 0 vs 非 0（Ref: Requirement 1, AC 1）
+  - [-] 2.2 创建 `ut/ErrorHandlers/ExceptionWrapperTest.php`，覆盖所有场景：基本包装、`ExistenceViolationException`（404 + key）、`DataValidationException`（400 + key）、普通 Exception（保持原始 code）。直接引用 `oasis/utils` 外部异常类（Ref: Requirement 1, AC 2）
   - [ ] 2.3 创建 `ut/ErrorHandlers/JsonErrorHandlerTest.php`，覆盖所有场景：返回数组结构、`type` 为完整类名、不同 code 值传递（Ref: Requirement 1, AC 3）
   - [ ] 2.4 将 3 个测试文件注册到 `phpunit.xml` 的 `error-handlers` suite 和 `all` suite（Ref: Requirement 13, AC 1–2）
   - [ ] 2.5 Checkpoint: 运行 `vendor/bin/phpunit --testsuite error-handlers`，全部通过且无 warning，commit
@@ -108,6 +108,8 @@
 - 测试框架为 PHPUnit 5.x（约束 C-1），不使用 PHPUnit 5.x 不支持的 API
 - `ExceptionWrapper` 测试直接引用 `oasis/utils` 包的外部异常类（CR Q3 = A），确保 `composer install` 已执行
 - R12 场景补充的具体 test case 在 task 执行阶段分析源代码分支后确定（CR Q1 = B），不预先列出
+- 当前环境默认 PHP 8.5.3，但 PHPUnit 5.x 及 Symfony 4.x 依赖仅兼容 PHP 7.x。运行测试须使用 PHP 7.1：`/usr/local/opt/php@7.1/bin/php vendor/bin/phpunit`；安装依赖须加 `--ignore-platform-reqs`
+- `ut/cache/` 存放 Symfony Router 路由缓存，已在 `ut/.gitignore` 中排除。如遇路由相关异常失败（参数未替换、路由不匹配），先 `rm -f ut/cache/Project*.php ut/cache/Project*.php.meta` 再重试
 - 集成测试配置文件在 Task 8 中独立创建（CR Q4 = A），确保 Task 9 执行时基础设施就绪
 
 ---

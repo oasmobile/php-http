@@ -72,19 +72,19 @@
   - [x] 8.3 创建 `ut/Integration/app.integration-kernel.php`：SilexKernel 跨社区集成测试的 SilexKernel 配置，包含 Cookie provider + Middleware + 基本路由（Ref: Requirement 11 前置）
   - [x] 8.4 Checkpoint: 确认配置文件语法正确（PHP 文件无 parse error，YAML 文件格式正确），commit
 
-- [-] 9. 集成测试 — Bootstrap Configuration + Security Flow + 跨社区（R9, R10, R11）
+- [x] 9. 集成测试 — Bootstrap Configuration + Security Flow + 跨社区（R9, R10, R11）
   - [x] 9.1 创建 `ut/Integration/BootstrapConfigurationIntegrationTest.php`（继承 `TestCase`），在测试方法内直接构造 SilexKernel，分别验证 routing/security/cors/twig/middlewares 配置后的 provider 注册和行为（Ref: Requirement 9, AC 1–5）
   - [x] 9.2 创建 `ut/Integration/SecurityAuthenticationFlowIntegrationTest.php`（继承 `WebTestCase`），使用 `app.integration-security.php`，验证完整认证授权链路、认证失败、403、Role Hierarchy（Ref: Requirement 10, AC 1–4）
   - [x] 9.3 创建 `ut/Integration/SilexKernelCrossCommunityIntegrationTest.php`（继承 `WebTestCase`），使用 `app.integration-kernel.php`，验证 Cookie 写入 response、Middleware 执行顺序、配置校验（Ref: Requirement 11, AC 1–3）
   - [x] 9.4 将 3 个测试文件注册到 `phpunit.xml` 的 `integration` suite 和 `all` suite（Ref: Requirement 13, AC 1–2）
-  - [-] 9.5 Checkpoint: 运行 `vendor/bin/phpunit --testsuite integration`，全部通过且无 warning，commit
+  - [x] 9.5 Checkpoint: 运行 `vendor/bin/phpunit --testsuite integration`，全部通过且无 warning，commit
 
-- [ ] 10. 现有测试场景补充（R12）— SilexKernel + Cors
+- [~] 10. 现有测试场景补充（R12）— SilexKernel + Cors
   - [ ] 10.1 分析 `src/SilexKernel.php` 所有未覆盖分支，在 `ut/SilexKernelTest.php` 和 `ut/SilexKernelWebTest.php` 中补充 test method：`__set()` magic properties、`handle()` ELB/CloudFront、`boot()` middleware 注册、getters 各状态、`isGranted()`、`getCacheDirectories()`（Ref: Requirement 12, AC 1）
   - [ ] 10.2 分析 `src/ServiceProviders/Cors/` 所有未覆盖分支，在 `ut/Cors/CrossOriginResourceSharingTest.php` 和 `ut/Cors/CrossOriginResourceSharingAdvancedTest.php` 中补充 test method：多策略优先级、credentials、headers_exposed、非 preflight（Ref: Requirement 12, AC 2）
   - [ ] 10.3 Checkpoint: 运行 `vendor/bin/phpunit --testsuite all`（含新增 + 现有），全部通过且无 warning，commit
 
-- [ ] 11. 现有测试场景补充（R12）— Security + Twig + Aws
+- [~] 11. 现有测试场景补充（R12）— Security + Twig + Aws
   - [ ] 11.1 分析 `src/ServiceProviders/Security/` 所有未覆盖分支，在 `ut/Security/SecurityServiceProviderTest.php` 中补充 test method：认证失败路径、AccessRule 边界、Role Hierarchy 多层（Ref: Requirement 12, AC 3）
   - [ ] 11.2 分析 `src/ServiceProviders/Twig/` 所有未覆盖分支，在 `ut/Twig/TwigServiceProviderTest.php` 中补充 test method：globals 变体、asset_base、无 cache_dir（Ref: Requirement 12, AC 4）
   - [ ] 11.3 分析 AWS 相关代码所有未覆盖分支，在 `ut/AwsTests/ElbTrustedProxyTest.php` 中补充 test method：behind_elb、trust_cloudfront_ips、两者同时（Ref: Requirement 12, AC 5）
@@ -109,7 +109,7 @@
 - `ExceptionWrapper` 测试直接引用 `oasis/utils` 包的外部异常类（CR Q3 = A），确保 `composer install` 已执行
 - R12 场景补充的具体 test case 在 task 执行阶段分析源代码分支后确定（CR Q1 = B），不预先列出
 - 当前环境默认 PHP 8.5.3，但 PHPUnit 5.x 及 Symfony 4.x 依赖仅兼容 PHP 7.x。运行测试须使用 PHP 7.1：`/usr/local/opt/php@7.1/bin/php vendor/bin/phpunit`；安装依赖须加 `--ignore-platform-reqs`
-- `ut/cache/` 存放 Symfony Router 路由缓存，已在 `ut/.gitignore` 中排除。如遇路由相关异常失败（参数未替换、路由不匹配），先 `rm -f ut/cache/Project*.php ut/cache/Project*.php.meta` 再重试
+- `ut/cache/` 存放 Symfony Router 路由缓存，已在 `ut/.gitignore` 中排除。涉及路由的测试类应在 `setUp()` 中清理缓存文件（`Project*.php` / `Project*.php.meta`），不要在测试代码外部用 shell 命令清理
 - 集成测试配置文件在 Task 8 中独立创建（CR Q4 = A），确保 Task 9 执行时基础设施就绪
 
 ---

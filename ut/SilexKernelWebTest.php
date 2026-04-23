@@ -1,5 +1,6 @@
 <?php
 use Oasis\Mlib\Http\SilexKernel;
+use Oasis\Mlib\Http\Test\Helpers\RouteCacheCleaner;
 use Oasis\Mlib\Http\Views\JsonViewHandler;
 use Oasis\Mlib\Utils\StringUtils;
 use Silex\WebTestCase;
@@ -15,7 +16,14 @@ use Symfony\Component\HttpKernel\HttpKernelInterface;
  */
 class SilexKernelWebTest extends WebTestCase
 {
-    
+    use RouteCacheCleaner;
+
+    protected function setUp()
+    {
+        $this->cleanRouteCache(__DIR__ . '/cache');
+        parent::setUp();
+    }
+
     /**
      * Creates the application.
      *
@@ -310,5 +318,82 @@ class SilexKernelWebTest extends WebTestCase
         );
         $this->assertEquals('John', $json['name']);
         
+    }
+
+    // ---------------------------------------------------------------
+    // handle() — behind_elb = false (default app.php) delegates to parent
+    // ---------------------------------------------------------------
+
+    /**
+     * With behind_elb = false (default), handle() should just delegate to parent
+     * without modifying trusted proxies beyond what was set in app.php.
+     */
+    public function testHandleWithoutElbDelegatesToParent()
+    {
+        $client = $this->createClient();
+        $client->request('GET', '/', [], [], ['REMOTE_ADDR' => '99.99.99.99']);
+        $response = $client->getResponse();
+
+        $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
+
+        $json = json_decode($response->getContent(), true);
+        $this->assertTrue(is_array($json));
+        $this->assertEquals(
+            'Oasis\\Mlib\\Http\\Test\\Helpers\\Controllers\\TestController::home()',
+            $json['called']
+        );
+    }
+}
+
+/**
+ * Separate WebTestCase subclass for testing handle() with behind_elb = true.
+ *
+ * Uses a dedicated app config with behind_elb enabled to verify that
+ * REMOTE_ADDR is added to trusted proxies during handle().
+ */
+class SilexKernelWebElbTest extends WebTestCase
+{
+    use RouteCacheCleaner;
+
+    protected function setUp()
+    {
+        $this->cleanRouteCache(__DIR__ . '/cache');
+        parent::setUp();
+    }
+
+    /**
+     * Creates the application with behind_elb = true.
+     *
+     * @return HttpKernelInterface
+     */
+    public function createApplication()
+    {
+        return require __DIR__ . '/AwsTests/elb.php';
+    }
+
+    /**
+     * With behind_elb = true, handle() should add REMOTE_ADDR to trusted proxies.
+     * This allows X-Forwarded-For to be trusted from the ELB's IP.
+     */
+    public function testHandleBehindElbAddsRemoteAddrToTrustedProxies()
+    {
+        $client = $this->createClient();
+        $client->request(
+            'GET',
+            '/aws/ip',
+            [],
+            [],
+            [
+                'REMOTE_ADDR'          => '3.4.5.6',
+                'HTTP_X_FORWARDED_FOR' => '9.8.7.6',
+            ]
+        );
+        $response = $client->getResponse();
+        $json     = json_decode($response->getContent(), true);
+
+        $this->assertTrue(is_array($json));
+        // Because behind_elb = true, REMOTE_ADDR (3.4.5.6) is added to trusted proxies,
+        // so X-Forwarded-For is trusted and the client IP resolves to 9.8.7.6
+        $this->assertEquals('9.8.7.6', $json['ip']);
     }
 }

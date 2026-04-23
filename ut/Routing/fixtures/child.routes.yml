@@ -1,0 +1,4 @@
+child.home:
+    path: /home
+    defaults:
+        _controller: ChildController::home

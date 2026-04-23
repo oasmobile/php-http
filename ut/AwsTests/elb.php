@@ -11,7 +11,7 @@ use Oasis\Mlib\Http\SilexKernel;
 use Oasis\Mlib\Http\Views\JsonViewHandler;
 
 $config = [
-    'cache_dir'            => __DIR__ . '/../cache',
+    'cache_dir'            => isset($cacheDir) ? $cacheDir : __DIR__ . '/../cache',
     'trust_cloudfront_ips' => true,
     'behind_elb'           => true,
     'routing'              => [

@@ -21,16 +21,16 @@
   - [x] 2.2 基于 `docs/changes/unreleased/php85-test-baseline.md` 的内容生成变更汇总。CHANGELOG 结构：标题（`# Changelog — v2.5.0`）、Release date（填入实际日期）、Summary（一段话概述）、Features section（从 change 记录提取 Added / Changed / Test Coverage）
   - [x] 2.3 Checkpoint: `docs/changes/2.5.0/CHANGELOG.md` 存在且内容完整，包含标题、日期、摘要、Features section。Commit message: `docs: 生成 release 2.5.0 CHANGELOG`
 
-- [-] 3. 归档 Feature Spec
+- [x] 3. 归档 Feature Spec
   - [x] 3.1 将 `.kiro/specs/php85-test-baseline/` 整个目录移动到 `docs/changes/2.5.0/specs/php85-test-baseline/`（Ref: Requirements CR Q2 = A；Design — Feature Spec 归档）
   - [x] 3.2 确认归档文件清单完整：`goal.md`、`requirements.md`、`design.md`、`tasks.md`、`.config.kiro`、`tests/` 目录（如有内容）
   - [x] 3.3 确认 `.kiro/specs/php85-test-baseline/` 已移除
-  - [-] 3.4 Checkpoint: `docs/changes/2.5.0/specs/php85-test-baseline/` 存在且文件完整，原目录已移除。Commit message: `docs: 归档 feature spec php85-test-baseline`
+  - [x] 3.4 Checkpoint: `docs/changes/2.5.0/specs/php85-test-baseline/` 存在且文件完整，原目录已移除。Commit message: `docs: 归档 feature spec php85-test-baseline`
 
-- [~] 4. 归档 Change 记录
-  - [ ] 4.1 将 `docs/changes/unreleased/php85-test-baseline.md` 移动到 `docs/changes/2.5.0/php85-test-baseline.md`（Ref: 发布判定 — Changes 记录完整；Design — Change 记录归档）
-  - [ ] 4.2 确认 `docs/changes/unreleased/php85-test-baseline.md` 已移除
-  - [ ] 4.3 Checkpoint: `docs/changes/2.5.0/php85-test-baseline.md` 存在，原文件已移除。Commit message: `docs: 归档 change 记录 php85-test-baseline`
+- [-] 4. 归档 Change 记录
+  - [x] 4.1 将 `docs/changes/unreleased/php85-test-baseline.md` 移动到 `docs/changes/2.5.0/php85-test-baseline.md`（Ref: 发布判定 — Changes 记录完整；Design — Change 记录归档）
+  - [x] 4.2 确认 `docs/changes/unreleased/php85-test-baseline.md` 已移除
+  - [-] 4.3 Checkpoint: `docs/changes/2.5.0/php85-test-baseline.md` 存在，原文件已移除。Commit message: `docs: 归档 change 记录 php85-test-baseline`
 
 - [~] 5. 确认 Proposal 状态
   - [ ] 5.1 确认 `docs/proposals/PRP-001-php85-test-baseline.md` 的 status 为 `implemented`，如状态不正确则更新（Ref: 发布判定 — Proposal 状态为 implemented）

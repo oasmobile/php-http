@@ -11,11 +11,11 @@
   - [x] 1.4 Checkpoint: 运行 `vendor/bin/phpunit`，确认现有测试全部通过且无 warning，commit
 
 - [-] 2. P0 — ErrorHandlers 单元测试（R1）
-  - [-] 2.1 创建 `ut/ErrorHandlers/WrappedExceptionInfoTest.php`，覆盖所有场景：构造函数（正常 code / code=0 转 500）、`toArray()` normal/rich mode、`jsonSerialize()`、`getAttribute()`/`setAttribute()`、`getAttributes()`、`getCode()`/`setCode()`、`getOriginalCode()`、`getShortExceptionType()`、`serializeException()` 嵌套 previous 链、exception code 0 vs 非 0（Ref: Requirement 1, AC 1）
-  - [-] 2.2 创建 `ut/ErrorHandlers/ExceptionWrapperTest.php`，覆盖所有场景：基本包装、`ExistenceViolationException`（404 + key）、`DataValidationException`（400 + key）、普通 Exception（保持原始 code）。直接引用 `oasis/utils` 外部异常类（Ref: Requirement 1, AC 2）
-  - [ ] 2.3 创建 `ut/ErrorHandlers/JsonErrorHandlerTest.php`，覆盖所有场景：返回数组结构、`type` 为完整类名、不同 code 值传递（Ref: Requirement 1, AC 3）
-  - [ ] 2.4 将 3 个测试文件注册到 `phpunit.xml` 的 `error-handlers` suite 和 `all` suite（Ref: Requirement 13, AC 1–2）
-  - [ ] 2.5 Checkpoint: 运行 `vendor/bin/phpunit --testsuite error-handlers`，全部通过且无 warning，commit
+  - [x] 2.1 创建 `ut/ErrorHandlers/WrappedExceptionInfoTest.php`，覆盖所有场景：构造函数（正常 code / code=0 转 500）、`toArray()` normal/rich mode、`jsonSerialize()`、`getAttribute()`/`setAttribute()`、`getAttributes()`、`getCode()`/`setCode()`、`getOriginalCode()`、`getShortExceptionType()`、`serializeException()` 嵌套 previous 链、exception code 0 vs 非 0（Ref: Requirement 1, AC 1）
+  - [x] 2.2 创建 `ut/ErrorHandlers/ExceptionWrapperTest.php`，覆盖所有场景：基本包装、`ExistenceViolationException`（404 + key）、`DataValidationException`（400 + key）、普通 Exception（保持原始 code）。直接引用 `oasis/utils` 外部异常类（Ref: Requirement 1, AC 2）
+  - [x] 2.3 创建 `ut/ErrorHandlers/JsonErrorHandlerTest.php`，覆盖所有场景：返回数组结构、`type` 为完整类名、不同 code 值传递（Ref: Requirement 1, AC 3）
+  - [x] 2.4 将 3 个测试文件注册到 `phpunit.xml` 的 `error-handlers` suite 和 `all` suite（Ref: Requirement 13, AC 1–2）
+  - [-] 2.5 Checkpoint: 运行 `vendor/bin/phpunit --testsuite error-handlers`，全部通过且无 warning，commit
 
 - [ ] 3. P0 — Configuration 单元测试（R2）
   - [ ] 3.1 创建 `ut/Configuration/HttpConfigurationTest.php`：默认值、variable 节点接受任意值、未知 key 抛 `InvalidConfigurationException`（Ref: Requirement 2, AC 1）

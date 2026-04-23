@@ -1,0 +1,5 @@
+child:
+    prefix: /child
+    resource: "child.routes.yml"
+    defaults:
+        _format: json

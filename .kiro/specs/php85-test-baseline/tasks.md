@@ -10,45 +10,45 @@
   - [x] 1.3 创建 `ut/Helpers/Middlewares/TestMiddleware.php`：`AbstractMiddleware` 的 concrete Test_Double，实现 `before()` / `after()` 方法，记录调用信息（Ref: Requirement 6, AC 1 前置）
   - [x] 1.4 Checkpoint: 运行 `vendor/bin/phpunit`，确认现有测试全部通过且无 warning，commit
 
-- [-] 2. P0 — ErrorHandlers 单元测试（R1）
+- [x] 2. P0 — ErrorHandlers 单元测试（R1）
   - [x] 2.1 创建 `ut/ErrorHandlers/WrappedExceptionInfoTest.php`，覆盖所有场景：构造函数（正常 code / code=0 转 500）、`toArray()` normal/rich mode、`jsonSerialize()`、`getAttribute()`/`setAttribute()`、`getAttributes()`、`getCode()`/`setCode()`、`getOriginalCode()`、`getShortExceptionType()`、`serializeException()` 嵌套 previous 链、exception code 0 vs 非 0（Ref: Requirement 1, AC 1）
   - [x] 2.2 创建 `ut/ErrorHandlers/ExceptionWrapperTest.php`，覆盖所有场景：基本包装、`ExistenceViolationException`（404 + key）、`DataValidationException`（400 + key）、普通 Exception（保持原始 code）。直接引用 `oasis/utils` 外部异常类（Ref: Requirement 1, AC 2）
   - [x] 2.3 创建 `ut/ErrorHandlers/JsonErrorHandlerTest.php`，覆盖所有场景：返回数组结构、`type` 为完整类名、不同 code 值传递（Ref: Requirement 1, AC 3）
   - [x] 2.4 将 3 个测试文件注册到 `phpunit.xml` 的 `error-handlers` suite 和 `all` suite（Ref: Requirement 13, AC 1–2）
-  - [-] 2.5 Checkpoint: 运行 `vendor/bin/phpunit --testsuite error-handlers`，全部通过且无 warning，commit
+  - [x] 2.5 Checkpoint: 运行 `vendor/bin/phpunit --testsuite error-handlers`，全部通过且无 warning，commit
 
-- [ ] 3. P0 — Configuration 单元测试（R2）
-  - [ ] 3.1 创建 `ut/Configuration/HttpConfigurationTest.php`：默认值、variable 节点接受任意值、未知 key 抛 `InvalidConfigurationException`（Ref: Requirement 2, AC 1）
-  - [ ] 3.2 创建 `ut/Configuration/SecurityConfigurationTest.php`：array prototype、`role_hierarchy` beforeNormalization、空配置（Ref: Requirement 2, AC 2）
-  - [ ] 3.3 创建 `ut/Configuration/CrossOriginResourceSharingConfigurationTest.php`：`pattern` 必填、`origins` beforeNormalization、`max_age` 默认值、`credentials_allowed` 默认值、可选节点（Ref: Requirement 2, AC 3）
-  - [ ] 3.4 创建 `ut/Configuration/TwigConfigurationTest.php`：`template_dir` 可选、`cache_dir` 默认 null、`asset_base` 默认空字符串、`globals` 默认空数组（Ref: Requirement 2, AC 4）
-  - [ ] 3.5 创建 `ut/Configuration/CacheableRouterConfigurationTest.php`：`path` 可选、`cache_dir` 默认 null、`namespaces` beforeNormalization（Ref: Requirement 2, AC 5）
-  - [ ] 3.6 创建 `ut/Configuration/SimpleAccessRuleConfigurationTest.php`：`pattern`/`roles` 必填、`roles` beforeNormalization、`channel` enum 默认 null（Ref: Requirement 2, AC 6）
-  - [ ] 3.7 创建 `ut/Configuration/SimpleFirewallConfigurationTest.php`：`pattern`/`policies`/`users` 必填、`stateless` 默认 false、`misc` 默认空数组（Ref: Requirement 2, AC 7）
-  - [ ] 3.8 创建 `ut/Configuration/ConfigurationValidationTraitTest.php`：返回 `ArrayDataProvider`、合法配置处理、非法配置抛异常（Ref: Requirement 2, AC 8）
-  - [ ] 3.9 将 8 个测试文件注册到 `phpunit.xml` 的 `configuration` suite 和 `all` suite（Ref: Requirement 13, AC 1–2）
-  - [ ] 3.10 Checkpoint: 运行 `vendor/bin/phpunit --testsuite configuration`，全部通过且无 warning，commit
+- [x] 3. P0 — Configuration 单元测试（R2）
+  - [x] 3.1 创建 `ut/Configuration/HttpConfigurationTest.php`：默认值、variable 节点接受任意值、未知 key 抛 `InvalidConfigurationException`（Ref: Requirement 2, AC 1）
+  - [x] 3.2 创建 `ut/Configuration/SecurityConfigurationTest.php`：array prototype、`role_hierarchy` beforeNormalization、空配置（Ref: Requirement 2, AC 2）
+  - [x] 3.3 创建 `ut/Configuration/CrossOriginResourceSharingConfigurationTest.php`：`pattern` 必填、`origins` beforeNormalization、`max_age` 默认值、`credentials_allowed` 默认值、可选节点（Ref: Requirement 2, AC 3）
+  - [x] 3.4 创建 `ut/Configuration/TwigConfigurationTest.php`：`template_dir` 可选、`cache_dir` 默认 null、`asset_base` 默认空字符串、`globals` 默认空数组（Ref: Requirement 2, AC 4）
+  - [x] 3.5 创建 `ut/Configuration/CacheableRouterConfigurationTest.php`：`path` 可选、`cache_dir` 默认 null、`namespaces` beforeNormalization（Ref: Requirement 2, AC 5）
+  - [x] 3.6 创建 `ut/Configuration/SimpleAccessRuleConfigurationTest.php`：`pattern`/`roles` 必填、`roles` beforeNormalization、`channel` enum 默认 null（Ref: Requirement 2, AC 6）
+  - [x] 3.7 创建 `ut/Configuration/SimpleFirewallConfigurationTest.php`：`pattern`/`policies`/`users` 必填、`stateless` 默认 false、`misc` 默认空数组（Ref: Requirement 2, AC 7）
+  - [x] 3.8 创建 `ut/Configuration/ConfigurationValidationTraitTest.php`：返回 `ArrayDataProvider`、合法配置处理、非法配置抛异常（Ref: Requirement 2, AC 8）
+  - [x] 3.9 将 8 个测试文件注册到 `phpunit.xml` 的 `configuration` suite 和 `all` suite（Ref: Requirement 13, AC 1–2）
+  - [x] 3.10 Checkpoint: 运行 `vendor/bin/phpunit --testsuite configuration`，全部通过且无 warning，commit
 
-- [ ] 4. P1 — Views 单元测试（R3）
-  - [ ] 4.1 创建 `ut/Views/AbstractSmartViewHandlerTest.php`，使用 `ConcreteSmartViewHandler` Test_Double：兼容类型匹配、`*/*`、空 Accept、不兼容、通配符（Ref: Requirement 3, AC 1）
-  - [ ] 4.2 创建 `ut/Views/JsonViewHandlerTest.php`：Accept 兼容返回 `JsonResponse`、不兼容返回 null、scalar/null 包装、数组直接返回、`getCompatibleTypes()`（Ref: Requirement 3, AC 2）
-  - [ ] 4.3 创建 `ut/Views/DefaultHtmlRendererTest.php`：`renderOnSuccess()` 各类型处理、`renderOnException()` 无 Twig / 有 Twig / 模板不存在 fallback。使用 mock 或最小 SilexKernel 实例（Ref: Requirement 3, AC 3）
-  - [ ] 4.4 创建 `ut/Views/JsonApiRendererTest.php`：数组直接返回、非数组包装、异常渲染 status code（Ref: Requirement 3, AC 4）
-  - [ ] 4.5 创建 `ut/Views/PrefilightResponseTest.php`：204 status + header、`addAllowedMethod()`/`getAllowedMethods()`、`freeze()`/`isFrozen()`（Ref: Requirement 3, AC 5）
-  - [ ] 4.6 创建 `ut/Views/RouteBasedResponseRendererResolverTest.php`：html/page → `DefaultHtmlRenderer`、api/json → `JsonApiRenderer`、未知 format 抛异常、format 优先级（Ref: Requirement 3, AC 6）
-  - [ ] 4.7 将 6 个测试文件注册到 `phpunit.xml` 的 `views` suite 和 `all` suite（Ref: Requirement 13, AC 1–2）
-  - [ ] 4.8 Checkpoint: 运行 `vendor/bin/phpunit --testsuite views`，全部通过且无 warning，commit
+- [x] 4. P1 — Views 单元测试（R3）
+  - [x] 4.1 创建 `ut/Views/AbstractSmartViewHandlerTest.php`，使用 `ConcreteSmartViewHandler` Test_Double：兼容类型匹配、`*/*`、空 Accept、不兼容、通配符（Ref: Requirement 3, AC 1）
+  - [x] 4.2 创建 `ut/Views/JsonViewHandlerTest.php`：Accept 兼容返回 `JsonResponse`、不兼容返回 null、scalar/null 包装、数组直接返回、`getCompatibleTypes()`（Ref: Requirement 3, AC 2）
+  - [x] 4.3 创建 `ut/Views/DefaultHtmlRendererTest.php`：`renderOnSuccess()` 各类型处理、`renderOnException()` 无 Twig / 有 Twig / 模板不存在 fallback。使用 mock 或最小 SilexKernel 实例（Ref: Requirement 3, AC 3）
+  - [x] 4.4 创建 `ut/Views/JsonApiRendererTest.php`：数组直接返回、非数组包装、异常渲染 status code（Ref: Requirement 3, AC 4）
+  - [x] 4.5 创建 `ut/Views/PrefilightResponseTest.php`：204 status + header、`addAllowedMethod()`/`getAllowedMethods()`、`freeze()`/`isFrozen()`（Ref: Requirement 3, AC 5）
+  - [x] 4.6 创建 `ut/Views/RouteBasedResponseRendererResolverTest.php`：html/page → `DefaultHtmlRenderer`、api/json → `JsonApiRenderer`、未知 format 抛异常、format 优先级（Ref: Requirement 3, AC 6）
+  - [x] 4.7 将 6 个测试文件注册到 `phpunit.xml` 的 `views` suite 和 `all` suite（Ref: Requirement 13, AC 1–2）
+  - [x] 4.8 Checkpoint: 运行 `vendor/bin/phpunit --testsuite views`，全部通过且无 warning，commit
 
-- [ ] 5. P1 — Routing 单元测试（R4）
-  - [ ] 5.1 创建 `ut/Routing/GroupUrlMatcherTest.php`：首个 matcher 成功、fallback 到下一个、全部失败抛异常、`matchRequest()` 委托、context 管理（Ref: Requirement 4, AC 1）
-  - [ ] 5.2 创建 `ut/Routing/GroupUrlGeneratorTest.php`：首个 generator 成功、fallback、全部失败、context 传递、context 管理（Ref: Requirement 4, AC 2）
-  - [ ] 5.3 创建 `ut/Routing/CacheableRouterUrlMatcherWrapperTest.php`：委托 match、namespace 前缀、类已存在不修改、context 委托（Ref: Requirement 4, AC 3）
-  - [ ] 5.4 创建 `ut/Routing/InheritableRouteCollectionTest.php`：构造复制路由、`addDefaults()` 添加/不覆盖（Ref: Requirement 4, AC 4）
-  - [ ] 5.5 创建 `ut/Routing/InheritableYamlFileLoaderTest.php`：`import()` 返回 `InheritableRouteCollection`。使用真实 YAML 文件（Ref: Requirement 4, AC 5）
-  - [ ] 5.6 创建 `ut/Routing/CacheableRouterTest.php`：`%param%` 替换、参数不存在保留、`%%` 转义、只替换一次。使用 mock SilexKernel 和 LoaderInterface（Ref: Requirement 4, AC 6）
-  - [ ] 5.7 创建 `ut/Routing/CacheableRouterProviderTest.php`：`register()` 注册服务、`getConfigDataProvider()` 注册前抛异常（Ref: Requirement 4, AC 7）
-  - [ ] 5.8 将 7 个测试文件注册到 `phpunit.xml` 的 `routing` suite 和 `all` suite（Ref: Requirement 13, AC 1–2）
-  - [ ] 5.9 Checkpoint: 运行 `vendor/bin/phpunit --testsuite routing`，全部通过且无 warning，commit
+- [-] 5. P1 — Routing 单元测试（R4）
+  - [x] 5.1 创建 `ut/Routing/GroupUrlMatcherTest.php`：首个 matcher 成功、fallback 到下一个、全部失败抛异常、`matchRequest()` 委托、context 管理（Ref: Requirement 4, AC 1）
+  - [x] 5.2 创建 `ut/Routing/GroupUrlGeneratorTest.php`：首个 generator 成功、fallback、全部失败、context 传递、context 管理（Ref: Requirement 4, AC 2）
+  - [x] 5.3 创建 `ut/Routing/CacheableRouterUrlMatcherWrapperTest.php`：委托 match、namespace 前缀、类已存在不修改、context 委托（Ref: Requirement 4, AC 3）
+  - [x] 5.4 创建 `ut/Routing/InheritableRouteCollectionTest.php`：构造复制路由、`addDefaults()` 添加/不覆盖（Ref: Requirement 4, AC 4）
+  - [x] 5.5 创建 `ut/Routing/InheritableYamlFileLoaderTest.php`：`import()` 返回 `InheritableRouteCollection`。使用真实 YAML 文件（Ref: Requirement 4, AC 5）
+  - [x] 5.6 创建 `ut/Routing/CacheableRouterTest.php`：`%param%` 替换、参数不存在保留、`%%` 转义、只替换一次。使用 mock SilexKernel 和 LoaderInterface（Ref: Requirement 4, AC 6）
+  - [x] 5.7 创建 `ut/Routing/CacheableRouterProviderTest.php`：`register()` 注册服务、`getConfigDataProvider()` 注册前抛异常（Ref: Requirement 4, AC 7）
+  - [x] 5.8 将 7 个测试文件注册到 `phpunit.xml` 的 `routing` suite 和 `all` suite（Ref: Requirement 13, AC 1–2）
+  - [-] 5.9 Checkpoint: 运行 `vendor/bin/phpunit --testsuite routing`，全部通过且无 warning，commit
 
 - [ ] 6. P1 — Cookie + Middlewares + NullEntryPoint 单元测试（R5, R6, R7）
   - [ ] 6.1 创建 `ut/Cookie/ResponseCookieContainerTest.php`：addCookie/getCookies、多次累积、初始空数组（Ref: Requirement 5, AC 1）

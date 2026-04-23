@@ -26,6 +26,13 @@
             <file>ut/Views/JsonApiRendererTest.php</file>
             <file>ut/Views/PrefilightResponseTest.php</file>
             <file>ut/Views/RouteBasedResponseRendererResolverTest.php</file>
+            <file>ut/Routing/GroupUrlMatcherTest.php</file>
+            <file>ut/Routing/GroupUrlGeneratorTest.php</file>
+            <file>ut/Routing/CacheableRouterUrlMatcherWrapperTest.php</file>
+            <file>ut/Routing/InheritableRouteCollectionTest.php</file>
+            <file>ut/Routing/InheritableYamlFileLoaderTest.php</file>
+            <file>ut/Routing/CacheableRouterTest.php</file>
+            <file>ut/Routing/CacheableRouterProviderTest.php</file>
         </testsuite>
         <testsuite name="exceptions">
             <file>ut/HttpExceptionTest.php</file>
@@ -69,6 +76,13 @@
             <file>ut/Views/RouteBasedResponseRendererResolverTest.php</file>
         </testsuite>
         <testsuite name="routing">
+            <file>ut/Routing/GroupUrlMatcherTest.php</file>
+            <file>ut/Routing/GroupUrlGeneratorTest.php</file>
+            <file>ut/Routing/CacheableRouterUrlMatcherWrapperTest.php</file>
+            <file>ut/Routing/InheritableRouteCollectionTest.php</file>
+            <file>ut/Routing/InheritableYamlFileLoaderTest.php</file>
+            <file>ut/Routing/CacheableRouterTest.php</file>
+            <file>ut/Routing/CacheableRouterProviderTest.php</file>
         </testsuite>
         <testsuite name="cookie">
         </testsuite>

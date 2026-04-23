@@ -134,7 +134,7 @@ prefix. The default namesapces are defined under `routing` parameter's
 
 Because the `routes.yml` file is fully symfony compatible, we can use
 the advanced routing features as well. Please refer to
-[advanced routing configuration] (docs/AdvancedRoutingConfiguration.md)
+[advanced routing configuration](docs/manual/routing.md)
 for more.
 
 ##### Security
@@ -177,7 +177,7 @@ the end, a user named admin with password 'foo' is the only user
 provided for this firewall.
 
 Please refer to
-[detailed security configuration](docs/AdvancedSecurityConfiguration.md)
+[detailed security configuration](docs/manual/security.md)
 for more advanced security schemes.
 
 ##### Cross Origin Resource Sharing
@@ -214,7 +214,7 @@ Using the configuration above, any request for path starting with
 `my.second.domain.tld`.
 
 Many more rules can be configured for CORS. Please refer
-[here](docs/AdvancedCorsConfiguration.md) for a more detailed guide.
+[here](docs/manual/cors.md) for a more detailed guide.
 
 ##### Rendering Templates
 

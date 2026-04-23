@@ -46,7 +46,7 @@
   - [x] 6.2 执行全量测试确认归档操作未影响测试结果：`/usr/local/opt/php@7.1/bin/php vendor/bin/phpunit`
   - [x] 6.3 Checkpoint: 目录结构符合预期，全量测试通过。Commit message: `docs: release 2.5.0 归档结果验证`
 
-- [~] 7. Code Review
+- [x] 7. Code Review
   - 委托给 code-reviewer sub-agent 执行。Review 范围为 release/2.5.0 分支上 Task 1–6 的所有变更。
 
 ## Issues

@@ -6,20 +6,20 @@
 
 ## Tasks
 
-- [-] 1. 全量测试确认与简化 Stabilize
-  - [ ] 1.1 在 release/2.5.0 分支上执行全量测试，确认 333 tests / 597 assertions 全部通过。测试命令：`/usr/local/opt/php@7.1/bin/php vendor/bin/phpunit`（Ref: 发布判定 — 全量测试通过）
-  - [ ] 1.2 手工测试确认 suite 完整性：
+- [x] 1. 全量测试确认与简化 Stabilize
+  - [x] 1.1 在 release/2.5.0 分支上执行全量测试，确认 333 tests / 597 assertions 全部通过。测试命令：`/usr/local/opt/php@7.1/bin/php vendor/bin/phpunit`（Ref: 发布判定 — 全量测试通过）
+  - [x] 1.2 手工测试确认 suite 完整性：
     - [ ] 所有 8 个新增 suite 可独立运行（`error-handlers`、`configuration`、`views`、`routing`、`cookie`、`middlewares`、`misc`、`integration`）
     - [ ] `all` suite 包含所有测试文件，无遗漏
     - [ ] 各 suite 测试数量与 feature spec 记录一致
     - [ ] 集成测试 app 配置文件与现有配置文件不冲突
-  - [ ] 1.3 Increment alpha tag：查询已有 alpha tag，打 `v2.5.0-alpha1` tag（`git tag v2.5.0-alpha1`）
-  - [ ] 1.4 Checkpoint: 全量测试输出 333 tests / 597 assertions / 0 failures / 0 errors，手工测试各项确认通过，alpha tag 已打。Commit message: `test: release 2.5.0 全量测试确认与 alpha tag`
+  - [x] 1.3 Increment alpha tag：查询已有 alpha tag，打 `v2.5.0-alpha1` tag（`git tag v2.5.0-alpha1`）
+  - [x] 1.4 Checkpoint: 全量测试输出 333 tests / 597 assertions / 0 failures / 0 errors，手工测试各项确认通过，alpha tag 已打。Commit message: `test: release 2.5.0 全量测试确认与 alpha tag`
 
-- [~] 2. 生成 CHANGELOG.md
-  - [ ] 2.1 创建 `docs/changes/2.5.0/` 目录，在其中创建 `CHANGELOG.md`（Ref: 发布判定 — Changes 记录完整；Requirements CR Q3 = A）
-  - [ ] 2.2 基于 `docs/changes/unreleased/php85-test-baseline.md` 的内容生成变更汇总。CHANGELOG 结构：标题（`# Changelog — v2.5.0`）、Release date（填入实际日期）、Summary（一段话概述）、Features section（从 change 记录提取 Added / Changed / Test Coverage）
-  - [ ] 2.3 Checkpoint: `docs/changes/2.5.0/CHANGELOG.md` 存在且内容完整，包含标题、日期、摘要、Features section。Commit message: `docs: 生成 release 2.5.0 CHANGELOG`
+- [-] 2. 生成 CHANGELOG.md
+  - [x] 2.1 创建 `docs/changes/2.5.0/` 目录，在其中创建 `CHANGELOG.md`（Ref: 发布判定 — Changes 记录完整；Requirements CR Q3 = A）
+  - [x] 2.2 基于 `docs/changes/unreleased/php85-test-baseline.md` 的内容生成变更汇总。CHANGELOG 结构：标题（`# Changelog — v2.5.0`）、Release date（填入实际日期）、Summary（一段话概述）、Features section（从 change 记录提取 Added / Changed / Test Coverage）
+  - [-] 2.3 Checkpoint: `docs/changes/2.5.0/CHANGELOG.md` 存在且内容完整，包含标题、日期、摘要、Features section。Commit message: `docs: 生成 release 2.5.0 CHANGELOG`
 
 - [~] 3. 归档 Feature Spec
   - [ ] 3.1 将 `.kiro/specs/php85-test-baseline/` 整个目录移动到 `docs/changes/2.5.0/specs/php85-test-baseline/`（Ref: Requirements CR Q2 = A；Design — Feature Spec 归档）

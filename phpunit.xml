@@ -9,6 +9,41 @@
             <file>ut/SilexKernelTest.php</file>
             <file>ut/SilexKernelWebTest.php</file>
             <file>ut/FallbackViewHandlerTest.php</file>
+            <file>ut/ErrorHandlers/WrappedExceptionInfoTest.php</file>
+            <file>ut/ErrorHandlers/ExceptionWrapperTest.php</file>
+            <file>ut/ErrorHandlers/JsonErrorHandlerTest.php</file>
+            <file>ut/Configuration/HttpConfigurationTest.php</file>
+            <file>ut/Configuration/SecurityConfigurationTest.php</file>
+            <file>ut/Configuration/CrossOriginResourceSharingConfigurationTest.php</file>
+            <file>ut/Configuration/TwigConfigurationTest.php</file>
+            <file>ut/Configuration/CacheableRouterConfigurationTest.php</file>
+            <file>ut/Configuration/SimpleAccessRuleConfigurationTest.php</file>
+            <file>ut/Configuration/SimpleFirewallConfigurationTest.php</file>
+            <file>ut/Configuration/ConfigurationValidationTraitTest.php</file>
+            <file>ut/Views/AbstractSmartViewHandlerTest.php</file>
+            <file>ut/Views/JsonViewHandlerTest.php</file>
+            <file>ut/Views/DefaultHtmlRendererTest.php</file>
+            <file>ut/Views/JsonApiRendererTest.php</file>
+            <file>ut/Views/PrefilightResponseTest.php</file>
+            <file>ut/Views/RouteBasedResponseRendererResolverTest.php</file>
+            <file>ut/Routing/GroupUrlMatcherTest.php</file>
+            <file>ut/Routing/GroupUrlGeneratorTest.php</file>
+            <file>ut/Routing/CacheableRouterUrlMatcherWrapperTest.php</file>
+            <file>ut/Routing/InheritableRouteCollectionTest.php</file>
+            <file>ut/Routing/InheritableYamlFileLoaderTest.php</file>
+            <file>ut/Routing/CacheableRouterTest.php</file>
+            <file>ut/Routing/CacheableRouterProviderTest.php</file>
+            <file>ut/Cookie/ResponseCookieContainerTest.php</file>
+            <file>ut/Cookie/SimpleCookieProviderTest.php</file>
+            <file>ut/Middlewares/AbstractMiddlewareTest.php</file>
+            <file>ut/Security/NullEntryPointTest.php</file>
+            <file>ut/Misc/ExtendedArgumentValueResolverTest.php</file>
+            <file>ut/Misc/ExtendedExceptionListnerWrapperTest.php</file>
+            <file>ut/Misc/ChainedParameterBagDataProviderTest.php</file>
+            <file>ut/Misc/UniquenessViolationHttpExceptionTest.php</file>
+            <file>ut/Integration/BootstrapConfigurationIntegrationTest.php</file>
+            <file>ut/Integration/SecurityAuthenticationFlowIntegrationTest.php</file>
+            <file>ut/Integration/SilexKernelCrossCommunityIntegrationTest.php</file>
         </testsuite>
         <testsuite name="exceptions">
             <file>ut/HttpExceptionTest.php</file>
@@ -20,6 +55,7 @@
         <testsuite name="security">
             <file>ut/Security/SecurityServiceProviderTest.php</file>
             <file>ut/Security/SecurityServiceProviderConfigurationTest.php</file>
+            <file>ut/Security/NullEntryPointTest.php</file>
         </testsuite>
         <testsuite name="twig">
             <file>ut/Twig/TwigServiceProviderTest.php</file>
@@ -27,6 +63,56 @@
         </testsuite>
         <testsuite name="aws">
             <file>ut/AwsTests/ElbTrustedProxyTest.php</file>
+        </testsuite>
+        <testsuite name="error-handlers">
+            <file>ut/ErrorHandlers/WrappedExceptionInfoTest.php</file>
+            <file>ut/ErrorHandlers/ExceptionWrapperTest.php</file>
+            <file>ut/ErrorHandlers/JsonErrorHandlerTest.php</file>
+        </testsuite>
+        <testsuite name="configuration">
+            <file>ut/Configuration/HttpConfigurationTest.php</file>
+            <file>ut/Configuration/SecurityConfigurationTest.php</file>
+            <file>ut/Configuration/CrossOriginResourceSharingConfigurationTest.php</file>
+            <file>ut/Configuration/TwigConfigurationTest.php</file>
+            <file>ut/Configuration/CacheableRouterConfigurationTest.php</file>
+            <file>ut/Configuration/SimpleAccessRuleConfigurationTest.php</file>
+            <file>ut/Configuration/SimpleFirewallConfigurationTest.php</file>
+            <file>ut/Configuration/ConfigurationValidationTraitTest.php</file>
+        </testsuite>
+        <testsuite name="views">
+            <file>ut/Views/AbstractSmartViewHandlerTest.php</file>
+            <file>ut/Views/JsonViewHandlerTest.php</file>
+            <file>ut/Views/DefaultHtmlRendererTest.php</file>
+            <file>ut/Views/JsonApiRendererTest.php</file>
+            <file>ut/Views/PrefilightResponseTest.php</file>
+            <file>ut/Views/RouteBasedResponseRendererResolverTest.php</file>
+        </testsuite>
+        <testsuite name="routing">
+            <file>ut/Routing/GroupUrlMatcherTest.php</file>
+            <file>ut/Routing/GroupUrlGeneratorTest.php</file>
+            <file>ut/Routing/CacheableRouterUrlMatcherWrapperTest.php</file>
+            <file>ut/Routing/InheritableRouteCollectionTest.php</file>
+            <file>ut/Routing/InheritableYamlFileLoaderTest.php</file>
+            <file>ut/Routing/CacheableRouterTest.php</file>
+            <file>ut/Routing/CacheableRouterProviderTest.php</file>
+        </testsuite>
+        <testsuite name="cookie">
+            <file>ut/Cookie/ResponseCookieContainerTest.php</file>
+            <file>ut/Cookie/SimpleCookieProviderTest.php</file>
+        </testsuite>
+        <testsuite name="middlewares">
+            <file>ut/Middlewares/AbstractMiddlewareTest.php</file>
+        </testsuite>
+        <testsuite name="misc">
+            <file>ut/Misc/ExtendedArgumentValueResolverTest.php</file>
+            <file>ut/Misc/ExtendedExceptionListnerWrapperTest.php</file>
+            <file>ut/Misc/ChainedParameterBagDataProviderTest.php</file>
+            <file>ut/Misc/UniquenessViolationHttpExceptionTest.php</file>
+        </testsuite>
+        <testsuite name="integration">
+            <file>ut/Integration/BootstrapConfigurationIntegrationTest.php</file>
+            <file>ut/Integration/SecurityAuthenticationFlowIntegrationTest.php</file>
+            <file>ut/Integration/SilexKernelCrossCommunityIntegrationTest.php</file>
         </testsuite>
     </testsuites>
 </phpunit>

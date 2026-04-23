@@ -1,0 +1,9 @@
+simple.home:
+    path: /
+    defaults:
+        _controller: SimpleController::home
+
+simple.about:
+    path: /about
+    defaults:
+        _controller: SimpleController::about

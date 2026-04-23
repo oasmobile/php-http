@@ -79,10 +79,10 @@
   - [x] 9.4 将 3 个测试文件注册到 `phpunit.xml` 的 `integration` suite 和 `all` suite（Ref: Requirement 13, AC 1–2）
   - [x] 9.5 Checkpoint: 运行 `vendor/bin/phpunit --testsuite integration`，全部通过且无 warning，commit
 
-- [~] 10. 现有测试场景补充（R12）— SilexKernel + Cors
-  - [ ] 10.1 分析 `src/SilexKernel.php` 所有未覆盖分支，在 `ut/SilexKernelTest.php` 和 `ut/SilexKernelWebTest.php` 中补充 test method：`__set()` magic properties、`handle()` ELB/CloudFront、`boot()` middleware 注册、getters 各状态、`isGranted()`、`getCacheDirectories()`（Ref: Requirement 12, AC 1）
-  - [ ] 10.2 分析 `src/ServiceProviders/Cors/` 所有未覆盖分支，在 `ut/Cors/CrossOriginResourceSharingTest.php` 和 `ut/Cors/CrossOriginResourceSharingAdvancedTest.php` 中补充 test method：多策略优先级、credentials、headers_exposed、非 preflight（Ref: Requirement 12, AC 2）
-  - [ ] 10.3 Checkpoint: 运行 `vendor/bin/phpunit --testsuite all`（含新增 + 现有），全部通过且无 warning，commit
+- [-] 10. 现有测试场景补充（R12）— SilexKernel + Cors
+  - [x] 10.1 分析 `src/SilexKernel.php` 所有未覆盖分支，在 `ut/SilexKernelTest.php` 和 `ut/SilexKernelWebTest.php` 中补充 test method：`__set()` magic properties、`handle()` ELB/CloudFront、`boot()` middleware 注册、getters 各状态、`isGranted()`、`getCacheDirectories()`（Ref: Requirement 12, AC 1）
+  - [x] 10.2 分析 `src/ServiceProviders/Cors/` 所有未覆盖分支，在 `ut/Cors/CrossOriginResourceSharingTest.php` 和 `ut/Cors/CrossOriginResourceSharingAdvancedTest.php` 中补充 test method：多策略优先级、credentials、headers_exposed、非 preflight（Ref: Requirement 12, AC 2）
+  - [-] 10.3 Checkpoint: 运行 `vendor/bin/phpunit --testsuite all`（含新增 + 现有），全部通过且无 warning，commit
 
 - [~] 11. 现有测试场景补充（R12）— Security + Twig + Aws
   - [ ] 11.1 分析 `src/ServiceProviders/Security/` 所有未覆盖分支，在 `ut/Security/SecurityServiceProviderTest.php` 中补充 test method：认证失败路径、AccessRule 边界、Role Hierarchy 多层（Ref: Requirement 12, AC 3）

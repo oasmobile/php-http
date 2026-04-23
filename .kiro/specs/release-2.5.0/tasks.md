@@ -27,24 +27,24 @@
   - [x] 3.3 确认 `.kiro/specs/php85-test-baseline/` 已移除
   - [x] 3.4 Checkpoint: `docs/changes/2.5.0/specs/php85-test-baseline/` 存在且文件完整，原目录已移除。Commit message: `docs: 归档 feature spec php85-test-baseline`
 
-- [-] 4. 归档 Change 记录
+- [x] 4. 归档 Change 记录
   - [x] 4.1 将 `docs/changes/unreleased/php85-test-baseline.md` 移动到 `docs/changes/2.5.0/php85-test-baseline.md`（Ref: 发布判定 — Changes 记录完整；Design — Change 记录归档）
   - [x] 4.2 确认 `docs/changes/unreleased/php85-test-baseline.md` 已移除
-  - [-] 4.3 Checkpoint: `docs/changes/2.5.0/php85-test-baseline.md` 存在，原文件已移除。Commit message: `docs: 归档 change 记录 php85-test-baseline`
+  - [x] 4.3 Checkpoint: `docs/changes/2.5.0/php85-test-baseline.md` 存在，原文件已移除。Commit message: `docs: 归档 change 记录 php85-test-baseline`
 
-- [~] 5. 确认 Proposal 状态
-  - [ ] 5.1 确认 `docs/proposals/PRP-001-php85-test-baseline.md` 的 status 为 `implemented`，如状态不正确则更新（Ref: 发布判定 — Proposal 状态为 implemented）
-  - [ ] 5.2 Checkpoint: PRP-001 status = `implemented`。Commit message（仅在状态有变更时）: `docs: 更新 PRP-001 状态为 implemented`
+- [x] 5. 确认 Proposal 状态
+  - [x] 5.1 确认 `docs/proposals/PRP-001-php85-test-baseline.md` 的 status 为 `implemented`，如状态不正确则更新（Ref: 发布判定 — Proposal 状态为 implemented）
+  - [x] 5.2 Checkpoint: PRP-001 status = `implemented`。Commit message（仅在状态有变更时）: `docs: 更新 PRP-001 状态为 implemented`
 
-- [~] 6. Final checkpoint — 归档结果验证
-  - [ ] 6.1 确认归档后目录结构符合预期：
-    - [ ] `docs/changes/2.5.0/CHANGELOG.md` 存在且内容完整
-    - [ ] `docs/changes/2.5.0/php85-test-baseline.md` 存在
-    - [ ] `docs/changes/2.5.0/specs/php85-test-baseline/` 存在且文件完整
-    - [ ] `.kiro/specs/php85-test-baseline/` 已移除
-    - [ ] `docs/changes/unreleased/php85-test-baseline.md` 已移除
-  - [ ] 6.2 执行全量测试确认归档操作未影响测试结果：`/usr/local/opt/php@7.1/bin/php vendor/bin/phpunit`
-  - [ ] 6.3 Checkpoint: 目录结构符合预期，全量测试通过。Commit message: `docs: release 2.5.0 归档结果验证`
+- [x] 6. Final checkpoint — 归档结果验证
+  - [x] 6.1 确认归档后目录结构符合预期：
+    - [x] `docs/changes/2.5.0/CHANGELOG.md` 存在且内容完整
+    - [x] `docs/changes/2.5.0/php85-test-baseline.md` 存在
+    - [x] `docs/changes/2.5.0/specs/php85-test-baseline/` 存在且文件完整
+    - [x] `.kiro/specs/php85-test-baseline/` 已移除
+    - [x] `docs/changes/unreleased/php85-test-baseline.md` 已移除
+  - [x] 6.2 执行全量测试确认归档操作未影响测试结果：`/usr/local/opt/php@7.1/bin/php vendor/bin/phpunit`
+  - [x] 6.3 Checkpoint: 目录结构符合预期，全量测试通过。Commit message: `docs: release 2.5.0 归档结果验证`
 
 - [~] 7. Code Review
   - 委托给 code-reviewer sub-agent 执行。Review 范围为 release/2.5.0 分支上 Task 1–6 的所有变更。

@@ -28,5 +28,21 @@
         <testsuite name="aws">
             <file>ut/AwsTests/ElbTrustedProxyTest.php</file>
         </testsuite>
+        <testsuite name="error-handlers">
+        </testsuite>
+        <testsuite name="configuration">
+        </testsuite>
+        <testsuite name="views">
+        </testsuite>
+        <testsuite name="routing">
+        </testsuite>
+        <testsuite name="cookie">
+        </testsuite>
+        <testsuite name="middlewares">
+        </testsuite>
+        <testsuite name="misc">
+        </testsuite>
+        <testsuite name="integration">
+        </testsuite>
     </testsuites>
 </phpunit>

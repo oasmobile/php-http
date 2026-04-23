@@ -12,6 +12,14 @@
             <file>ut/ErrorHandlers/WrappedExceptionInfoTest.php</file>
             <file>ut/ErrorHandlers/ExceptionWrapperTest.php</file>
             <file>ut/ErrorHandlers/JsonErrorHandlerTest.php</file>
+            <file>ut/Configuration/HttpConfigurationTest.php</file>
+            <file>ut/Configuration/SecurityConfigurationTest.php</file>
+            <file>ut/Configuration/CrossOriginResourceSharingConfigurationTest.php</file>
+            <file>ut/Configuration/TwigConfigurationTest.php</file>
+            <file>ut/Configuration/CacheableRouterConfigurationTest.php</file>
+            <file>ut/Configuration/SimpleAccessRuleConfigurationTest.php</file>
+            <file>ut/Configuration/SimpleFirewallConfigurationTest.php</file>
+            <file>ut/Configuration/ConfigurationValidationTraitTest.php</file>
         </testsuite>
         <testsuite name="exceptions">
             <file>ut/HttpExceptionTest.php</file>
@@ -37,6 +45,14 @@
             <file>ut/ErrorHandlers/JsonErrorHandlerTest.php</file>
         </testsuite>
         <testsuite name="configuration">
+            <file>ut/Configuration/HttpConfigurationTest.php</file>
+            <file>ut/Configuration/SecurityConfigurationTest.php</file>
+            <file>ut/Configuration/CrossOriginResourceSharingConfigurationTest.php</file>
+            <file>ut/Configuration/TwigConfigurationTest.php</file>
+            <file>ut/Configuration/CacheableRouterConfigurationTest.php</file>
+            <file>ut/Configuration/SimpleAccessRuleConfigurationTest.php</file>
+            <file>ut/Configuration/SimpleFirewallConfigurationTest.php</file>
+            <file>ut/Configuration/ConfigurationValidationTraitTest.php</file>
         </testsuite>
         <testsuite name="views">
         </testsuite>

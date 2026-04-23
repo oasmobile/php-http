@@ -59,6 +59,6 @@
 
 ## Notes
 
-- 依赖 Phase 0 完成（测试框架可用）
+- 依赖 PRP-001（测试覆盖补全）和 PRP-002（Phase 0 依赖升级）完成
 - Symfony Security 组件虽然在此 Phase 升级到 7.x，但 authenticator 系统的重写放在 Phase 3 单独处理；本 Phase 仅做最小可编译的适配
 - `symfony/twig-bridge` 版本约束随 Symfony 组件统一升级到 7.x，但 Twig 本体（`twig/twig`）的升级和模板适配放在 Phase 2

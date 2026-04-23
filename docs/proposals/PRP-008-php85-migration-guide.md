@@ -74,7 +74,7 @@
 
 - `docs/notes/php85-upgrade.md` — 升级调研 note
 - `docs/state/architecture.md` — 当前架构（公共 API 和 Bootstrap Config 定义）
-- `docs/proposals/PRP-001-php85-phase0-prerequisites.md` ~ `docs/proposals/PRP-006-php85-phase5-validation-stabilization.md` — 各 Phase 的 proposal
+- `docs/proposals/PRP-002-php85-phase0-prerequisites.md` ~ `docs/proposals/PRP-007-php85-phase5-validation-stabilization.md` — 各 Phase 的 proposal
 
 ## Notes
 

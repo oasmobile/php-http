@@ -20,7 +20,7 @@ class IntegrationController
     {
         return [
             'called' => __CLASS__ . '::' . __FUNCTION__ . '()',
-            'user'   => (string) $app->getUser(),
+            'user'   => $app->getUser()->getUsername(),
             'admin'  => $app->isGranted('ROLE_ADMIN'),
         ];
     }
@@ -29,7 +29,7 @@ class IntegrationController
     {
         return [
             'called' => __CLASS__ . '::' . __FUNCTION__ . '()',
-            'user'   => (string) $app->getUser(),
+            'user'   => $app->getUser()->getUsername(),
         ];
     }
 
@@ -37,7 +37,7 @@ class IntegrationController
     {
         return [
             'called' => __CLASS__ . '::' . __FUNCTION__ . '()',
-            'user'   => (string) $app->getUser(),
+            'user'   => $app->getUser()->getUsername(),
             'parent' => $app->isGranted('ROLE_PARENT'),
         ];
     }
@@ -46,7 +46,7 @@ class IntegrationController
     {
         return [
             'called' => __CLASS__ . '::' . __FUNCTION__ . '()',
-            'user'   => (string) $app->getUser(),
+            'user'   => $app->getUser()->getUsername(),
             'child'  => $app->isGranted('ROLE_CHILD'),
         ];
     }

@@ -3,6 +3,7 @@
 namespace Oasis\Mlib\Http\Test\Cors;
 
 use Oasis\Mlib\Http\ServiceProviders\Cors\CrossOriginResourceSharingProvider;
+use Oasis\Mlib\Http\Test\Helpers\RouteCacheCleaner;
 use Silex\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
@@ -15,7 +16,14 @@ use Symfony\Component\HttpKernel\HttpKernelInterface;
  */
 class CrossOriginResourceSharingTest extends WebTestCase
 {
-    
+    use RouteCacheCleaner;
+
+    protected function setUp()
+    {
+        $this->cleanRouteCache(__DIR__ . '/../cache');
+        parent::setUp();
+    }
+
     /**
      * Creates the application.
      *

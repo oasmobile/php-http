@@ -1,5 +1,6 @@
 <?php
 use Oasis\Mlib\Http\SilexKernel;
+use Oasis\Mlib\Http\Test\Helpers\RouteCacheCleaner;
 use Oasis\Mlib\Http\Views\JsonViewHandler;
 use Oasis\Mlib\Utils\StringUtils;
 use Silex\WebTestCase;
@@ -15,7 +16,14 @@ use Symfony\Component\HttpKernel\HttpKernelInterface;
  */
 class SilexKernelWebTest extends WebTestCase
 {
-    
+    use RouteCacheCleaner;
+
+    protected function setUp()
+    {
+        $this->cleanRouteCache(__DIR__ . '/cache');
+        parent::setUp();
+    }
+
     /**
      * Creates the application.
      *
@@ -345,6 +353,14 @@ class SilexKernelWebTest extends WebTestCase
  */
 class SilexKernelWebElbTest extends WebTestCase
 {
+    use RouteCacheCleaner;
+
+    protected function setUp()
+    {
+        $this->cleanRouteCache(__DIR__ . '/cache');
+        parent::setUp();
+    }
+
     /**
      * Creates the application with behind_elb = true.
      *

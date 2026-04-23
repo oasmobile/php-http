@@ -14,6 +14,7 @@ use Oasis\Mlib\Http\ServiceProviders\Security\SimpleSecurityProvider;
 use Oasis\Mlib\Http\ServiceProviders\Security\SimpleFirewall;
 use Oasis\Mlib\Http\SilexKernel;
 use Oasis\Mlib\Http\Test\Helpers\Middlewares\TestMiddleware;
+use Oasis\Mlib\Http\Test\Helpers\RouteCacheCleaner;
 use Oasis\Mlib\Http\Test\Helpers\Security\TestAccessRule;
 use Oasis\Mlib\Http\Test\Helpers\Security\TestApiUserProvider;
 use Oasis\Mlib\Http\Test\Helpers\Security\TestAuthenticationPolicy;
@@ -25,19 +26,15 @@ use Symfony\Component\HttpFoundation\Response;
 
 class BootstrapConfigurationIntegrationTest extends TestCase
 {
+    use RouteCacheCleaner;
+
     /**
      * Clean route cache before each test to avoid stale cache issues.
      */
     protected function setUp()
     {
         parent::setUp();
-        $cacheDir = __DIR__ . '/../cache';
-        foreach (glob($cacheDir . '/Project*.php') as $file) {
-            @unlink($file);
-        }
-        foreach (glob($cacheDir . '/Project*.php.meta') as $file) {
-            @unlink($file);
-        }
+        $this->cleanRouteCache(__DIR__ . '/../cache');
     }
 
     // ---------------------------------------------------------------

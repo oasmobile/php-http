@@ -2,6 +2,7 @@
 
 use Oasis\Mlib\Http\SilexKernel;
 use Oasis\Mlib\Http\Test\Helpers\Middlewares\TestMiddleware;
+use Oasis\Mlib\Http\Test\Helpers\RouteCacheCleaner;
 use Oasis\Mlib\Http\Views\JsonViewHandler;
 use PHPUnit\Framework\TestCase;
 use Pimple\ServiceProviderInterface;
@@ -22,6 +23,8 @@ use Symfony\Component\Security\Core\User\UserInterface;
  */
 class SilexKernelTest extends TestCase
 {
+    use RouteCacheCleaner;
+
     /** @var int|null saved trusted header set before each test */
     private $savedTrustedHeaderSet;
     /** @var array saved trusted proxies before each test */
@@ -30,6 +33,7 @@ class SilexKernelTest extends TestCase
     protected function setUp()
     {
         parent::setUp();
+        $this->cleanRouteCache(__DIR__ . '/cache');
         $this->savedTrustedProxies   = Request::getTrustedProxies();
         $this->savedTrustedHeaderSet = Request::getTrustedHeaderSet();
     }

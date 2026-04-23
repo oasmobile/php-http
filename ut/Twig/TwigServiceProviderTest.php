@@ -2,6 +2,7 @@
 
 namespace Oasis\Mlib\Http\Test\Twig;
 
+use Oasis\Mlib\Http\Test\Helpers\RouteCacheCleaner;
 use Silex\WebTestCase;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 
@@ -13,7 +14,14 @@ use Symfony\Component\HttpKernel\HttpKernelInterface;
  */
 class TwigServiceProviderTest extends WebTestCase
 {
-    
+    use RouteCacheCleaner;
+
+    protected function setUp()
+    {
+        $this->cleanRouteCache(__DIR__ . '/../cache');
+        parent::setUp();
+    }
+
     /**
      * Creates the application.
      *

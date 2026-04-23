@@ -2,6 +2,7 @@
 
 namespace Oasis\Mlib\Http\Test\Security;
 
+use Oasis\Mlib\Http\Test\Helpers\RouteCacheCleaner;
 use Silex\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
@@ -14,7 +15,14 @@ use Symfony\Component\HttpKernel\HttpKernelInterface;
  */
 class SecurityServiceProviderTest extends WebTestCase
 {
-    
+    use RouteCacheCleaner;
+
+    protected function setUp()
+    {
+        $this->cleanRouteCache(__DIR__ . '/../cache');
+        parent::setUp();
+    }
+
     /**
      * Creates the application.
      *

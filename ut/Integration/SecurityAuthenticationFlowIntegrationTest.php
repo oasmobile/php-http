@@ -8,12 +8,15 @@
 
 namespace Oasis\Mlib\Http\Test\Integration;
 
+use Oasis\Mlib\Http\Test\Helpers\RouteCacheCleaner;
 use Silex\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 
 class SecurityAuthenticationFlowIntegrationTest extends WebTestCase
 {
+    use RouteCacheCleaner;
+
     /**
      * Creates the application.
      *
@@ -30,15 +33,7 @@ class SecurityAuthenticationFlowIntegrationTest extends WebTestCase
 
     protected function setUp()
     {
-        // Clear route cache to avoid stale cache issues
-        $cacheDir = __DIR__ . '/../cache';
-        foreach (glob($cacheDir . '/Project*.php') as $file) {
-            unlink($file);
-        }
-        foreach (glob($cacheDir . '/Project*.php.meta') as $file) {
-            unlink($file);
-        }
-
+        $this->cleanRouteCache(__DIR__ . '/../cache');
         parent::setUp();
     }
 

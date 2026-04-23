@@ -6,7 +6,7 @@
 
 ## Tasks
 
-- [ ] 1. 全量测试确认与简化 Stabilize
+- [-] 1. 全量测试确认与简化 Stabilize
   - [ ] 1.1 在 release/2.5.0 分支上执行全量测试，确认 333 tests / 597 assertions 全部通过。测试命令：`/usr/local/opt/php@7.1/bin/php vendor/bin/phpunit`（Ref: 发布判定 — 全量测试通过）
   - [ ] 1.2 手工测试确认 suite 完整性：
     - [ ] 所有 8 个新增 suite 可独立运行（`error-handlers`、`configuration`、`views`、`routing`、`cookie`、`middlewares`、`misc`、`integration`）
@@ -16,27 +16,27 @@
   - [ ] 1.3 Increment alpha tag：查询已有 alpha tag，打 `v2.5.0-alpha1` tag（`git tag v2.5.0-alpha1`）
   - [ ] 1.4 Checkpoint: 全量测试输出 333 tests / 597 assertions / 0 failures / 0 errors，手工测试各项确认通过，alpha tag 已打。Commit message: `test: release 2.5.0 全量测试确认与 alpha tag`
 
-- [ ] 2. 生成 CHANGELOG.md
+- [~] 2. 生成 CHANGELOG.md
   - [ ] 2.1 创建 `docs/changes/2.5.0/` 目录，在其中创建 `CHANGELOG.md`（Ref: 发布判定 — Changes 记录完整；Requirements CR Q3 = A）
   - [ ] 2.2 基于 `docs/changes/unreleased/php85-test-baseline.md` 的内容生成变更汇总。CHANGELOG 结构：标题（`# Changelog — v2.5.0`）、Release date（填入实际日期）、Summary（一段话概述）、Features section（从 change 记录提取 Added / Changed / Test Coverage）
   - [ ] 2.3 Checkpoint: `docs/changes/2.5.0/CHANGELOG.md` 存在且内容完整，包含标题、日期、摘要、Features section。Commit message: `docs: 生成 release 2.5.0 CHANGELOG`
 
-- [ ] 3. 归档 Feature Spec
+- [~] 3. 归档 Feature Spec
   - [ ] 3.1 将 `.kiro/specs/php85-test-baseline/` 整个目录移动到 `docs/changes/2.5.0/specs/php85-test-baseline/`（Ref: Requirements CR Q2 = A；Design — Feature Spec 归档）
   - [ ] 3.2 确认归档文件清单完整：`goal.md`、`requirements.md`、`design.md`、`tasks.md`、`.config.kiro`、`tests/` 目录（如有内容）
   - [ ] 3.3 确认 `.kiro/specs/php85-test-baseline/` 已移除
   - [ ] 3.4 Checkpoint: `docs/changes/2.5.0/specs/php85-test-baseline/` 存在且文件完整，原目录已移除。Commit message: `docs: 归档 feature spec php85-test-baseline`
 
-- [ ] 4. 归档 Change 记录
+- [~] 4. 归档 Change 记录
   - [ ] 4.1 将 `docs/changes/unreleased/php85-test-baseline.md` 移动到 `docs/changes/2.5.0/php85-test-baseline.md`（Ref: 发布判定 — Changes 记录完整；Design — Change 记录归档）
   - [ ] 4.2 确认 `docs/changes/unreleased/php85-test-baseline.md` 已移除
   - [ ] 4.3 Checkpoint: `docs/changes/2.5.0/php85-test-baseline.md` 存在，原文件已移除。Commit message: `docs: 归档 change 记录 php85-test-baseline`
 
-- [ ] 5. 确认 Proposal 状态
+- [~] 5. 确认 Proposal 状态
   - [ ] 5.1 确认 `docs/proposals/PRP-001-php85-test-baseline.md` 的 status 为 `implemented`，如状态不正确则更新（Ref: 发布判定 — Proposal 状态为 implemented）
   - [ ] 5.2 Checkpoint: PRP-001 status = `implemented`。Commit message（仅在状态有变更时）: `docs: 更新 PRP-001 状态为 implemented`
 
-- [ ] 6. Final checkpoint — 归档结果验证
+- [~] 6. Final checkpoint — 归档结果验证
   - [ ] 6.1 确认归档后目录结构符合预期：
     - [ ] `docs/changes/2.5.0/CHANGELOG.md` 存在且内容完整
     - [ ] `docs/changes/2.5.0/php85-test-baseline.md` 存在
@@ -46,7 +46,7 @@
   - [ ] 6.2 执行全量测试确认归档操作未影响测试结果：`/usr/local/opt/php@7.1/bin/php vendor/bin/phpunit`
   - [ ] 6.3 Checkpoint: 目录结构符合预期，全量测试通过。Commit message: `docs: release 2.5.0 归档结果验证`
 
-- [ ] 7. Code Review
+- [~] 7. Code Review
   - 委托给 code-reviewer sub-agent 执行。Review 范围为 release/2.5.0 分支上 Task 1–6 的所有变更。
 
 ## Issues

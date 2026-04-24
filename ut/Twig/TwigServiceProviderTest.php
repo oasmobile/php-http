@@ -306,4 +306,148 @@ class TwigServiceProviderTest extends WebTestCase
         $app->boot();
         $this->assertInstanceOf(\Twig\Environment::class, $app->getTwig());
     }
+
+    // --- strict_variables / auto_reload tests (R4 AC1/AC2, R5 AC1) ---
+
+    /**
+     * strict_variables: enabled by default when not explicitly configured.
+     *
+     * @runInSeparateProcess
+     */
+    public function testStrictVariablesEnabledByDefault()
+    {
+        $config = [
+            'cache_dir' => static::createTempCacheDir(),
+            'routing'   => [
+                'path'       => __DIR__ . '/../routes.yml',
+                'namespaces' => ['Oasis\\Mlib\\Http\\Test\\Helpers\\Controllers\\'],
+            ],
+            'twig'      => [
+                'template_dir' => __DIR__ . '/templates',
+                // strict_variables not set — should default to true
+            ],
+        ];
+        $app = new MicroKernel($config, true);
+        $app->boot();
+        $twig = $app->getTwig();
+        $this->assertTrue($twig->isStrictVariables());
+    }
+
+    /**
+     * strict_variables: disabled when explicitly configured to false.
+     *
+     * @runInSeparateProcess
+     */
+    public function testStrictVariablesDisabledWhenConfigured()
+    {
+        $config = [
+            'cache_dir' => static::createTempCacheDir(),
+            'routing'   => [
+                'path'       => __DIR__ . '/../routes.yml',
+                'namespaces' => ['Oasis\\Mlib\\Http\\Test\\Helpers\\Controllers\\'],
+            ],
+            'twig'      => [
+                'template_dir'     => __DIR__ . '/templates',
+                'strict_variables' => false,
+            ],
+        ];
+        $app = new MicroKernel($config, true);
+        $app->boot();
+        $twig = $app->getTwig();
+        $this->assertFalse($twig->isStrictVariables());
+    }
+
+    /**
+     * auto_reload: enabled in debug mode when auto_reload is not configured (null → auto-detect).
+     *
+     * @runInSeparateProcess
+     */
+    public function testAutoReloadEnabledInDebugMode()
+    {
+        $config = [
+            'cache_dir' => static::createTempCacheDir(),
+            'routing'   => [
+                'path'       => __DIR__ . '/../routes.yml',
+                'namespaces' => ['Oasis\\Mlib\\Http\\Test\\Helpers\\Controllers\\'],
+            ],
+            'twig'      => [
+                'template_dir' => __DIR__ . '/templates',
+                // auto_reload not set — should auto-detect via isDebug()
+            ],
+        ];
+        // debug = true
+        $app = new MicroKernel($config, true);
+        $app->boot();
+        $twig = $app->getTwig();
+        $this->assertTrue($twig->isAutoReload());
+    }
+
+    /**
+     * auto_reload: disabled in non-debug mode when auto_reload is not configured (null → auto-detect).
+     *
+     * @runInSeparateProcess
+     */
+    public function testAutoReloadDisabledInNonDebugMode()
+    {
+        $config = [
+            'cache_dir' => static::createTempCacheDir(),
+            'routing'   => [
+                'path'       => __DIR__ . '/../routes.yml',
+                'namespaces' => ['Oasis\\Mlib\\Http\\Test\\Helpers\\Controllers\\'],
+            ],
+            'twig'      => [
+                'template_dir' => __DIR__ . '/templates',
+                // auto_reload not set — should auto-detect via isDebug()
+            ],
+        ];
+        // debug = false
+        $app = new MicroKernel($config, false);
+        $app->boot();
+        $twig = $app->getTwig();
+        $this->assertFalse($twig->isAutoReload());
+    }
+
+    /**
+     * auto_reload: explicit configuration overrides auto-detect logic.
+     *
+     * @runInSeparateProcess
+     */
+    public function testAutoReloadExplicitOverride()
+    {
+        // Case 1: debug=true but auto_reload explicitly set to false
+        $config = [
+            'cache_dir' => static::createTempCacheDir(),
+            'routing'   => [
+                'path'       => __DIR__ . '/../routes.yml',
+                'namespaces' => ['Oasis\\Mlib\\Http\\Test\\Helpers\\Controllers\\'],
+            ],
+            'twig'      => [
+                'template_dir' => __DIR__ . '/templates',
+                'auto_reload'  => false,
+            ],
+        ];
+        $app = new MicroKernel($config, true);
+        $app->boot();
+        $twig = $app->getTwig();
+        $this->assertFalse($twig->isAutoReload(), 'auto_reload=false should override debug=true');
+
+        $app->shutdown();
+
+        // Case 2: debug=false but auto_reload explicitly set to true
+        $config2 = [
+            'cache_dir' => static::createTempCacheDir(),
+            'routing'   => [
+                'path'       => __DIR__ . '/../routes.yml',
+                'namespaces' => ['Oasis\\Mlib\\Http\\Test\\Helpers\\Controllers\\'],
+            ],
+            'twig'      => [
+                'template_dir' => __DIR__ . '/templates',
+                'auto_reload'  => true,
+            ],
+        ];
+        $app2 = new MicroKernel($config2, false);
+        $app2->boot();
+        $twig2 = $app2->getTwig();
+        $this->assertTrue($twig2->isAutoReload(), 'auto_reload=true should override debug=false');
+    }
 }

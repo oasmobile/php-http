@@ -34,15 +34,25 @@ class SimpleTwigServiceProvider
     {
         $dataProvider = $this->processConfiguration($twigConfig, new TwigConfiguration());
 
-        $templateDir = $dataProvider->getMandatory('template_dir');
-        $cacheDir    = $dataProvider->getOptional('cache_dir');
-        $assetBase   = $dataProvider->getOptional('asset_base', DataProviderInterface::STRING_TYPE, '');
-        $globals     = $dataProvider->getOptional('globals', DataProviderInterface::ARRAY_TYPE, []);
+        $templateDir     = $dataProvider->getMandatory('template_dir');
+        $cacheDir        = $dataProvider->getOptional('cache_dir');
+        $assetBase       = $dataProvider->getOptional('asset_base', DataProviderInterface::STRING_TYPE, '');
+        $globals         = $dataProvider->getOptional('globals', DataProviderInterface::ARRAY_TYPE, []);
+        $strictVariables = $dataProvider->getOptional('strict_variables', DataProviderInterface::BOOL_TYPE, true);
+        $autoReload      = $dataProvider->getOptional('auto_reload', DataProviderInterface::MIXED_TYPE);
 
         // Build Twig options
         $options = [];
         if ($cacheDir) {
             $options['cache'] = $cacheDir;
+        }
+        $options['strict_variables'] = $strictVariables;
+
+        // auto_reload: null → auto-detect via $kernel->isDebug(); otherwise use explicit value
+        if ($autoReload === null) {
+            $options['auto_reload'] = $kernel->isDebug();
+        } else {
+            $options['auto_reload'] = (bool) $autoReload;
         }
 
         // Create Twig environment

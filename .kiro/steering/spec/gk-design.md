@@ -84,6 +84,7 @@ Release spec 的 design 结构不同，应包含以下内容：
 Impact Analysis 必须至少覆盖以下维度：
 
 - [ ] 受影响的 state 文档条目（具体文件名及 section）
+- [ ] 如果存在 `graphify-out/GRAPH_REPORT.md`，是否参考了该文件的项目架构
 - [ ] 现有 model / service / CLI 行为的变化
 - [ ] 是否涉及数据模型变更——如涉及，是否提醒了旧数据兼容
 - [ ] 是否涉及外部系统交互变化

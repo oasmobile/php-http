@@ -1,448 +1,651 @@
-# Graph Report - .  (2026-04-23)
+# Graph Report - .  (2026-04-24)
 
 ## Corpus Check
-- 108 files · ~65,052 words
+- 92 files · ~50,000 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 566 nodes · 647 edges · 71 communities detected
-- Extraction: 86% EXTRACTED · 14% INFERRED · 0% AMBIGUOUS · INFERRED: 88 edges (avg confidence: 0.79)
+- 1111 nodes · 1313 edges · 109 communities detected
+- Extraction: 91% EXTRACTED · 9% INFERRED · 0% AMBIGUOUS · INFERRED: 115 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Community Hubs (Navigation)
-- [[_COMMUNITY_jQuery & Test Helpers|jQuery & Test Helpers]]
-- [[_COMMUNITY_Kernel Core & Middleware|Kernel Core & Middleware]]
-- [[_COMMUNITY_Documentation Concepts|Documentation Concepts]]
-- [[_COMMUNITY_Security Provider Core|Security Provider Core]]
-- [[_COMMUNITY_Configuration & Bootstrap|Configuration & Bootstrap]]
+- [[_COMMUNITY_Cacheable Router & Routing|Cacheable Router & Routing]]
+- [[_COMMUNITY_CORS Advanced Tests|CORS Advanced Tests]]
+- [[_COMMUNITY_Security Firewall & Access Rules|Security Firewall & Access Rules]]
+- [[_COMMUNITY_Upgrade Planning & Concepts|Upgrade Planning & Concepts]]
+- [[_COMMUNITY_SilexKernel Unit Tests|SilexKernel Unit Tests]]
+- [[_COMMUNITY_Middleware & Controllers|Middleware & Controllers]]
 - [[_COMMUNITY_CORS Provider & Preflight|CORS Provider & Preflight]]
+- [[_COMMUNITY_Cookie Management|Cookie Management]]
+- [[_COMMUNITY_Architecture Documentation|Architecture Documentation]]
 - [[_COMMUNITY_Error Handling & Renderers|Error Handling & Renderers]]
-- [[_COMMUNITY_Test Controllers|Test Controllers]]
-- [[_COMMUNITY_Pre-Authentication|Pre-Authentication]]
-- [[_COMMUNITY_Cookie & Middleware Interface|Cookie & Middleware Interface]]
-- [[_COMMUNITY_Kernel Web Tests|Kernel Web Tests]]
-- [[_COMMUNITY_CORS Tests|CORS Tests]]
-- [[_COMMUNITY_Security Tests|Security Tests]]
-- [[_COMMUNITY_URL Generator & ZXC|URL Generator & ZXC]]
-- [[_COMMUNITY_Documentation Governance|Documentation Governance]]
-- [[_COMMUNITY_View Handler Interfaces|View Handler Interfaces]]
-- [[_COMMUNITY_Smart View & JSON Handler|Smart View & JSON Handler]]
-- [[_COMMUNITY_HTTP Exception & Route Collection|HTTP Exception & Route Collection]]
-- [[_COMMUNITY_Pre-Auth Policy Abstract|Pre-Auth Policy Abstract]]
-- [[_COMMUNITY_URL Matcher Wrapper|URL Matcher Wrapper]]
-- [[_COMMUNITY_Fallback View Tests|Fallback View Tests]]
-- [[_COMMUNITY_ELB Proxy Tests|ELB Proxy Tests]]
-- [[_COMMUNITY_Group URL Matcher|Group URL Matcher]]
+- [[_COMMUNITY_Bootstrap Integration Tests|Bootstrap Integration Tests]]
+- [[_COMMUNITY_Security Provider Tests|Security Provider Tests]]
+- [[_COMMUNITY_CORS Basic Tests|CORS Basic Tests]]
+- [[_COMMUNITY_Pre-Authentication System|Pre-Authentication System]]
+- [[_COMMUNITY_WrappedExceptionInfo Tests|WrappedExceptionInfo Tests]]
+- [[_COMMUNITY_AWS Trusted Proxy Tests|AWS Trusted Proxy Tests]]
+- [[_COMMUNITY_ChainedParameterBag Tests|ChainedParameterBag Tests]]
+- [[_COMMUNITY_SmartViewHandler Tests|SmartViewHandler Tests]]
+- [[_COMMUNITY_ArgumentValueResolver Tests|ArgumentValueResolver Tests]]
+- [[_COMMUNITY_CORS Configuration Tests|CORS Configuration Tests]]
+- [[_COMMUNITY_DefaultHtmlRenderer Tests|DefaultHtmlRenderer Tests]]
+- [[_COMMUNITY_SimpleFirewall Config Tests|SimpleFirewall Config Tests]]
+- [[_COMMUNITY_SimpleAccessRule Config Tests|SimpleAccessRule Config Tests]]
+- [[_COMMUNITY_HttpConfiguration Tests|HttpConfiguration Tests]]
+- [[_COMMUNITY_Security Auth Flow Tests|Security Auth Flow Tests]]
+- [[_COMMUNITY_RouterUrlMatcher Tests|RouterUrlMatcher Tests]]
+- [[_COMMUNITY_TwigConfiguration Tests|TwigConfiguration Tests]]
+- [[_COMMUNITY_JsonApiRenderer Tests|JsonApiRenderer Tests]]
+- [[_COMMUNITY_CacheableRouter Config Tests|CacheableRouter Config Tests]]
+- [[_COMMUNITY_SecurityConfiguration Tests|SecurityConfiguration Tests]]
+- [[_COMMUNITY_CacheableRouter Tests|CacheableRouter Tests]]
+- [[_COMMUNITY_JsonViewHandler Tests|JsonViewHandler Tests]]
+- [[_COMMUNITY_PrefilightResponse Tests|PrefilightResponse Tests]]
+- [[_COMMUNITY_URL Generator|URL Generator]]
+- [[_COMMUNITY_Agent & Spec Workflow|Agent & Spec Workflow]]
+- [[_COMMUNITY_ExceptionListenerWrapper Tests|ExceptionListenerWrapper Tests]]
+- [[_COMMUNITY_Integration Controllers|Integration Controllers]]
+- [[_COMMUNITY_GroupUrlGenerator Tests|GroupUrlGenerator Tests]]
+- [[_COMMUNITY_ResponseRenderer Tests|ResponseRenderer Tests]]
+- [[_COMMUNITY_FallbackViewHandler|FallbackViewHandler]]
+- [[_COMMUNITY_AbstractSmartViewHandler|AbstractSmartViewHandler]]
+- [[_COMMUNITY_Twig Template Cache|Twig Template Cache]]
+- [[_COMMUNITY_ExceptionWrapper Tests|ExceptionWrapper Tests]]
+- [[_COMMUNITY_JsonErrorHandler Tests|JsonErrorHandler Tests]]
+- [[_COMMUNITY_InheritableRouteCollection Tests|InheritableRouteCollection Tests]]
+- [[_COMMUNITY_GroupUrlMatcher Tests|GroupUrlMatcher Tests]]
+- [[_COMMUNITY_Pre-Auth Policy|Pre-Auth Policy]]
+- [[_COMMUNITY_HttpException Tests|HttpException Tests]]
+- [[_COMMUNITY_UniquenessViolation Tests|UniquenessViolation Tests]]
+- [[_COMMUNITY_GroupUrlMatcher|GroupUrlMatcher]]
+- [[_COMMUNITY_ConfigValidationTrait Tests|ConfigValidationTrait Tests]]
 - [[_COMMUNITY_Firewall Interface|Firewall Interface]]
-- [[_COMMUNITY_User Provider Abstract|User Provider Abstract]]
+- [[_COMMUNITY_Pre-Auth UserProvider|Pre-Auth UserProvider]]
 - [[_COMMUNITY_CORS Controller|CORS Controller]]
-- [[_COMMUNITY_Argument Value Resolver|Argument Value Resolver]]
-- [[_COMMUNITY_Session Listener|Session Listener]]
-- [[_COMMUNITY_Advanced CORS Tests|Advanced CORS Tests]]
-- [[_COMMUNITY_Cached URL Matcher|Cached URL Matcher]]
-- [[_COMMUNITY_Twig Tests|Twig Tests]]
-- [[_COMMUNITY_Test User Provider|Test User Provider]]
-- [[_COMMUNITY_Fallback Controller|Fallback Controller]]
-- [[_COMMUNITY_Twig Controller|Twig Controller]]
-- [[_COMMUNITY_AWS Controller|AWS Controller]]
-- [[_COMMUNITY_Chained Parameter Bag|Chained Parameter Bag]]
-- [[_COMMUNITY_Issue Management|Issue Management]]
+- [[_COMMUNITY_ArgumentValueResolver|ArgumentValueResolver]]
+- [[_COMMUNITY_AbstractMiddleware Tests|AbstractMiddleware Tests]]
+- [[_COMMUNITY_ResponseCookieContainer Tests|ResponseCookieContainer Tests]]
+- [[_COMMUNITY_CacheableRouterProvider Tests|CacheableRouterProvider Tests]]
 - [[_COMMUNITY_Session Provider|Session Provider]]
+- [[_COMMUNITY_ProjectUrlMatcher Cache|ProjectUrlMatcher Cache]]
+- [[_COMMUNITY_TestApiUserProvider|TestApiUserProvider]]
+- [[_COMMUNITY_FallbackController|FallbackController]]
+- [[_COMMUNITY_TwigController|TwigController]]
+- [[_COMMUNITY_AwsController|AwsController]]
+- [[_COMMUNITY_ChainedParameterBag|ChainedParameterBag]]
+- [[_COMMUNITY_Issue Tracking|Issue Tracking]]
+- [[_COMMUNITY_NullEntryPoint Tests|NullEntryPoint Tests]]
+- [[_COMMUNITY_SimpleCookieProvider Tests|SimpleCookieProvider Tests]]
+- [[_COMMUNITY_YamlFileLoader Tests|YamlFileLoader Tests]]
+- [[_COMMUNITY_SessionServiceProvider|SessionServiceProvider]]
 - [[_COMMUNITY_Security Config Tests|Security Config Tests]]
 - [[_COMMUNITY_Twig Config Tests|Twig Config Tests]]
-- [[_COMMUNITY_Test Access Rule|Test Access Rule]]
-- [[_COMMUNITY_Test Auth Policy|Test Auth Policy]]
-- [[_COMMUNITY_Test Pre-Authenticator|Test Pre-Authenticator]]
-- [[_COMMUNITY_Exception Test Controller|Exception Test Controller]]
-- [[_COMMUNITY_Exception Listener Wrapper|Exception Listener Wrapper]]
-- [[_COMMUNITY_Twig Configuration|Twig Configuration]]
-- [[_COMMUNITY_Router Configuration|Router Configuration]]
-- [[_COMMUNITY_Security Configuration|Security Configuration]]
-- [[_COMMUNITY_Access Rule Configuration|Access Rule Configuration]]
-- [[_COMMUNITY_Firewall Configuration|Firewall Configuration]]
-- [[_COMMUNITY_CORS Configuration|CORS Configuration]]
-- [[_COMMUNITY_HTTP Configuration|HTTP Configuration]]
-- [[_COMMUNITY_Uniqueness Violation Exception|Uniqueness Violation Exception]]
-- [[_COMMUNITY_JSON Error Handler|JSON Error Handler]]
-- [[_COMMUNITY_Null Entry Point|Null Entry Point]]
-- [[_COMMUNITY_YAML File Loader|YAML File Loader]]
-- [[_COMMUNITY_Route-Based Renderer Resolver|Route-Based Renderer Resolver]]
-- [[_COMMUNITY_App Bootstrap|App Bootstrap]]
-- [[_COMMUNITY_ZXC Index|ZXC Index]]
-- [[_COMMUNITY_Test Bootstrap|Test Bootstrap]]
+- [[_COMMUNITY_TestAccessRule|TestAccessRule]]
+- [[_COMMUNITY_TestAuthPolicy|TestAuthPolicy]]
+- [[_COMMUNITY_TestPreAuthenticator|TestPreAuthenticator]]
+- [[_COMMUNITY_ExceptionTestController|ExceptionTestController]]
+- [[_COMMUNITY_ExceptionListenerWrapper|ExceptionListenerWrapper]]
+- [[_COMMUNITY_TwigConfiguration|TwigConfiguration]]
+- [[_COMMUNITY_CacheableRouterConfiguration|CacheableRouterConfiguration]]
+- [[_COMMUNITY_SecurityConfiguration|SecurityConfiguration]]
+- [[_COMMUNITY_SimpleAccessRuleConfiguration|SimpleAccessRuleConfiguration]]
+- [[_COMMUNITY_SimpleFirewallConfiguration|SimpleFirewallConfiguration]]
+- [[_COMMUNITY_CORSConfiguration|CORSConfiguration]]
+- [[_COMMUNITY_HttpConfiguration|HttpConfiguration]]
+- [[_COMMUNITY_UniquenessViolationException|UniquenessViolationException]]
+- [[_COMMUNITY_JsonErrorHandler|JsonErrorHandler]]
+- [[_COMMUNITY_NullEntryPoint|NullEntryPoint]]
+- [[_COMMUNITY_InheritableYamlFileLoader|InheritableYamlFileLoader]]
+- [[_COMMUNITY_RouteBasedRendererResolver|RouteBasedRendererResolver]]
+- [[_COMMUNITY_App Entry Point|App Entry Point]]
+- [[_COMMUNITY_ZXC Entry Point|ZXC Entry Point]]
+- [[_COMMUNITY_Bootstrap Entry|Bootstrap Entry]]
 - [[_COMMUNITY_Test Entry|Test Entry]]
-- [[_COMMUNITY_Twig Index|Twig Index]]
-- [[_COMMUNITY_Security Index|Security Index]]
-- [[_COMMUNITY_CORS Index|CORS Index]]
-- [[_COMMUNITY_ELB Bootstrap|ELB Bootstrap]]
-- [[_COMMUNITY_Security App Config 2|Security App Config 2]]
-- [[_COMMUNITY_Security App Config|Security App Config]]
-- [[_COMMUNITY_CORS App Config|CORS App Config]]
-- [[_COMMUNITY_Advanced CORS App Config|Advanced CORS App Config]]
-- [[_COMMUNITY_Twig App Config|Twig App Config]]
-- [[_COMMUNITY_Twig App Config 2|Twig App Config 2]]
+- [[_COMMUNITY_Twig Entry|Twig Entry]]
+- [[_COMMUNITY_Security Entry|Security Entry]]
+- [[_COMMUNITY_CORS Entry|CORS Entry]]
+- [[_COMMUNITY_ELB Entry|ELB Entry]]
+- [[_COMMUNITY_Security2 App|Security2 App]]
+- [[_COMMUNITY_Security App|Security App]]
+- [[_COMMUNITY_CORS App|CORS App]]
+- [[_COMMUNITY_CORS Advanced App|CORS Advanced App]]
+- [[_COMMUNITY_Twig App|Twig App]]
+- [[_COMMUNITY_Twig2 App|Twig2 App]]
+- [[_COMMUNITY_ELB Only App|ELB Only App]]
+- [[_COMMUNITY_CloudFront Only App|CloudFront Only App]]
+- [[_COMMUNITY_No AWS App|No AWS App]]
+- [[_COMMUNITY_Integration Security App|Integration Security App]]
+- [[_COMMUNITY_Integration Kernel App|Integration Kernel App]]
+- [[_COMMUNITY_Twig No Cache App|Twig No Cache App]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `SilexKernel` - 19 edges
-2. `TestController` - 16 edges
-3. `SilexKernelWebTest` - 14 edges
-4. `CrossOriginResourceSharingTest` - 13 edges
-5. `WrappedExceptionInfo` - 13 edges
-6. `SimpleSecurityProvider` - 12 edges
-7. `CrossOriginResourceSharingStrategy` - 10 edges
-8. `SilexKernel` - 10 edges
-9. `SecurityServiceProviderTest` - 9 edges
-10. `AuthController` - 9 edges
+1. `SilexKernelTest` - 46 edges
+2. `SecurityServiceProviderTest` - 24 edges
+3. `CrossOriginResourceSharingTest` - 21 edges
+4. `SilexKernel` - 19 edges
+5. `WrappedExceptionInfoTest` - 18 edges
+6. `ElbTrustedProxyTest` - 17 edges
+7. `TwigServiceProviderTest` - 17 edges
+8. `ChainedParameterBagDataProviderTest` - 17 edges
+9. `SilexKernelWebTest` - 16 edges
+10. `TestController` - 16 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `Routing Configuration` --semantically_similar_to--> `Security Firewalls`  [INFERRED] [semantically similar]
   README.md → docs/AdvancedSecurityConfiguration.md
+- `oasis/http Project` --extends--> `Silex Micro-Framework`  [EXTRACTED]
+  PROJECT.md → README.md
+- `oasis/http Project` --depends_on--> `Symfony Components`  [EXTRACTED]
+  PROJECT.md → README.md
+- `oasis/http Project` --depends_on--> `Pimple DI Container`  [EXTRACTED]
+  PROJECT.md → README.md
 - `Route Placeholder` --feature_of--> `Routing Configuration`  [EXTRACTED]
-  docs/AdvancedRoutingConfiguration.md → README.md
-- `Route Requirements` --feature_of--> `Routing Configuration`  [EXTRACTED]
-  docs/AdvancedRoutingConfiguration.md → README.md
-- `Route Resource Importing` --feature_of--> `Routing Configuration`  [EXTRACTED]
-  docs/AdvancedRoutingConfiguration.md → README.md
-- `Route Caching` --feature_of--> `Routing Configuration`  [EXTRACTED]
   docs/AdvancedRoutingConfiguration.md → README.md
 
 ## Hyperedges (group relationships)
-- **Bootstrap Configuration System** — config_routing, config_security, config_cors, config_twig, config_middlewares, config_providers, concept_view_handler, concept_error_handler, concept_injected_args, concept_trusted_proxies [EXTRACTED 1.00]
-- **Security Authentication Flow** — security_policies, security_firewalls, security_access_rules, security_role_hierarchy, custom_policy_flow, concept_pre_authenticator, concept_user_provider, concept_request_sender [EXTRACTED 1.00]
 - **Documentation Governance System** — doc_layer_state, doc_layer_manual, doc_layer_proposals, doc_layer_notes, doc_layer_changes, doc_layer_issues, concept_ssot, agents_instructions [EXTRACTED 0.95]
+- **PHP 8.5 Upgrade Pipeline** — prp001_test_baseline, prp002_phase0, prp003_phase1, prp004_phase2, prp005_phase3, prp006_phase4, prp007_phase5, prp008_migration [EXTRACTED 1.00]
+- **Release 2.5.0 Artifacts** — release_v250, feature_test_baseline, spec_release_250, spec_test_baseline [EXTRACTED 1.00]
+- **Architecture Module System** — arch_silexkernel, arch_bootstrap_config, arch_request_flow, arch_security_model, arch_cors_model [EXTRACTED 1.00]
 
 ## Communities
 
-### Community 0 - "jQuery & Test Helpers"
+### Community 0 - "Cacheable Router & Routing"
 Cohesion: 0.04
-Nodes (38): actualDisplay(), addCombinator(), ajaxConvert(), ajaxHandleResponses(), Animation(), augmentWidthOrHeight(), buildParams(), completed() (+30 more)
+Nodes (41): CacheableRouterUrlMatcherWrapper, actualDisplay(), addCombinator(), addToPrefiltersOrTransports(), ajaxConvert(), ajaxHandleResponses(), Animation(), augmentWidthOrHeight() (+33 more)
 
-### Community 1 - "Kernel Core & Middleware"
-Cohesion: 0.08
-Nodes (5): AbstractMiddleware, AuthController, CacheableRouter, SilexKernel, SilexKernelTest
+### Community 1 - "CORS Advanced Tests"
+Cohesion: 0.04
+Nodes (6): CrossOriginResourceSharingAdvancedTest, FallbackViewHandlerTest, cleanRouteCache(), SilexKernelWebElbTest, SilexKernelWebTest, TwigServiceProviderTest
 
-### Community 2 - "Documentation Concepts"
+### Community 2 - "Security Firewall & Access Rules"
+Cohesion: 0.05
+Nodes (12): getPattern(), getRequiredChannel(), getRequiredRoles(), getAuthenticationListener(), getAuthenticationProvider(), getAuthenticationType(), getEntryPoint(), CacheableRouterProvider (+4 more)
+
+### Community 3 - "Upgrade Planning & Concepts"
+Cohesion: 0.05
+Nodes (47): AWS CloudFront Trusted Proxy, AWS ELB Trusted Proxy, Behavior Baseline, Cross-Community Bridge, Error Handler, God Node (Graph), Injected Arguments, Pre-Authenticator Pattern (+39 more)
+
+### Community 4 - "SilexKernel Unit Tests"
+Cohesion: 0.04
+Nodes (1): SilexKernelTest
+
+### Community 5 - "Middleware & Controllers"
 Cohesion: 0.07
-Nodes (34): AWS CloudFront Trusted Proxy, AWS ELB Trusted Proxy, Error Handler, Injected Arguments, Pre-Authenticator Pattern, Request Sender (User Class), Trusted Proxies, User Provider Pattern (+26 more)
+Nodes (5): AbstractMiddleware, AuthController, CacheableRouter, SilexKernel, SimpleTwigServiceProvider
 
-### Community 3 - "Security Provider Core"
+### Community 6 - "CORS Provider & Preflight"
+Cohesion: 0.08
+Nodes (5): CrossOriginResourceSharingProvider, CrossOriginResourceSharingStrategy, after(), before(), PrefilightResponse
+
+### Community 7 - "Cookie Management"
 Cohesion: 0.1
-Nodes (9): getPattern(), getRequiredChannel(), getRequiredRoles(), getAuthenticationListener(), getAuthenticationProvider(), getAuthenticationType(), getEntryPoint(), SimpleFirewall (+1 more)
+Nodes (4): ResponseCookieContainer, SimpleCookieProvider, SubTestController, TestController
 
-### Community 4 - "Configuration & Bootstrap"
-Cohesion: 0.09
-Nodes (4): CacheableRouterProvider, processConfiguration(), SimpleAccessRule, SimpleTwigServiceProvider
-
-### Community 5 - "CORS Provider & Preflight"
-Cohesion: 0.11
-Nodes (3): CrossOriginResourceSharingProvider, CrossOriginResourceSharingStrategy, PrefilightResponse
-
-### Community 6 - "Error Handling & Renderers"
+### Community 8 - "Architecture Documentation"
 Cohesion: 0.12
+Nodes (26): Bootstrap Config System, CORS Model, Request Processing Flow, Security Model, SilexKernel Architecture, Bootstrap Configuration Manual, CORS Manual, Getting Started Manual (+18 more)
+
+### Community 9 - "Error Handling & Renderers"
+Cohesion: 0.11
 Nodes (4): DefaultHtmlRenderer, ExceptionWrapper, JsonApiRenderer, WrappedExceptionInfo
 
-### Community 7 - "Test Controllers"
-Cohesion: 0.17
-Nodes (2): SubTestController, TestController
+### Community 10 - "Bootstrap Integration Tests"
+Cohesion: 0.09
+Nodes (3): BootstrapConfigurationIntegrationTest, SilexKernelCrossCommunityIntegrationTest, TestMiddleware
 
-### Community 8 - "Pre-Authentication"
+### Community 11 - "Security Provider Tests"
+Cohesion: 0.08
+Nodes (1): SecurityServiceProviderTest
+
+### Community 12 - "CORS Basic Tests"
+Cohesion: 0.1
+Nodes (1): CrossOriginResourceSharingTest
+
+### Community 13 - "Pre-Authentication System"
 Cohesion: 0.13
 Nodes (3): AbstractSimplePreAuthenticator, authenticateAndGetUser(), TestApiUser
 
-### Community 9 - "Cookie & Middleware Interface"
-Cohesion: 0.12
-Nodes (4): after(), before(), ResponseCookieContainer, SimpleCookieProvider
+### Community 14 - "WrappedExceptionInfo Tests"
+Cohesion: 0.11
+Nodes (1): WrappedExceptionInfoTest
 
-### Community 10 - "Kernel Web Tests"
-Cohesion: 0.12
-Nodes (1): SilexKernelWebTest
+### Community 15 - "AWS Trusted Proxy Tests"
+Cohesion: 0.13
+Nodes (1): ElbTrustedProxyTest
 
-### Community 11 - "CORS Tests"
-Cohesion: 0.14
-Nodes (1): CrossOriginResourceSharingTest
+### Community 16 - "ChainedParameterBag Tests"
+Cohesion: 0.11
+Nodes (1): ChainedParameterBagDataProviderTest
 
-### Community 12 - "Security Tests"
-Cohesion: 0.2
-Nodes (1): SecurityServiceProviderTest
+### Community 17 - "SmartViewHandler Tests"
+Cohesion: 0.18
+Nodes (2): AbstractSmartViewHandlerTest, ConcreteSmartViewHandler
 
-### Community 13 - "URL Generator & ZXC"
+### Community 18 - "ArgumentValueResolver Tests"
+Cohesion: 0.19
+Nodes (1): ExtendedArgumentValueResolverTest
+
+### Community 19 - "CORS Configuration Tests"
+Cohesion: 0.23
+Nodes (1): CrossOriginResourceSharingConfigurationTest
+
+### Community 20 - "DefaultHtmlRenderer Tests"
+Cohesion: 0.25
+Nodes (1): DefaultHtmlRendererTest
+
+### Community 21 - "SimpleFirewall Config Tests"
+Cohesion: 0.31
+Nodes (1): SimpleFirewallConfigurationTest
+
+### Community 22 - "SimpleAccessRule Config Tests"
+Cohesion: 0.27
+Nodes (1): SimpleAccessRuleConfigurationTest
+
+### Community 23 - "HttpConfiguration Tests"
+Cohesion: 0.26
+Nodes (1): HttpConfigurationTest
+
+### Community 24 - "Security Auth Flow Tests"
+Cohesion: 0.15
+Nodes (1): SecurityAuthenticationFlowIntegrationTest
+
+### Community 25 - "RouterUrlMatcher Tests"
+Cohesion: 0.15
+Nodes (1): CacheableRouterUrlMatcherWrapperTest
+
+### Community 26 - "TwigConfiguration Tests"
+Cohesion: 0.29
+Nodes (1): TwigConfigurationTest
+
+### Community 27 - "JsonApiRenderer Tests"
+Cohesion: 0.3
+Nodes (1): JsonApiRendererTest
+
+### Community 28 - "CacheableRouter Config Tests"
+Cohesion: 0.31
+Nodes (1): CacheableRouterConfigurationTest
+
+### Community 29 - "SecurityConfiguration Tests"
+Cohesion: 0.31
+Nodes (1): SecurityConfigurationTest
+
+### Community 30 - "CacheableRouter Tests"
+Cohesion: 0.33
+Nodes (1): CacheableRouterTest
+
+### Community 31 - "JsonViewHandler Tests"
+Cohesion: 0.18
+Nodes (1): JsonViewHandlerTest
+
+### Community 32 - "PrefilightResponse Tests"
+Cohesion: 0.18
+Nodes (1): PrefilightResponseTest
+
+### Community 33 - "URL Generator"
 Cohesion: 0.24
 Nodes (2): GroupUrlGenerator, ZxcController
 
-### Community 14 - "Documentation Governance"
+### Community 34 - "Agent & Spec Workflow"
 Cohesion: 0.22
 Nodes (10): Agent Instructions, Socratic Review Gate, Spec Workflow, Single Source of Truth (SSOT), Changes Layer, Manual Layer, Notes Layer, Proposals Layer (+2 more)
 
-### Community 15 - "View Handler Interfaces"
+### Community 35 - "ExceptionListenerWrapper Tests"
+Cohesion: 0.47
+Nodes (2): ExtendedExceptionListnerWrapperTest, TestableExceptionListnerWrapper
+
+### Community 36 - "Integration Controllers"
+Cohesion: 0.2
+Nodes (1): IntegrationController
+
+### Community 37 - "GroupUrlGenerator Tests"
+Cohesion: 0.2
+Nodes (1): GroupUrlGeneratorTest
+
+### Community 38 - "ResponseRenderer Tests"
+Cohesion: 0.2
+Nodes (1): RouteBasedResponseRendererResolverTest
+
+### Community 39 - "FallbackViewHandler"
 Cohesion: 0.25
 Nodes (4): FallbackViewHandler, renderOnException(), renderOnSuccess(), resolveRequest()
 
-### Community 16 - "Smart View & JSON Handler"
+### Community 40 - "AbstractSmartViewHandler"
 Cohesion: 0.28
 Nodes (2): AbstractSmartViewHandler, JsonViewHandler
 
-### Community 17 - "HTTP Exception & Route Collection"
+### Community 41 - "Twig Template Cache"
 Cohesion: 0.25
-Nodes (2): HttpExceptionTest, InheritableRouteCollection
+Nodes (1): __TwigTemplate_dfa1e8ae049d8cfa38e9b1aa139d0ed18661de2192de29c7ff95c362dff55cc7
 
-### Community 18 - "Pre-Auth Policy Abstract"
+### Community 42 - "ExceptionWrapper Tests"
+Cohesion: 0.22
+Nodes (1): ExceptionWrapperTest
+
+### Community 43 - "JsonErrorHandler Tests"
+Cohesion: 0.22
+Nodes (1): JsonErrorHandlerTest
+
+### Community 44 - "InheritableRouteCollection Tests"
+Cohesion: 0.22
+Nodes (1): InheritableRouteCollectionTest
+
+### Community 45 - "GroupUrlMatcher Tests"
+Cohesion: 0.22
+Nodes (1): GroupUrlMatcherTest
+
+### Community 46 - "Pre-Auth Policy"
 Cohesion: 0.36
 Nodes (1): AbstractSimplePreAuthenticationPolicy
 
-### Community 19 - "URL Matcher Wrapper"
+### Community 47 - "HttpException Tests"
 Cohesion: 0.25
-Nodes (3): CacheableRouterUrlMatcherWrapper, addToPrefiltersOrTransports(), createOptions()
+Nodes (2): HttpExceptionTest, InheritableRouteCollection
 
-### Community 20 - "Fallback View Tests"
-Cohesion: 0.29
-Nodes (1): FallbackViewHandlerTest
+### Community 48 - "UniquenessViolation Tests"
+Cohesion: 0.25
+Nodes (1): UniquenessViolationHttpExceptionTest
 
-### Community 21 - "ELB Proxy Tests"
-Cohesion: 0.29
-Nodes (1): ElbTrustedProxyTest
-
-### Community 22 - "Group URL Matcher"
+### Community 49 - "GroupUrlMatcher"
 Cohesion: 0.33
 Nodes (1): GroupUrlMatcher
 
-### Community 23 - "Firewall Interface"
+### Community 50 - "ConfigValidationTrait Tests"
+Cohesion: 0.29
+Nodes (2): ConfigurationValidationTraitConsumer, ConfigurationValidationTraitTest
+
+### Community 51 - "Firewall Interface"
 Cohesion: 0.33
 Nodes (0): 
 
-### Community 24 - "User Provider Abstract"
+### Community 52 - "Pre-Auth UserProvider"
 Cohesion: 0.33
 Nodes (1): AbstractSimplePreAuthenticateUserProvider
 
-### Community 25 - "CORS Controller"
+### Community 53 - "CORS Controller"
 Cohesion: 0.6
 Nodes (1): CorsController
 
-### Community 26 - "Argument Value Resolver"
+### Community 54 - "ArgumentValueResolver"
 Cohesion: 0.4
 Nodes (1): ExtendedArgumentValueResolver
 
-### Community 27 - "Session Listener"
+### Community 55 - "AbstractMiddleware Tests"
+Cohesion: 0.4
+Nodes (1): AbstractMiddlewareTest
+
+### Community 56 - "ResponseCookieContainer Tests"
+Cohesion: 0.4
+Nodes (1): ResponseCookieContainerTest
+
+### Community 57 - "CacheableRouterProvider Tests"
+Cohesion: 0.4
+Nodes (1): CacheableRouterProviderTest
+
+### Community 58 - "Session Provider"
 Cohesion: 0.5
 Nodes (1): TestSessionListener
 
-### Community 28 - "Advanced CORS Tests"
-Cohesion: 0.5
-Nodes (1): CrossOriginResourceSharingAdvancedTest
-
-### Community 29 - "Cached URL Matcher"
+### Community 59 - "ProjectUrlMatcher Cache"
 Cohesion: 0.5
 Nodes (1): ProjectUrlMatcher
 
-### Community 30 - "Twig Tests"
-Cohesion: 0.5
-Nodes (1): TwigServiceProviderTest
-
-### Community 31 - "Test User Provider"
+### Community 60 - "TestApiUserProvider"
 Cohesion: 0.5
 Nodes (1): TestApiUserProvider
 
-### Community 32 - "Fallback Controller"
+### Community 61 - "FallbackController"
 Cohesion: 0.5
 Nodes (1): FallbackController
 
-### Community 33 - "Twig Controller"
+### Community 62 - "TwigController"
 Cohesion: 0.5
 Nodes (1): TwigController
 
-### Community 34 - "AWS Controller"
+### Community 63 - "AwsController"
 Cohesion: 0.5
 Nodes (1): AwsController
 
-### Community 35 - "Chained Parameter Bag"
+### Community 64 - "ChainedParameterBag"
 Cohesion: 0.5
 Nodes (1): ChainedParameterBagDataProvider
 
-### Community 36 - "Issue Management"
+### Community 65 - "Issue Tracking"
 Cohesion: 0.5
 Nodes (4): Issues Layer, L-Series Issues (Production Bugs), Release Issues (Stabilize Phase), Issue Severity System
 
-### Community 37 - "Session Provider"
+### Community 66 - "NullEntryPoint Tests"
+Cohesion: 0.5
+Nodes (1): NullEntryPointTest
+
+### Community 67 - "SimpleCookieProvider Tests"
+Cohesion: 0.5
+Nodes (1): SimpleCookieProviderTest
+
+### Community 68 - "YamlFileLoader Tests"
+Cohesion: 0.5
+Nodes (1): InheritableYamlFileLoaderTest
+
+### Community 69 - "SessionServiceProvider"
 Cohesion: 0.67
 Nodes (1): SessionServiceProvider
 
-### Community 38 - "Security Config Tests"
+### Community 70 - "Security Config Tests"
 Cohesion: 0.67
 Nodes (1): SecurityServiceProviderConfigurationTest
 
-### Community 39 - "Twig Config Tests"
+### Community 71 - "Twig Config Tests"
 Cohesion: 0.67
 Nodes (1): TwigServiceProviderConfigurationTest
 
-### Community 40 - "Test Access Rule"
+### Community 72 - "TestAccessRule"
 Cohesion: 0.67
 Nodes (1): TestAccessRule
 
-### Community 41 - "Test Auth Policy"
+### Community 73 - "TestAuthPolicy"
 Cohesion: 0.67
 Nodes (1): TestAuthenticationPolicy
 
-### Community 42 - "Test Pre-Authenticator"
+### Community 74 - "TestPreAuthenticator"
 Cohesion: 0.67
 Nodes (1): TestApiUserPreAuthenticator
 
-### Community 43 - "Exception Test Controller"
+### Community 75 - "ExceptionTestController"
 Cohesion: 0.67
 Nodes (1): ExceptionTestController
 
-### Community 44 - "Exception Listener Wrapper"
+### Community 76 - "ExceptionListenerWrapper"
 Cohesion: 0.67
 Nodes (1): ExtendedExceptionListnerWrapper
 
-### Community 45 - "Twig Configuration"
+### Community 77 - "TwigConfiguration"
 Cohesion: 0.67
 Nodes (1): TwigConfiguration
 
-### Community 46 - "Router Configuration"
+### Community 78 - "CacheableRouterConfiguration"
 Cohesion: 0.67
 Nodes (1): CacheableRouterConfiguration
 
-### Community 47 - "Security Configuration"
+### Community 79 - "SecurityConfiguration"
 Cohesion: 0.67
 Nodes (1): SecurityConfiguration
 
-### Community 48 - "Access Rule Configuration"
+### Community 80 - "SimpleAccessRuleConfiguration"
 Cohesion: 0.67
 Nodes (1): SimpleAccessRuleConfiguration
 
-### Community 49 - "Firewall Configuration"
+### Community 81 - "SimpleFirewallConfiguration"
 Cohesion: 0.67
 Nodes (1): SimpleFirewallConfiguration
 
-### Community 50 - "CORS Configuration"
+### Community 82 - "CORSConfiguration"
 Cohesion: 0.67
 Nodes (1): CrossOriginResourceSharingConfiguration
 
-### Community 51 - "HTTP Configuration"
+### Community 83 - "HttpConfiguration"
 Cohesion: 0.67
 Nodes (1): HttpConfiguration
 
-### Community 52 - "Uniqueness Violation Exception"
+### Community 84 - "UniquenessViolationException"
 Cohesion: 0.67
 Nodes (1): UniquenessViolationHttpException
 
-### Community 53 - "JSON Error Handler"
+### Community 85 - "JsonErrorHandler"
 Cohesion: 0.67
 Nodes (1): JsonErrorHandler
 
-### Community 54 - "Null Entry Point"
+### Community 86 - "NullEntryPoint"
 Cohesion: 0.67
 Nodes (1): NullEntryPoint
 
-### Community 55 - "YAML File Loader"
+### Community 87 - "InheritableYamlFileLoader"
 Cohesion: 0.67
 Nodes (1): InheritableYamlFileLoader
 
-### Community 56 - "Route-Based Renderer Resolver"
+### Community 88 - "RouteBasedRendererResolver"
 Cohesion: 0.67
 Nodes (1): RouteBasedResponseRendererResolver
 
-### Community 57 - "App Bootstrap"
+### Community 89 - "App Entry Point"
 Cohesion: 1.0
 Nodes (0): 
 
-### Community 58 - "ZXC Index"
+### Community 90 - "ZXC Entry Point"
 Cohesion: 1.0
 Nodes (0): 
 
-### Community 59 - "Test Bootstrap"
+### Community 91 - "Bootstrap Entry"
 Cohesion: 1.0
 Nodes (0): 
 
-### Community 60 - "Test Entry"
+### Community 92 - "Test Entry"
 Cohesion: 1.0
 Nodes (0): 
 
-### Community 61 - "Twig Index"
+### Community 93 - "Twig Entry"
 Cohesion: 1.0
 Nodes (0): 
 
-### Community 62 - "Security Index"
+### Community 94 - "Security Entry"
 Cohesion: 1.0
 Nodes (0): 
 
-### Community 63 - "CORS Index"
+### Community 95 - "CORS Entry"
 Cohesion: 1.0
 Nodes (0): 
 
-### Community 64 - "ELB Bootstrap"
+### Community 96 - "ELB Entry"
 Cohesion: 1.0
 Nodes (0): 
 
-### Community 65 - "Security App Config 2"
+### Community 97 - "Security2 App"
 Cohesion: 1.0
 Nodes (0): 
 
-### Community 66 - "Security App Config"
+### Community 98 - "Security App"
 Cohesion: 1.0
 Nodes (0): 
 
-### Community 67 - "CORS App Config"
+### Community 99 - "CORS App"
 Cohesion: 1.0
 Nodes (0): 
 
-### Community 68 - "Advanced CORS App Config"
+### Community 100 - "CORS Advanced App"
 Cohesion: 1.0
 Nodes (0): 
 
-### Community 69 - "Twig App Config"
+### Community 101 - "Twig App"
 Cohesion: 1.0
 Nodes (0): 
 
-### Community 70 - "Twig App Config 2"
+### Community 102 - "Twig2 App"
+Cohesion: 1.0
+Nodes (0): 
+
+### Community 103 - "ELB Only App"
+Cohesion: 1.0
+Nodes (0): 
+
+### Community 104 - "CloudFront Only App"
+Cohesion: 1.0
+Nodes (0): 
+
+### Community 105 - "No AWS App"
+Cohesion: 1.0
+Nodes (0): 
+
+### Community 106 - "Integration Security App"
+Cohesion: 1.0
+Nodes (0): 
+
+### Community 107 - "Integration Kernel App"
+Cohesion: 1.0
+Nodes (0): 
+
+### Community 108 - "Twig No Cache App"
 Cohesion: 1.0
 Nodes (0): 
 
 ## Knowledge Gaps
-- **23 isolated node(s):** `Symfony Components`, `Pimple DI Container`, `Twig Template Engine`, `Middlewares Configuration`, `Service Providers Configuration` (+18 more)
+- **40 isolated node(s):** `Symfony Components`, `Pimple DI Container`, `Twig Template Engine`, `Middlewares Configuration`, `Service Providers Configuration` (+35 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **Thin community `App Bootstrap`** (1 nodes): `app.php`
+- **Thin community `App Entry Point`** (1 nodes): `app.php`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `ZXC Index`** (1 nodes): `index.zxc.php`
+- **Thin community `ZXC Entry Point`** (1 nodes): `index.zxc.php`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Test Bootstrap`** (1 nodes): `bootstrap.php`
+- **Thin community `Bootstrap Entry`** (1 nodes): `bootstrap.php`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 - **Thin community `Test Entry`** (1 nodes): `test.php`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Twig Index`** (1 nodes): `index.twig.php`
+- **Thin community `Twig Entry`** (1 nodes): `index.twig.php`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Security Index`** (1 nodes): `index.security.php`
+- **Thin community `Security Entry`** (1 nodes): `index.security.php`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `CORS Index`** (1 nodes): `index.cors.php`
+- **Thin community `CORS Entry`** (1 nodes): `index.cors.php`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `ELB Bootstrap`** (1 nodes): `elb.php`
+- **Thin community `ELB Entry`** (1 nodes): `elb.php`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Security App Config 2`** (1 nodes): `app.security2.php`
+- **Thin community `Security2 App`** (1 nodes): `app.security2.php`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Security App Config`** (1 nodes): `app.security.php`
+- **Thin community `Security App`** (1 nodes): `app.security.php`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `CORS App Config`** (1 nodes): `app.cors.php`
+- **Thin community `CORS App`** (1 nodes): `app.cors.php`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Advanced CORS App Config`** (1 nodes): `app.cors-advanced.php`
+- **Thin community `CORS Advanced App`** (1 nodes): `app.cors-advanced.php`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Twig App Config`** (1 nodes): `app.twig.php`
+- **Thin community `Twig App`** (1 nodes): `app.twig.php`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Twig App Config 2`** (1 nodes): `app.twig2.php`
+- **Thin community `Twig2 App`** (1 nodes): `app.twig2.php`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `ELB Only App`** (1 nodes): `elb-only.php`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `CloudFront Only App`** (1 nodes): `cloudfront-only.php`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `No AWS App`** (1 nodes): `no-aws.php`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Integration Security App`** (1 nodes): `app.integration-security.php`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Integration Kernel App`** (1 nodes): `app.integration-kernel.php`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Twig No Cache App`** (1 nodes): `app.twig-no-cache.php`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `SilexKernel` connect `Kernel Core & Middleware` to `Cookie & Middleware Interface`, `Kernel Web Tests`, `Configuration & Bootstrap`?**
-  _High betweenness centrality (0.160) - this node is a cross-community bridge._
-- **Why does `Animation()` connect `jQuery & Test Helpers` to `Kernel Core & Middleware`?**
-  _High betweenness centrality (0.085) - this node is a cross-community bridge._
-- **Why does `processConfiguration()` connect `Configuration & Bootstrap` to `Security Provider Core`?**
-  _High betweenness centrality (0.078) - this node is a cross-community bridge._
+- **Why does `SilexKernel` connect `Middleware & Controllers` to `CORS Advanced Tests`, `Security Firewall & Access Rules`, `Error Handling & Renderers`?**
+  _High betweenness centrality (0.096) - this node is a cross-community bridge._
+- **Why does `cleanRouteCache()` connect `CORS Advanced Tests` to `Security Auth Flow Tests`, `Bootstrap Integration Tests`?**
+  _High betweenness centrality (0.074) - this node is a cross-community bridge._
+- **Why does `SilexKernelTest` connect `SilexKernel Unit Tests` to `CORS Advanced Tests`, `Middleware & Controllers`?**
+  _High betweenness centrality (0.065) - this node is a cross-community bridge._
 - **What connects `Symfony Components`, `Pimple DI Container`, `Twig Template Engine` to the rest of the system?**
-  _23 weakly-connected nodes found - possible documentation gaps or missing edges._
-- **Should `jQuery & Test Helpers` be split into smaller, more focused modules?**
+  _40 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Should `Cacheable Router & Routing` be split into smaller, more focused modules?**
   _Cohesion score 0.04 - nodes in this community are weakly interconnected._
-- **Should `Kernel Core & Middleware` be split into smaller, more focused modules?**
-  _Cohesion score 0.08 - nodes in this community are weakly interconnected._
-- **Should `Documentation Concepts` be split into smaller, more focused modules?**
-  _Cohesion score 0.07 - nodes in this community are weakly interconnected._
+- **Should `CORS Advanced Tests` be split into smaller, more focused modules?**
+  _Cohesion score 0.04 - nodes in this community are weakly interconnected._
+- **Should `Security Firewall & Access Rules` be split into smaller, more focused modules?**
+  _Cohesion score 0.05 - nodes in this community are weakly interconnected._

@@ -26,6 +26,7 @@ description: 当开启一个新的 spec、生成 requirements、生成 design、
 
 - 如果 requirements.md Gatekeep Log 中存在 Clarification Round 且用户已回答，生成前先读取，确保 design 体现用户在 requirements CR 中做出的决策
 - 必须覆盖 requirements 中的所有 Requirement 和 AC
+- 如果存在 `graphify-out/GRAPH_REPORT.md`，应参考该文件了解项目架构
 - 完成后做 Socratic Review 并记录 log
 - 生成完成后提醒用户：可以运行 gatekeeper（`GK`）对 design 进行校验
 

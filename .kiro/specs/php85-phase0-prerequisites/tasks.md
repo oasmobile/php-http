@@ -130,7 +130,7 @@
     - _Requirements: R4 AC2_
   - [x] 6.4 Checkpoint: 7 个 Framework_Independent_Suite 全部通过、`--list-suites` 输出 14 个 suite，commit
 
-- [-] 7. Framework_Dependent_Suite 预期失败确认（R12）
+- [x] 7. Framework_Dependent_Suite 预期失败确认（R12）
   - [x] 7.1 运行 `vendor/bin/phpunit --testsuite cors`，确认预期失败并记录失败原因
     - _Requirements: R12 AC1_
   - [x] 7.2 运行 `vendor/bin/phpunit --testsuite security`，确认预期失败并记录失败原因
@@ -146,18 +146,18 @@
   - [x] 7.7 汇总所有预期失败和意外失败（如有），记录到 CHANGELOG 或 spec notes 中
     - 包含：失败的测试类和方法、失败原因分析、归属的后续 Phase
     - _Requirements: R12 AC1, R12 AC2_
-  - [-] 7.8 Checkpoint: 预期失败记录完成，commit
+  - [x] 7.8 Checkpoint: 预期失败记录完成，commit
 
-- [ ] 8. 手工测试
-  - [ ] 8.1 验证 `phpunit.xml` 中 14 个 suite 定义完整（`all`、`exceptions`、`cors`、`security`、`twig`、`aws`、`error-handlers`、`configuration`、`views`、`routing`、`cookie`、`middlewares`、`misc`、`integration`）
+- [-] 8. 手工测试
+  - [x] 8.1 验证 `phpunit.xml` 中 14 个 suite 定义完整（`all`、`exceptions`、`cors`、`security`、`twig`、`aws`、`error-handlers`、`configuration`、`views`、`routing`、`cookie`、`middlewares`、`misc`、`integration`）
     - _Requirements: R4 AC2_
-  - [ ] 8.2 验证 `all` suite 使用 `<directory>ut</directory>` 后覆盖的测试集合与原逐文件列表一致（无遗漏、无多余）
+  - [x] 8.2 验证 `all` suite 使用 `<directory>ut</directory>` 后覆盖的测试集合与原逐文件列表一致（无遗漏、无多余）
     - _Requirements: R4 AC2_
-  - [ ] 8.3 验证 `composer.json` 中 PHP 版本约束、内部依赖版本、PHPUnit 版本均已正确更新
+  - [x] 8.3 验证 `composer.json` 中 PHP 版本约束、内部依赖版本、PHPUnit 版本均已正确更新
     - _Requirements: R1 AC1, R2 AC1–AC2, R3 AC1_
-  - [ ] 8.4 验证 `ut/bootstrap.php` 在 PHP 8.5 下加载无错误，autoloader 正常工作
+  - [x] 8.4 验证 `ut/bootstrap.php` 在 PHP 8.5 下加载无错误，autoloader 正常工作
     - _Requirements: R5 AC1–AC3_
-  - [ ] 8.5 Checkpoint: 手工测试全部通过，记录测试结果，commit
+  - [-] 8.5 Checkpoint: 手工测试全部通过，记录测试结果，commit
 
 - [ ] 9. Code Review
   - [ ] 9.1 委托 `code-reviewer` sub-agent 对当前分支的所有变更进行 code review

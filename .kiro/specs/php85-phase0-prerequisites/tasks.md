@@ -99,7 +99,7 @@
   - [x] 4.6 Checkpoint: 运行 `vendor/bin/phpunit --testsuite error-handlers --testsuite views --testsuite misc`，全部通过无 fatal error，commit
     - _Requirements: R10 AC4, R11 AC2, R11 AC3, R11 AC4_
 
-- [-] 5. 间接框架依赖修复（Design §5, CR Q1=B）
+- [x] 5. 间接框架依赖修复（Design §5, CR Q1=B）
   - [x] 5.1 修复 `ut/Cookie/SimpleCookieProviderTest.php`（Design §5.2）
     - 根据 Task 1.5 的 Silex 可加载性验证结果选择修复路径：
       - 如果 `Silex\Application` 可加载：保持现状，仅做 PHPUnit API 适配（`setUp(): void` 等）
@@ -110,13 +110,13 @@
       - 如果 `Silex\Application` 可加载（常量 `LATE_EVENT`/`EARLY_EVENT` 可访问）：保持现状
       - 如果不可加载：将常量值硬编码到测试中（`LATE_EVENT = -512`，`EARLY_EVENT = 512`），移除对 `Silex\Application` 的 `use` 引用
     - _Requirements: R11 AC7, R12 AC2_
-  - [-] 5.3 Checkpoint: 运行 `vendor/bin/phpunit --testsuite cookie --testsuite middlewares`，全部通过，commit
+  - [x] 5.3 Checkpoint: 运行 `vendor/bin/phpunit --testsuite cookie --testsuite middlewares`，全部通过，commit
     - _Requirements: R11 AC6, R11 AC7_
 
-- [~] 6. Test_Adaptation — Exceptions 模块验证 + 全量 Framework_Independent 验证（R11）
-  - [ ] 6.1 确认 `ut/Misc/UniquenessViolationHttpExceptionTest.php` 无需 PHPUnit API 适配（Design §8.1 确认无 PHPUnit 5.x API 使用）
+- [-] 6. Test_Adaptation — Exceptions 模块验证 + 全量 Framework_Independent 验证（R11）
+  - [x] 6.1 确认 `ut/Misc/UniquenessViolationHttpExceptionTest.php` 无需 PHPUnit API 适配（Design §8.1 确认无 PHPUnit 5.x API 使用）
     - _Requirements: R11 AC5_
-  - [ ] 6.2 逐一运行全部 7 个 Framework_Independent_Suite，确认全部通过：
+  - [x] 6.2 逐一运行全部 7 个 Framework_Independent_Suite，确认全部通过：
     - `vendor/bin/phpunit --testsuite configuration`
     - `vendor/bin/phpunit --testsuite error-handlers`
     - `vendor/bin/phpunit --testsuite views`
@@ -126,11 +126,11 @@
     - `vendor/bin/phpunit --testsuite middlewares`
     - 如有失败，按 Design §6.2 失败处理流程修复
     - _Requirements: R11 AC1–AC7_
-  - [ ] 6.3 运行 `vendor/bin/phpunit --list-suites`，确认输出所有 14 个 suite（承接 Task 2.7 延迟验证）
+  - [x] 6.3 运行 `vendor/bin/phpunit --list-suites`，确认输出所有 14 个 suite（承接 Task 2.7 延迟验证）
     - _Requirements: R4 AC2_
-  - [ ] 6.4 Checkpoint: 7 个 Framework_Independent_Suite 全部通过、`--list-suites` 输出 14 个 suite，commit
+  - [-] 6.4 Checkpoint: 7 个 Framework_Independent_Suite 全部通过、`--list-suites` 输出 14 个 suite，commit
 
-- [ ] 7. Framework_Dependent_Suite 预期失败确认（R12）
+- [~] 7. Framework_Dependent_Suite 预期失败确认（R12）
   - [ ] 7.1 运行 `vendor/bin/phpunit --testsuite cors`，确认预期失败并记录失败原因
     - _Requirements: R12 AC1_
   - [ ] 7.2 运行 `vendor/bin/phpunit --testsuite security`，确认预期失败并记录失败原因

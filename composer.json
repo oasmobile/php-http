@@ -26,7 +26,7 @@
         "twig/twig"                     : "^3.0",
         "oasis/logging"                 : "^2.0",
         "oasis/utils"                   : "^2.0",
-        "guzzlehttp/guzzle"             : "^6.3"
+        "guzzlehttp/guzzle"             : "^7.0"
     },
     "require-dev"      : {
         "phpunit/phpunit"      : "^13.0",

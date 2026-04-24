@@ -770,7 +770,7 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
                 if (\file_exists($cacheFilename)) {
                     $content = \file_get_contents($cacheFilename);
                     try {
-                        $awsIps = \GuzzleHttp\json_decode($content, true);
+                        $awsIps = \json_decode($content, true, 512, JSON_THROW_ON_ERROR);
                         if (isset($awsIps['expire_at']) && time() > $awsIps['expire_at']) {
                             $awsIps = [];
                         }
@@ -802,13 +802,13 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
                     );
                 } else {
                     $content = $awsResponse->getBody()->getContents();
-                    $awsIps  = \GuzzleHttp\json_decode($content, true);
+                    $awsIps  = \json_decode($content, true, 512, JSON_THROW_ON_ERROR);
                     if ($this->cacheDir && \is_writable($this->cacheDir)) {
                         $cacheFilename       = $this->cacheDir . "/aws.ips";
                         $awsIps['expire_at'] = time() + 86400;
                         \file_put_contents(
                             $cacheFilename,
-                            \GuzzleHttp\json_encode($awsIps, \JSON_PRETTY_PRINT),
+                            \json_encode($awsIps, \JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR),
                             \LOCK_EX
                         );
                     }

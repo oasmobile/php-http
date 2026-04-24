@@ -11,13 +11,9 @@ use Oasis\Mlib\Http\Middlewares\MiddlewareInterface;
 use Oasis\Mlib\Http\ServiceProviders\Cookie\ResponseCookieContainer;
 use Oasis\Mlib\Http\ServiceProviders\Cookie\SimpleCookieProvider;
 use Oasis\Mlib\Http\ServiceProviders\Cors\CrossOriginResourceSharingProvider;
-use Oasis\Mlib\Http\ServiceProviders\Cors\CrossOriginResourceSharingStrategy;
 use Oasis\Mlib\Http\ServiceProviders\Security\SimpleSecurityProvider;
 use Oasis\Mlib\Http\ServiceProviders\Twig\SimpleTwigServiceProvider;
 use Oasis\Mlib\Http\ServiceProviders\Routing\CacheableRouterProvider;
-use Oasis\Mlib\Http\ServiceProviders\Routing\GroupUrlGenerator;
-use Oasis\Mlib\Http\ServiceProviders\Routing\GroupUrlMatcher;
-use Oasis\Mlib\Logging\MLogging;
 use Oasis\Mlib\Utils\ArrayDataProvider;
 use Oasis\Mlib\Utils\DataProviderInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -608,11 +604,10 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
         // Our listener uses the custom GroupUrlMatcher to resolve routes.
         // Once _controller is set, Symfony's RouterListener will skip routing.
         $matcher    = $this->requestMatcher;
-        $router     = $this->routerProvider;
         $dispatcher = $this->getContainer()->get('event_dispatcher');
         $dispatcher->addListener(
             KernelEvents::REQUEST,
-            function (RequestEvent $event) use ($matcher, $requestContext, $router) {
+            function (RequestEvent $event) use ($matcher, $requestContext) {
                 $request = $event->getRequest();
 
                 if ($request->attributes->has('_controller')) {

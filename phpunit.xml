@@ -77,6 +77,15 @@
             <file>ut/Integration/SecurityAuthenticationFlowIntegrationTest.php</file>
             <file>ut/Integration/SilexKernelCrossCommunityIntegrationTest.php</file>
         </testsuite>
+        <testsuite name="SilexKernelTest">
+            <file>ut/SilexKernelTest.php</file>
+        </testsuite>
+        <testsuite name="SilexKernelWebTest">
+            <file>ut/SilexKernelWebTest.php</file>
+        </testsuite>
+        <testsuite name="FallbackViewHandlerTest">
+            <file>ut/FallbackViewHandlerTest.php</file>
+        </testsuite>
         <testsuite name="pbt">
             <directory>ut/PBT</directory>
         </testsuite>

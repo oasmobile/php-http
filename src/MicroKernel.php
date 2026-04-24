@@ -431,10 +431,11 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
     protected function registerErrorHandlers(): void
     {
         $dispatcher = $this->getContainer()->get('event_dispatcher');
+        $kernel = $this;
         foreach ($this->errorHandlers as $handler) {
             $dispatcher->addListener(
                 KernelEvents::EXCEPTION,
-                function (ExceptionEvent $event) use ($handler) {
+                function (ExceptionEvent $event) use ($handler, $kernel) {
                     // If a previous handler (e.g., CORS) already set a response, skip
                     if ($event->getResponse() !== null) {
                         return;
@@ -450,6 +451,20 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
 
                     if ($response instanceof Response) {
                         $event->setResponse($response);
+                    } elseif ($response !== null) {
+                        // Non-Response, non-null return (e.g., array from JsonErrorHandler,
+                        // WrappedExceptionInfo from ExceptionWrapper):
+                        // Pass through the view handler chain to convert to a Response,
+                        // matching the old Silex behavior where error handler returns
+                        // were processed by view handlers.
+                        foreach ($kernel->getViewHandlers() as $viewHandler) {
+                            $viewResponse = $viewHandler($response, $request);
+                            if ($viewResponse instanceof Response) {
+                                $viewResponse->setStatusCode($code);
+                                $event->setResponse($viewResponse);
+                                return;
+                            }
+                        }
                     }
                     // handler returns null and event has no response → let exception propagate
                 },
@@ -593,10 +608,11 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
         // Our listener uses the custom GroupUrlMatcher to resolve routes.
         // Once _controller is set, Symfony's RouterListener will skip routing.
         $matcher    = $this->requestMatcher;
+        $router     = $this->routerProvider;
         $dispatcher = $this->getContainer()->get('event_dispatcher');
         $dispatcher->addListener(
             KernelEvents::REQUEST,
-            function (RequestEvent $event) use ($matcher, $requestContext) {
+            function (RequestEvent $event) use ($matcher, $requestContext, $router) {
                 $request = $event->getRequest();
 
                 if ($request->attributes->has('_controller')) {
@@ -606,11 +622,31 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
                 try {
                     $requestContext->fromRequest($request);
                     $parameters = $matcher->matchRequest($request);
+
                     $request->attributes->add($parameters);
                     unset($parameters['_route'], $parameters['_controller']);
                     $request->attributes->set('_route_params', $parameters);
                 } catch (\Symfony\Component\Routing\Exception\ResourceNotFoundException $e) {
-                    // Let Symfony's RouterListener handle the 404
+                    // Check if the 404 is due to a scheme mismatch (e.g., HTTPS request
+                    // to an HTTP-only route). If so, generate a redirect response.
+                    try {
+                        $originalScheme = $requestContext->getScheme();
+                        $targetScheme = ($originalScheme === 'https') ? 'http' : 'https';
+                        $requestContext->setScheme($targetScheme);
+                        $parameters = $matcher->matchRequest($request);
+                        // Match succeeded with different scheme → redirect
+                        $url = $targetScheme . '://' . $request->getHost() . $request->getBaseUrl() . $request->getPathInfo();
+                        if ($request->getQueryString()) {
+                            $url .= '?' . $request->getQueryString();
+                        }
+                        $event->setResponse(new \Symfony\Component\HttpFoundation\RedirectResponse($url, 302));
+                        $event->stopPropagation();
+                        return;
+                    } catch (\Throwable $retryException) {
+                        // Not a scheme issue; restore context and let Symfony handle the 404
+                    } finally {
+                        $requestContext->setScheme($originalScheme);
+                    }
                 } catch (\Symfony\Component\Routing\Exception\MethodNotAllowedException $e) {
                     // Throw MethodNotAllowedHttpException so CORS onException handler can intercept it
                     $message = \sprintf('No route found for "%s %s": Method Not Allowed (Allow: %s)', $request->getMethod(), $request->getBaseUrl().$request->getPathInfo(), implode(', ', $e->getAllowedMethods()));

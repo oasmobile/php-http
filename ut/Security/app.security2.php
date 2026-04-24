@@ -9,7 +9,7 @@
  * Time: 17:09
  */
 use Oasis\Mlib\Http\ErrorHandlers\JsonErrorHandler;
-use Oasis\Mlib\Http\SilexKernel;
+use Oasis\Mlib\Http\MicroKernel;
 use Oasis\Mlib\Http\Test\Helpers\Security\TestApiUserProvider;
 use Oasis\Mlib\Http\Test\Helpers\Security\TestAuthenticationPolicy;
 use Oasis\Mlib\Http\Test\Security\SessionServiceProvider;
@@ -101,7 +101,7 @@ $config = [
     'providers'      => new SessionServiceProvider(),
 ];
 
-$app = new SilexKernel($config, true);
+$app = new MicroKernel($config, true);
 //
 //$provider->addRoleHierarchy('ROLE_GOOD', 'ROLE_USER');
 //$provider->addRoleHierarchy('ROLE_CHILD', 'ROLE_USER');

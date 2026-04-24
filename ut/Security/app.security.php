@@ -7,11 +7,10 @@
  */
 use Oasis\Mlib\Http\ServiceProviders\Security\SimpleFirewall;
 use Oasis\Mlib\Http\ServiceProviders\Security\SimpleSecurityProvider;
-use Oasis\Mlib\Http\SilexKernel;
+use Oasis\Mlib\Http\MicroKernel;
 use Oasis\Mlib\Http\Test\Helpers\Security\TestAccessRule;
 use Oasis\Mlib\Http\Test\Helpers\Security\TestApiUserProvider;
 use Oasis\Mlib\Http\Test\Helpers\Security\TestAuthenticationPolicy;
-use Oasis\Mlib\Http\Test\Security\SessionServiceProvider;
 use Symfony\Component\HttpFoundation\ChainRequestMatcher;
 use Symfony\Component\HttpFoundation\RequestMatcher\HostRequestMatcher;
 use Symfony\Component\HttpFoundation\RequestMatcher\PathRequestMatcher;
@@ -33,9 +32,6 @@ $users = [
 ];
 
 $preUsers = new TestApiUserProvider();
-
-/** @var SilexKernel $app */
-$app = require __DIR__ . "/../app.php";
 
 $secPolicy = new TestAuthenticationPolicy();
 
@@ -93,9 +89,50 @@ $provider->addRoleHierarchy('ROLE_CHILD', 'ROLE_USER');
 $provider->addRoleHierarchy('ROLE_PARENT', 'ROLE_CHILD');
 $provider->addRoleHierarchy('ROLE_PARENT', 'ROLE_USER');
 
-$app->service_providers = [
-    $provider,
-    new SessionServiceProvider(),
+// Build security config for Bootstrap_Config
+$securityConfig = [
+    'policies'       => [
+        'mauth' => $secPolicy,
+    ],
+    'firewalls'      => [
+        'admin'        => [
+            "pattern"  => "^/secured/admin",
+            "policies" => ["http" => true],
+            "users"    => $users,
+        ],
+        'form.admin'   => [
+            "pattern"  => "^/secured/fadmin",
+            "policies" => [
+                "form" => [
+                    "login_path" => "/secured/flogin",
+                    "check_path" => "/secured/fadmin/check",
+                ],
+            ],
+            "users"    => $users,
+        ],
+        'minhao.admin' => $testFirewall,
+    ],
+    'access_rules'   => [
+        ['pattern' => '^/secured/madmin/admin', 'roles' => 'ROLE_ADMIN'],
+        [
+            'pattern' => new ChainRequestMatcher([new PathRequestMatcher('^/secured/madmin/parent'), new HostRequestMatcher("bai(du|da)\\.com")]),
+            'roles'   => ['ROLE_PARENT'],
+        ],
+        ['pattern' => '^/secured/madmin/child', 'roles' => 'ROLE_CHILD'],
+        ['pattern' => '^/secured/madmin', 'roles' => 'ROLE_USER'],
+    ],
+    'role_hierarchy' => [
+        'ROLE_GOOD'   => 'ROLE_USER',
+        'ROLE_CHILD'  => ['ROLE_USER'],
+        'ROLE_PARENT' => ['ROLE_CHILD', 'ROLE_USER'],
+    ],
 ];
+
+/** @var MicroKernel $app */
+$app = require __DIR__ . "/../app.php";
+
+// Note: Security is configured via Bootstrap_Config in Phase 1.
+// The old $app->service_providers magic setter is removed.
+// Security tests are expected to fail in Phase 1 (except NullEntryPointTest).
 
 return $app;

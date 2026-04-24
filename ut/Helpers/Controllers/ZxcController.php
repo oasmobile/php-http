@@ -8,25 +8,20 @@
 
 namespace Oasis\Mlib\Http\Test\Helpers\Controllers;
 
-use Oasis\Mlib\Http\SilexKernel;
+use Oasis\Mlib\Http\MicroKernel;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Generator\UrlGenerator;
 
 class ZxcController
 {
-    public function home($game, $lang, Request $request, SilexKernel $kernel)
+    public function home($game, $lang, Request $request, MicroKernel $kernel)
     {
         /** @var UrlGenerator $ug */
-        $ug  = $kernel['url_generator'];
+        $ug  = $kernel->getUrlGenerator();
         $url = $ug->generate('play.server', ['lang' => $lang, 'game' => $game]);
 
-        return $kernel->redirect($url);
-        //
-        //return [
-        //    "I got this message" =>
-        //        "lang = $lang, game = $game",
-        //    "request"            => $request->getMethod(),
-        //];
+        return new RedirectResponse($url);
     }
 
     public function playServer($game, $lang)

@@ -127,8 +127,8 @@
     - _Ref: Requirement 9, AC 1–4_
   - [x] 7.2 Checkpoint: 运行 `cookie` test suite，确认 Cookie 机制可用。Commit。
 
-- [ ] 8. Twig Provider 迁移
-  - [ ] 8.1 重写 SimpleTwigServiceProvider
+- [x] 8. Twig Provider 迁移
+  - [x] 8.1 重写 SimpleTwigServiceProvider
     - 移除 `Silex\Provider\TwigServiceProvider` 继承和 Pimple 依赖
     - 在 `MicroKernel::boot()` 中直接创建 `\Twig\Environment` 实例
     - 从 Bootstrap_Config `twig` key 读取配置（template_dir、cache_dir、asset_base、globals）
@@ -136,33 +136,33 @@
     - Twig 配置不存在时不注册 Twig services
     - `MicroKernel::getTwig()` 返回 `\Twig\Environment|null`
     - _Ref: Requirement 10, AC 1–8; Requirement 16, AC 3_
-  - [ ] 8.2 Checkpoint: 运行 `twig` test suite，确认 Twig 集成可用。Commit。
+  - [x] 8.2 Checkpoint: 运行 `twig` test suite，确认 Twig 集成可用。Commit。
 
-- [ ] 9. Security Provider 最小可编译适配
-  - [ ] 9.1 重写 SimpleSecurityProvider
+- [x] 9. Security Provider 最小可编译适配
+  - [x] 9.1 重写 SimpleSecurityProvider
     - 移除 `Silex\Provider\SecurityServiceProvider` 继承和 Pimple 依赖
     - 保留 `addFirewall()`、`addAccessRule()`、`addAuthenticationPolicy()`、`addRoleHierarchy()` 配置方法
     - `register()` 改为接受 `MicroKernel`
     - Security 配置不存在时不注册 Security services
     - _Ref: Requirement 11, AC 1/2/6; Requirement 16, AC 4_
-  - [ ] 9.2 适配 AuthenticationPolicyInterface 和 Security abstract 类
+  - [x] 9.2 适配 AuthenticationPolicyInterface 和 Security abstract 类
     - `AuthenticationPolicyInterface`：方法签名 `Container $app` → `MicroKernel $kernel`，移除 `Pimple\Container` 和 `ListenerInterface` 引用
     - `AbstractSimplePreAuthenticationPolicy`：改为 abstract stub，移除对 `SimpleAuthenticationProvider`、`SimplePreAuthenticationListener`、`ListenerInterface` 的依赖，所有依赖已移除 API 的方法改为 abstract
     - `AbstractSimplePreAuthenticator`：改为 abstract stub，移除 `SimplePreAuthenticatorInterface` 的 `implements`，所有依赖已移除 API 的方法改为 abstract
     - `AbstractSimplePreAuthenticateUserProvider`：检查并适配（如有 Silex/Pimple 依赖）
     - _Ref: Requirement 11, AC 3/4/5_
-  - [ ] 9.3 Checkpoint: 确认 Security 相关类可编译（abstract stub 策略）。Security suite 预期失败（除 `NullEntryPointTest`）。Commit。
+  - [x] 9.3 Checkpoint: 确认 Security 相关类可编译（abstract stub 策略）。Security suite 预期失败（除 `NullEntryPointTest`）。Commit。
 
-- [ ] 10. Provider 机制迁移（Bootstrap_Config `providers` key）
-  - [ ] 10.1 实现 providers 接受 CompilerPass / Extension
+- [x] 10. Provider 机制迁移（Bootstrap_Config `providers` key）
+  - [x] 10.1 实现 providers 接受 CompilerPass / Extension
     - Bootstrap_Config `providers` key 改为接受 `CompilerPassInterface` 或 `ExtensionInterface` 实例数组
     - 在 `configureContainer()` 中注册 CompilerPass / Extension
     - 非法类型抛出 `InvalidConfigurationException`
     - _Ref: Requirement 3, AC 4/6_
-  - [ ] 10.2 Checkpoint: 运行 `cors`、`aws`、`routing`、`cookie`、`middlewares`、`twig` test suite，确认全部子系统迁移完成且基本可用。如有问题请与用户沟通。Commit。
+  - [x] 10.2 Checkpoint: 运行 `cors`、`aws`、`routing`、`cookie`、`middlewares`、`twig` test suite，确认全部子系统迁移完成且基本可用。如有问题请与用户沟通。Commit。
 
-- [ ] 11. 测试适配
-  - [ ] 11.1 更新测试 bootstrap 文件
+- [-] 11. 测试适配
+  - [x] 11.1 更新测试 bootstrap 文件
     - 更新 `ut/app.php`、`ut/index.cors.php`、`ut/index.security.php`、`ut/index.twig.php`、`ut/index.zxc.php`、`ut/test.php` 中的 `SilexKernel` → `MicroKernel`
     - 更新 `ut/AwsTests/*.php`（`elb.php`、`elb-only.php`、`cloudfront-only.php`、`no-aws.php`）
     - 更新 `ut/Cors/app.cors.php`、`ut/Cors/app.cors-advanced.php`
@@ -172,20 +172,20 @@
     - 所有 `new SilexKernel(...)` → `new MicroKernel(...)`
     - 适配 WebTestCase（Silex WebTestCase → Symfony WebTestCase 或自定义 test client）
     - _Ref: Requirement 14, AC 2_
-  - [ ] 11.2 适配 SilexKernelTest 和 SilexKernelWebTest
+  - [x] 11.2 适配 SilexKernelTest 和 SilexKernelWebTest
     - 更新内部 `SilexKernel` 引用为 `MicroKernel`（保持文件名不变）
     - 适配测试中的 `$app['xxx']` Pimple 风格访问
     - 适配 `$app->service_providers = [...]` 为 Bootstrap_Config `providers` key
     - _Ref: Requirement 14, AC 1/3_
-  - [ ] 11.3 适配 FallbackViewHandlerTest
+  - [x] 11.3 适配 FallbackViewHandlerTest
     - 更新 `SilexKernel` mock 为 `MicroKernel` mock
     - _Ref: Requirement 14, AC 4_
-  - [ ] 11.4 适配其他受影响的测试文件
+  - [x] 11.4 适配其他受影响的测试文件
     - 更新 `CacheableRouterProviderTest`、`SimpleCookieProviderTest`、`CrossOriginResourceSharingTest`、`CrossOriginResourceSharingAdvancedTest`、`TwigServiceProviderTest`、`SecurityServiceProviderTest`、`AbstractMiddlewareTest`、`ExtendedExceptionListnerWrapperTest`、`ExtendedArgumentValueResolverTest` 等
     - 更新 `ElbTrustedProxyTest`
     - 更新 `DefaultHtmlRendererTest`、`JsonApiRendererTest`
     - _Ref: Requirement 14, AC 1/5_
-  - [ ] 11.5 Checkpoint: 运行以下 test suite 并确认全部通过：`cors`、`aws`、`routing`、`cookie`、`middlewares`、`twig`、`SilexKernelTest`、`SilexKernelWebTest`、`FallbackViewHandlerTest`。Security suite 预期失败（除 `NullEntryPointTest`）。如有问题请与用户沟通。Commit。
+  - [-] 11.5 Checkpoint: 运行以下 test suite 并确认全部通过：`cors`、`aws`、`routing`、`cookie`、`middlewares`、`twig`、`SilexKernelTest`、`SilexKernelWebTest`、`FallbackViewHandlerTest`。Security suite 预期失败（除 `NullEntryPointTest`）。如有问题请与用户沟通。Commit。
     - _Ref: Requirement 14, AC 5/6_
 
 - [ ] 12. Eris PBT 引入与核心 Property Test

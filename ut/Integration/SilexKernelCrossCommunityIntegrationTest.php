@@ -1,6 +1,6 @@
 <?php
 /**
- * Integration test for SilexKernel cross-community interactions (Requirement 11).
+ * Integration test for MicroKernel cross-community interactions.
  *
  * Verifies Cookie provider → response header, Middleware execution order,
  * and Configuration validation using a full HTTP request lifecycle via WebTestCase.
@@ -8,10 +8,10 @@
 
 namespace Oasis\Mlib\Http\Test\Integration;
 
-use Oasis\Mlib\Http\SilexKernel;
+use Oasis\Mlib\Http\MicroKernel;
 use Oasis\Mlib\Http\Test\Helpers\Middlewares\TestMiddleware;
 use Oasis\Mlib\Http\Test\Helpers\RouteCacheCleaner;
-use Silex\WebTestCase;
+use Oasis\Mlib\Http\Test\Helpers\WebTestCase;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
@@ -20,6 +20,9 @@ class SilexKernelCrossCommunityIntegrationTest extends WebTestCase
 {
     use RouteCacheCleaner;
 
+    /** @var TestMiddleware|null */
+    private $testMiddleware;
+
     /**
      * Creates the application.
      *
@@ -27,12 +30,25 @@ class SilexKernelCrossCommunityIntegrationTest extends WebTestCase
      */
     public function createApplication()
     {
-        $app = require __DIR__ . '/app.integration-kernel.php';
+        $this->testMiddleware = new TestMiddleware();
 
-        return $app;
+        $config = [
+            'cache_dir'      => __DIR__ . '/../cache',
+            'routing'        => [
+                'path'       => __DIR__ . '/integration.routes.yml',
+                'namespaces' => [
+                    'Oasis\\Mlib\\Http\\Test\\Integration\\',
+                ],
+            ],
+            'view_handlers'  => [new \Oasis\Mlib\Http\Views\JsonViewHandler()],
+            'error_handlers' => [new \Oasis\Mlib\Http\ErrorHandlers\JsonErrorHandler()],
+            'middlewares'    => [$this->testMiddleware],
+        ];
+
+        return new MicroKernel($config, true);
     }
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->cleanRouteCache(__DIR__ . '/../cache');
         parent::setUp();
@@ -92,7 +108,7 @@ class SilexKernelCrossCommunityIntegrationTest extends WebTestCase
 
         $json = json_decode($response->getContent(), true);
         $this->assertTrue(is_array($json));
-        $this->assertContains('cookieCheck', $json['called']);
+        $this->assertStringContainsString('cookieCheck', $json['called']);
         $this->assertEquals('integration_value', $json['name']);
     }
 
@@ -112,17 +128,14 @@ class SilexKernelCrossCommunityIntegrationTest extends WebTestCase
 
         $this->assertEquals(Response::HTTP_OK, $response->getStatusCode(), $response->getContent());
 
-        /** @var TestMiddleware $middleware */
-        $middleware = $this->app['test.middleware'];
-
         $this->assertCount(
             1,
-            $middleware->getBeforeCalls(),
+            $this->testMiddleware->getBeforeCalls(),
             'before() should be called once after handling a request'
         );
         $this->assertCount(
             1,
-            $middleware->getAfterCalls(),
+            $this->testMiddleware->getAfterCalls(),
             'after() should be called once after handling a request'
         );
     }
@@ -140,17 +153,14 @@ class SilexKernelCrossCommunityIntegrationTest extends WebTestCase
 
         $this->assertEquals(Response::HTTP_OK, $response->getStatusCode(), $response->getContent());
 
-        /** @var TestMiddleware $middleware */
-        $middleware = $this->app['test.middleware'];
-
-        // before() should have received the request and application
-        $beforeCalls = $middleware->getBeforeCalls();
+        // before() should have received the request and kernel
+        $beforeCalls = $this->testMiddleware->getBeforeCalls();
         $this->assertCount(1, $beforeCalls);
         $this->assertArrayHasKey('request', $beforeCalls[0]);
-        $this->assertArrayHasKey('application', $beforeCalls[0]);
+        $this->assertArrayHasKey('kernel', $beforeCalls[0]);
 
         // after() should have received the request and response
-        $afterCalls = $middleware->getAfterCalls();
+        $afterCalls = $this->testMiddleware->getAfterCalls();
         $this->assertCount(1, $afterCalls);
         $this->assertArrayHasKey('request', $afterCalls[0]);
         $this->assertArrayHasKey('response', $afterCalls[0]);
@@ -164,16 +174,18 @@ class SilexKernelCrossCommunityIntegrationTest extends WebTestCase
     // ---------------------------------------------------------------
 
     /**
-     * Constructing SilexKernel with valid configuration should succeed
-     * (the app from app.integration-kernel.php boots successfully).
+     * Constructing MicroKernel with valid configuration should succeed
+     * (the app from createApplication() boots successfully).
      */
     public function testValidConfigurationBootsSuccessfully()
     {
         // The app is already created via createApplication() — just verify it boots
-        $this->app->boot();
+        if ($this->app instanceof \Symfony\Component\HttpKernel\Kernel) {
+            $this->app->boot();
+        }
 
         // If we reach here without exception, boot succeeded
-        $this->assertTrue(true, 'SilexKernel with valid configuration should boot successfully');
+        $this->assertTrue(true, 'MicroKernel with valid configuration should boot successfully');
 
         // Additionally verify the app can handle a request
         $client = $this->createClient();
@@ -184,18 +196,18 @@ class SilexKernelCrossCommunityIntegrationTest extends WebTestCase
 
         $json = json_decode($response->getContent(), true);
         $this->assertTrue(is_array($json));
-        $this->assertContains('publicAction', $json['called']);
+        $this->assertStringContainsString('publicAction', $json['called']);
     }
 
     /**
-     * Constructing SilexKernel with invalid configuration (unknown top-level key)
+     * Constructing MicroKernel with invalid configuration (unknown top-level key)
      * should throw InvalidConfigurationException.
      */
     public function testInvalidConfigurationThrowsException()
     {
-        $this->setExpectedException(InvalidConfigurationException::class);
+        $this->expectException(InvalidConfigurationException::class);
 
-        new SilexKernel(
+        new MicroKernel(
             [
                 'unknown_invalid_key' => 'some_value',
             ],

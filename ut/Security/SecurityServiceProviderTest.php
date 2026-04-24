@@ -3,7 +3,7 @@
 namespace Oasis\Mlib\Http\Test\Security;
 
 use Oasis\Mlib\Http\Test\Helpers\RouteCacheCleaner;
-use Silex\WebTestCase;
+use Oasis\Mlib\Http\Test\Helpers\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 
@@ -17,7 +17,7 @@ class SecurityServiceProviderTest extends WebTestCase
 {
     use RouteCacheCleaner;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->cleanRouteCache(__DIR__ . '/../cache');
         parent::setUp();
@@ -32,7 +32,8 @@ class SecurityServiceProviderTest extends WebTestCase
     {
         $app = require __DIR__ . "/app.security.php";
         
-        $app['session.test'] = true;
+        // Note: session.test configuration is not available in MicroKernel
+        // Security tests are expected to fail in Phase 1 (except NullEntryPointTest)
         
         return $app;
     }

@@ -33,5 +33,43 @@ trait RouteCacheCleaner
         foreach (glob($cacheDir . '/Project*.php.meta') as $file) {
             @unlink($file);
         }
+        // Also clean cached URL matcher/generator files
+        foreach (glob($cacheDir . '/url_*.php') as $file) {
+            @unlink($file);
+        }
+        foreach (glob($cacheDir . '/url_*.php.meta') as $file) {
+            @unlink($file);
+        }
+        foreach (glob($cacheDir . '/url_*.php.meta.json') as $file) {
+            @unlink($file);
+        }
+        // Clean Symfony kernel cache (compiled container, route matchers, etc.)
+        // This is needed when different tests use different route files with the same cache_dir
+        $symfonyDir = $cacheDir . '/symfony';
+        if (is_dir($symfonyDir)) {
+            $this->removeDirectoryRecursive($symfonyDir);
+        }
+    }
+
+    /**
+     * Recursively remove a directory and all its contents.
+     */
+    private function removeDirectoryRecursive(string $dir): void
+    {
+        if (!is_dir($dir)) {
+            return;
+        }
+        foreach (scandir($dir) as $entry) {
+            if ($entry === '.' || $entry === '..') {
+                continue;
+            }
+            $path = $dir . '/' . $entry;
+            if (is_dir($path)) {
+                $this->removeDirectoryRecursive($path);
+            } else {
+                @unlink($path);
+            }
+        }
+        @rmdir($dir);
     }
 }

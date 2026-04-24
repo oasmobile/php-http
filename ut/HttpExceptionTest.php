@@ -1,10 +1,10 @@
 <?php
 use Oasis\Mlib\Http\ErrorHandlers\ExceptionWrapper;
-use Oasis\Mlib\Http\SilexKernel;
-use Oasis\Mlib\Http\Test\Helpers\Controllers\ExceptionTestController;
+use Oasis\Mlib\Http\MicroKernel;
+use Oasis\Mlib\Http\Test\Helpers\RouteCacheCleaner;
+use Oasis\Mlib\Http\Test\Helpers\WebTestCase;
 use Oasis\Mlib\Http\Views\FallbackViewHandler;
 use Oasis\Mlib\Http\Views\RouteBasedResponseRendererResolver;
-use Silex\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 
@@ -16,6 +16,14 @@ use Symfony\Component\HttpKernel\HttpKernelInterface;
  */
 class HttpExceptionTest extends WebTestCase
 {
+    use RouteCacheCleaner;
+
+    protected function setUp(): void
+    {
+        $this->cleanRouteCache(__DIR__ . '/cache');
+        parent::setUp();
+    }
+
     /**
      * Creates the application.
      *
@@ -23,23 +31,31 @@ class HttpExceptionTest extends WebTestCase
      */
     public function createApplication()
     {
-        $config              = [
+        $lazyViewHandler = null;
+        $appRef = null;
+
+        $viewHandlerCallable = function ($result, $request) use (&$lazyViewHandler, &$appRef) {
+            if ($lazyViewHandler === null) {
+                $lazyViewHandler = new FallbackViewHandler($appRef, new RouteBasedResponseRendererResolver());
+            }
+            return $lazyViewHandler($result, $request);
+        };
+
+        $config = [
+            'cache_dir' => __DIR__ . '/cache',
+            'routing'   => [
+                'path'       => __DIR__ . "/exception-test.routes.yml",
+                'namespaces' => [
+                    'Oasis\\Mlib\\Http\\Test\\Helpers\\Controllers\\',
+                ],
+            ],
+            'view_handlers'  => [$viewHandlerCallable],
+            'error_handlers' => [new ExceptionWrapper()],
         ];
-        $app                 = new SilexKernel($config, true);
-        $app->view_handlers  = [
-            new FallbackViewHandler($app, new RouteBasedResponseRendererResolver()),
-        ];
-        $app->error_handlers = [
-            new ExceptionWrapper(),
-        ];
-        $app->get('/uniq', [new ExceptionTestController(), "throwUniquenessViolationExceptionAction"])
-            ->getRoute()
-            ->addDefaults(
-                [
-                    'format' => 'api',
-                ]
-            );
-        
+
+        $app = new MicroKernel($config, true);
+        $appRef = $app;
+
         return $app;
     }
     

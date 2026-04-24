@@ -108,7 +108,7 @@ Release spec 的 tasks 结构不同：
 
 - [ ] top-level task 按依赖关系排序（被依赖的 task 排在前面）
 - [ ] 无循环依赖
-- [ ] 如果 `graphify-out/GRAPH_REPORT.md` 存在，利用其模块依赖关系验证 task 排序是否遗漏了隐含的跨模块依赖
+- [ ] 如果 `graphify-out/GRAPH_REPORT.md` 存在，利用 graphify 子命令查询模块依赖关系，验证 task 排序是否遗漏了隐含的跨模块依赖
 - [ ] 如果标注了并行计划（如 `[并行: 1.1, 1.2, 1.3]`），检查并行条件是否成立：各 sub-task 不修改同一个文件且不存在调用依赖
 
 ---

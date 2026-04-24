@@ -1,6 +1,6 @@
 ---
 inclusion: auto
-description: 做 design 设计、生成或修改 design 文件、做复杂代码修改（跨模块重构、框架替换等）、code review、评估变更影响面时读取
+description: 涉及 graphify 用法的时候读取
 ---
 
 # graphify — 项目知识图谱

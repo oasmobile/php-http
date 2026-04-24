@@ -27,7 +27,7 @@ description: Spec gatekeeper 校验 design 阶段的详细指引。由 spec-gate
 
 ## 0. 架构上下文加载
 
-如果 `graphify-out/GRAPH_REPORT.md` 存在，在开始语义校验前先读取，后续步骤（特别是 §4 Impact Analysis 和 §5 技术方案质量）可利用其中的模块依赖关系、god node、community 结构来辅助判断。
+如果 `graphify-out/GRAPH_REPORT.md` 存在，优先使用 graphify 子命令（`/graphify query`、`/graphify explain`、`/graphify path` 等）进行结构化查询，而不是直接读取源文件。后续步骤（特别是 §4 Impact Analysis 和 §5 技术方案质量）可利用其中的模块依赖关系、god node、community 结构来辅助判断。具体用法参见 `graphify.md` steering。
 
 ---
 
@@ -91,7 +91,7 @@ Release spec 的 design 结构不同，应包含以下内容：
 Impact Analysis 必须至少覆盖以下维度：
 
 - [ ] 受影响的 state 文档条目（具体文件名及 section）
-- [ ] 如果 §0 已加载 GRAPH_REPORT.md，是否利用其模块依赖关系和 community 结构辅助识别了受影响范围（如遗漏的下游依赖、跨 community 的连锁影响）
+- [ ] 如果 §0 已加载架构上下文，是否利用 graphify 查询结果辅助识别了受影响范围（如遗漏的下游依赖、跨 community 的连锁影响）
 - [ ] 现有 model / service / CLI 行为的变化
 - [ ] 是否涉及数据模型变更——如涉及，是否提醒了旧数据兼容
 - [ ] 是否涉及外部系统交互变化
@@ -105,7 +105,7 @@ Impact Analysis 必须至少覆盖以下维度：
 
 - [ ] 技术选型有明确理由（不是无理由地选择某个库或模式）
 - [ ] 接口签名足够清晰，能让 task 独立执行（参数类型、返回类型、异常类型）
-- [ ] 模块间依赖关系清晰，无循环依赖（如果 §0 已加载 GRAPH_REPORT.md，对照其 community 结构和依赖边验证）
+- [ ] 模块间依赖关系清晰，无循环依赖（如果 §0 已加载架构上下文，对照 graphify 查询结果验证）
 - [ ] 无过度设计（当前不需要的抽象、预留的扩展点）
 - [ ] 与 state 文档中描述的现有架构一致（不引入矛盾的设计）
 

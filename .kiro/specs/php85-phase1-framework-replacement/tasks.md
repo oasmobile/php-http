@@ -161,7 +161,7 @@
     - _Ref: Requirement 3, AC 4/6_
   - [x] 10.2 Checkpoint: 运行 `cors`、`aws`、`routing`、`cookie`、`middlewares`、`twig` test suite，确认全部子系统迁移完成且基本可用。如有问题请与用户沟通。Commit。
 
-- [-] 11. 测试适配
+- [x] 11. 测试适配
   - [x] 11.1 更新测试 bootstrap 文件
     - 更新 `ut/app.php`、`ut/index.cors.php`、`ut/index.security.php`、`ut/index.twig.php`、`ut/index.zxc.php`、`ut/test.php` 中的 `SilexKernel` → `MicroKernel`
     - 更新 `ut/AwsTests/*.php`（`elb.php`、`elb-only.php`、`cloudfront-only.php`、`no-aws.php`）
@@ -185,38 +185,38 @@
     - 更新 `ElbTrustedProxyTest`
     - 更新 `DefaultHtmlRendererTest`、`JsonApiRendererTest`
     - _Ref: Requirement 14, AC 1/5_
-  - [-] 11.5 Checkpoint: 运行以下 test suite 并确认全部通过：`cors`、`aws`、`routing`、`cookie`、`middlewares`、`twig`、`SilexKernelTest`、`SilexKernelWebTest`、`FallbackViewHandlerTest`。Security suite 预期失败（除 `NullEntryPointTest`）。如有问题请与用户沟通。Commit。
+  - [x] 11.5 Checkpoint: 运行以下 test suite 并确认全部通过：`cors`、`aws`、`routing`、`cookie`、`middlewares`、`twig`、`SilexKernelTest`、`SilexKernelWebTest`、`FallbackViewHandlerTest`。Security suite 预期失败（除 `NullEntryPointTest`）。如有问题请与用户沟通。Commit。
     - _Ref: Requirement 14, AC 5/6_
 
-- [ ] 12. Eris PBT 引入与核心 Property Test
-  - [ ] 12.1 更新 phpunit.xml 新增 pbt test suite
+- [x] 12. Eris PBT 引入与核心 Property Test
+  - [x] 12.1 更新 phpunit.xml 新增 pbt test suite
     - 添加 `<testsuite name="pbt"><directory>ut/PBT</directory></testsuite>`
     - _Ref: Requirement 15, AC 6_
-  - [ ] 12.2 编写路由解析 property test
+  - [x] 12.2 编写路由解析 property test
     - 创建 `ut/PBT/RoutingPropertyTest.php`
     - **Property CP1: 路由解析幂等性** — 对于任何已定义路由 path，`router->match()` 结果在多次调用间一致
     - 测试未定义路由抛出 `ResourceNotFoundException`
     - 测试 `%param%` 参数替换幂等性
     - 集成级：启动 MicroKernel 实例，使用真实路由配置
     - _Ref: Requirement 15, AC 1/2/3_
-  - [ ] 12.3 编写 Middleware 链 property test
+  - [x] 12.3 编写 Middleware 链 property test
     - 创建 `ut/PBT/MiddlewareChainPropertyTest.php`
     - **Property CP2: Middleware 优先级排序** — 任何 middleware 集合的执行顺序严格按 priority 降序
     - **Property CP3: Before middleware 短路** — before middleware 返回 Response 时后续 middleware 和 controller 不执行
     - 测试 `onlyForMasterRequest()` 对 sub-request 的过滤
     - 集成级：启动 MicroKernel 实例
     - _Ref: Requirement 15, AC 4_
-  - [ ] 12.4 编写请求分发 property test
+  - [x] 12.4 编写请求分发 property test
     - 创建 `ut/PBT/RequestDispatchPropertyTest.php`
     - **Property CP4: 请求分发完整性** — 任何有效请求的 `handle()` 返回 Response 状态码在 100–599 范围内
     - **Property CP5: View Handler 链传递** — 控制器返回非 Response 值时 View_Handler_Chain 被调用
     - 测试控制器抛出异常时 Error_Handler_Chain 被调用
     - 集成级：启动 MicroKernel 实例
     - _Ref: Requirement 15, AC 5_
-  - [ ] 12.5 Checkpoint: 运行全量测试（`phpunit`），确认 C-7 定义的预期通过 suite 全部通过，PBT suite 通过。确认 Security suite 预期失败（除 `NullEntryPointTest`）不阻塞。如有问题请与用户沟通。Commit。
+  - [x] 12.5 Checkpoint: 运行全量测试（`phpunit`），确认 C-7 定义的预期通过 suite 全部通过，PBT suite 通过。确认 Security suite 预期失败（除 `NullEntryPointTest`）不阻塞。如有问题请与用户沟通。Commit。
 
-- [ ] 13. 手工测试
-  - [ ] 13.1 编写手工测试场景
+- [x] 13. 手工测试
+  - [x] 13.1 编写手工测试场景
     - 场景 1: MicroKernel 启动与基本请求 — 使用 Bootstrap_Config 创建 MicroKernel 实例，发送 GET 请求到已定义路由，确认返回正确 Response
     - 场景 2: Middleware 链执行 — 配置 before/after middleware，发送请求，确认 middleware 按 priority 顺序执行，before middleware 返回 Response 时短路
     - 场景 3: CORS preflight — 发送 OPTIONS 请求带 `Access-Control-Request-Method` header，确认返回 PrefilightResponse 和正确的 CORS headers
@@ -225,10 +225,10 @@
     - 场景 6: Cookie 写入 — 通过 `ResponseCookieContainer` 添加 cookie，确认 Response headers 中包含 cookie
     - 场景 7: Twig 渲染 — 配置 Twig，控制器返回模板渲染结果，确认 HTML 输出正确
     - 场景 8: Bootstrap_Config 完整性 — 使用包含所有顶层 key 的 Bootstrap_Config 创建 MicroKernel，确认各子系统正常初始化
-  - [ ] 13.2 执行手工测试并记录结果
+  - [x] 13.2 执行手工测试并记录结果
 
-- [ ] 14. Code Review
-  - [ ] 14.1 委托给 code-reviewer sub-agent 执行
+- [x] 14. Code Review
+  - [x] 14.1 委托给 code-reviewer sub-agent 执行
 
 ## Socratic Review
 

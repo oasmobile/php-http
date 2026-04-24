@@ -106,12 +106,6 @@ class GroupUrlMatcher implements UrlMatcherInterface, RequestMatcherInterface
      */
     public function matchRequest(Request $request): array
     {
-        $this->request = $request;
-        
-        $ret = $this->match($request->getPathInfo());
-        
-        $this->request = null;
-        
-        return $ret;
+        return $this->match($request->getPathInfo());
     }
 }

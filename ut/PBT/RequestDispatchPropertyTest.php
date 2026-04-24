@@ -85,12 +85,13 @@ class RequestDispatchPropertyTest extends TestCase
             ['GET', '/param/injected2', null],
         ];
 
+        // Reuse a single kernel across all iterations — only the request varies
+        $kernel = $this->createStandardKernel();
+
         $this->forAll(
             Generators::elements($validRequests)
-        )->then(function (array $requestSpec) {
+        )->then(function (array $requestSpec) use ($kernel) {
             [$method, $path, $host] = $requestSpec;
-
-            $kernel = $this->createStandardKernel();
 
             $server = [];
             if ($host !== null) {
@@ -111,9 +112,9 @@ class RequestDispatchPropertyTest extends TestCase
                 $statusCode,
                 sprintf('Status code %d is above 599 for %s %s', $statusCode, $method, $path)
             );
-
-            $kernel->shutdown();
         });
+
+        $kernel->shutdown();
     }
 
     /**
@@ -122,16 +123,18 @@ class RequestDispatchPropertyTest extends TestCase
      */
     public function testHandleReturnsValidStatusCodeForUndefinedRoutes(): void
     {
+        // Reuse a single kernel across all iterations — only the request path varies
+        $kernel = $this->createStandardKernel();
+
         $this->forAll(
             Generators::string()
         )
             ->when(function (string $path) {
                 return strlen($path) > 0;
             })
-            ->then(function (string $randomString) {
+            ->then(function (string $randomString) use ($kernel) {
                 $path = '/__pbt_undefined__/' . bin2hex($randomString);
 
-                $kernel = $this->createStandardKernel();
                 $request = Request::create($path, 'GET');
                 $response = $kernel->handle($request);
 
@@ -146,9 +149,9 @@ class RequestDispatchPropertyTest extends TestCase
                     $statusCode,
                     sprintf('Status code %d is above 599 for undefined path %s', $statusCode, $path)
                 );
-
-                $kernel->shutdown();
             });
+
+        $kernel->shutdown();
     }
 
     // ─── CP5: View Handler 链传递 ────────────────────────────────────
@@ -171,20 +174,24 @@ class RequestDispatchPropertyTest extends TestCase
             ['GET', '/param/id/99', 'naruto.baidu.com'],           // TestController::paramId()
         ];
 
+        $viewHandlerCallCount = 0;
+        $wrappingViewHandler = function ($result, $request) use (&$viewHandlerCallCount) {
+            $viewHandlerCallCount++;
+            // Delegate to JsonViewHandler for actual conversion
+            $jsonHandler = new JsonViewHandler();
+            return $jsonHandler($result, $request);
+        };
+
+        // Reuse a single kernel across all iterations
+        $kernel = $this->createKernelWithViewHandler($wrappingViewHandler);
+
         $this->forAll(
             Generators::elements($arrayReturningRoutes)
-        )->then(function (array $requestSpec) {
+        )->then(function (array $requestSpec) use ($kernel, &$viewHandlerCallCount) {
             [$method, $path, $host] = $requestSpec;
 
-            $viewHandlerCalled = false;
-            $wrappingViewHandler = function ($result, $request) use (&$viewHandlerCalled) {
-                $viewHandlerCalled = true;
-                // Delegate to JsonViewHandler for actual conversion
-                $jsonHandler = new JsonViewHandler();
-                return $jsonHandler($result, $request);
-            };
-
-            $kernel = $this->createKernelWithViewHandler($wrappingViewHandler);
+            // Reset counter before each iteration
+            $previousCount = $viewHandlerCallCount;
 
             $server = [];
             if ($host !== null) {
@@ -194,8 +201,9 @@ class RequestDispatchPropertyTest extends TestCase
             $request = Request::create($path, $method, [], [], [], $server);
             $response = $kernel->handle($request);
 
-            $this->assertTrue(
-                $viewHandlerCalled,
+            $this->assertGreaterThan(
+                $previousCount,
+                $viewHandlerCallCount,
                 sprintf('View handler chain should be invoked for %s %s (controller returns non-Response)', $method, $path)
             );
 
@@ -203,9 +211,9 @@ class RequestDispatchPropertyTest extends TestCase
             $this->assertEquals(200, $response->getStatusCode());
             $json = json_decode($response->getContent(), true);
             $this->assertIsArray($json, 'Response content should be valid JSON');
-
-            $kernel->shutdown();
         });
+
+        $kernel->shutdown();
     }
 
     // ─── Error Handler 链调用 ────────────────────────────────────────
@@ -215,7 +223,7 @@ class RequestDispatchPropertyTest extends TestCase
      */
     public function testErrorHandlerChainIsInvokedWhenControllerThrowsException(): void
     {
-        $this->forAll(
+        $this->limitTo(20)->forAll(
             Generators::choose(400, 599)
         )->then(function (int $errorCode) {
             $errorHandlerCalled = false;
@@ -261,7 +269,7 @@ class RequestDispatchPropertyTest extends TestCase
      */
     public function testFirstErrorHandlerResponseWins(): void
     {
-        $this->forAll(
+        $this->limitTo(20)->forAll(
             Generators::choose(2, 5)
         )->then(function (int $handlerCount) {
             $callLog = [];

@@ -16,7 +16,7 @@ use Silex\Api\BootableProviderInterface;
 use Silex\Application;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
+use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 
 class CrossOriginResourceSharingProvider implements ServiceProviderInterface, BootableProviderInterface
@@ -155,7 +155,7 @@ class CrossOriginResourceSharingProvider implements ServiceProviderInterface, Bo
      * @param \Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException $e
      * @param                                                                       $request
      * @param                                                                       $code
-     * @param \Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent      $event
+     * @param \Symfony\Component\HttpKernel\Event\ExceptionEvent                    $event
      *
      * @return null|\Oasis\Mlib\Http\Views\PrefilightResponse
      */
@@ -164,7 +164,7 @@ class CrossOriginResourceSharingProvider implements ServiceProviderInterface, Bo
                                            $request,
         /** @noinspection PhpUnusedParameterInspection */
                                            $code,
-                                           GetResponseForExceptionEvent $event)
+                                           ExceptionEvent $event)
     {
         if ($this->preFlightResponse) {
             foreach (explode(', ', $e->getHeaders()['Allow']) as $method) {

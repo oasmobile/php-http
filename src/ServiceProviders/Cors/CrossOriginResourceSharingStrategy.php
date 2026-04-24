@@ -11,8 +11,11 @@ namespace Oasis\Mlib\Http\ServiceProviders\Cors;
 use Oasis\Mlib\Http\Configuration\ConfigurationValidationTrait;
 use Oasis\Mlib\Http\Configuration\CrossOriginResourceSharingConfiguration;
 use Oasis\Mlib\Utils\DataProviderInterface;
+use Symfony\Component\HttpFoundation\ChainRequestMatcher;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\RequestMatcher;
+use Symfony\Component\HttpFoundation\RequestMatcher\HostRequestMatcher;
+use Symfony\Component\HttpFoundation\RequestMatcher\PathRequestMatcher;
+use Symfony\Component\HttpFoundation\RequestMatcherInterface;
 
 class CrossOriginResourceSharingStrategy
 {
@@ -28,7 +31,7 @@ class CrossOriginResourceSharingStrategy
     
     use ConfigurationValidationTrait;
     
-    /** @var RequestMatcher */
+    /** @var RequestMatcherInterface */
     protected $matcher            = null;
     protected $originsAllowed     = [];
     protected $headersAllowed     = [];
@@ -52,13 +55,13 @@ class CrossOriginResourceSharingStrategy
         
         if (is_string($pattern)) {
             if ($pattern == "*") {
-                $this->matcher = new RequestMatcher('.*');
+                $this->matcher = new ChainRequestMatcher([new PathRequestMatcher('.*')]);
             }
             else {
-                $this->matcher = new RequestMatcher($pattern);
+                $this->matcher = new ChainRequestMatcher([new PathRequestMatcher($pattern)]);
             }
         }
-        elseif ($pattern instanceof RequestMatcher) {
+        elseif ($pattern instanceof RequestMatcherInterface) {
             $this->matcher = $pattern;
         }
         else {

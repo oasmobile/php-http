@@ -15,7 +15,9 @@ use Oasis\Mlib\Http\Test\Helpers\Security\TestAuthenticationPolicy;
 use Oasis\Mlib\Http\Test\Helpers\TwigHelper;
 use Oasis\Mlib\Http\Views\JsonViewHandler;
 use Silex\Provider\SessionServiceProvider;
-use Symfony\Component\HttpFoundation\RequestMatcher;
+use Symfony\Component\HttpFoundation\ChainRequestMatcher;
+use Symfony\Component\HttpFoundation\RequestMatcher\HostRequestMatcher;
+use Symfony\Component\HttpFoundation\RequestMatcher\PathRequestMatcher;
 
 $users = [
     "admin"  => [
@@ -79,7 +81,7 @@ $config = [
                 'roles'   => 'ROLE_ADMIN',
             ],
             [
-                'pattern' => new RequestMatcher('^/secured/madmin/parent', "bai(du|da)\\.com"),
+                'pattern' => new ChainRequestMatcher([new PathRequestMatcher('^/secured/madmin/parent'), new HostRequestMatcher("bai(du|da)\\.com")]),
                 'roles'   => ['ROLE_PARENT'],
             ],
             [

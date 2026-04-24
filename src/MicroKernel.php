@@ -21,7 +21,9 @@ use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
+use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
@@ -560,6 +562,15 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
                 $container->loadFromExtension($provider->getAlias());
             }
         }
+
+        // Register ExtendedArgumentValueResolver for controller injected args.
+        // The resolver is created via a factory method on the kernel service,
+        // which provides the injected args at runtime (after all addControllerInjectedArg() calls).
+        $resolverDef = new Definition(ExtendedArgumentValueResolver::class);
+        $resolverDef->setFactory([new Reference('kernel'), 'createArgumentValueResolver']);
+        $resolverDef->setPublic(true);
+        $resolverDef->addTag('controller.argument_value_resolver', ['priority' => 200]);
+        $container->setDefinition(ExtendedArgumentValueResolver::class, $resolverDef);
     }
 
     public function boot(): void
@@ -741,5 +752,14 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
     public function setAuthorizationChecker(?AuthorizationCheckerInterface $checker): void
     {
         $this->authorizationChecker = $checker;
+    }
+
+    /**
+     * Factory method for creating the ExtendedArgumentValueResolver.
+     * Called by the DI container via service factory definition.
+     */
+    public function createArgumentValueResolver(): ExtendedArgumentValueResolver
+    {
+        return new ExtendedArgumentValueResolver($this->controllerInjectedArgs);
     }
 }

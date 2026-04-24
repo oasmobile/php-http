@@ -9,7 +9,7 @@
 namespace Oasis\Mlib\Http\Test\Helpers\Security;
 
 use Oasis\Mlib\Http\ServiceProviders\Security\SimpleAccessRule;
-use Symfony\Component\Routing\Matcher\RequestMatcherInterface;
+use Symfony\Component\HttpFoundation\RequestMatcherInterface;
 
 class TestAccessRule extends SimpleAccessRule
 {

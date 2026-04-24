@@ -48,7 +48,7 @@
     - _Ref: Requirement 2, AC 8_
   - [x] 2.5 Checkpoint: 确认 MicroKernel 类可编译，MiddlewareInterface / AbstractMiddleware 无语法错误。Commit。
 
-- [-] 3. 路由系统迁移
+- [x] 3. 路由系统迁移
   - [x] 3.1 重写 CacheableRouterProvider 为 DI 注册方式
     - 移除 `Pimple\ServiceProviderInterface` 实现
     - 提供 `register(MicroKernel $kernel)` 方法
@@ -66,10 +66,10 @@
   - [x] 3.4 验证 GroupUrlMatcher / GroupUrlGenerator / CacheableRouterUrlMatcherWrapper 无需修改
     - 确认这些类无 Silex 依赖，在 Symfony 7.x 下正常工作
     - _Ref: Requirement 5, AC 4/5/6_
-  - [-] 3.5 Checkpoint: 运行 `routing` 和 `middlewares` test suite，确认请求链路基本跑通（MicroKernel 能启动、路由能匹配、middleware 能执行）。如有问题请与用户沟通。Commit。
+  - [x] 3.5 Checkpoint: 运行 `routing` 和 `middlewares` test suite，确认请求链路基本跑通（MicroKernel 能启动、路由能匹配、middleware 能执行）。如有问题请与用户沟通。Commit。
 
-- [ ] 4. Symfony 4.x → 7.x API 适配与 ArgumentValueResolver
-  - [ ] 4.1 全局替换 Symfony 4.x 已移除 API
+- [-] 4. Symfony 4.x → 7.x API 适配与 ArgumentValueResolver
+  - [x] 4.1 全局替换 Symfony 4.x 已移除 API
     - `FilterResponseEvent` → `ResponseEvent`
     - `GetResponseEvent` → `RequestEvent`
     - `GetResponseForExceptionEvent` → `ExceptionEvent`
@@ -77,15 +77,15 @@
     - 移除 `Silex\CallbackResolver` 用法
     - 检查 `RequestMatcher` 构造函数在 Symfony 7.x 中的变化并适配
     - _Ref: Requirement 13, AC 1–7_
-  - [ ] 4.2 适配 ExtendedArgumentValueResolver 到 Symfony 7.x
+  - [x] 4.2 适配 ExtendedArgumentValueResolver 到 Symfony 7.x
     - 将 `ArgumentValueResolverInterface` 替换为 `ValueResolverInterface`
     - 移除 `supports()` 方法，将逻辑合并到 `resolve()` 中（不支持时返回空数组）
     - 注册到 Symfony DI 作为 argument value resolver
     - Bootstrap_Config `injected_args` 继续作为 auto-injection 候选
     - _Ref: Requirement 12, AC 1–4; Requirement 16, AC 9_
-  - [ ] 4.3 Checkpoint: 确认所有 Symfony 4.x API 引用已替换，代码可编译。Commit。
+  - [-] 4.3 Checkpoint: 确认所有 Symfony 4.x API 引用已替换，代码可编译。Commit。
 
-- [ ] 5. CORS 机制迁移
+- [~] 5. CORS 机制迁移
   - [ ] 5.1 重写 CrossOriginResourceSharingProvider 为 EventSubscriber
     - 创建 `CrossOriginResourceSharingSubscriber` 实现 `EventSubscriberInterface`
     - `getSubscribedEvents()` 注册：`KernelEvents::REQUEST` [onPreRouting, 33] + [onPostRouting, 20]、`KernelEvents::RESPONSE` [onResponse, -512]、`KernelEvents::EXCEPTION` [onException, 512]

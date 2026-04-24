@@ -13,7 +13,9 @@ use Oasis\Mlib\Http\Test\Helpers\Security\TestAccessRule;
 use Oasis\Mlib\Http\Test\Helpers\Security\TestApiUserProvider;
 use Oasis\Mlib\Http\Test\Helpers\Security\TestAuthenticationPolicy;
 use Oasis\Mlib\Http\Test\Security\SessionServiceProvider;
-use Symfony\Component\HttpFoundation\RequestMatcher;
+use Symfony\Component\HttpFoundation\ChainRequestMatcher;
+use Symfony\Component\HttpFoundation\RequestMatcher\HostRequestMatcher;
+use Symfony\Component\HttpFoundation\RequestMatcher\PathRequestMatcher;
 
 $users = [
     "admin"  => [
@@ -72,12 +74,12 @@ $provider->addFirewall("minhao.admin", $testFirewall);
 $provider->addAccessRule(new TestAccessRule('^/secured/madmin/admin', 'ROLE_ADMIN'));
 $provider->addAccessRule(
     new TestAccessRule(
-        new RequestMatcher('^/secured/madmin/parent', "bai(du|da)\\.com"), ['ROLE_PARENT']
+        new ChainRequestMatcher([new PathRequestMatcher('^/secured/madmin/parent'), new HostRequestMatcher("bai(du|da)\\.com")]), ['ROLE_PARENT']
     )
 );
 $provider->addAccessRule(
     new TestAccessRule(
-        new RequestMatcher('^/secured/madmin/child'),
+        new ChainRequestMatcher([new PathRequestMatcher('^/secured/madmin/child')]),
         'ROLE_CHILD'
     )
 );

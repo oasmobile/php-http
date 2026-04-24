@@ -14,7 +14,9 @@ use Oasis\Mlib\Http\Test\Helpers\Security\TestApiUserProvider;
 use Oasis\Mlib\Http\Test\Helpers\Security\TestAuthenticationPolicy;
 use Oasis\Mlib\Http\Test\Security\SessionServiceProvider;
 use Oasis\Mlib\Http\Views\JsonViewHandler;
-use Symfony\Component\HttpFoundation\RequestMatcher;
+use Symfony\Component\HttpFoundation\ChainRequestMatcher;
+use Symfony\Component\HttpFoundation\RequestMatcher\HostRequestMatcher;
+use Symfony\Component\HttpFoundation\RequestMatcher\PathRequestMatcher;
 
 $users = [
     "admin" => [
@@ -76,7 +78,7 @@ $config = [
                 'roles'   => 'ROLE_ADMIN',
             ],
             [
-                'pattern' => new RequestMatcher('^/secured/madmin/parent', "bai(du|da)\\.com"),
+                'pattern' => new ChainRequestMatcher([new PathRequestMatcher('^/secured/madmin/parent'), new HostRequestMatcher("bai(du|da)\\.com")]),
                 'roles'   => ['ROLE_PARENT'],
             ],
             [

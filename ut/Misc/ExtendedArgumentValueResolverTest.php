@@ -48,24 +48,27 @@ class ExtendedArgumentValueResolverTest extends TestCase
     }
 
     //----------------------------------------------------------------------
-    // supports() — exact match
+    // resolve() returns non-empty — exact match (replaces old supports() test)
     //----------------------------------------------------------------------
 
-    public function testSupportsExactMatch()
+    public function testResolveExactMatchReturnsNonEmpty()
     {
         $obj      = new \stdClass();
         $resolver = new ExtendedArgumentValueResolver([$obj]);
         $request  = Request::create('/');
         $argument = $this->createArgumentMetadata('stdClass');
 
-        $this->assertTrue($resolver->supports($request, $argument));
+        $results = $this->resolveToArray($resolver, $request, $argument);
+
+        $this->assertNotEmpty($results);
+        $this->assertSame($obj, $results[0]);
     }
 
     //----------------------------------------------------------------------
-    // supports() — instanceof match
+    // resolve() returns non-empty — instanceof match (replaces old supports() test)
     //----------------------------------------------------------------------
 
-    public function testSupportsInstanceofMatch()
+    public function testResolveInstanceofMatchReturnsNonEmpty()
     {
         $obj      = new \RuntimeException('test');
         $resolver = new ExtendedArgumentValueResolver([$obj]);
@@ -73,34 +76,41 @@ class ExtendedArgumentValueResolverTest extends TestCase
         // RuntimeException extends Exception — argument typed as parent class
         $argument = $this->createArgumentMetadata('Exception');
 
-        $this->assertTrue($resolver->supports($request, $argument));
+        $results = $this->resolveToArray($resolver, $request, $argument);
+
+        $this->assertNotEmpty($results);
+        $this->assertSame($obj, $results[0]);
     }
 
     //----------------------------------------------------------------------
-    // supports() — non-existent class
+    // resolve() returns empty — non-existent class (replaces old supports() test)
     //----------------------------------------------------------------------
 
-    public function testSupportsNonExistentClassReturnsFalse()
+    public function testResolveNonExistentClassReturnsEmpty()
     {
         $resolver = new ExtendedArgumentValueResolver([new \stdClass()]);
         $request  = Request::create('/');
         $argument = $this->createArgumentMetadata('NonExistent\\ClassName\\That\\Does\\Not\\Exist');
 
-        $this->assertFalse($resolver->supports($request, $argument));
+        $results = $this->resolveToArray($resolver, $request, $argument);
+
+        $this->assertEmpty($results);
     }
 
     //----------------------------------------------------------------------
-    // supports() — no match
+    // resolve() returns empty — no match (replaces old supports() test)
     //----------------------------------------------------------------------
 
-    public function testSupportsNoMatchReturnsFalse()
+    public function testResolveNoMatchReturnsEmpty()
     {
         $resolver = new ExtendedArgumentValueResolver([new \stdClass()]);
         $request  = Request::create('/');
         // ArrayObject is a real class but stdClass is not an instance of it
         $argument = $this->createArgumentMetadata('ArrayObject');
 
-        $this->assertFalse($resolver->supports($request, $argument));
+        $results = $this->resolveToArray($resolver, $request, $argument);
+
+        $this->assertEmpty($results);
     }
 
     //----------------------------------------------------------------------
@@ -114,7 +124,7 @@ class ExtendedArgumentValueResolverTest extends TestCase
         $request  = Request::create('/');
         $argument = $this->createArgumentMetadata('stdClass');
 
-        $results = iterator_to_array($resolver->resolve($request, $argument));
+        $results = $this->resolveToArray($resolver, $request, $argument);
 
         $this->assertCount(1, $results);
         $this->assertSame($obj, $results[0]);
@@ -131,7 +141,7 @@ class ExtendedArgumentValueResolverTest extends TestCase
         $request  = Request::create('/');
         $argument = $this->createArgumentMetadata('Exception');
 
-        $results = iterator_to_array($resolver->resolve($request, $argument));
+        $results = $this->resolveToArray($resolver, $request, $argument);
 
         $this->assertCount(1, $results);
         $this->assertSame($obj, $results[0]);
@@ -149,42 +159,52 @@ class ExtendedArgumentValueResolverTest extends TestCase
         $request   = Request::create('/');
         $argument  = $this->createArgumentMetadata('LogicException');
 
-        $results = iterator_to_array($resolver->resolve($request, $argument));
+        $results = $this->resolveToArray($resolver, $request, $argument);
 
         $this->assertCount(1, $results);
         $this->assertSame($logic, $results[0]);
     }
 
     //----------------------------------------------------------------------
-    // resolve() — multiple instanceof matches yield all
+    // resolve() — null type returns empty
     //----------------------------------------------------------------------
 
-    public function testResolveMultipleInstanceofMatchesYieldAll()
+    public function testResolveNullTypeReturnsEmpty()
     {
-        $runtime = new \RuntimeException('r');
-        $logic   = new \LogicException('l');
-        $resolver = new ExtendedArgumentValueResolver([$runtime, $logic]);
+        $resolver = new ExtendedArgumentValueResolver([new \stdClass()]);
         $request  = Request::create('/');
-        // Both are instances of Exception
-        $argument = $this->createArgumentMetadata('Exception');
+        $argument = $this->createArgumentMetadata(null);
 
-        $results = iterator_to_array($resolver->resolve($request, $argument));
+        $results = $this->resolveToArray($resolver, $request, $argument);
 
-        $this->assertCount(2, $results);
-        $this->assertSame($runtime, $results[0]);
-        $this->assertSame($logic, $results[1]);
+        $this->assertEmpty($results);
     }
 
     //----------------------------------------------------------------------
-    // Helper
+    // resolve() — empty resolver returns empty
+    //----------------------------------------------------------------------
+
+    public function testResolveEmptyResolverReturnsEmpty()
+    {
+        $resolver = new ExtendedArgumentValueResolver([]);
+        $request  = Request::create('/');
+        $argument = $this->createArgumentMetadata('stdClass');
+
+        $results = $this->resolveToArray($resolver, $request, $argument);
+
+        $this->assertEmpty($results);
+    }
+
+    //----------------------------------------------------------------------
+    // Helpers
     //----------------------------------------------------------------------
 
     /**
-     * @param string $type
+     * @param string|null $type
      *
-     * @return ArgumentMetadata|\PHPUnit_Framework_MockObject_MockObject
+     * @return ArgumentMetadata
      */
-    private function createArgumentMetadata($type)
+    private function createArgumentMetadata(?string $type): ArgumentMetadata
     {
         $argument = $this->getMockBuilder(ArgumentMetadata::class)
                          ->disableOriginalConstructor()
@@ -192,5 +212,14 @@ class ExtendedArgumentValueResolverTest extends TestCase
         $argument->method('getType')->willReturn($type);
 
         return $argument;
+    }
+
+    /**
+     * Convert resolve() iterable result to array for easier assertion.
+     */
+    private function resolveToArray(ExtendedArgumentValueResolver $resolver, Request $request, ArgumentMetadata $argument): array
+    {
+        $result = $resolver->resolve($request, $argument);
+        return is_array($result) ? $result : iterator_to_array($result);
     }
 }

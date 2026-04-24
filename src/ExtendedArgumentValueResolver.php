@@ -9,10 +9,10 @@
 namespace Oasis\Mlib\Http;
 
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Controller\ArgumentValueResolverInterface;
+use Symfony\Component\HttpKernel\Controller\ValueResolverInterface;
 use Symfony\Component\HttpKernel\ControllerMetadata\ArgumentMetadata;
 
-class ExtendedArgumentValueResolver implements ArgumentValueResolverInterface
+class ExtendedArgumentValueResolver implements ValueResolverInterface
 {
     protected $mappingParameters = [];
     
@@ -27,53 +27,31 @@ class ExtendedArgumentValueResolver implements ArgumentValueResolverInterface
     }
     
     /**
-     * Whether this resolver can resolve the value for the given ArgumentMetadata.
-     *
-     * @param Request          $request
-     * @param ArgumentMetadata $argument
-     *
-     * @return bool
-     */
-    public function supports(Request $request, ArgumentMetadata $argument)
-    {
-        $classname = $argument->getType();
-        if (!\class_exists($classname)) {
-            return false;
-        }
-        if (\array_key_exists($classname, $this->mappingParameters)) {
-            return true;
-        }
-        else {
-            foreach ($this->mappingParameters as $value) {
-                if ($value instanceof $classname) {
-                    return true;
-                }
-            }
-            
-            return false;
-        }
-    }
-    
-    /**
      * Returns the possible value(s).
      *
+     * In Symfony 7.x, supports() was removed from the interface.
+     * Return an empty array when the argument is not supported.
+     *
      * @param Request          $request
      * @param ArgumentMetadata $argument
      *
-     * @return \Generator
+     * @return iterable
      */
-    public function resolve(Request $request, ArgumentMetadata $argument)
+    public function resolve(Request $request, ArgumentMetadata $argument): iterable
     {
-        if (\array_key_exists($argument->getType(), $this->mappingParameters)) {
-            yield $this->mappingParameters[$argument->getType()];
+        $classname = $argument->getType();
+        if (!$classname || !\class_exists($classname)) {
+            return [];
         }
-        else {
-            foreach ($this->mappingParameters as $value) {
-                $classname = $argument->getType();
-                if ($value instanceof $classname) {
-                    yield $value;
-                }
+        if (\array_key_exists($classname, $this->mappingParameters)) {
+            return [$this->mappingParameters[$classname]];
+        }
+        foreach ($this->mappingParameters as $value) {
+            if ($value instanceof $classname) {
+                return [$value];
             }
         }
+        
+        return [];
     }
 }

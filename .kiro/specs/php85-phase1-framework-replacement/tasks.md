@@ -68,7 +68,7 @@
     - _Ref: Requirement 5, AC 4/5/6_
   - [x] 3.5 Checkpoint: 运行 `routing` 和 `middlewares` test suite，确认请求链路基本跑通（MicroKernel 能启动、路由能匹配、middleware 能执行）。如有问题请与用户沟通。Commit。
 
-- [-] 4. Symfony 4.x → 7.x API 适配与 ArgumentValueResolver
+- [x] 4. Symfony 4.x → 7.x API 适配与 ArgumentValueResolver
   - [x] 4.1 全局替换 Symfony 4.x 已移除 API
     - `FilterResponseEvent` → `ResponseEvent`
     - `GetResponseEvent` → `RequestEvent`
@@ -83,10 +83,10 @@
     - 注册到 Symfony DI 作为 argument value resolver
     - Bootstrap_Config `injected_args` 继续作为 auto-injection 候选
     - _Ref: Requirement 12, AC 1–4; Requirement 16, AC 9_
-  - [-] 4.3 Checkpoint: 确认所有 Symfony 4.x API 引用已替换，代码可编译。Commit。
+  - [x] 4.3 Checkpoint: 确认所有 Symfony 4.x API 引用已替换，代码可编译。Commit。
 
-- [~] 5. CORS 机制迁移
-  - [ ] 5.1 重写 CrossOriginResourceSharingProvider 为 EventSubscriber
+- [-] 5. CORS 机制迁移
+  - [x] 5.1 重写 CrossOriginResourceSharingProvider 为 EventSubscriber
     - 创建 `CrossOriginResourceSharingSubscriber` 实现 `EventSubscriberInterface`
     - `getSubscribedEvents()` 注册：`KernelEvents::REQUEST` [onPreRouting, 33] + [onPostRouting, 20]、`KernelEvents::RESPONSE` [onResponse, -512]、`KernelEvents::EXCEPTION` [onException, 512]
     - `onPreRouting()`、`onPostRouting()` 签名适配 `RequestEvent`
@@ -96,7 +96,7 @@
     - `CrossOriginResourceSharingStrategy` 保持不变
     - Bootstrap_Config `cors` key 初始化 strategies
     - _Ref: Requirement 6, AC 1–7; Requirement 16, AC 5_
-  - [ ] 5.2 Checkpoint: 运行 `cors` test suite，确认 CORS 机制可用。Commit。
+  - [-] 5.2 Checkpoint: 运行 `cors` test suite，确认 CORS 机制可用。Commit。
 
 - [ ] 6. View Handler 链与 Error Handler 链迁移
   - [ ] 6.1 创建 ViewHandlerSubscriber

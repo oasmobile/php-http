@@ -29,8 +29,11 @@ class ExtendedArgumentValueResolver implements ValueResolverInterface
     /**
      * Returns the possible value(s).
      *
-     * In Symfony 7.x, supports() was removed from the interface.
-     * Return an empty array when the argument is not supported.
+     * Symfony 7.x 用 ValueResolverInterface 替代了 ArgumentValueResolverInterface，
+     * 移除了 supports() 方法。原来的两步流程（supports() 判断 + resolve() 取值）
+     * 合并为一步：resolve() 返回空数组表示不支持，返回非空数组表示匹配成功。
+     *
+     * 匹配逻辑与原 supports() 一致：精确类名匹配优先，其次 instanceof 匹配。
      *
      * @param Request          $request
      * @param ArgumentMetadata $argument

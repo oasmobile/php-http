@@ -3,7 +3,7 @@ namespace Oasis\Mlib\Http\Test\Cors;
 
 use Oasis\Mlib\Http\ServiceProviders\Cors\CrossOriginResourceSharingProvider;
 use Oasis\Mlib\Http\Test\Helpers\RouteCacheCleaner;
-use Silex\WebTestCase;
+use Oasis\Mlib\Http\Test\Helpers\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 
@@ -17,7 +17,7 @@ class CrossOriginResourceSharingAdvancedTest extends WebTestCase
 {
     use RouteCacheCleaner;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->cleanRouteCache(__DIR__ . '/../cache');
         parent::setUp();
@@ -59,7 +59,7 @@ class CrossOriginResourceSharingAdvancedTest extends WebTestCase
         $this->assertTrue($response->headers->has(CrossOriginResourceSharingProvider::HEADER_ALLOW_ORIGIN));
         $this->assertEquals($origin, $response->headers->get(CrossOriginResourceSharingProvider::HEADER_ALLOW_ORIGIN));
         $this->assertTrue($response->headers->has(CrossOriginResourceSharingProvider::HEADER_ALLOW_HEADERS));
-        $this->assertContains(
+        $this->assertStringContainsString(
             $myHeader,
             $response->headers->get(CrossOriginResourceSharingProvider::HEADER_ALLOW_HEADERS)
         );

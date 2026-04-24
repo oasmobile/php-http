@@ -7,6 +7,8 @@ use Oasis\Mlib\Http\Configuration\CacheableRouterConfiguration;
 use Oasis\Mlib\Http\Configuration\ConfigurationValidationTrait;
 use Oasis\Mlib\Http\Configuration\HttpConfiguration;
 use Oasis\Mlib\Http\Middlewares\MiddlewareInterface;
+use Oasis\Mlib\Http\ServiceProviders\Cors\CrossOriginResourceSharingProvider;
+use Oasis\Mlib\Http\ServiceProviders\Cors\CrossOriginResourceSharingStrategy;
 use Oasis\Mlib\Http\ServiceProviders\Routing\CacheableRouterProvider;
 use Oasis\Mlib\Http\ServiceProviders\Routing\GroupUrlGenerator;
 use Oasis\Mlib\Http\ServiceProviders\Routing\GroupUrlMatcher;
@@ -75,6 +77,8 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
     protected $authorizationChecker = null;
     /** @var array */
     protected $providers = [];
+    /** @var CrossOriginResourceSharingProvider|null */
+    protected $corsSubscriber = null;
     /** @var CacheableRouterProvider|null */
     protected $routerProvider = null;
     /** @var ArrayDataProvider|null */
@@ -426,6 +430,11 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
             $dispatcher->addListener(
                 KernelEvents::EXCEPTION,
                 function (ExceptionEvent $event) use ($handler) {
+                    // If a previous handler (e.g., CORS) already set a response, skip
+                    if ($event->getResponse() !== null) {
+                        return;
+                    }
+
                     $exception = $event->getThrowable();
                     $request   = $event->getRequest();
                     $code      = $exception instanceof \Symfony\Component\HttpKernel\Exception\HttpExceptionInterface
@@ -476,6 +485,28 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
         );
     }
 
+    // ─── Internal: CORS registration ─────────────────────────────────
+
+    /**
+     * Register CORS EventSubscriber if cors config is provided.
+     * Called during boot().
+     */
+    protected function registerCors(): void
+    {
+        $corsConfig = $this->httpDataProvider->getOptional(
+            'cors',
+            DataProviderInterface::MIXED_TYPE
+        );
+
+        if (!$corsConfig || !\is_array($corsConfig)) {
+            return;
+        }
+
+        $this->corsSubscriber = new CrossOriginResourceSharingProvider($corsConfig);
+        $dispatcher = $this->getContainer()->get('event_dispatcher');
+        $dispatcher->addSubscriber($this->corsSubscriber);
+    }
+
     // ─── Internal: Routing registration ─────────────────────────────
 
     /**
@@ -507,6 +538,37 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
         $requestContext       = new RequestContext();
         $this->requestMatcher = $this->routerProvider->buildRequestMatcher($requestContext);
         $this->urlGenerator   = $this->routerProvider->buildUrlGenerator($requestContext);
+
+        // Register a custom routing listener that runs before Symfony's RouterListener (priority 32).
+        // Our listener uses the custom GroupUrlMatcher to resolve routes.
+        // Once _controller is set, Symfony's RouterListener will skip routing.
+        $matcher    = $this->requestMatcher;
+        $dispatcher = $this->getContainer()->get('event_dispatcher');
+        $dispatcher->addListener(
+            KernelEvents::REQUEST,
+            function (RequestEvent $event) use ($matcher, $requestContext) {
+                $request = $event->getRequest();
+
+                if ($request->attributes->has('_controller')) {
+                    return;
+                }
+
+                try {
+                    $requestContext->fromRequest($request);
+                    $parameters = $matcher->matchRequest($request);
+                    $request->attributes->add($parameters);
+                    unset($parameters['_route'], $parameters['_controller']);
+                    $request->attributes->set('_route_params', $parameters);
+                } catch (\Symfony\Component\Routing\Exception\ResourceNotFoundException $e) {
+                    // Let Symfony's RouterListener handle the 404
+                } catch (\Symfony\Component\Routing\Exception\MethodNotAllowedException $e) {
+                    // Throw MethodNotAllowedHttpException so CORS onException handler can intercept it
+                    $message = \sprintf('No route found for "%s %s": Method Not Allowed (Allow: %s)', $request->getMethod(), $request->getBaseUrl().$request->getPathInfo(), implode(', ', $e->getAllowedMethods()));
+                    throw new \Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException($e->getAllowedMethods(), $message, $e);
+                }
+            },
+            self::BEFORE_PRIORITY_ROUTING + 1 // priority 33, one above Symfony's RouterListener (32)
+        );
     }
 
     // ─── Symfony Kernel overrides ────────────────────────────────────
@@ -580,6 +642,10 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
         }
 
         parent::boot();
+
+        // Register CORS subscriber if cors config is provided (before routing,
+        // so onPreRouting can detect preflight before the routing listener throws)
+        $this->registerCors();
 
         // Register routing services if routing config is provided
         $this->registerRouting();

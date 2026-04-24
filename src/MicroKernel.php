@@ -12,6 +12,7 @@ use Oasis\Mlib\Http\ServiceProviders\Cookie\ResponseCookieContainer;
 use Oasis\Mlib\Http\ServiceProviders\Cookie\SimpleCookieProvider;
 use Oasis\Mlib\Http\ServiceProviders\Cors\CrossOriginResourceSharingProvider;
 use Oasis\Mlib\Http\ServiceProviders\Cors\CrossOriginResourceSharingStrategy;
+use Oasis\Mlib\Http\ServiceProviders\Twig\SimpleTwigServiceProvider;
 use Oasis\Mlib\Http\ServiceProviders\Routing\CacheableRouterProvider;
 use Oasis\Mlib\Http\ServiceProviders\Routing\GroupUrlGenerator;
 use Oasis\Mlib\Http\ServiceProviders\Routing\GroupUrlMatcher;
@@ -513,6 +514,27 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
         $dispatcher->addSubscriber($this->corsSubscriber);
     }
 
+    // ─── Internal: Twig registration ────────────────────────────────
+
+    /**
+     * Register Twig environment if twig config is provided.
+     * Called during boot().
+     */
+    protected function registerTwig(): void
+    {
+        $twigConfig = $this->httpDataProvider->getOptional(
+            'twig',
+            DataProviderInterface::MIXED_TYPE
+        );
+
+        if (!$twigConfig || !\is_array($twigConfig)) {
+            return;
+        }
+
+        $twigProvider = new SimpleTwigServiceProvider();
+        $twigProvider->register($this, $twigConfig);
+    }
+
     // ─── Internal: Routing registration ─────────────────────────────
 
     /**
@@ -649,12 +671,19 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
 
         parent::boot();
 
+        // Register the kernel itself as a controller injected arg
+        // so controllers can type-hint MicroKernel to receive it
+        $this->addControllerInjectedArg($this);
+
         // Register Cookie subscriber
         $this->registerCookie();
 
         // Register CORS subscriber if cors config is provided (before routing,
         // so onPreRouting can detect preflight before the routing listener throws)
         $this->registerCors();
+
+        // Register Twig environment if twig config is provided
+        $this->registerTwig();
 
         // Register routing services if routing config is provided
         $this->registerRouting();

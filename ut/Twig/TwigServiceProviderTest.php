@@ -2,21 +2,19 @@
 
 namespace Oasis\Mlib\Http\Test\Twig;
 
+use Oasis\Mlib\Http\MicroKernel;
 use Oasis\Mlib\Http\Test\Helpers\RouteCacheCleaner;
-use Silex\WebTestCase;
+use Oasis\Mlib\Http\Test\Helpers\WebTestCase;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 
 /**
- * Created by PhpStorm.
- * User: minhao
- * Date: 2016-03-25
- * Time: 11:53
+ * Tests for Twig integration via SimpleTwigServiceProvider.
  */
 class TwigServiceProviderTest extends WebTestCase
 {
     use RouteCacheCleaner;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->cleanRouteCache(__DIR__ . '/../cache');
         parent::setUp();
@@ -31,7 +29,7 @@ class TwigServiceProviderTest extends WebTestCase
     {
         return require __DIR__ . "/app.twig.php";
     }
-    
+
     /**
      * @runInSeparateProcess
      */
@@ -40,43 +38,43 @@ class TwigServiceProviderTest extends WebTestCase
         $client = $this->createClient();
         $client->request('GET', '/twig/2');
         $crawler = $client->getCrawler();
-        $this->assertContains("WOW", $crawler->filter("body")->text());
-        $this->assertContains("haha", $crawler->filter("body")->text());
-        
+        $this->assertStringContainsString("WOW", $crawler->filter("body")->text());
+        $this->assertStringContainsString("haha", $crawler->filter("body")->text());
+
         // escape testing
-        $this->assertContains("yyzzMljlkfda", $crawler->filter("div#div_foo")->text());
-        $this->assertContains("X<BR/>U", $crawler->filter("div#div_foo")->text());
-        $this->assertContains("X&lt;BR/&gt;U", $crawler->filter("div#div_foo")->html());
-        
+        $this->assertStringContainsString("yyzzMljlkfda", $crawler->filter("div#div_foo")->text());
+        $this->assertStringContainsString("X<BR/>U", $crawler->filter("div#div_foo")->text());
+        $this->assertStringContainsString("X&lt;BR/&gt;U", $crawler->filter("div#div_foo")->html());
+
         // macro testing
         $this->assertEquals("alice@9", $crawler->filter("div#div_side > input")->first()->attr('value'));
-        
+
         // include testing
-        $this->assertContains('THIS IS FOOTER', $crawler->filter('div#div_footer')->text());
-        
+        $this->assertStringContainsString('THIS IS FOOTER', $crawler->filter('div#div_footer')->text());
+
         // global var testing
-        $this->assertContains('great nba game', $crawler->filter('div#div_footer')->text());
+        $this->assertStringContainsString('great nba game', $crawler->filter('div#div_footer')->text());
     }
-    
-    // --- Supplementary tests for R12 AC 4 ---
-    
+
+    // --- Supplementary tests ---
+
     /**
-     * Globals: the 'http' global is always registered (pointing to the app container).
-     * Verify it is a SilexKernel instance.
+     * Globals: the 'http' global is always registered (pointing to the kernel).
+     * Verify it is a MicroKernel instance.
      *
      * @runInSeparateProcess
      */
     public function testGlobalHttpIsRegistered()
     {
+        /** @var MicroKernel $app */
         $app = $this->createApplication();
         $app->boot();
-        /** @var \Twig_Environment $twig */
-        $twig    = $app['twig'];
+        $twig    = $app->getTwig();
         $globals = $twig->getGlobals();
         $this->assertArrayHasKey('http', $globals);
-        $this->assertInstanceOf('Oasis\Mlib\Http\SilexKernel', $globals['http']);
+        $this->assertInstanceOf(MicroKernel::class, $globals['http']);
     }
-    
+
     /**
      * Globals: custom global variables from configuration are accessible in Twig.
      * The 'helper' global is a TwigHelper instance.
@@ -85,15 +83,15 @@ class TwigServiceProviderTest extends WebTestCase
      */
     public function testGlobalCustomVariableRegistered()
     {
+        /** @var MicroKernel $app */
         $app = $this->createApplication();
         $app->boot();
-        /** @var \Twig_Environment $twig */
-        $twig    = $app['twig'];
+        $twig    = $app->getTwig();
         $globals = $twig->getGlobals();
         $this->assertArrayHasKey('helper', $globals);
         $this->assertInstanceOf('Oasis\Mlib\Http\Test\Helpers\TwigHelper', $globals['helper']);
     }
-    
+
     /**
      * Globals: when globals config is empty array, only the default 'http' global is present.
      *
@@ -101,18 +99,29 @@ class TwigServiceProviderTest extends WebTestCase
      */
     public function testGlobalEmptyConfig()
     {
-        $app = $this->createApplication();
-        // Override globals config to empty
-        $app['twig.config'] = array_merge($app['twig.config'], ['globals' => []]);
+        // Create a kernel with empty globals
+        $config = [
+            'cache_dir' => __DIR__ . '/../cache',
+            'routing'   => [
+                'path'       => __DIR__ . '/../routes.yml',
+                'namespaces' => ['Oasis\\Mlib\\Http\\Test\\Helpers\\Controllers\\'],
+            ],
+            'twig'      => [
+                'template_dir' => __DIR__ . '/templates',
+                'cache_dir'    => '/tmp/twig_cache',
+                'asset_base'   => 'http://163.com/img',
+                'globals'      => [],
+            ],
+        ];
+        $app = new MicroKernel($config, true);
         $app->boot();
-        /** @var \Twig_Environment $twig */
-        $twig    = $app['twig'];
+        $twig    = $app->getTwig();
         $globals = $twig->getGlobals();
         $this->assertArrayHasKey('http', $globals);
         // 'helper' should not be present since globals is empty
         $this->assertArrayNotHasKey('helper', $globals);
     }
-    
+
     /**
      * Globals: scalar global variables are correctly registered.
      *
@@ -120,78 +129,78 @@ class TwigServiceProviderTest extends WebTestCase
      */
     public function testGlobalScalarVariables()
     {
-        $app = $this->createApplication();
-        $app['twig.config'] = array_merge($app['twig.config'], [
-            'globals' => [
-                'site_name' => 'TestSite',
-                'version'   => 42,
-                'debug'     => true,
+        $config = [
+            'cache_dir' => __DIR__ . '/../cache',
+            'routing'   => [
+                'path'       => __DIR__ . '/../routes.yml',
+                'namespaces' => ['Oasis\\Mlib\\Http\\Test\\Helpers\\Controllers\\'],
             ],
-        ]);
+            'twig'      => [
+                'template_dir' => __DIR__ . '/templates',
+                'cache_dir'    => '/tmp/twig_cache',
+                'globals'      => [
+                    'site_name' => 'TestSite',
+                    'version'   => 42,
+                    'debug'     => true,
+                ],
+            ],
+        ];
+        $app = new MicroKernel($config, true);
         $app->boot();
-        /** @var \Twig_Environment $twig */
-        $twig    = $app['twig'];
+        $twig    = $app->getTwig();
         $globals = $twig->getGlobals();
         $this->assertEquals('TestSite', $globals['site_name']);
         $this->assertEquals(42, $globals['version']);
         $this->assertEquals(true, $globals['debug']);
     }
-    
+
     /**
      * asset_base: the asset() Twig function prepends asset_base to the file path.
      * Template a.twig calls {{ asset('/pics/cool.jpg', "3.0") }}.
-     * The expected output depends on the app's asset_base configuration.
      *
      * @runInSeparateProcess
      */
     public function testAssetBaseInTemplate()
     {
-        $app = $this->createApplication();
-        $assetBase = isset($app['twig.config']['asset_base']) ? $app['twig.config']['asset_base'] : '';
-        
         $client = $this->createClient();
         $client->request('GET', '/twig/2');
         $crawler = $client->getCrawler();
         $html = $crawler->filter('div#div_foo')->html();
-        $expected = $assetBase . '/pics/cool.jpg?v=3.0';
-        $this->assertContains($expected, $html);
+        $expected = 'http://163.com/img/pics/cool.jpg?v=3.0';
+        $this->assertStringContainsString($expected, $html);
     }
-    
+
     /**
      * asset_base: the asset() function with empty version omits the query string.
-     * Uses Twig template rendering to avoid Closure serialization issues.
      *
      * @runInSeparateProcess
      */
     public function testAssetFunctionWithoutVersion()
     {
+        /** @var MicroKernel $app */
         $app = $this->createApplication();
         $app->boot();
-        /** @var \Twig_Environment $twig */
-        $twig = $app['twig'];
+        $twig = $app->getTwig();
         // Render inline template to test asset function without version
         $result = $twig->createTemplate('{{ asset("/style.css") }}')->render([]);
-        $assetBase = $app['twig.config.asset_base'];
-        $this->assertEquals($assetBase . '/style.css', $result);
+        $this->assertEquals('http://163.com/img/style.css', $result);
     }
-    
+
     /**
      * asset_base: the asset() function with a version appends ?v=<version>.
-     * Uses Twig template rendering to avoid Closure serialization issues.
      *
      * @runInSeparateProcess
      */
     public function testAssetFunctionWithVersion()
     {
+        /** @var MicroKernel $app */
         $app = $this->createApplication();
         $app->boot();
-        /** @var \Twig_Environment $twig */
-        $twig = $app['twig'];
+        $twig = $app->getTwig();
         $result = $twig->createTemplate('{{ asset("/style.css", "2.1") }}')->render([]);
-        $assetBase = $app['twig.config.asset_base'];
-        $this->assertEquals($assetBase . '/style.css?v=2.1', $result);
+        $this->assertEquals('http://163.com/img/style.css?v=2.1', $result);
     }
-    
+
     /**
      * asset_base: when asset_base is empty string (default), asset paths are relative.
      *
@@ -199,18 +208,24 @@ class TwigServiceProviderTest extends WebTestCase
      */
     public function testAssetBaseEmptyDefault()
     {
-        $app = $this->createApplication();
-        // Override to remove asset_base (will default to empty string via TwigConfiguration)
-        $config = $app['twig.config'];
-        unset($config['asset_base']);
-        $app['twig.config'] = $config;
+        $config = [
+            'cache_dir' => __DIR__ . '/../cache',
+            'routing'   => [
+                'path'       => __DIR__ . '/../routes.yml',
+                'namespaces' => ['Oasis\\Mlib\\Http\\Test\\Helpers\\Controllers\\'],
+            ],
+            'twig'      => [
+                'template_dir' => __DIR__ . '/templates',
+                // no asset_base — defaults to empty string
+            ],
+        ];
+        $app = new MicroKernel($config, true);
         $app->boot();
-        /** @var \Twig_Environment $twig */
-        $twig   = $app['twig'];
+        $twig   = $app->getTwig();
         $result = $twig->createTemplate('{{ asset("/style.css") }}')->render([]);
         $this->assertEquals('/style.css', $result);
     }
-    
+
     /**
      * cache_dir absent: when cache_dir is not configured (defaults to null),
      * Twig should still work without caching.
@@ -220,67 +235,74 @@ class TwigServiceProviderTest extends WebTestCase
     public function testNoCacheDirTemplateRendering()
     {
         $app = require __DIR__ . "/app.twig-no-cache.php";
-        $app['session.test'] = true;
-        
-        $client = $this->createClient();
-        // Override the app for this test
+
         $this->app = $app;
         $client    = $this->createClient();
         $client->request('GET', '/twig/2');
         $response = $client->getResponse();
         $this->assertEquals(200, $response->getStatusCode());
-        $this->assertContains('WOW', $response->getContent());
+        $this->assertStringContainsString('WOW', $response->getContent());
     }
-    
+
     /**
-     * cache_dir absent: twig.options should not contain 'cache' key when cache_dir is null.
+     * cache_dir absent: Twig environment should not have cache enabled.
      *
      * @runInSeparateProcess
      */
-    public function testNoCacheDirTwigOptions()
+    public function testNoCacheDirTwigHasNoCache()
     {
         $app = require __DIR__ . "/app.twig-no-cache.php";
-        $app['session.test'] = true;
         $app->boot();
-        
-        // When cache_dir is null, boot() should not set cache in twig.options
-        $options = $app['twig.options'];
-        $this->assertArrayNotHasKey('cache', $options);
+
+        $twig = $app->getTwig();
+        // When cache_dir is null, Twig should not have a cache directory set
+        $this->assertFalse($twig->getCache());
     }
-    
+
     /**
-     * cache_dir present: twig.options should contain 'cache' key with the configured path.
+     * cache_dir present: Twig environment should have cache enabled.
      *
      * @runInSeparateProcess
      */
-    public function testCacheDirSetInTwigOptions()
+    public function testCacheDirSetInTwig()
     {
+        /** @var MicroKernel $app */
         $app = $this->createApplication();
         $app->boot();
-        $options = $app['twig.options'];
-        $this->assertArrayHasKey('cache', $options);
-        $this->assertEquals('/tmp/twig_cache', $options['cache']);
+        $twig = $app->getTwig();
+        $this->assertEquals('/tmp/twig_cache', $twig->getCache());
     }
-    
+
     /**
-     * template_dir: twig.path is set to the configured template_dir.
+     * getTwig() returns null when twig config is absent.
      *
      * @runInSeparateProcess
      */
-    public function testTemplateDirSetInTwigPath()
+    public function testGetTwigReturnsNullWhenNotConfigured()
     {
+        $config = [
+            'cache_dir' => __DIR__ . '/../cache',
+            'routing'   => [
+                'path'       => __DIR__ . '/../routes.yml',
+                'namespaces' => ['Oasis\\Mlib\\Http\\Test\\Helpers\\Controllers\\'],
+            ],
+            // no 'twig' key
+        ];
+        $app = new MicroKernel($config, true);
+        $app->boot();
+        $this->assertNull($app->getTwig());
+    }
+
+    /**
+     * getTwig() returns a Twig\Environment when twig config is present.
+     *
+     * @runInSeparateProcess
+     */
+    public function testGetTwigReturnsTwigEnvironment()
+    {
+        /** @var MicroKernel $app */
         $app = $this->createApplication();
         $app->boot();
-        $this->assertEquals($app['twig.config']['template_dir'], $app['twig.path']);
-    }
-    
-    /**
-     * getConfigDataProvider() before register() throws LogicException.
-     */
-    public function testGetConfigDataProviderBeforeRegisterThrows()
-    {
-        $provider = new \Oasis\Mlib\Http\ServiceProviders\Twig\SimpleTwigServiceProvider();
-        $this->setExpectedException('LogicException');
-        $provider->getConfigDataProvider();
+        $this->assertInstanceOf(\Twig\Environment::class, $app->getTwig());
     }
 }

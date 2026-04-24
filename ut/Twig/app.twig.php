@@ -1,23 +1,36 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: minhao
- * Date: 2016-03-25
- * Time: 11:53
+ * Twig test bootstrap — MicroKernel with twig config (with cache_dir).
  */
-use Oasis\Mlib\Http\SilexKernel;
+use Oasis\Mlib\Http\ErrorHandlers\JsonErrorHandler;
+use Oasis\Mlib\Http\MicroKernel;
 use Oasis\Mlib\Http\Test\Helpers\TwigHelper;
+use Oasis\Mlib\Http\Views\JsonViewHandler;
 
-/** @var SilexKernel $app */
-$app = require __DIR__ . "/../Security/app.security.php";
-
-$app['twig.config'] = [
-    "template_dir" => __DIR__ . "/templates",
-    "cache_dir"    => "/tmp/twig_cache",
-    "asset_base"   => "http://163.com/img",
-    "globals"      => [
-        "helper" => new TwigHelper(),
+$config = [
+    'cache_dir'      => __DIR__ . '/../cache',
+    'routing'        => [
+        'path'       => __DIR__ . '/../routes.yml',
+        'namespaces' => [
+            'Oasis\\Mlib\\Http\\Test\\Helpers\\Controllers\\',
+        ],
+    ],
+    'twig'           => [
+        'template_dir' => __DIR__ . '/templates',
+        'cache_dir'    => '/tmp/twig_cache',
+        'asset_base'   => 'http://163.com/img',
+        'globals'      => [
+            'helper' => new TwigHelper(),
+        ],
+    ],
+    'view_handlers'  => [
+        new JsonViewHandler(),
+    ],
+    'error_handlers' => [
+        new JsonErrorHandler(),
     ],
 ];
+
+$app = new MicroKernel($config, true);
 
 return $app;

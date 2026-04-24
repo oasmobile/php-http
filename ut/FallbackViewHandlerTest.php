@@ -47,7 +47,7 @@ class FallbackViewHandlerTest extends WebTestCase
         };
 
         $config = [
-            'cache_dir'      => __DIR__ . '/cache',
+            'cache_dir'      => static::createTempCacheDir(),
             'routing'        => [
                 'path'       => __DIR__ . "/fallback-test.routes.yml",
                 'namespaces' => [

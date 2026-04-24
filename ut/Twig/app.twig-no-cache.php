@@ -8,7 +8,7 @@ use Oasis\Mlib\Http\Test\Helpers\TwigHelper;
 use Oasis\Mlib\Http\Views\JsonViewHandler;
 
 $config = [
-    'cache_dir'      => __DIR__ . '/../cache',
+    'cache_dir'      => isset($cacheDir) ? $cacheDir : __DIR__ . '/../cache',
     'routing'        => [
         'path'       => __DIR__ . '/../routes.yml',
         'namespaces' => [

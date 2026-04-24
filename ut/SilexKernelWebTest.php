@@ -31,6 +31,7 @@ class SilexKernelWebTest extends WebTestCase
      */
     public function createApplication()
     {
+        $cacheDir = static::createTempCacheDir();
         /** @var MicroKernel $app */
         $app = require __DIR__ . '/app.php';
         $app->addExtraParameters(
@@ -368,6 +369,7 @@ class SilexKernelWebElbTest extends WebTestCase
      */
     public function createApplication()
     {
+        $cacheDir = static::createTempCacheDir();
         return require __DIR__ . '/AwsTests/elb.php';
     }
 

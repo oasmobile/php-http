@@ -30,6 +30,7 @@ class SecurityServiceProviderTest extends WebTestCase
      */
     public function createApplication()
     {
+        $cacheDir = static::createTempCacheDir();
         $app = require __DIR__ . "/app.security.php";
         
         // Note: session.test configuration is not available in MicroKernel

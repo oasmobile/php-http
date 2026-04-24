@@ -1,60 +1,65 @@
 <?php
 /**
- * Trait for cleaning route cache files before each test.
+ * Trait for providing isolated cache directories per test class.
  *
- * The Symfony Router caches compiled matchers/generators as PHP files.
- * These cached files contain raw route defaults (including %param% placeholders)
- * baked in at dump time. When multiple test classes share the same cache_dir,
- * stale cache from a previous test can cause parameter replacement to be skipped
- * because the Router loads the cached matcher directly without calling
- * CacheableRouter::getRouteCollection().
+ * The Symfony Kernel caches compiled container and route matchers keyed by
+ * environment + debug flag. When multiple test classes share the same cache_dir
+ * but use different route files, stale cache causes incorrect behavior.
  *
- * Any WebTestCase or TestCase that uses routing with a real cache_dir should
- * use this trait and call $this->cleanRouteCache($dir) in setUp().
+ * Each test class gets its own isolated temp cache directory via
+ * createTempCacheDir(). The directory is automatically cleaned up
+ * in tearDownAfterClass().
  */
 
 namespace Oasis\Mlib\Http\Test\Helpers;
 
 trait RouteCacheCleaner
 {
+    /** @var string|null Isolated temp cache dir for this test class */
+    private static $tempCacheDir;
+
     /**
-     * Remove all cached route matcher/generator PHP files from the given directory.
+     * Create (or return) an isolated temp cache directory for this test class.
+     * Returns the same directory across all calls within the same class + process.
      *
-     * @param string $cacheDir Absolute path to the cache directory
+     * @return string Absolute path to the isolated cache directory
      */
-    protected function cleanRouteCache($cacheDir)
+    protected static function createTempCacheDir(): string
     {
-        if (!is_dir($cacheDir)) {
-            return;
+        if (self::$tempCacheDir === null) {
+            self::$tempCacheDir = sys_get_temp_dir() . '/oasis-http-test-' . md5(static::class) . '-' . getmypid();
+            if (!is_dir(self::$tempCacheDir)) {
+                mkdir(self::$tempCacheDir, 0777, true);
+            }
         }
-        foreach (glob($cacheDir . '/Project*.php') as $file) {
-            @unlink($file);
-        }
-        foreach (glob($cacheDir . '/Project*.php.meta') as $file) {
-            @unlink($file);
-        }
-        // Also clean cached URL matcher/generator files
-        foreach (glob($cacheDir . '/url_*.php') as $file) {
-            @unlink($file);
-        }
-        foreach (glob($cacheDir . '/url_*.php.meta') as $file) {
-            @unlink($file);
-        }
-        foreach (glob($cacheDir . '/url_*.php.meta.json') as $file) {
-            @unlink($file);
-        }
-        // Clean Symfony kernel cache (compiled container, route matchers, etc.)
-        // This is needed when different tests use different route files with the same cache_dir
-        $symfonyDir = $cacheDir . '/symfony';
-        if (is_dir($symfonyDir)) {
-            $this->removeDirectoryRecursive($symfonyDir);
+
+        return self::$tempCacheDir;
+    }
+
+    /**
+     * @afterClass
+     */
+    public static function cleanUpTempCacheDir(): void
+    {
+        if (self::$tempCacheDir !== null && is_dir(self::$tempCacheDir)) {
+            self::removeDirRecursive(self::$tempCacheDir);
+            self::$tempCacheDir = null;
         }
     }
 
     /**
-     * Recursively remove a directory and all its contents.
+     * Backward-compatible method that returns the isolated temp cache dir.
+     * Callers that previously passed a shared cache_dir now get an isolated one.
+     *
+     * @param string $cacheDir Ignored (kept for backward compatibility)
      */
-    private function removeDirectoryRecursive(string $dir): void
+    protected function cleanRouteCache($cacheDir = '')
+    {
+        // Return value not used by callers (they call this for side effects).
+        // The actual isolation happens via createTempCacheDir() in bootstrap files.
+    }
+
+    private static function removeDirRecursive(string $dir): void
     {
         if (!is_dir($dir)) {
             return;
@@ -65,7 +70,7 @@ trait RouteCacheCleaner
             }
             $path = $dir . '/' . $entry;
             if (is_dir($path)) {
-                $this->removeDirectoryRecursive($path);
+                self::removeDirRecursive($path);
             } else {
                 @unlink($path);
             }

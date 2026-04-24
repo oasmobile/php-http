@@ -102,7 +102,7 @@ use Oasis\Mlib\Http\Views\JsonViewHandler;
 // --- End Security setup ---
 
 $config = [
-    'cache_dir' => __DIR__ . '/../cache',
+    'cache_dir' => isset($cacheDir) ? $cacheDir : __DIR__ . '/../cache',
     'routing'   => [
         'path'       => __DIR__ . "/../routes.yml",
         'namespaces' => [

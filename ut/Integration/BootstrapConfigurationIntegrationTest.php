@@ -40,7 +40,7 @@ class BootstrapConfigurationIntegrationTest extends TestCase
     {
         $app = new MicroKernel(
             [
-                'cache_dir' => __DIR__ . '/../cache',
+                'cache_dir' => static::createTempCacheDir(),
                 'routing'   => [
                     'path'       => __DIR__ . '/integration.routes.yml',
                     'namespaces' => [
@@ -123,7 +123,7 @@ class BootstrapConfigurationIntegrationTest extends TestCase
     {
         $app = new MicroKernel(
             [
-                'cache_dir' => __DIR__ . '/../cache',
+                'cache_dir' => static::createTempCacheDir(),
                 'twig'      => [
                     'template_dir' => __DIR__ . '/templates',
                 ],

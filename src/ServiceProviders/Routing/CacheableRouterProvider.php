@@ -75,7 +75,7 @@ class CacheableRouterProvider
             }
 
             $cacheDir                = strcasecmp($this->getConfigDataProvider()->getOptional('cache_dir', DataProviderInterface::STRING_TYPE, ''), "false") == 0 ? null :
-                ($this->getConfigDataProvider()->getOptional('cache_dir') ?: $routerPath . "/cache");
+                ($this->getConfigDataProvider()->getOptional('cache_dir') ?: $this->kernel->getCacheDir() . "/routing");
             $locator                 = new FileLocator([$routerPath]);
             $this->router            = new CacheableRouter(
                 $this->kernel,

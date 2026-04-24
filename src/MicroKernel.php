@@ -701,6 +701,15 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
             ],
         ]);
 
+        // Override the default Symfony logger to suppress stderr output.
+        // The framework-bundle registers a Symfony\Component\HttpKernel\Log\Logger
+        // that writes to stderr by default, which pollutes PHPUnit output with
+        // [critical] / [error] messages from ErrorListener. We replace it with
+        // a NullLogger since oasis/logging handles application-level logging.
+        $loggerDef = new Definition(\Psr\Log\NullLogger::class);
+        $loggerDef->setPublic(true);
+        $container->setDefinition('logger', $loggerDef);
+
         // Register user-provided CompilerPass / Extension
         foreach ($this->providers as $provider) {
             if ($provider instanceof CompilerPassInterface) {

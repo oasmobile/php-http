@@ -30,6 +30,7 @@ class CrossOriginResourceSharingAdvancedTest extends WebTestCase
      */
     public function createApplication()
     {
+        $cacheDir = static::createTempCacheDir();
         return require __DIR__ . '/app.cors-advanced.php';
     }
     

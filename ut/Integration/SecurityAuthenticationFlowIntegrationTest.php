@@ -27,6 +27,7 @@ class SecurityAuthenticationFlowIntegrationTest extends WebTestCase
      */
     public function createApplication()
     {
+        $cacheDir = static::createTempCacheDir();
         return require __DIR__ . '/app.integration-security.php';
     }
 

@@ -32,8 +32,9 @@ class SilexKernelCrossCommunityIntegrationTest extends WebTestCase
     {
         $this->testMiddleware = new TestMiddleware();
 
+        $cacheDir = static::createTempCacheDir();
         $config = [
-            'cache_dir'      => __DIR__ . '/../cache',
+            'cache_dir'      => $cacheDir,
             'routing'        => [
                 'path'       => __DIR__ . '/integration.routes.yml',
                 'namespaces' => [

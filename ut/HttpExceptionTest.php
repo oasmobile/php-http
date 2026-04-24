@@ -42,7 +42,7 @@ class HttpExceptionTest extends WebTestCase
         };
 
         $config = [
-            'cache_dir' => __DIR__ . '/cache',
+            'cache_dir' => static::createTempCacheDir(),
             'routing'   => [
                 'path'       => __DIR__ . "/exception-test.routes.yml",
                 'namespaces' => [

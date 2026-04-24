@@ -27,6 +27,7 @@ class TwigServiceProviderTest extends WebTestCase
      */
     public function createApplication()
     {
+        $cacheDir = static::createTempCacheDir();
         return require __DIR__ . "/app.twig.php";
     }
 
@@ -101,7 +102,7 @@ class TwigServiceProviderTest extends WebTestCase
     {
         // Create a kernel with empty globals
         $config = [
-            'cache_dir' => __DIR__ . '/../cache',
+            'cache_dir' => static::createTempCacheDir(),
             'routing'   => [
                 'path'       => __DIR__ . '/../routes.yml',
                 'namespaces' => ['Oasis\\Mlib\\Http\\Test\\Helpers\\Controllers\\'],
@@ -130,7 +131,7 @@ class TwigServiceProviderTest extends WebTestCase
     public function testGlobalScalarVariables()
     {
         $config = [
-            'cache_dir' => __DIR__ . '/../cache',
+            'cache_dir' => static::createTempCacheDir(),
             'routing'   => [
                 'path'       => __DIR__ . '/../routes.yml',
                 'namespaces' => ['Oasis\\Mlib\\Http\\Test\\Helpers\\Controllers\\'],
@@ -209,7 +210,7 @@ class TwigServiceProviderTest extends WebTestCase
     public function testAssetBaseEmptyDefault()
     {
         $config = [
-            'cache_dir' => __DIR__ . '/../cache',
+            'cache_dir' => static::createTempCacheDir(),
             'routing'   => [
                 'path'       => __DIR__ . '/../routes.yml',
                 'namespaces' => ['Oasis\\Mlib\\Http\\Test\\Helpers\\Controllers\\'],
@@ -281,7 +282,7 @@ class TwigServiceProviderTest extends WebTestCase
     public function testGetTwigReturnsNullWhenNotConfigured()
     {
         $config = [
-            'cache_dir' => __DIR__ . '/../cache',
+            'cache_dir' => static::createTempCacheDir(),
             'routing'   => [
                 'path'       => __DIR__ . '/../routes.yml',
                 'namespaces' => ['Oasis\\Mlib\\Http\\Test\\Helpers\\Controllers\\'],

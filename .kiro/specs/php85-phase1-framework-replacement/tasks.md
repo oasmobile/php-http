@@ -118,14 +118,14 @@
     - _Ref: Requirement 8, AC 1–5; Requirement 16, AC 8_
   - [x] 6.4 Checkpoint: 确认 ViewHandlerSubscriber 和 Error Handler 链可编译，无语法错误。Commit。
 
-- [-] 7. Cookie Provider 迁移
+- [x] 7. Cookie Provider 迁移
   - [x] 7.1 重写 SimpleCookieProvider 为 CookieSubscriber
     - 创建 `CookieSubscriber` 实现 `EventSubscriberInterface`，监听 `KernelEvents::RESPONSE`
     - 从 `ResponseCookieContainer` 读取 cookie 写入 response headers
     - 通过 `MicroKernel::addControllerInjectedArg()` 注册 `ResponseCookieContainer`
     - `ResponseCookieContainer` 保持不变
     - _Ref: Requirement 9, AC 1–4_
-  - [-] 7.2 Checkpoint: 运行 `cookie` test suite，确认 Cookie 机制可用。Commit。
+  - [x] 7.2 Checkpoint: 运行 `cookie` test suite，确认 Cookie 机制可用。Commit。
 
 - [ ] 8. Twig Provider 迁移
   - [ ] 8.1 重写 SimpleTwigServiceProvider

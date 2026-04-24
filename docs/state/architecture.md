@@ -44,6 +44,8 @@ src/
 | `security` | 安全配置（firewalls / access_rules / role_hierarchy / policies） |
 | `cors` | CORS 策略数组 |
 | `twig` | Twig 模板配置 |
+| `twig.strict_variables` | boolean，默认 `true`。启用 Twig 严格变量模式，引用未定义变量时抛出异常 |
+| `twig.auto_reload` | boolean/null，默认 `null`。模板自动重载：`true` 强制开启，`false` 强制关闭，`null` 根据 debug 模式自动判定 |
 | `middlewares` | `MiddlewareInterface` 实例数组 |
 | `providers` | `ServiceProviderInterface` 实例数组 |
 | `view_handlers` | callable 数组，处理非 Response 返回值 |

@@ -63,7 +63,7 @@
     - _Ref: R4 AC1/AC2, R4 AC5_
   - [x] 3.3 Checkpoint: 运行 `phpunit --testsuite twig` 确认 twig suite 通过（含新增的 `strict_variables` 和 `auto_reload` 测试，以及所有现有测试）。Commit。
 
-- [-] 4. Twig 3.x 兼容性验证（R3）
+- [x] 4. Twig 3.x 兼容性验证（R3）
   - [x] 4.1 验证现有 Twig 代码和模板的 Twig 3.x 兼容性
     - 确认 `SimpleTwigServiceProvider` 使用 Twig 3.x API：`Twig\Environment`、`Twig\Loader\FilesystemLoader`、`Twig\TwigFunction`
     - 确认 `DefaultHtmlRenderer` 捕获 `Twig\Error\LoaderError`（Twig 3.x 异常类）
@@ -72,14 +72,14 @@
     - 确认 `is_granted()` 和 `asset()` 自定义 Twig 函数正常工作
     - 如发现兼容性问题，修复代码或模板
     - _Ref: R3 AC1/AC2/AC3/AC4/AC5/AC6_
-  - [-] 4.2 Checkpoint: 运行 `phpunit --testsuite twig` 和 `phpunit --testsuite views` 确认 twig 和 views suite 通过。Commit。
+  - [x] 4.2 Checkpoint: 运行 `phpunit --testsuite twig` 和 `phpunit --testsuite views` 确认 twig 和 views suite 通过。Commit。
 
-- [~] 5. State 文档更新
-  - [ ] 5.1 更新 `docs/state/architecture.md` 的 Bootstrap Config 表
+- [-] 5. State 文档更新
+  - [x] 5.1 更新 `docs/state/architecture.md` 的 Bootstrap Config 表
     - 在 `twig` 配置说明中补充 `twig.strict_variables`（boolean, 默认 `true`，严格变量模式）和 `twig.auto_reload`（boolean/null, 默认 `null`，auto-detect based on debug mode）
     - 仅补充本 Phase 新增的配置项，不做 state 文档的全面更新（Phase 1 遗留的 `SilexKernel` → `MicroKernel` 更新不在本 Phase scope 内）
     - _Ref: Design Impact Analysis — 受影响的 state 文档_
-  - [ ] 5.2 Checkpoint: 确认 `docs/state/architecture.md` 更新内容准确，与 TwigConfiguration 代码一致。运行 `phpunit --testsuite twig --testsuite aws --testsuite configuration` 确认所有预期通过 suite 仍然通过。Commit。
+  - [-] 5.2 Checkpoint: 确认 `docs/state/architecture.md` 更新内容准确，与 TwigConfiguration 代码一致。运行 `phpunit --testsuite twig --testsuite aws --testsuite configuration` 确认所有预期通过 suite 仍然通过。Commit。
 
 - [ ] 6. 全量验证
   - [ ] 6.1 运行全量测试并确认预期 suite 通过状态

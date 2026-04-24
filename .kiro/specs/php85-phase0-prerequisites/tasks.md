@@ -76,7 +76,7 @@
   - [x] 3.9 Checkpoint: 运行 `vendor/bin/phpunit --testsuite configuration`，全部通过无 fatal error，commit
     - _Requirements: R10 AC4, R11 AC1_
 
-- [-] 4. Test_Adaptation — ErrorHandlers + Views + Misc 模块（R6–R10）
+- [x] 4. Test_Adaptation — ErrorHandlers + Views + Misc 模块（R6–R10）
   - [x] 4.1 适配 `ut/ErrorHandlers/JsonErrorHandlerTest.php`
     - `setUp()` 添加 `: void` 返回类型（R6 AC1）
     - `assertInternalType('array', ...)` → `assertIsArray(...)`（1 处，R10 AC1）
@@ -96,21 +96,21 @@
     - `assertInternalType('array', ...)` → `assertIsArray(...)`（1 处，R10 AC1）
     - `assertContains` 用于数组 haystack — 无需迁移
     - _Requirements: R10 AC1_
-  - [-] 4.6 Checkpoint: 运行 `vendor/bin/phpunit --testsuite error-handlers --testsuite views --testsuite misc`，全部通过无 fatal error，commit
+  - [x] 4.6 Checkpoint: 运行 `vendor/bin/phpunit --testsuite error-handlers --testsuite views --testsuite misc`，全部通过无 fatal error，commit
     - _Requirements: R10 AC4, R11 AC2, R11 AC3, R11 AC4_
 
-- [~] 5. 间接框架依赖修复（Design §5, CR Q1=B）
-  - [ ] 5.1 修复 `ut/Cookie/SimpleCookieProviderTest.php`（Design §5.2）
+- [-] 5. 间接框架依赖修复（Design §5, CR Q1=B）
+  - [x] 5.1 修复 `ut/Cookie/SimpleCookieProviderTest.php`（Design §5.2）
     - 根据 Task 1.5 的 Silex 可加载性验证结果选择修复路径：
       - 如果 `Silex\Application` 可加载：保持现状，仅做 PHPUnit API 适配（`setUp(): void` 等）
       - 如果不可加载：`testBootThrowsLogicExceptionForNonSilexKernel` 中 `new Application()` 替换为 mock；`testBootRegistersAfterMiddlewareThatWritesCookiesToResponse` 从 `cookie` suite 移出或条件跳过
     - _Requirements: R11 AC6, R12 AC2_
-  - [ ] 5.2 修复 `ut/Middlewares/AbstractMiddlewareTest.php`（Design §5.3）
+  - [x] 5.2 修复 `ut/Middlewares/AbstractMiddlewareTest.php`（Design §5.3）
     - 根据 Task 1.5 的 Silex 可加载性验证结果选择修复路径：
       - 如果 `Silex\Application` 可加载（常量 `LATE_EVENT`/`EARLY_EVENT` 可访问）：保持现状
       - 如果不可加载：将常量值硬编码到测试中（`LATE_EVENT = -512`，`EARLY_EVENT = 512`），移除对 `Silex\Application` 的 `use` 引用
     - _Requirements: R11 AC7, R12 AC2_
-  - [ ] 5.3 Checkpoint: 运行 `vendor/bin/phpunit --testsuite cookie --testsuite middlewares`，全部通过，commit
+  - [-] 5.3 Checkpoint: 运行 `vendor/bin/phpunit --testsuite cookie --testsuite middlewares`，全部通过，commit
     - _Requirements: R11 AC6, R11 AC7_
 
 - [~] 6. Test_Adaptation — Exceptions 模块验证 + 全量 Framework_Independent 验证（R11）

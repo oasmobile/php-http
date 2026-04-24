@@ -81,16 +81,16 @@
     - _Ref: Design Impact Analysis — 受影响的 state 文档_
   - [x] 5.2 Checkpoint: 确认 `docs/state/architecture.md` 更新内容准确，与 TwigConfiguration 代码一致。运行 `phpunit --testsuite twig --testsuite aws --testsuite configuration` 确认所有预期通过 suite 仍然通过。Commit。
 
-- [-] 6. 全量验证
+- [x] 6. 全量验证
   - [x] 6.1 运行全量测试并确认预期 suite 通过状态
     - 运行 `phpunit` 全量测试
     - 确认以下 suite 通过：`twig`、`aws`、`configuration`、`views`、`cors`、`routing`、`cookie`、`middlewares`、`exceptions`、`error-handlers`、`misc`、`pbt`
     - 确认以下 suite 预期失败且不阻塞：`security`（authenticator 系统未重写，等 Phase 3）、`integration`（部分集成测试依赖 Security 完整链路）
     - _Ref: R3 AC7, R5 AC3/AC4_
-  - [-] 6.2 Checkpoint: 全量测试结果符合预期。Commit。
+  - [x] 6.2 Checkpoint: 全量测试结果符合预期。Commit。
 
-- [~] 7. 手工测试
-  - [ ] 7.1 编写并执行手工测试场景
+- [x] 7. 手工测试
+  - [x] 7.1 编写并执行手工测试场景
     - 场景 1: Guzzle 升级验证 — 确认 `composer.json` 中 `guzzlehttp/guzzle` 为 `^7.0`，`composer show guzzlehttp/guzzle` 显示 7.x 版本，`composer install` 无冲突
     - 场景 2: JSON 函数零残留 — 全局搜索 `\GuzzleHttp\json_decode` 和 `\GuzzleHttp\json_encode`，确认 codebase 中零残留
     - 场景 3: Twig strict_variables 生效 — 创建一个引用未定义变量的临时模板，确认渲染时抛出 `Twig\Error\RuntimeError`

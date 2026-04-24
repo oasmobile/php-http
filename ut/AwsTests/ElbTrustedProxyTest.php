@@ -9,7 +9,7 @@
 namespace AwsTests;
 
 use GuzzleHttp\Client;
-use Silex\WebTestCase;
+use Oasis\Mlib\Http\Test\Helpers\WebTestCase;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 
 class ElbTrustedProxyTest extends WebTestCase
@@ -17,7 +17,7 @@ class ElbTrustedProxyTest extends WebTestCase
     /** @var string Isolated temp cache dir shared across all tests in this class */
     private static $tempCacheDir;
     
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass(): void
     {
         self::$tempCacheDir = \sys_get_temp_dir() . '/oasis-http-aws-test-' . \getmypid();
         \mkdir(self::$tempCacheDir, 0777, true);
@@ -29,15 +29,28 @@ class ElbTrustedProxyTest extends WebTestCase
         }
     }
     
-    public static function tearDownAfterClass()
+    public static function tearDownAfterClass(): void
     {
         if (self::$tempCacheDir && \is_dir(self::$tempCacheDir)) {
-            foreach (\glob(self::$tempCacheDir . '/*') as $file) {
-                \unlink($file);
-            }
-            \rmdir(self::$tempCacheDir);
+            self::removeDirectory(self::$tempCacheDir);
         }
         self::$tempCacheDir = null;
+    }
+    
+    private static function removeDirectory(string $dir): void
+    {
+        foreach (\scandir($dir) as $entry) {
+            if ($entry === '.' || $entry === '..') {
+                continue;
+            }
+            $path = $dir . '/' . $entry;
+            if (\is_dir($path)) {
+                self::removeDirectory($path);
+            } else {
+                \unlink($path);
+            }
+        }
+        \rmdir($dir);
     }
     
     /**
@@ -52,7 +65,7 @@ class ElbTrustedProxyTest extends WebTestCase
     }
     
     /**
-     * Load AWS IP ranges from local cache (written by SilexKernel when trust_cloudfront_ips = true).
+     * Load AWS IP ranges from local cache (written by MicroKernel when trust_cloudfront_ips = true).
      * Falls back to live HTTP request only if cache is missing.
      *
      * @return array
@@ -69,7 +82,7 @@ class ElbTrustedProxyTest extends WebTestCase
             }
         }
         
-        // Fallback: runtime cache written by SilexKernel
+        // Fallback: runtime cache written by MicroKernel
         $cacheFile = __DIR__ . '/../cache/aws.ips';
         if (\file_exists($cacheFile)) {
             $content = \file_get_contents($cacheFile);

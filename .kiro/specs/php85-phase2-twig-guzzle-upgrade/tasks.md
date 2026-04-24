@@ -98,8 +98,8 @@
     - 场景 5: 现有模板渲染不变 — 通过 WebTestCase 发送请求到 `/twig/2`，确认 HTML 输出包含预期内容（`WOW`、`haha`、escape 处理、macro、include、globals）
     - [脚本] 所有场景可通过脚本自动化执行
 
-- [~] 8. Code Review
-  - [ ] 8.1 委托给 code-reviewer sub-agent 执行
+- [x] 8. Code Review
+  - [x] 8.1 委托给 code-reviewer sub-agent 执行
 
 ## Notes
 

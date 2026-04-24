@@ -77,5 +77,8 @@
             <file>ut/Integration/SecurityAuthenticationFlowIntegrationTest.php</file>
             <file>ut/Integration/SilexKernelCrossCommunityIntegrationTest.php</file>
         </testsuite>
+        <testsuite name="pbt">
+            <directory>ut/PBT</directory>
+        </testsuite>
     </testsuites>
 </phpunit>

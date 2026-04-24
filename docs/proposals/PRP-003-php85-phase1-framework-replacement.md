@@ -52,6 +52,36 @@
 - 路由注册方式变化可能影响所有 controller 的挂载
 - 下游消费者如果依赖 `SilexKernel` 的公共 API，会受到 breaking change 影响
 
+## Branch Strategy
+
+PRP-002 至 PRP-007（Phase 0–5）共享同一个长生命周期 feature branch `feature/php85-upgrade`。
+
+- 各 Phase 在该 branch 上按依赖顺序逐个推进，每个 PRP 独立开 spec
+- **branch 级 DoD**：全量 PHPUnit 通过（`--testsuite all`）+ PRP-007 scope 完成后，才 merge 回 develop
+- **spec 级 DoD**：该 spec 的 tasks 全部完成 + 下列预期通过的 suite 实际通过
+- 期间需定期将 develop 合入，避免最终 merge 时冲突过大
+
+### Phase 1 完成后的测试预期
+
+Silex 被移除，Symfony 组件升级到 7.x，`SilexKernel` 重写为 Symfony MicroKernel。框架层面的测试应恢复，但 Twig 1.x 和 Security authenticator 尚未适配。
+
+**预期通过的 suite（在 Phase 0 基础上新增）：**
+
+- `cors` — CORS 逻辑迁移到新框架后恢复
+- `aws` — 信任代理逻辑迁移后恢复
+- `routing` — Symfony Routing 7.x 适配完成
+- `cookie` — 保持通过
+- `middlewares` — 中间件机制迁移后恢复
+- `all` 中的 `SilexKernelTest`、`SilexKernelWebTest`、`FallbackViewHandlerTest` — Kernel 重写后恢复
+
+**预期失败的 suite：**
+
+- `security` — authenticator 系统未重写（等 Phase 3）
+- `twig` — Twig 1.x 未升级（等 Phase 2）
+- `integration` — 部分集成测试依赖 Security + Twig 完整链路
+
+> 注：Phase 1 对 Security 组件仅做最小可编译适配，`NullEntryPointTest` 等不依赖 authenticator 系统的测试可能通过。
+
 ## References
 
 - `docs/notes/php85-upgrade.md` — 升级调研 note

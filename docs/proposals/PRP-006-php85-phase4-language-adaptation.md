@@ -45,6 +45,29 @@
 - 字符串/数字比较行为变更的影响难以通过静态分析完全发现，需依赖测试覆盖
 - 部分 breaking changes 仅在特定运行路径下触发，需要充分的测试场景
 
+## Branch Strategy
+
+PRP-002 至 PRP-007（Phase 0–5）共享同一个长生命周期 feature branch `feature/php85-upgrade`。
+
+- 各 Phase 在该 branch 上按依赖顺序逐个推进，每个 PRP 独立开 spec
+- **branch 级 DoD**：全量 PHPUnit 通过（`--testsuite all`）+ PRP-007 scope 完成后，才 merge 回 develop
+- **spec 级 DoD**：该 spec 的 tasks 全部完成 + 下列预期通过的 suite 实际通过
+- 期间需定期将 develop 合入，避免最终 merge 时冲突过大
+
+### Phase 4 完成后的测试预期
+
+PHP 语言层面 breaking changes 全部修复，`composer.json` 中 PHP 约束收紧到 `>=8.5`。
+
+**预期通过：**
+
+- `--testsuite all` 全量通过——所有框架依赖已在 Phase 1–3 解决，语言层面兼容性在本 Phase 修复
+- 无 deprecation notice
+
+**预期可能残留的问题：**
+
+- 静态分析发现的类型问题（等 Phase 5 处理）
+- CI 矩阵尚未配置（等 Phase 5）
+
 ## References
 
 - `docs/notes/php85-upgrade.md` — 升级调研 note（语言层面 Breaking Changes 章节）

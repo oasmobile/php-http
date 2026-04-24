@@ -49,6 +49,28 @@
 - 自定义 Twig 扩展的 API 在 3.x 中有较大变化（`Twig_Extension` → `AbstractExtension` 等）
 - Guzzle 7 的 API 变化相对较小，风险可控
 
+## Branch Strategy
+
+PRP-002 至 PRP-007（Phase 0–5）共享同一个长生命周期 feature branch `feature/php85-upgrade`。
+
+- 各 Phase 在该 branch 上按依赖顺序逐个推进，每个 PRP 独立开 spec
+- **branch 级 DoD**：全量 PHPUnit 通过（`--testsuite all`）+ PRP-007 scope 完成后，才 merge 回 develop
+- **spec 级 DoD**：该 spec 的 tasks 全部完成 + 下列预期通过的 suite 实际通过
+- 期间需定期将 develop 合入，避免最终 merge 时冲突过大
+
+### Phase 2 完成后的测试预期
+
+Twig 升级到 3.x，Guzzle 升级到 7.x。
+
+**预期通过的 suite（在 Phase 1 基础上新增）：**
+
+- `twig` — Twig 3.x 适配完成
+
+**预期仍失败的 suite：**
+
+- `security` — authenticator 系统未重写（等 Phase 3）
+- `integration` — 部分集成测试依赖 Security 完整链路
+
 ## References
 
 - `docs/notes/php85-upgrade.md` — 升级调研 note

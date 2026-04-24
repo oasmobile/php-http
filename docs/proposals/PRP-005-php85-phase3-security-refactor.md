@@ -47,6 +47,28 @@ Symfony Security 组件从 5.x 起经历了重大重构，引入了新的 authen
 - 认证和授权逻辑的正确性至关重要，需要充分的测试覆盖
 - 新 authenticator 系统的概念模型与旧系统差异较大，可能需要重新设计部分接口
 
+## Branch Strategy
+
+PRP-002 至 PRP-007（Phase 0–5）共享同一个长生命周期 feature branch `feature/php85-upgrade`。
+
+- 各 Phase 在该 branch 上按依赖顺序逐个推进，每个 PRP 独立开 spec
+- **branch 级 DoD**：全量 PHPUnit 通过（`--testsuite all`）+ PRP-007 scope 完成后，才 merge 回 develop
+- **spec 级 DoD**：该 spec 的 tasks 全部完成 + 下列预期通过的 suite 实际通过
+- 期间需定期将 develop 合入，避免最终 merge 时冲突过大
+
+### Phase 3 完成后的测试预期
+
+Security 组件完整重写，authenticator 系统适配 Symfony 7.x。
+
+**预期通过的 suite（在 Phase 2 基础上新增）：**
+
+- `security` — authenticator 系统重写完成
+- `integration` — Security + Twig + 框架完整链路恢复
+
+**预期仍失败的测试：**
+
+- PHP 语言层面 deprecation 导致的零星失败（等 Phase 4）——如隐式 nullable 参数、动态属性等触发的 warning/error
+
 ## References
 
 - `docs/notes/php85-upgrade.md` — 升级调研 note

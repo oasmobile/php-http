@@ -46,6 +46,28 @@
 - PHP 8.5 GA 时间为 2025 年 11 月，若在此之前执行本 Phase，CI 矩阵中的 8.5 覆盖可能需要使用 RC 版本
 - 静态分析提升级别后可能暴露大量历史问题，需评估修复范围
 
+## Branch Strategy
+
+PRP-002 至 PRP-007（Phase 0–5）共享同一个长生命周期 feature branch `feature/php85-upgrade`。
+
+- 各 Phase 在该 branch 上按依赖顺序逐个推进，每个 PRP 独立开 spec
+- **branch 级 DoD**：全量 PHPUnit 通过（`--testsuite all`）+ PRP-007 scope 完成后，才 merge 回 develop
+- **spec 级 DoD**：该 spec 的 tasks 全部完成 + 下列预期通过的 suite 实际通过
+- 期间需定期将 develop 合入，避免最终 merge 时冲突过大
+
+### Phase 5 完成后的测试预期
+
+本 Phase 是 branch 级 DoD 的最终验证点。
+
+**预期通过：**
+
+- `--testsuite all` 全量通过
+- PHPStan / Psalm 静态分析通过（目标级别在 spec design 阶段确定）
+- CI 矩阵覆盖 PHP 8.4 + 8.5，全绿
+- 无 deprecation notice
+
+全部通过后，`feature/php85-upgrade` merge 回 develop。
+
 ## References
 
 - `docs/notes/php85-upgrade.md` — 升级调研 note

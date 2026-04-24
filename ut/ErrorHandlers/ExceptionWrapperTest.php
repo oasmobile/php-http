@@ -18,7 +18,7 @@ class ExceptionWrapperTest extends TestCase
     /** @var Request */
     private $request;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->wrapper = new ExceptionWrapper();
         $this->request = Request::create('/test');

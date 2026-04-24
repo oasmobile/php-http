@@ -40,7 +40,7 @@
     - _Requirements: R5 AC1, R5 AC2, R5 AC3_
   - [x] 2.7 Checkpoint: `vendor/bin/phpunit --list-suites` 输出所有 14 个 suite、bootstrap 加载无错误，commit
 
-- [-] 3. Test_Adaptation — Configuration 模块（R6–R10）
+- [x] 3. Test_Adaptation — Configuration 模块（R6–R10）
   - [x] 3.1 适配 `ut/Configuration/HttpConfigurationTest.php`
     - `setUp()` 添加 `: void` 返回类型（R6 AC1）
     - `setExpectedException` → `expectException`（1 处，R7 AC1–AC2）
@@ -73,33 +73,33 @@
     - `setUp()` 添加 `: void` 返回类型（R6 AC1）
     - `setExpectedException` → `expectException`（1 处，R7 AC1–AC2）
     - _Requirements: R6 AC1, R7 AC1–AC2_
-  - [-] 3.9 Checkpoint: 运行 `vendor/bin/phpunit --testsuite configuration`，全部通过无 fatal error，commit
+  - [x] 3.9 Checkpoint: 运行 `vendor/bin/phpunit --testsuite configuration`，全部通过无 fatal error，commit
     - _Requirements: R10 AC4, R11 AC1_
 
-- [ ] 4. Test_Adaptation — ErrorHandlers + Views + Misc 模块（R6–R10）
-  - [ ] 4.1 适配 `ut/ErrorHandlers/JsonErrorHandlerTest.php`
+- [-] 4. Test_Adaptation — ErrorHandlers + Views + Misc 模块（R6–R10）
+  - [x] 4.1 适配 `ut/ErrorHandlers/JsonErrorHandlerTest.php`
     - `setUp()` 添加 `: void` 返回类型（R6 AC1）
     - `assertInternalType('array', ...)` → `assertIsArray(...)`（1 处，R10 AC1）
     - _Requirements: R6 AC1, R10 AC1_
-  - [ ] 4.2 适配 `ut/ErrorHandlers/ExceptionWrapperTest.php`
+  - [x] 4.2 适配 `ut/ErrorHandlers/ExceptionWrapperTest.php`
     - `setUp()` 添加 `: void` 返回类型
     - _Requirements: R6 AC1_
-  - [ ] 4.3 适配 `ut/Views/DefaultHtmlRendererTest.php`
+  - [x] 4.3 适配 `ut/Views/DefaultHtmlRendererTest.php`
     - `assertContains` → `assertStringContainsString`（6 处字符串 haystack，R10 AC1）
     - `getMockBuilder(\Twig_Environment::class)->...->getMock()` → `createMock(\Twig_Environment::class)`（2 处，R9 AC1–AC3）
     - 注意：`\Twig_Environment` 属于 Twig 1.x 遗留类名，如 PHP 8.5 下不可加载则该测试归入 Framework_Dependent（Design §4.4）
     - _Requirements: R9 AC1–AC3, R10 AC1_
-  - [ ] 4.4 适配 `ut/Views/RouteBasedResponseRendererResolverTest.php`
+  - [x] 4.4 适配 `ut/Views/RouteBasedResponseRendererResolverTest.php`
     - `setExpectedException(X::class, 'message')` → `expectException(X::class)` + `expectExceptionMessage('message')`（1 处，R7 AC1–AC4）
     - _Requirements: R7 AC1–AC4_
-  - [ ] 4.5 适配 `ut/Misc/ChainedParameterBagDataProviderTest.php`
+  - [x] 4.5 适配 `ut/Misc/ChainedParameterBagDataProviderTest.php`
     - `assertInternalType('array', ...)` → `assertIsArray(...)`（1 处，R10 AC1）
     - `assertContains` 用于数组 haystack — 无需迁移
     - _Requirements: R10 AC1_
-  - [ ] 4.6 Checkpoint: 运行 `vendor/bin/phpunit --testsuite error-handlers --testsuite views --testsuite misc`，全部通过无 fatal error，commit
+  - [-] 4.6 Checkpoint: 运行 `vendor/bin/phpunit --testsuite error-handlers --testsuite views --testsuite misc`，全部通过无 fatal error，commit
     - _Requirements: R10 AC4, R11 AC2, R11 AC3, R11 AC4_
 
-- [ ] 5. 间接框架依赖修复（Design §5, CR Q1=B）
+- [~] 5. 间接框架依赖修复（Design §5, CR Q1=B）
   - [ ] 5.1 修复 `ut/Cookie/SimpleCookieProviderTest.php`（Design §5.2）
     - 根据 Task 1.5 的 Silex 可加载性验证结果选择修复路径：
       - 如果 `Silex\Application` 可加载：保持现状，仅做 PHPUnit API 适配（`setUp(): void` 等）
@@ -113,7 +113,7 @@
   - [ ] 5.3 Checkpoint: 运行 `vendor/bin/phpunit --testsuite cookie --testsuite middlewares`，全部通过，commit
     - _Requirements: R11 AC6, R11 AC7_
 
-- [ ] 6. Test_Adaptation — Exceptions 模块验证 + 全量 Framework_Independent 验证（R11）
+- [~] 6. Test_Adaptation — Exceptions 模块验证 + 全量 Framework_Independent 验证（R11）
   - [ ] 6.1 确认 `ut/Misc/UniquenessViolationHttpExceptionTest.php` 无需 PHPUnit API 适配（Design §8.1 确认无 PHPUnit 5.x API 使用）
     - _Requirements: R11 AC5_
   - [ ] 6.2 逐一运行全部 7 个 Framework_Independent_Suite，确认全部通过：

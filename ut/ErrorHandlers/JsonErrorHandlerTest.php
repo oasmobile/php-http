@@ -10,7 +10,7 @@ class JsonErrorHandlerTest extends TestCase
     /** @var JsonErrorHandler */
     private $handler;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->handler = new JsonErrorHandler();
     }
@@ -24,7 +24,7 @@ class JsonErrorHandlerTest extends TestCase
         $exception = new \RuntimeException('test message');
         $result    = call_user_func($this->handler, $exception, 500);
 
-        $this->assertInternalType('array', $result);
+        $this->assertIsArray($result);
         $this->assertArrayHasKey('code', $result);
         $this->assertArrayHasKey('type', $result);
         $this->assertArrayHasKey('message', $result);

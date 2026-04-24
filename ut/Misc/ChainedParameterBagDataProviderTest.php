@@ -116,7 +116,7 @@ class ChainedParameterBagDataProviderTest extends TestCase
         $provider = new ChainedParameterBagDataProvider($bag);
 
         $result = $provider->getOptional('x-multi', 'requireArray');
-        $this->assertInternalType('array', $result);
+        $this->assertIsArray($result);
         $this->assertCount(2, $result);
         $this->assertContains('val1', $result);
         $this->assertContains('val2', $result);

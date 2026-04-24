@@ -41,7 +41,7 @@ class GroupUrlMatcher implements UrlMatcherInterface, RequestMatcherInterface
      *
      * @param RequestContext $context The context
      */
-    public function setContext(RequestContext $context)
+    public function setContext(RequestContext $context): void
     {
         $this->context = $context;
     }
@@ -51,7 +51,7 @@ class GroupUrlMatcher implements UrlMatcherInterface, RequestMatcherInterface
      *
      * @return RequestContext The context
      */
-    public function getContext()
+    public function getContext(): RequestContext
     {
         return $this->context;
     }
@@ -69,7 +69,7 @@ class GroupUrlMatcher implements UrlMatcherInterface, RequestMatcherInterface
      * @throws ResourceNotFoundException If the resource could not be found
      * @throws MethodNotAllowedException If the resource was found but the request method is not allowed
      */
-    public function match($pathinfo)
+    public function match(string $pathinfo): array
     {
         $total   = sizeof($this->matchers);
         $matched = 0;
@@ -104,7 +104,7 @@ class GroupUrlMatcher implements UrlMatcherInterface, RequestMatcherInterface
      * @throws ResourceNotFoundException If no matching resource could be found
      * @throws MethodNotAllowedException If a matching resource was found but the request method is not allowed
      */
-    public function matchRequest(Request $request)
+    public function matchRequest(Request $request): array
     {
         $this->request = $request;
         

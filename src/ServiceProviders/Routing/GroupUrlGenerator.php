@@ -21,6 +21,9 @@ class GroupUrlGenerator implements UrlGeneratorInterface
     
     /** @var  RequestContext */
     protected $context;
+
+    /** @var bool Whether setContext() has been explicitly called */
+    protected $contextExplicitlySet = false;
     
     /**
      * GroupUrlGenerator constructor.
@@ -30,6 +33,7 @@ class GroupUrlGenerator implements UrlGeneratorInterface
     public function __construct(array $generators)
     {
         $this->generators = $generators;
+        $this->context    = new RequestContext();
     }
     
     /**
@@ -37,9 +41,10 @@ class GroupUrlGenerator implements UrlGeneratorInterface
      *
      * @param RequestContext $context The context
      */
-    public function setContext(RequestContext $context)
+    public function setContext(RequestContext $context): void
     {
-        $this->context = $context;
+        $this->context              = $context;
+        $this->contextExplicitlySet = true;
     }
     
     /**
@@ -47,7 +52,7 @@ class GroupUrlGenerator implements UrlGeneratorInterface
      *
      * @return RequestContext The context
      */
-    public function getContext()
+    public function getContext(): RequestContext
     {
         return $this->context;
     }
@@ -78,7 +83,7 @@ class GroupUrlGenerator implements UrlGeneratorInterface
      * @throws InvalidParameterException           When a parameter value for a placeholder is not correct because
      *                                             it does not match the requirement
      */
-    public function generate($name, $parameters = [], $referenceType = self::ABSOLUTE_PATH)
+    public function generate(string $name, array $parameters = [], int $referenceType = self::ABSOLUTE_PATH): string
     {
         $total = sizeof($this->generators);
         $found = 0;
@@ -86,7 +91,7 @@ class GroupUrlGenerator implements UrlGeneratorInterface
         foreach ($this->generators as $generator) {
             $found++;
             try {
-                if ($this->getContext()) {
+                if ($this->contextExplicitlySet) {
                     $generator->setContext($this->getContext());
                 }
                 

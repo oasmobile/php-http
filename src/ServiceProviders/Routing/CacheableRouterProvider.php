@@ -10,112 +10,49 @@ namespace Oasis\Mlib\Http\ServiceProviders\Routing;
 
 use Oasis\Mlib\Http\Configuration\CacheableRouterConfiguration;
 use Oasis\Mlib\Http\Configuration\ConfigurationValidationTrait;
-use Oasis\Mlib\Http\SilexKernel;
+use Oasis\Mlib\Http\MicroKernel;
 use Oasis\Mlib\Utils\DataProviderInterface;
-use Pimple\Container;
-use Pimple\ServiceProviderInterface;
-use Silex\Provider\Routing\RedirectableUrlMatcher;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\Router;
 
-class CacheableRouterProvider implements ServiceProviderInterface
+class CacheableRouterProvider
 {
     use ConfigurationValidationTrait;
-    
+
     /** @var Router */
     protected $router;
-    /** @var  SilexKernel */
+    /** @var MicroKernel */
     protected $kernel;
-    
+
     public function __construct()
     {
     }
-    
+
     /**
-     * Registers services on the given app.
+     * Register routing services on the given MicroKernel.
      *
-     * This method should only be used to configure services and parameters.
-     * It should not get services.
-     *
-     * @param Container $app
+     * Replaces the old Pimple ServiceProviderInterface::register(Container $app).
+     * After calling this method, the kernel exposes routing services via getters:
+     *   - getRequestMatcher()
+     *   - getUrlGenerator()
+     *   - getRouter()
      */
-    public function register(Container $app)
+    public function register(MicroKernel $kernel): void
     {
-        $this->kernel                        = $app;
-        $app['request_matcher']              = $app->extend(
-            'request_matcher',
-            function ($urlMatcher, $c) {
-                $context = $c['request_context'];
-                
-                $newMatcher = new GroupUrlMatcher(
-                    $context,
-                    [
-                        new CacheableRouterUrlMatcherWrapper(
-                            $this->getRouter($context)->getMatcher(),
-                            $c['routing.config.namespaces']
-                        ),
-                        $urlMatcher,
-                    ]
-                );
-                
-                return $newMatcher;
-            }
-        );
-        $app['url_generator']                = $app->extend(
-            'url_generator',
-            function ($generator, $kernel) {
-                /** @var SilexKernel $kernel */
-                
-                /** @var RequestContext $context */
-                //$context = $kernel['request_context'];
-                /** @var Router $router */
-                $router       = $kernel['router'];
-                $newGenerator = $router->getGenerator();
-                
-                //$newGenerator = new UrlGenerator($router->getRouteCollection(), $context);
-                
-                return new GroupUrlGenerator(
-                    [
-                        $newGenerator,
-                        $generator,
-                    ]
-                );
-            }
-        );
-        $app['router']                       = function ($app) {
-            return $this->getRouter($app['request_context']);
-        };
-        $app['routing.config.data_provider'] = function ($app) {
-            $routingConfig = $app['routing.config'];
-            
-            return $this->processConfiguration(
-                $routingConfig,
-                new CacheableRouterConfiguration()
-            );
-        };
-        $app['routing.config.namespaces']    = function () {
-            return $this->getConfigDataProvider()->getOptional(
-                'namespaces',
-                DataProviderInterface::ARRAY_TYPE,
-                []
-            );
-        };
-        $app['routing.config.cache_dir']     = function () {
-            return $this->getConfigDataProvider()->getOptional('cache_dir');
-        };
+        $this->kernel = $kernel;
     }
-    
+
     /** @return DataProviderInterface */
     public function getConfigDataProvider()
     {
         if (!$this->kernel) {
             throw new \LogicException("Cannot get config data provider before registration");
         }
-        
-        return $this->kernel['routing.config.data_provider'];
+
+        return $this->kernel->getRoutingConfigDataProvider();
     }
-    
+
     /**
      * @param RequestContext $requestContext
      *
@@ -129,38 +66,74 @@ class CacheableRouterProvider implements ServiceProviderInterface
                     "Cannot use CacheableRouterProvider because 'routing.config' not configured."
                 );
             }
-            
+
             $routerFile = 'routes.yml';
             $routerPath = $this->getConfigDataProvider()->getMandatory('path');
             if (!is_dir($routerPath)) {
                 $routerFile = basename($routerPath);
                 $routerPath = dirname($routerPath);
             }
-            
-            $cacheDir                = strcasecmp($this->kernel['routing.config.cache_dir'], "false") == 0 ? null :
-                ($this->kernel['routing.config.cache_dir'] ? : $routerPath . "/cache");
-            $hash                    = md5(
-                realpath($cacheDir) . "/" . realpath($routerPath) . "/" . $routerFile
-            );
-            $matcherCacheClassname   = "ProjectUrlMatcher_$hash";
-            $generatorCacheClassname = "ProjectUrlGenerator_$hash";
+
+            $cacheDir                = strcasecmp($this->getConfigDataProvider()->getOptional('cache_dir', DataProviderInterface::STRING_TYPE, ''), "false") == 0 ? null :
+                ($this->getConfigDataProvider()->getOptional('cache_dir') ?: $routerPath . "/cache");
             $locator                 = new FileLocator([$routerPath]);
             $this->router            = new CacheableRouter(
                 $this->kernel,
-                //new YamlFileLoader($locator),
                 new InheritableYamlFileLoader($locator),
                 $routerFile,
                 [
-                    'cache_dir'             => $cacheDir,
-                    'matcher_cache_class'   => $matcherCacheClassname,
-                    'generator_cache_class' => $generatorCacheClassname,
-                    'matcher_base_class'    => RedirectableUrlMatcher::class,
-                    "debug"                 => $this->kernel['debug'],
+                    'cache_dir' => $cacheDir,
+                    "debug"     => $this->kernel->isDebug(),
                 ],
                 $requestContext
             );
         }
-        
+
         return $this->router;
+    }
+
+    /**
+     * Build the request matcher (GroupUrlMatcher) for this routing provider.
+     *
+     * @param RequestContext $requestContext
+     *
+     * @return GroupUrlMatcher
+     */
+    public function buildRequestMatcher(RequestContext $requestContext): GroupUrlMatcher
+    {
+        $namespaces = $this->getConfigDataProvider()->getOptional(
+            'namespaces',
+            DataProviderInterface::ARRAY_TYPE,
+            []
+        );
+
+        return new GroupUrlMatcher(
+            $requestContext,
+            [
+                new CacheableRouterUrlMatcherWrapper(
+                    $this->getRouter($requestContext)->getMatcher(),
+                    $namespaces
+                ),
+            ]
+        );
+    }
+
+    /**
+     * Build the URL generator (GroupUrlGenerator) for this routing provider.
+     *
+     * @param RequestContext $requestContext
+     *
+     * @return GroupUrlGenerator
+     */
+    public function buildUrlGenerator(RequestContext $requestContext): GroupUrlGenerator
+    {
+        $router       = $this->getRouter($requestContext);
+        $newGenerator = $router->getGenerator();
+
+        return new GroupUrlGenerator(
+            [
+                $newGenerator,
+            ]
+        );
     }
 }

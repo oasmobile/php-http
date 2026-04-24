@@ -3,12 +3,20 @@
 namespace Oasis\Mlib\Http;
 
 use GuzzleHttp\Client;
+use Oasis\Mlib\Http\Configuration\CacheableRouterConfiguration;
 use Oasis\Mlib\Http\Configuration\ConfigurationValidationTrait;
 use Oasis\Mlib\Http\Configuration\HttpConfiguration;
 use Oasis\Mlib\Http\Middlewares\MiddlewareInterface;
+use Oasis\Mlib\Http\ServiceProviders\Routing\CacheableRouterProvider;
+use Oasis\Mlib\Http\ServiceProviders\Routing\GroupUrlGenerator;
+use Oasis\Mlib\Http\ServiceProviders\Routing\GroupUrlMatcher;
 use Oasis\Mlib\Logging\MLogging;
 use Oasis\Mlib\Utils\ArrayDataProvider;
 use Oasis\Mlib\Utils\DataProviderInterface;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Routing\Matcher\RequestMatcherInterface;
+use Symfony\Component\Routing\RequestContext;
+use Symfony\Component\Routing\Router;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
@@ -65,6 +73,14 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
     protected $authorizationChecker = null;
     /** @var array */
     protected $providers = [];
+    /** @var CacheableRouterProvider|null */
+    protected $routerProvider = null;
+    /** @var ArrayDataProvider|null */
+    protected $routingConfigDataProvider = null;
+    /** @var RequestMatcherInterface|null */
+    protected $requestMatcher = null;
+    /** @var UrlGeneratorInterface|null */
+    protected $urlGenerator = null;
 
     /**
      * Slow request threshold in milliseconds.
@@ -458,6 +474,39 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
         );
     }
 
+    // ─── Internal: Routing registration ─────────────────────────────
+
+    /**
+     * Register routing services if routing config is provided.
+     * Called during boot().
+     */
+    protected function registerRouting(): void
+    {
+        $routingConfig = $this->httpDataProvider->getOptional(
+            'routing',
+            DataProviderInterface::MIXED_TYPE
+        );
+
+        if (!$routingConfig || !is_array($routingConfig)) {
+            return;
+        }
+
+        // Process routing configuration
+        $this->routingConfigDataProvider = $this->processConfiguration(
+            $routingConfig,
+            new CacheableRouterConfiguration()
+        );
+
+        // Create and register the router provider
+        $this->routerProvider = new CacheableRouterProvider();
+        $this->routerProvider->register($this);
+
+        // Build routing services with a fresh RequestContext
+        $requestContext       = new RequestContext();
+        $this->requestMatcher = $this->routerProvider->buildRequestMatcher($requestContext);
+        $this->urlGenerator   = $this->routerProvider->buildUrlGenerator($requestContext);
+    }
+
     // ─── Symfony Kernel overrides ────────────────────────────────────
 
     public function getProjectDir(): string
@@ -520,6 +569,9 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
         }
 
         parent::boot();
+
+        // Register routing services if routing config is provided
+        $this->registerRouting();
 
         // Register middlewares, view handlers, error handlers after container is ready
         $this->registerMiddlewares();
@@ -605,6 +657,42 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
     public function getHttpDataProvider(): ArrayDataProvider
     {
         return $this->httpDataProvider;
+    }
+
+    /**
+     * @return ArrayDataProvider|null The routing configuration data provider, or null if routing is not configured.
+     */
+    public function getRoutingConfigDataProvider(): ?ArrayDataProvider
+    {
+        return $this->routingConfigDataProvider;
+    }
+
+    /**
+     * @return RequestMatcherInterface|null The request matcher, or null if routing is not configured.
+     */
+    public function getRequestMatcher(): ?RequestMatcherInterface
+    {
+        return $this->requestMatcher;
+    }
+
+    /**
+     * @return UrlGeneratorInterface|null The URL generator, or null if routing is not configured.
+     */
+    public function getUrlGenerator(): ?UrlGeneratorInterface
+    {
+        return $this->urlGenerator;
+    }
+
+    /**
+     * @return Router|null The router, or null if routing is not configured.
+     */
+    public function getRouter(): ?Router
+    {
+        if ($this->routerProvider === null) {
+            return null;
+        }
+
+        return $this->routerProvider->getRouter(new RequestContext());
     }
 
     /**

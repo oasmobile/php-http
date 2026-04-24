@@ -19,10 +19,10 @@ class TwigConfiguration implements ConfigurationInterface
      *
      * @return \Symfony\Component\Config\Definition\Builder\TreeBuilder The tree builder
      */
-    public function getConfigTreeBuilder()
+    public function getConfigTreeBuilder(): TreeBuilder
     {
-        $builder = new TreeBuilder();
-        $twig    = $builder->root('twig');
+        $builder = new TreeBuilder('twig');
+        $twig    = $builder->getRootNode();
         {
             $twig->children()->scalarNode('template_dir');
             $twig->children()->scalarNode('cache_dir')->defaultValue(null);

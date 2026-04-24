@@ -8,7 +8,7 @@
 
 namespace Oasis\Mlib\Http\ServiceProviders\Routing;
 
-use Oasis\Mlib\Http\SilexKernel;
+use Oasis\Mlib\Http\MicroKernel;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\Config\Resource\FileResource;
@@ -18,7 +18,7 @@ use Symfony\Component\Routing\Router;
 
 class CacheableRouter extends Router
 {
-    /** @var SilexKernel */
+    /** @var MicroKernel */
     private $kernel;
     /** @var bool */
     private $isParamReplaced = false;
@@ -26,7 +26,7 @@ class CacheableRouter extends Router
     /**
      * CacheableRouter constructor.
      *
-     * @param SilexKernel          $kernel
+     * @param MicroKernel          $kernel
      * @param LoaderInterface      $loader
      * @param mixed                $resource
      * @param array                $options
@@ -34,18 +34,18 @@ class CacheableRouter extends Router
      * @param LoggerInterface|null $logger
      */
     public function __construct(
-        SilexKernel $kernel,
+        MicroKernel $kernel,
         LoaderInterface $loader,
         $resource,
         array $options = [],
-        RequestContext $context = null,
-        LoggerInterface $logger = null)
+        ?RequestContext $context = null,
+        ?LoggerInterface $logger = null)
     {
         parent::__construct($loader, $resource, $options, $context, $logger);
         $this->kernel = $kernel;
     }
     
-    public function getRouteCollection()
+    public function getRouteCollection(): \Symfony\Component\Routing\RouteCollection
     {
         $collection = parent::getRouteCollection();
         if (!$this->isParamReplaced) {

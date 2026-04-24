@@ -20,10 +20,10 @@ class SecurityConfiguration implements ConfigurationInterface
      *
      * @return \Symfony\Component\Config\Definition\Builder\TreeBuilder The tree builder
      */
-    public function getConfigTreeBuilder()
+    public function getConfigTreeBuilder(): TreeBuilder
     {
-        $builder  = new TreeBuilder();
-        $security = $builder->root('security');
+        $builder  = new TreeBuilder('security');
+        $security = $builder->getRootNode();
         {
             /** @var ArrayNodeDefinition $policies */
             $policies = $security->children()->arrayNode('policies');

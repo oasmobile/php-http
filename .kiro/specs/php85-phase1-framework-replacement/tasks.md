@@ -19,7 +19,7 @@
     - _Ref: Requirement 1, AC 1–8_
   - [x] 1.2 Checkpoint: 执行 `composer install` 确认依赖解析成功，无冲突。Commit。
 
-- [-] 2. MicroKernel 核心入口与 Middleware 机制（请求链路骨架）
+- [x] 2. MicroKernel 核心入口与 Middleware 机制（请求链路骨架）
   - [x] 2.1 创建 MicroKernel 类，实现核心公共 API
     - 在 `src/MicroKernel.php` 创建 `Oasis\Mlib\Http\MicroKernel`，继承 Symfony `Kernel` + `MicroKernelTrait`，实现 `AuthorizationCheckerInterface`
     - 保留 priority 常量（`BEFORE_PRIORITY_ROUTING` = 32、`BEFORE_PRIORITY_CORS_PREFLIGHT` = 20、`BEFORE_PRIORITY_FIREWALL` = 8、`BEFORE_PRIORITY_EARLIEST` = 512、`BEFORE_PRIORITY_LATEST` = -512、`AFTER_PRIORITY_EARLIEST` = 512、`AFTER_PRIORITY_LATEST` = -512），精确数值是行为契约
@@ -46,27 +46,27 @@
   - [x] 2.4 删除旧 SilexKernel 类
     - 删除 `src/SilexKernel.php`
     - _Ref: Requirement 2, AC 8_
-  - [-] 2.5 Checkpoint: 确认 MicroKernel 类可编译，MiddlewareInterface / AbstractMiddleware 无语法错误。Commit。
+  - [x] 2.5 Checkpoint: 确认 MicroKernel 类可编译，MiddlewareInterface / AbstractMiddleware 无语法错误。Commit。
 
-- [ ] 3. 路由系统迁移
-  - [ ] 3.1 重写 CacheableRouterProvider 为 DI 注册方式
+- [-] 3. 路由系统迁移
+  - [x] 3.1 重写 CacheableRouterProvider 为 DI 注册方式
     - 移除 `Pimple\ServiceProviderInterface` 实现
     - 提供 `register(MicroKernel $kernel)` 方法
     - 路由 service 通过 MicroKernel getter 暴露
     - `RedirectableUrlMatcher` 基类从 `Silex\Provider\Routing\RedirectableUrlMatcher` 更新为 Symfony Routing 7.x 等价类
     - _Ref: Requirement 5, AC 1/8/9; Requirement 3, AC 3; Requirement 16, AC 2_
-  - [ ] 3.2 适配 CacheableRouter 接受 MicroKernel
+  - [x] 3.2 适配 CacheableRouter 接受 MicroKernel
     - 构造函数 `SilexKernel` → `MicroKernel`（或 parameter provider interface）
     - 保留 `getRouteCollection()` 的 `%param%` 参数替换逻辑
     - _Ref: Requirement 5, AC 2/3_
-  - [ ] 3.3 适配 InheritableYamlFileLoader 到 Symfony Routing 7.x
+  - [x] 3.3 适配 InheritableYamlFileLoader 到 Symfony Routing 7.x
     - 检查并适配 `YamlFileLoader::import()` 签名变化
     - 确保 `InheritableRouteCollection` 兼容 Symfony Routing 7.x
     - _Ref: Requirement 5, AC 7_
-  - [ ] 3.4 验证 GroupUrlMatcher / GroupUrlGenerator / CacheableRouterUrlMatcherWrapper 无需修改
+  - [x] 3.4 验证 GroupUrlMatcher / GroupUrlGenerator / CacheableRouterUrlMatcherWrapper 无需修改
     - 确认这些类无 Silex 依赖，在 Symfony 7.x 下正常工作
     - _Ref: Requirement 5, AC 4/5/6_
-  - [ ] 3.5 Checkpoint: 运行 `routing` 和 `middlewares` test suite，确认请求链路基本跑通（MicroKernel 能启动、路由能匹配、middleware 能执行）。如有问题请与用户沟通。Commit。
+  - [-] 3.5 Checkpoint: 运行 `routing` 和 `middlewares` test suite，确认请求链路基本跑通（MicroKernel 能启动、路由能匹配、middleware 能执行）。如有问题请与用户沟通。Commit。
 
 - [ ] 4. Symfony 4.x → 7.x API 适配与 ArgumentValueResolver
   - [ ] 4.1 全局替换 Symfony 4.x 已移除 API

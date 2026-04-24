@@ -81,7 +81,7 @@ class GroupUrlMatcherTest extends TestCase
 
         $group = new GroupUrlMatcher($context, [$matcher1, $matcher2]);
 
-        $this->setExpectedException(ResourceNotFoundException::class);
+        $this->expectException(ResourceNotFoundException::class);
         $group->match('/nonexistent');
     }
 
@@ -94,7 +94,7 @@ class GroupUrlMatcherTest extends TestCase
         $context = new RequestContext();
         $group   = new GroupUrlMatcher($context, []);
 
-        $this->setExpectedException(ResourceNotFoundException::class);
+        $this->expectException(ResourceNotFoundException::class);
         $group->match('/anything');
     }
 

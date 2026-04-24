@@ -19,10 +19,10 @@ class CrossOriginResourceSharingConfiguration implements ConfigurationInterface
      *
      * @return \Symfony\Component\Config\Definition\Builder\TreeBuilder The tree builder
      */
-    public function getConfigTreeBuilder()
+    public function getConfigTreeBuilder(): TreeBuilder
     {
-        $builder = new TreeBuilder();
-        $cors    = $builder->root('cors');
+        $builder = new TreeBuilder('cors');
+        $cors    = $builder->getRootNode();
         {
             $cors->children()->scalarNode('pattern')->isRequired();
             $cors->children()->variableNode('origins')->beforeNormalization()->ifString()->then(

@@ -2,8 +2,8 @@
 
 namespace Oasis\Mlib\Http\Test\Helpers\Middlewares;
 
+use Oasis\Mlib\Http\MicroKernel;
 use Oasis\Mlib\Http\Middlewares\AbstractMiddleware;
-use Silex\Application;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -23,11 +23,11 @@ class TestMiddleware extends AbstractMiddleware
     /**
      * {@inheritdoc}
      */
-    public function before(Request $request, Application $application)
+    public function before(Request $request, MicroKernel $kernel)
     {
         $this->beforeCalls[] = [
             'request' => $request,
-            'application' => $application,
+            'kernel' => $kernel,
         ];
     }
 

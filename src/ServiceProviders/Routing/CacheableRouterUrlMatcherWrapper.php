@@ -31,7 +31,7 @@ class CacheableRouterUrlMatcherWrapper implements UrlMatcherInterface
      *
      * @param RequestContext $context The context
      */
-    public function setContext(RequestContext $context)
+    public function setContext(RequestContext $context): void
     {
         $this->other->setContext($context);
     }
@@ -41,7 +41,7 @@ class CacheableRouterUrlMatcherWrapper implements UrlMatcherInterface
      *
      * @return RequestContext The context
      */
-    public function getContext()
+    public function getContext(): RequestContext
     {
         return $this->other->getContext();
     }
@@ -59,7 +59,7 @@ class CacheableRouterUrlMatcherWrapper implements UrlMatcherInterface
      * @throws ResourceNotFoundException If the resource could not be found
      * @throws MethodNotAllowedException If the resource was found but the request method is not allowed
      */
-    public function match($pathinfo)
+    public function match(string $pathinfo): array
     {
         /** @var string[] $result */
         $result = $this->other->match($pathinfo);

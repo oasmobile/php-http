@@ -74,22 +74,22 @@
     - _Ref: R3 AC1/AC2/AC3/AC4/AC5/AC6_
   - [x] 4.2 Checkpoint: 运行 `phpunit --testsuite twig` 和 `phpunit --testsuite views` 确认 twig 和 views suite 通过。Commit。
 
-- [-] 5. State 文档更新
+- [x] 5. State 文档更新
   - [x] 5.1 更新 `docs/state/architecture.md` 的 Bootstrap Config 表
     - 在 `twig` 配置说明中补充 `twig.strict_variables`（boolean, 默认 `true`，严格变量模式）和 `twig.auto_reload`（boolean/null, 默认 `null`，auto-detect based on debug mode）
     - 仅补充本 Phase 新增的配置项，不做 state 文档的全面更新（Phase 1 遗留的 `SilexKernel` → `MicroKernel` 更新不在本 Phase scope 内）
     - _Ref: Design Impact Analysis — 受影响的 state 文档_
-  - [-] 5.2 Checkpoint: 确认 `docs/state/architecture.md` 更新内容准确，与 TwigConfiguration 代码一致。运行 `phpunit --testsuite twig --testsuite aws --testsuite configuration` 确认所有预期通过 suite 仍然通过。Commit。
+  - [x] 5.2 Checkpoint: 确认 `docs/state/architecture.md` 更新内容准确，与 TwigConfiguration 代码一致。运行 `phpunit --testsuite twig --testsuite aws --testsuite configuration` 确认所有预期通过 suite 仍然通过。Commit。
 
-- [ ] 6. 全量验证
-  - [ ] 6.1 运行全量测试并确认预期 suite 通过状态
+- [-] 6. 全量验证
+  - [x] 6.1 运行全量测试并确认预期 suite 通过状态
     - 运行 `phpunit` 全量测试
     - 确认以下 suite 通过：`twig`、`aws`、`configuration`、`views`、`cors`、`routing`、`cookie`、`middlewares`、`exceptions`、`error-handlers`、`misc`、`pbt`
     - 确认以下 suite 预期失败且不阻塞：`security`（authenticator 系统未重写，等 Phase 3）、`integration`（部分集成测试依赖 Security 完整链路）
     - _Ref: R3 AC7, R5 AC3/AC4_
-  - [ ] 6.2 Checkpoint: 全量测试结果符合预期。Commit。
+  - [-] 6.2 Checkpoint: 全量测试结果符合预期。Commit。
 
-- [ ] 7. 手工测试
+- [~] 7. 手工测试
   - [ ] 7.1 编写并执行手工测试场景
     - 场景 1: Guzzle 升级验证 — 确认 `composer.json` 中 `guzzlehttp/guzzle` 为 `^7.0`，`composer show guzzlehttp/guzzle` 显示 7.x 版本，`composer install` 无冲突
     - 场景 2: JSON 函数零残留 — 全局搜索 `\GuzzleHttp\json_decode` 和 `\GuzzleHttp\json_encode`，确认 codebase 中零残留
@@ -98,7 +98,7 @@
     - 场景 5: 现有模板渲染不变 — 通过 WebTestCase 发送请求到 `/twig/2`，确认 HTML 输出包含预期内容（`WOW`、`haha`、escape 处理、macro、include、globals）
     - [脚本] 所有场景可通过脚本自动化执行
 
-- [ ] 8. Code Review
+- [~] 8. Code Review
   - [ ] 8.1 委托给 code-reviewer sub-agent 执行
 
 ## Notes

@@ -11,6 +11,7 @@ description: 当开启一个新的 spec、生成 requirements、生成 design、
 
 - 文档以中文行文，英文术语可直接使用
 - 每份文档末尾包含 Socratic Review（自问自答式审查），记录审查 log
+- **分段写入**：生成 requirements、design 或 tasks 文件时，如果预计内容较大（超过约 50 行），不应尝试一次性写入，而应先用 `fsWrite` 写入第一段，再用 `fsAppend` 逐段追加后续内容，避免单次写入过大导致截断或丢失
 
 ---
 

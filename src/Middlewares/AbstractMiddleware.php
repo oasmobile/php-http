@@ -8,22 +8,22 @@
 
 namespace Oasis\Mlib\Http\Middlewares;
 
-use Silex\Application;
+use Oasis\Mlib\Http\MicroKernel;
 
 abstract class AbstractMiddleware implements MiddlewareInterface
 {
-    public function onlyForMasterRequest()
+    public function onlyForMasterRequest(): bool
     {
         return true;
     }
 
-    public function getAfterPriority()
+    public function getAfterPriority(): int|false
     {
-        return Application::LATE_EVENT;
+        return MicroKernel::AFTER_PRIORITY_LATEST;
     }
 
-    public function getBeforePriority()
+    public function getBeforePriority(): int|false
     {
-        return Application::EARLY_EVENT;
+        return MicroKernel::BEFORE_PRIORITY_EARLIEST;
     }
 }

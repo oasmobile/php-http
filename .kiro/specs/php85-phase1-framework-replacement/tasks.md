@@ -6,8 +6,8 @@
 
 ## Tasks
 
-- [ ] 1. composer.json 依赖替换
-  - [ ] 1.1 移除 Silex/Pimple 依赖，升级 Symfony 组件到 ^7.2，新增 MicroKernel 所需包
+- [x] 1. composer.json 依赖替换
+  - [x] 1.1 移除 Silex/Pimple 依赖，升级 Symfony 组件到 ^7.2，新增 MicroKernel 所需包
     - 移除 `silex/silex`、`silex/providers`、`twig/extensions`
     - 升级 `symfony/http-foundation`、`symfony/routing`、`symfony/config`、`symfony/yaml`、`symfony/expression-language`、`symfony/twig-bridge`、`symfony/css-selector`、`symfony/browser-kit` 到 `^7.2`
     - 将 `symfony/security` 替换为 `symfony/security-core` `^7.2` + `symfony/security-http` `^7.2`
@@ -17,10 +17,10 @@
     - 保持 `guzzlehttp/guzzle` `^6.3` 不变
     - 执行 `composer update` 确认依赖解析成功
     - _Ref: Requirement 1, AC 1–8_
-  - [ ] 1.2 Checkpoint: 执行 `composer install` 确认依赖解析成功，无冲突。Commit。
+  - [x] 1.2 Checkpoint: 执行 `composer install` 确认依赖解析成功，无冲突。Commit。
 
-- [ ] 2. MicroKernel 核心入口与 Middleware 机制（请求链路骨架）
-  - [ ] 2.1 创建 MicroKernel 类，实现核心公共 API
+- [-] 2. MicroKernel 核心入口与 Middleware 机制（请求链路骨架）
+  - [x] 2.1 创建 MicroKernel 类，实现核心公共 API
     - 在 `src/MicroKernel.php` 创建 `Oasis\Mlib\Http\MicroKernel`，继承 Symfony `Kernel` + `MicroKernelTrait`，实现 `AuthorizationCheckerInterface`
     - 保留 priority 常量（`BEFORE_PRIORITY_ROUTING` = 32、`BEFORE_PRIORITY_CORS_PREFLIGHT` = 20、`BEFORE_PRIORITY_FIREWALL` = 8、`BEFORE_PRIORITY_EARLIEST` = 512、`BEFORE_PRIORITY_LATEST` = -512、`AFTER_PRIORITY_EARLIEST` = 512、`AFTER_PRIORITY_LATEST` = -512），精确数值是行为契约
     - 构造函数接受 `(array $httpConfig, bool $isDebug)`，通过 `ConfigurationValidationTrait` + `HttpConfiguration` 处理配置
@@ -30,12 +30,12 @@
     - 实现 `configureContainer()` 将 Bootstrap_Config 转化为 Symfony DI service 定义
     - 不保留 `__set()` 魔术方法
     - _Ref: Requirement 2, AC 1–7/9; Requirement 3, AC 1/2/5; Requirement 16, AC 1/10/11_
-  - [ ] 2.2 迁移 MiddlewareInterface 和 AbstractMiddleware
+  - [x] 2.2 迁移 MiddlewareInterface 和 AbstractMiddleware
     - 更新 `MiddlewareInterface::before()` 签名：`Application $application` → `MicroKernel $kernel`
     - 更新 `AbstractMiddleware`：移除 `Silex\Application` 依赖，`getBeforePriority()` 返回 `MicroKernel::BEFORE_PRIORITY_EARLIEST`，`getAfterPriority()` 返回 `MicroKernel::AFTER_PRIORITY_LATEST`
     - 为 `onlyForMasterRequest()`、`getBeforePriority()`、`getAfterPriority()` 添加 `bool`/`int|false` 返回类型
     - _Ref: Requirement 4, AC 1/2_
-  - [ ] 2.3 实现 Middleware 注册与 EventDispatcher 集成
+  - [x] 2.3 实现 Middleware 注册与 EventDispatcher 集成
     - `MicroKernel::addMiddleware()` 存储 middleware 实例
     - 在 `boot()` 阶段通过 `addListener()` 注册到 `KernelEvents::REQUEST`（before）和 `KernelEvents::RESPONSE`（after）
     - before middleware 接收 `RequestEvent`，支持 `setResponse()` 短路
@@ -43,10 +43,10 @@
     - `onlyForMasterRequest()` 过滤使用 `HttpKernelInterface::MAIN_REQUEST`
     - Bootstrap_Config `middlewares` key 中的每个 `MiddlewareInterface` 实例注册为 listener
     - _Ref: Requirement 4, AC 3–7; Requirement 16, AC 6_
-  - [ ] 2.4 删除旧 SilexKernel 类
+  - [x] 2.4 删除旧 SilexKernel 类
     - 删除 `src/SilexKernel.php`
     - _Ref: Requirement 2, AC 8_
-  - [ ] 2.5 Checkpoint: 确认 MicroKernel 类可编译，MiddlewareInterface / AbstractMiddleware 无语法错误。Commit。
+  - [-] 2.5 Checkpoint: 确认 MicroKernel 类可编译，MiddlewareInterface / AbstractMiddleware 无语法错误。Commit。
 
 - [ ] 3. 路由系统迁移
   - [ ] 3.1 重写 CacheableRouterProvider 为 DI 注册方式

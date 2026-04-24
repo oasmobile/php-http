@@ -8,6 +8,8 @@ use Oasis\Mlib\Http\Configuration\ConfigurationValidationTrait;
 use Oasis\Mlib\Http\Configuration\HttpConfiguration;
 use Oasis\Mlib\Http\EventSubscribers\ViewHandlerSubscriber;
 use Oasis\Mlib\Http\Middlewares\MiddlewareInterface;
+use Oasis\Mlib\Http\ServiceProviders\Cookie\ResponseCookieContainer;
+use Oasis\Mlib\Http\ServiceProviders\Cookie\SimpleCookieProvider;
 use Oasis\Mlib\Http\ServiceProviders\Cors\CrossOriginResourceSharingProvider;
 use Oasis\Mlib\Http\ServiceProviders\Cors\CrossOriginResourceSharingStrategy;
 use Oasis\Mlib\Http\ServiceProviders\Routing\CacheableRouterProvider;
@@ -471,6 +473,24 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
         $dispatcher->addSubscriber($subscriber);
     }
 
+    // ─── Internal: Cookie registration ──────────────────────────────
+
+    /**
+     * Register Cookie EventSubscriber.
+     * Creates a ResponseCookieContainer, registers it as a controller injected arg,
+     * and adds the CookieSubscriber to the EventDispatcher.
+     * Called during boot().
+     */
+    protected function registerCookie(): void
+    {
+        $cookieContainer  = new ResponseCookieContainer();
+        $this->addControllerInjectedArg($cookieContainer);
+
+        $cookieSubscriber = new SimpleCookieProvider($cookieContainer);
+        $dispatcher       = $this->getContainer()->get('event_dispatcher');
+        $dispatcher->addSubscriber($cookieSubscriber);
+    }
+
     // ─── Internal: CORS registration ─────────────────────────────────
 
     /**
@@ -628,6 +648,9 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
         }
 
         parent::boot();
+
+        // Register Cookie subscriber
+        $this->registerCookie();
 
         // Register CORS subscriber if cors config is provided (before routing,
         // so onPreRouting can detect preflight before the routing listener throws)

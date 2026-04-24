@@ -85,7 +85,7 @@
     - _Ref: Requirement 12, AC 1–4; Requirement 16, AC 9_
   - [x] 4.3 Checkpoint: 确认所有 Symfony 4.x API 引用已替换，代码可编译。Commit。
 
-- [-] 5. CORS 机制迁移
+- [x] 5. CORS 机制迁移
   - [x] 5.1 重写 CrossOriginResourceSharingProvider 为 EventSubscriber
     - 创建 `CrossOriginResourceSharingSubscriber` 实现 `EventSubscriberInterface`
     - `getSubscribedEvents()` 注册：`KernelEvents::REQUEST` [onPreRouting, 33] + [onPostRouting, 20]、`KernelEvents::RESPONSE` [onResponse, -512]、`KernelEvents::EXCEPTION` [onException, 512]
@@ -96,36 +96,36 @@
     - `CrossOriginResourceSharingStrategy` 保持不变
     - Bootstrap_Config `cors` key 初始化 strategies
     - _Ref: Requirement 6, AC 1–7; Requirement 16, AC 5_
-  - [-] 5.2 Checkpoint: 运行 `cors` test suite，确认 CORS 机制可用。Commit。
+  - [x] 5.2 Checkpoint: 运行 `cors` test suite，确认 CORS 机制可用。Commit。
 
-- [ ] 6. View Handler 链与 Error Handler 链迁移
-  - [ ] 6.1 创建 ViewHandlerSubscriber
+- [x] 6. View Handler 链与 Error Handler 链迁移
+  - [x] 6.1 创建 ViewHandlerSubscriber
     - 在 `src/EventSubscribers/ViewHandlerSubscriber.php` 创建 EventSubscriber
     - 监听 `KernelEvents::VIEW`，遍历 handler 链，handler 返回 Response 时停止链
     - Bootstrap_Config `view_handlers` key 注册 callable
     - _Ref: Requirement 7, AC 1–5; Requirement 16, AC 7_
-  - [ ] 6.2 更新 View 相关类的 SilexKernel 引用
+  - [x] 6.2 更新 View 相关类的 SilexKernel 引用
     - `FallbackViewHandler`：`SilexKernel` → `MicroKernel`
     - `ResponseRendererInterface`：`SilexKernel` → `MicroKernel`
     - `DefaultHtmlRenderer`：`SilexKernel` → `MicroKernel`，同时更新 Twig 1.x API 引用（`\Twig_Error_Loader` → `\Twig\Error\LoaderError`）
     - `JsonApiRenderer`：`SilexKernel` → `MicroKernel`
     - _Ref: Requirement 7, AC 6/7/8_
-  - [ ] 6.3 实现 Error Handler 链注册
+  - [x] 6.3 实现 Error Handler 链注册
     - 在 `MicroKernel` 中通过 `addListener()` 逐个注册 error handler 到 `KernelEvents::EXCEPTION`
     - 内联 `ExtendedExceptionListnerWrapper` 的核心行为（handler 返回 null 且 event 无 response 时不设置 response）
     - 删除或重写 `ExtendedExceptionListnerWrapper`（移除 Silex `ExceptionListenerWrapper` 基类依赖）
     - Bootstrap_Config `error_handlers` key 注册 handler，保留 priority 机制
     - _Ref: Requirement 8, AC 1–5; Requirement 16, AC 8_
-  - [ ] 6.4 Checkpoint: 确认 ViewHandlerSubscriber 和 Error Handler 链可编译，无语法错误。Commit。
+  - [x] 6.4 Checkpoint: 确认 ViewHandlerSubscriber 和 Error Handler 链可编译，无语法错误。Commit。
 
-- [ ] 7. Cookie Provider 迁移
-  - [ ] 7.1 重写 SimpleCookieProvider 为 CookieSubscriber
+- [-] 7. Cookie Provider 迁移
+  - [x] 7.1 重写 SimpleCookieProvider 为 CookieSubscriber
     - 创建 `CookieSubscriber` 实现 `EventSubscriberInterface`，监听 `KernelEvents::RESPONSE`
     - 从 `ResponseCookieContainer` 读取 cookie 写入 response headers
     - 通过 `MicroKernel::addControllerInjectedArg()` 注册 `ResponseCookieContainer`
     - `ResponseCookieContainer` 保持不变
     - _Ref: Requirement 9, AC 1–4_
-  - [ ] 7.2 Checkpoint: 运行 `cookie` test suite，确认 Cookie 机制可用。Commit。
+  - [-] 7.2 Checkpoint: 运行 `cookie` test suite，确认 Cookie 机制可用。Commit。
 
 - [ ] 8. Twig Provider 迁移
   - [ ] 8.1 重写 SimpleTwigServiceProvider

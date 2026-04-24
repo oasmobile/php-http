@@ -2,54 +2,99 @@
 
 namespace Oasis\Mlib\Http\Test\Cookie;
 
+use Oasis\Mlib\Http\MicroKernel;
+use Oasis\Mlib\Http\ServiceProviders\Cookie\ResponseCookieContainer;
 use Oasis\Mlib\Http\ServiceProviders\Cookie\SimpleCookieProvider;
-use Oasis\Mlib\Http\SilexKernel;
 use PHPUnit\Framework\TestCase;
-use Silex\Application;
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Event\ResponseEvent;
+use Symfony\Component\HttpKernel\HttpKernelInterface;
 
 class SimpleCookieProviderTest extends TestCase
 {
-    public function testBootThrowsLogicExceptionForNonSilexKernel()
+    public function testGetSubscribedEventsListensOnKernelResponse()
     {
-        $provider = new SimpleCookieProvider();
-        $app = new Application();
+        $events = SimpleCookieProvider::getSubscribedEvents();
 
-        $this->expectException(\LogicException::class);
-        $provider->boot($app);
+        $this->assertArrayHasKey('kernel.response', $events);
+        $this->assertSame(['onResponse', 0], $events['kernel.response']);
     }
 
-    public function testBootRegistersAfterMiddlewareThatWritesCookiesToResponse()
+    public function testOnResponseWritesCookiesToResponseHeaders()
     {
-        $provider = new SimpleCookieProvider();
-
-        $kernel = new SilexKernel([], true);
-        $provider->register($kernel);
-        $provider->boot($kernel);
-
-        // Access the internal cookie container via reflection
-        $ref = new \ReflectionProperty(SimpleCookieProvider::class, 'cookieContainer');
-        $ref->setAccessible(true);
-        $cookieContainer = $ref->getValue($provider);
-
-        // Add a cookie to the container
-        $cookie = new Cookie('test_cookie', 'test_value');
+        $cookieContainer = new ResponseCookieContainer();
+        $cookie          = new Cookie('test_cookie', 'test_value');
         $cookieContainer->addCookie($cookie);
 
-        // Set up a simple route and handle a request to trigger the after middleware
-        $kernel->get('/test', function () {
-            return new Response('ok');
-        });
+        $provider = new SimpleCookieProvider($cookieContainer);
 
-        $request = Request::create('/test');
-        $response = $kernel->handle($request);
+        $kernel   = $this->createMock(HttpKernelInterface::class);
+        $request  = Request::create('/test');
+        $response = new Response('ok');
+        $event    = new ResponseEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST, $response);
 
-        // Verify the cookie was written to the response headers
+        $provider->onResponse($event);
+
         $responseCookies = $response->headers->getCookies();
         $this->assertCount(1, $responseCookies);
         $this->assertSame('test_cookie', $responseCookies[0]->getName());
         $this->assertSame('test_value', $responseCookies[0]->getValue());
+    }
+
+    public function testOnResponseWritesMultipleCookies()
+    {
+        $cookieContainer = new ResponseCookieContainer();
+        $cookieContainer->addCookie(new Cookie('first', 'value1'));
+        $cookieContainer->addCookie(new Cookie('second', 'value2'));
+
+        $provider = new SimpleCookieProvider($cookieContainer);
+
+        $kernel   = $this->createMock(HttpKernelInterface::class);
+        $request  = Request::create('/test');
+        $response = new Response('ok');
+        $event    = new ResponseEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST, $response);
+
+        $provider->onResponse($event);
+
+        $responseCookies = $response->headers->getCookies();
+        $this->assertCount(2, $responseCookies);
+
+        $names = array_map(fn(Cookie $c) => $c->getName(), $responseCookies);
+        $this->assertContains('first', $names);
+        $this->assertContains('second', $names);
+    }
+
+    public function testOnResponseDoesNothingWhenNoCookies()
+    {
+        $cookieContainer = new ResponseCookieContainer();
+        $provider        = new SimpleCookieProvider($cookieContainer);
+
+        $kernel   = $this->createMock(HttpKernelInterface::class);
+        $request  = Request::create('/test');
+        $response = new Response('ok');
+        $event    = new ResponseEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST, $response);
+
+        $provider->onResponse($event);
+
+        $this->assertEmpty($response->headers->getCookies());
+    }
+
+    public function testConstructorCreatesDefaultCookieContainerWhenNoneProvided()
+    {
+        $provider  = new SimpleCookieProvider();
+        $container = $provider->getCookieContainer();
+
+        $this->assertInstanceOf(ResponseCookieContainer::class, $container);
+        $this->assertEmpty($container->getCookies());
+    }
+
+    public function testGetCookieContainerReturnsSameInstance()
+    {
+        $cookieContainer = new ResponseCookieContainer();
+        $provider        = new SimpleCookieProvider($cookieContainer);
+
+        $this->assertSame($cookieContainer, $provider->getCookieContainer());
     }
 }

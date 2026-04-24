@@ -1,67 +1,34 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: minhao
- * Date: 2016-04-20
- * Time: 22:34
- */
 
 namespace Oasis\Mlib\Http\ServiceProviders\Cookie;
 
-use Oasis\Mlib\Http\SilexKernel;
-use Pimple\Container;
-use Pimple\ServiceProviderInterface;
-use Silex\Api\BootableProviderInterface;
-use Silex\Application;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\HttpKernel\Event\ResponseEvent;
+use Symfony\Component\HttpKernel\KernelEvents;
 
-class SimpleCookieProvider implements ServiceProviderInterface, BootableProviderInterface
+class SimpleCookieProvider implements EventSubscriberInterface
 {
-    /** @var ResponseCookieContainer */
-    protected $cookieContainer;
-    
-    public function __construct()
+    protected ResponseCookieContainer $cookieContainer;
+
+    public function __construct(?ResponseCookieContainer $cookieContainer = null)
     {
-        $this->cookieContainer = new ResponseCookieContainer();
+        $this->cookieContainer = $cookieContainer ?? new ResponseCookieContainer();
     }
-    
-    /**
-     * Registers services on the given app.
-     *
-     * This method should only be used to configure services and parameters.
-     * It should not get services.
-     *
-     * @param Container $app
-     */
-    public function register(Container $app)
+
+    public static function getSubscribedEvents(): array
     {
+        return [KernelEvents::RESPONSE => ['onResponse', 0]];
     }
-    
-    /**
-     * Bootstraps the application.
-     *
-     * This method is called after all services are registered
-     * and should be used for "dynamic" configuration (whenever
-     * a service must be requested).
-     *
-     * @param Application $app
-     */
-    public function boot(Application $app)
+
+    public function onResponse(ResponseEvent $event): void
     {
-        if (!$app instanceof SilexKernel) {
-            throw new \LogicException(static::class . " can only be used with " . SilexKernel::class);
+        foreach ($this->cookieContainer->getCookies() as $cookie) {
+            $event->getResponse()->headers->setCookie($cookie);
         }
-        
-        $app->addControllerInjectedArg($this->cookieContainer);
-        $app->after(
-            function (/** @noinspection PhpUnusedParameterInspection */
-                Request $request,
-                Response $response) {
-                foreach ($this->cookieContainer->getCookies() as $cookie) {
-                    $response->headers->setCookie($cookie);
-                }
-            }
-        );
+    }
+
+    public function getCookieContainer(): ResponseCookieContainer
+    {
+        return $this->cookieContainer;
     }
 }

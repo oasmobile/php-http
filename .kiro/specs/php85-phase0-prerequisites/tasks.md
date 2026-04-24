@@ -148,7 +148,7 @@
     - _Requirements: R12 AC1, R12 AC2_
   - [x] 7.8 Checkpoint: 预期失败记录完成，commit
 
-- [-] 8. 手工测试
+- [x] 8. 手工测试
   - [x] 8.1 验证 `phpunit.xml` 中 14 个 suite 定义完整（`all`、`exceptions`、`cors`、`security`、`twig`、`aws`、`error-handlers`、`configuration`、`views`、`routing`、`cookie`、`middlewares`、`misc`、`integration`）
     - _Requirements: R4 AC2_
   - [x] 8.2 验证 `all` suite 使用 `<directory>ut</directory>` 后覆盖的测试集合与原逐文件列表一致（无遗漏、无多余）
@@ -157,10 +157,10 @@
     - _Requirements: R1 AC1, R2 AC1–AC2, R3 AC1_
   - [x] 8.4 验证 `ut/bootstrap.php` 在 PHP 8.5 下加载无错误，autoloader 正常工作
     - _Requirements: R5 AC1–AC3_
-  - [-] 8.5 Checkpoint: 手工测试全部通过，记录测试结果，commit
+  - [x] 8.5 Checkpoint: 手工测试全部通过，记录测试结果，commit
 
-- [ ] 9. Code Review
-  - [ ] 9.1 委托 `code-reviewer` sub-agent 对当前分支的所有变更进行 code review
+- [x] 9. Code Review
+  - [x] 9.1 委托 `code-reviewer` sub-agent 对当前分支的所有变更进行 code review
 
 ---
 

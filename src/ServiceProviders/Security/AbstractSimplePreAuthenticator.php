@@ -9,77 +9,55 @@
 namespace Oasis\Mlib\Http\ServiceProviders\Security;
 
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Security\Core\Authentication\Token\PreAuthenticatedToken;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
-use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
-use Symfony\Component\Security\Http\Authentication\SimplePreAuthenticatorInterface;
 
-abstract class AbstractSimplePreAuthenticator implements SimplePreAuthenticatorInterface
+/**
+ * Abstract stub for pre-authenticator.
+ *
+ * In Symfony 6.0+, SimplePreAuthenticatorInterface has been removed.
+ * This class no longer implements that interface. All methods that previously
+ * depended on the removed API are declared abstract, forcing downstream to
+ * provide implementations in Phase 3 (PRP-005).
+ *
+ * The concrete methods (createToken, authenticateToken, supportsToken) that
+ * relied on removed Symfony APIs are now abstract stubs.
+ */
+abstract class AbstractSimplePreAuthenticator
 {
-
-    public function createToken(Request $request, $providerKey)
-    {
-        $credentials = $this->getCredentialsFromRequest($request);
-        $username    = $this->getUsernameFromRequest($request);
-
-        return new PreAuthenticatedToken($username, $credentials, $providerKey);
-    }
-
-    public function authenticateToken(TokenInterface $token, UserProviderInterface $userProvider, $providerKey)
-    {
-        if (!$userProvider instanceof SimplePreAuthenticateUserProviderInterface) {
-            throw new \InvalidArgumentException(
-                "User provider must implement " . SimplePreAuthenticateUserProviderInterface::class
-            );
-        }
-
-        $credentials = $token->getCredentials();
-        $user = $userProvider->authenticateAndGetUser($credentials);
-
-        return $this->createAuthenticatedToken($user, $credentials, $providerKey);
-    }
-
-    public function supportsToken(TokenInterface $token, $providerKey)
-    {
-        return (
-            $token instanceof PreAuthenticatedToken
-            && $token->getProviderKey() === $providerKey
-        );
-    }
-
     /**
-     * Parse the given request, and extract the username from the request.
-     *
-     * If username cannot be parsed from request, "anon." should be returned.
-     *
-     * NOTE: this method should only parse the request, and should NOT load username from any resouce except the request
+     * Must be implemented by downstream in Phase 3.
+     * Previously created a PreAuthenticatedToken from request credentials.
      *
      * @param Request $request
+     * @param string  $providerKey
      *
-     * @return string
+     * @return TokenInterface
      */
-    protected function getUsernameFromRequest(/** @noinspection PhpUnusedParameterInspection */
-        Request $request)
-    {
-        return "anon.";
-    }
+    abstract public function createToken(Request $request, $providerKey);
 
     /**
-     * Creates an authenticated token upon authentication success.
+     * Must be implemented by downstream in Phase 3.
+     * Previously authenticated a token using SimplePreAuthenticateUserProviderInterface.
      *
-     * Inherited class can override this method to provide their own pre-authenticated token implementation
+     * @param TokenInterface        $token
+     * @param UserProviderInterface $userProvider
+     * @param string                $providerKey
      *
-     * @param string|UserInterface $user        The user
-     * @param mixed                $credentials The user credentials
-     * @param string               $providerKey The provider key
-     *
-     * @return PreAuthenticatedToken
+     * @return TokenInterface
      */
-    protected function createAuthenticatedToken($user, $credentials, $providerKey)
-    {
-        return new PreAuthenticatedToken($user, $credentials, $providerKey, $user->getRoles());
-    }
+    abstract public function authenticateToken(TokenInterface $token, UserProviderInterface $userProvider, $providerKey);
+
+    /**
+     * Must be implemented by downstream in Phase 3.
+     * Previously checked if the token was a PreAuthenticatedToken matching the provider key.
+     *
+     * @param TokenInterface $token
+     * @param string         $providerKey
+     *
+     * @return bool
+     */
+    abstract public function supportsToken(TokenInterface $token, $providerKey);
 
     /**
      * Parse the given request, and extract the credential information from the request

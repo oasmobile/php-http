@@ -9,7 +9,7 @@
 namespace Oasis\Mlib\Http\ServiceProviders\Security;
 
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
-use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
+use Symfony\Component\Security\Core\Exception\UserNotFoundException;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 abstract class AbstractSimplePreAuthenticateUserProvider implements SimplePreAuthenticateUserProviderInterface
@@ -25,20 +25,19 @@ abstract class AbstractSimplePreAuthenticateUserProvider implements SimplePreAut
     }
 
     /**
-     * Loads the user for the given username.
+     * Loads the user for the given identifier.
      *
-     * This method must throw UsernameNotFoundException if the user is not
-     * found.
+     * This method must throw UserNotFoundException if the user is not found.
      *
-     * @param string $username The username
+     * @param string $identifier The user identifier (e.g. username or email)
      *
      * @return UserInterface
      *
-     * @throws UsernameNotFoundException if the user is not found
+     * @throws UserNotFoundException if the user is not found
      */
-    public function loadUserByUsername($username)
+    public function loadUserByIdentifier(string $identifier): UserInterface
     {
-        throw new \LogicException("You should not load a user by username, try authenticateAndGetUser()");
+        throw new \LogicException("You should not load a user by identifier, try authenticateAndGetUser()");
     }
 
     /**
@@ -55,7 +54,7 @@ abstract class AbstractSimplePreAuthenticateUserProvider implements SimplePreAut
      *
      * @throws UnsupportedUserException if the account is not supported
      */
-    public function refreshUser(UserInterface $user)
+    public function refreshUser(UserInterface $user): UserInterface
     {
         return $user;
     }
@@ -67,7 +66,7 @@ abstract class AbstractSimplePreAuthenticateUserProvider implements SimplePreAut
      *
      * @return bool
      */
-    public function supportsClass($class)
+    public function supportsClass(string $class): bool
     {
         return $class == $this->supportedUserClassname || is_subclass_of($class, $this->supportedUserClassname, true);
     }

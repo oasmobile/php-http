@@ -8,17 +8,38 @@
 
 namespace Oasis\Mlib\Http\Test\Helpers\Security;
 
+use Oasis\Mlib\Http\MicroKernel;
 use Oasis\Mlib\Http\ServiceProviders\Security\AbstractSimplePreAuthenticationPolicy;
-use Silex\Application;
-use Symfony\Component\Security\Http\Authentication\SimplePreAuthenticatorInterface;
+use Symfony\Component\Security\Core\Authentication\Provider\AuthenticationProviderInterface;
 
 class TestAuthenticationPolicy extends AbstractSimplePreAuthenticationPolicy
 {
     /**
-     * @return SimplePreAuthenticatorInterface
+     * Phase 3 stub: returns the pre-authenticator instance.
+     * Previously used by SimpleAuthenticationProvider (removed in Symfony 6.0).
+     *
+     * @return TestApiUserPreAuthenticator
      */
     public function getPreAuthenticator()
     {
         return new TestApiUserPreAuthenticator();
+    }
+
+    /**
+     * @inheritDoc
+     * Phase 3 stub — not functional in Phase 1.
+     */
+    public function getAuthenticationProvider(MicroKernel $kernel, $firewallName, $options): string|AuthenticationProviderInterface
+    {
+        throw new \LogicException("Security authenticator system not yet implemented — Phase 3 (PRP-005)");
+    }
+
+    /**
+     * @inheritDoc
+     * Phase 3 stub — not functional in Phase 1.
+     */
+    public function getAuthenticationListener(MicroKernel $kernel, $firewallName, $options): mixed
+    {
+        throw new \LogicException("Security authenticator system not yet implemented — Phase 3 (PRP-005)");
     }
 }

@@ -10,7 +10,7 @@ namespace Oasis\Mlib\Http\Test\Helpers\Security;
 
 use Oasis\Mlib\Http\ServiceProviders\Security\AbstractSimplePreAuthenticateUserProvider;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
-use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
+use Symfony\Component\Security\Core\Exception\UserNotFoundException;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 class TestApiUserProvider extends AbstractSimplePreAuthenticateUserProvider
@@ -40,7 +40,7 @@ class TestApiUserProvider extends AbstractSimplePreAuthenticateUserProvider
                 return new TestApiUser('child', ['ROLE_CHILD']);
                 break;
             default:
-                throw new UsernameNotFoundException("apikey $credentials doesn't match any user!");
+                throw new UserNotFoundException("apikey $credentials doesn't match any user!");
         }
     }
 }

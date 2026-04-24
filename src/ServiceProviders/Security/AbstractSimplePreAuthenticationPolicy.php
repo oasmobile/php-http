@@ -8,14 +8,19 @@
 
 namespace Oasis\Mlib\Http\ServiceProviders\Security;
 
-use Pimple\Container;
+use Oasis\Mlib\Http\MicroKernel;
 use Symfony\Component\Security\Core\Authentication\Provider\AuthenticationProviderInterface;
-use Symfony\Component\Security\Core\Authentication\Provider\SimpleAuthenticationProvider;
-use Symfony\Component\Security\Http\Authentication\SimplePreAuthenticatorInterface;
 use Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface;
-use Symfony\Component\Security\Http\Firewall\ListenerInterface;
-use Symfony\Component\Security\Http\Firewall\SimplePreAuthenticationListener;
 
+/**
+ * Abstract stub for pre-authentication policy.
+ *
+ * In Symfony 6.0+, SimpleAuthenticationProvider, SimplePreAuthenticationListener,
+ * and ListenerInterface (Security\Http\Firewall) have been removed.
+ * This class is now an abstract stub — all methods that previously depended on
+ * those removed APIs are declared abstract, forcing downstream to provide
+ * implementations in Phase 3 (PRP-005).
+ */
 abstract class AbstractSimplePreAuthenticationPolicy implements AuthenticationPolicyInterface
 {
     public function getAuthenticationType()
@@ -24,63 +29,40 @@ abstract class AbstractSimplePreAuthenticationPolicy implements AuthenticationPo
     }
     
     /**
-     * If string is returned, it must be either "anonymous" or "dao"
+     * Must be implemented by downstream in Phase 3.
+     * Previously returned a SimpleAuthenticationProvider instance (removed in Symfony 6.0).
      *
-     * @param Container   $app
+     * @param MicroKernel $kernel
      * @param             $firewallName
      * @param             $options
      *
      * @return string|AuthenticationProviderInterface
      */
-    public function getAuthenticationProvider(Container $app, $firewallName, $options)
-    {
-        return new SimpleAuthenticationProvider(
-            $this->getPreAuthenticator(),
-            $this->getUserProvider($app, $firewallName),
-            $firewallName
-        );
-    }
+    abstract public function getAuthenticationProvider(MicroKernel $kernel, $firewallName, $options);
     
     /**
-     * @param Container                      $app
-     * @param                                $firewallName
-     * @param                                $options
+     * Must be implemented by downstream in Phase 3.
+     * Previously returned a SimplePreAuthenticationListener instance (removed in Symfony 6.0).
      *
-     * @return ListenerInterface
+     * @param MicroKernel $kernel
+     * @param             $firewallName
+     * @param             $options
+     *
+     * @return mixed
      */
-    public function getAuthenticationListener(Container $app,
-                                              $firewallName,
-                                              $options)
-    {
-        return new SimplePreAuthenticationListener(
-            $app['security.token_storage'],
-            $app['security.authentication_manager'],
-            $firewallName,
-            $this->getPreAuthenticator(),
-            $app['logger']
-        );
-    }
+    abstract public function getAuthenticationListener(MicroKernel $kernel,
+                                                       $firewallName,
+                                                       $options);
     
     /**
-     * @param Container   $app
+     * @param MicroKernel $kernel
      * @param             $name
      * @param             $options
      *
      * @return AuthenticationEntryPointInterface
      */
-    public function getEntryPoint(Container $app, $name, $options)
+    public function getEntryPoint(MicroKernel $kernel, $name, $options)
     {
         return new NullEntryPoint();
     }
-    
-    protected function getUserProvider(Container $app, $firewallName)
-    {
-        return $app['security.user_provider.' . $firewallName];
-    }
-    
-    /**
-     * @return SimplePreAuthenticatorInterface
-     */
-    abstract protected function getPreAuthenticator();
-    
 }

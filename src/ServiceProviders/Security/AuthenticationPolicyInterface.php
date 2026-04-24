@@ -8,10 +8,9 @@
 
 namespace Oasis\Mlib\Http\ServiceProviders\Security;
 
-use Pimple\Container;
+use Oasis\Mlib\Http\MicroKernel;
 use Symfony\Component\Security\Core\Authentication\Provider\AuthenticationProviderInterface;
 use Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface;
-use Symfony\Component\Security\Http\Firewall\ListenerInterface;
 
 interface AuthenticationPolicyInterface
 {
@@ -27,31 +26,31 @@ interface AuthenticationPolicyInterface
     /**
      * If string is returned, it must be either "anonymous" or "dao"
      *
-     * @param Container   $app
+     * @param MicroKernel $kernel
      * @param             $firewallName
      * @param             $options
      *
      * @return string|AuthenticationProviderInterface
      */
-    public function getAuthenticationProvider(Container $app, $firewallName, $options);
+    public function getAuthenticationProvider(MicroKernel $kernel, $firewallName, $options);
     
     /**
-     * @param Container                      $app
-     * @param                                $firewallName
-     * @param                                $options
+     * @param MicroKernel $kernel
+     * @param             $firewallName
+     * @param             $options
      *
-     * @return ListenerInterface
+     * @return mixed
      */
-    public function getAuthenticationListener(Container $app,
+    public function getAuthenticationListener(MicroKernel $kernel,
                                               $firewallName,
                                               $options);
     
     /**
-     * @param Container   $app
+     * @param MicroKernel $kernel
      * @param             $name
      * @param             $options
      *
      * @return AuthenticationEntryPointInterface
      */
-    public function getEntryPoint(Container $app, $name, $options);
+    public function getEntryPoint(MicroKernel $kernel, $name, $options);
 }

@@ -12,6 +12,7 @@ use Oasis\Mlib\Http\ServiceProviders\Cookie\ResponseCookieContainer;
 use Oasis\Mlib\Http\ServiceProviders\Cookie\SimpleCookieProvider;
 use Oasis\Mlib\Http\ServiceProviders\Cors\CrossOriginResourceSharingProvider;
 use Oasis\Mlib\Http\ServiceProviders\Cors\CrossOriginResourceSharingStrategy;
+use Oasis\Mlib\Http\ServiceProviders\Security\SimpleSecurityProvider;
 use Oasis\Mlib\Http\ServiceProviders\Twig\SimpleTwigServiceProvider;
 use Oasis\Mlib\Http\ServiceProviders\Routing\CacheableRouterProvider;
 use Oasis\Mlib\Http\ServiceProviders\Routing\GroupUrlGenerator;
@@ -535,6 +536,27 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
         $twigProvider->register($this, $twigConfig);
     }
 
+    // ─── Internal: Security registration ────────────────────────────
+
+    /**
+     * Register Security provider if security config is provided.
+     * Called during boot().
+     */
+    protected function registerSecurity(): void
+    {
+        $securityConfig = $this->httpDataProvider->getOptional(
+            'security',
+            DataProviderInterface::MIXED_TYPE
+        );
+
+        if (!$securityConfig || !\is_array($securityConfig)) {
+            return;
+        }
+
+        $securityProvider = new SimpleSecurityProvider();
+        $securityProvider->register($this, $securityConfig);
+    }
+
     // ─── Internal: Routing registration ─────────────────────────────
 
     /**
@@ -684,6 +706,9 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
 
         // Register Twig environment if twig config is provided
         $this->registerTwig();
+
+        // Register Security provider if security config is provided
+        $this->registerSecurity();
 
         // Register routing services if routing config is provided
         $this->registerRouting();

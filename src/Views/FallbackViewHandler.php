@@ -9,15 +9,15 @@
 namespace Oasis\Mlib\Http\Views;
 
 use Oasis\Mlib\Http\ErrorHandlers\WrappedExceptionInfo;
-use Oasis\Mlib\Http\SilexKernel;
+use Oasis\Mlib\Http\MicroKernel;
 use Symfony\Component\HttpFoundation\Request;
 
 class FallbackViewHandler
 {
     /**
-     * @var SilexKernel
+     * @var MicroKernel
      */
-    protected $silexKernel;
+    protected $kernel;
     /**
      * @var ResponseRendererResolverInterface
      */
@@ -26,15 +26,15 @@ class FallbackViewHandler
     /**
      * FallbackViewHandler constructor.
      *
-     * @param SilexKernel                       $silexKernel
+     * @param MicroKernel                       $kernel
      * @param ResponseRendererResolverInterface $rendererResolver
      */
-    public function __construct(SilexKernel $silexKernel, $rendererResolver = null)
+    public function __construct(MicroKernel $kernel, $rendererResolver = null)
     {
         if ($rendererResolver == null) {
             $rendererResolver = new RouteBasedResponseRendererResolver();
         }
-        $this->silexKernel      = $silexKernel;
+        $this->kernel           = $kernel;
         $this->rendererResolver = $rendererResolver;
     }
     
@@ -42,10 +42,10 @@ class FallbackViewHandler
     {
         $renderer = $this->rendererResolver->resolveRequest($request);
         if ($result instanceof WrappedExceptionInfo) {
-            $response = $renderer->renderOnException($result, $this->silexKernel);
+            $response = $renderer->renderOnException($result, $this->kernel);
         }
         else {
-            $response = $renderer->renderOnSuccess($result, $this->silexKernel);
+            $response = $renderer->renderOnSuccess($result, $this->kernel);
         }
         
         return $response;

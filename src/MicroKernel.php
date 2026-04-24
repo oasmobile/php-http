@@ -6,6 +6,7 @@ use GuzzleHttp\Client;
 use Oasis\Mlib\Http\Configuration\CacheableRouterConfiguration;
 use Oasis\Mlib\Http\Configuration\ConfigurationValidationTrait;
 use Oasis\Mlib\Http\Configuration\HttpConfiguration;
+use Oasis\Mlib\Http\EventSubscribers\ViewHandlerSubscriber;
 use Oasis\Mlib\Http\Middlewares\MiddlewareInterface;
 use Oasis\Mlib\Http\ServiceProviders\Cors\CrossOriginResourceSharingProvider;
 use Oasis\Mlib\Http\ServiceProviders\Cors\CrossOriginResourceSharingStrategy;
@@ -456,7 +457,7 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
     // ─── Internal: View handler registration ─────────────────────────
 
     /**
-     * Register view handlers as EventDispatcher listener on KernelEvents::VIEW.
+     * Register view handlers as EventSubscriber on KernelEvents::VIEW.
      * Called during boot().
      */
     protected function registerViewHandlers(): void
@@ -465,24 +466,9 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
             return;
         }
 
-        $handlers   = $this->viewHandlers;
+        $subscriber = new ViewHandlerSubscriber($this->viewHandlers);
         $dispatcher = $this->getContainer()->get('event_dispatcher');
-        $dispatcher->addListener(
-            KernelEvents::VIEW,
-            function (\Symfony\Component\HttpKernel\Event\ViewEvent $event) use ($handlers) {
-                $result  = $event->getControllerResult();
-                $request = $event->getRequest();
-
-                foreach ($handlers as $handler) {
-                    $response = $handler($result, $request);
-                    if ($response instanceof Response) {
-                        $event->setResponse($response);
-                        return;
-                    }
-                }
-            },
-            0
-        );
+        $dispatcher->addSubscriber($subscriber);
     }
 
     // ─── Internal: CORS registration ─────────────────────────────────

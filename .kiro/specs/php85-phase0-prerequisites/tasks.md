@@ -113,7 +113,7 @@
   - [x] 5.3 Checkpoint: 运行 `vendor/bin/phpunit --testsuite cookie --testsuite middlewares`，全部通过，commit
     - _Requirements: R11 AC6, R11 AC7_
 
-- [-] 6. Test_Adaptation — Exceptions 模块验证 + 全量 Framework_Independent 验证（R11）
+- [x] 6. Test_Adaptation — Exceptions 模块验证 + 全量 Framework_Independent 验证（R11）
   - [x] 6.1 确认 `ut/Misc/UniquenessViolationHttpExceptionTest.php` 无需 PHPUnit API 适配（Design §8.1 确认无 PHPUnit 5.x API 使用）
     - _Requirements: R11 AC5_
   - [x] 6.2 逐一运行全部 7 个 Framework_Independent_Suite，确认全部通过：
@@ -128,25 +128,25 @@
     - _Requirements: R11 AC1–AC7_
   - [x] 6.3 运行 `vendor/bin/phpunit --list-suites`，确认输出所有 14 个 suite（承接 Task 2.7 延迟验证）
     - _Requirements: R4 AC2_
-  - [-] 6.4 Checkpoint: 7 个 Framework_Independent_Suite 全部通过、`--list-suites` 输出 14 个 suite，commit
+  - [x] 6.4 Checkpoint: 7 个 Framework_Independent_Suite 全部通过、`--list-suites` 输出 14 个 suite，commit
 
-- [~] 7. Framework_Dependent_Suite 预期失败确认（R12）
-  - [ ] 7.1 运行 `vendor/bin/phpunit --testsuite cors`，确认预期失败并记录失败原因
+- [-] 7. Framework_Dependent_Suite 预期失败确认（R12）
+  - [x] 7.1 运行 `vendor/bin/phpunit --testsuite cors`，确认预期失败并记录失败原因
     - _Requirements: R12 AC1_
-  - [ ] 7.2 运行 `vendor/bin/phpunit --testsuite security`，确认预期失败并记录失败原因
+  - [x] 7.2 运行 `vendor/bin/phpunit --testsuite security`，确认预期失败并记录失败原因
     - _Requirements: R12 AC1_
-  - [ ] 7.3 运行 `vendor/bin/phpunit --testsuite twig`，确认预期失败并记录失败原因
+  - [x] 7.3 运行 `vendor/bin/phpunit --testsuite twig`，确认预期失败并记录失败原因
     - _Requirements: R12 AC1_
-  - [ ] 7.4 运行 `vendor/bin/phpunit --testsuite aws`，确认预期失败并记录失败原因
+  - [x] 7.4 运行 `vendor/bin/phpunit --testsuite aws`，确认预期失败并记录失败原因
     - _Requirements: R12 AC1_
-  - [ ] 7.5 运行 `vendor/bin/phpunit --testsuite routing`，确认预期失败并记录失败原因
+  - [x] 7.5 运行 `vendor/bin/phpunit --testsuite routing`，确认预期失败并记录失败原因
     - _Requirements: R12 AC1_
-  - [ ] 7.6 运行 `vendor/bin/phpunit --testsuite integration`，确认预期失败并记录失败原因
+  - [x] 7.6 运行 `vendor/bin/phpunit --testsuite integration`，确认预期失败并记录失败原因
     - _Requirements: R12 AC1_
-  - [ ] 7.7 汇总所有预期失败和意外失败（如有），记录到 CHANGELOG 或 spec notes 中
+  - [x] 7.7 汇总所有预期失败和意外失败（如有），记录到 CHANGELOG 或 spec notes 中
     - 包含：失败的测试类和方法、失败原因分析、归属的后续 Phase
     - _Requirements: R12 AC1, R12 AC2_
-  - [ ] 7.8 Checkpoint: 预期失败记录完成，commit
+  - [-] 7.8 Checkpoint: 预期失败记录完成，commit
 
 - [ ] 8. 手工测试
   - [ ] 8.1 验证 `phpunit.xml` 中 14 个 suite 定义完整（`all`、`exceptions`、`cors`、`security`、`twig`、`aws`、`error-handlers`、`configuration`、`views`、`routing`、`cookie`、`middlewares`、`misc`、`integration`）

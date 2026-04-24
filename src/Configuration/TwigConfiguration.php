@@ -28,6 +28,12 @@ class TwigConfiguration implements ConfigurationInterface
             $twig->children()->scalarNode('cache_dir')->defaultValue(null);
             $twig->children()->scalarNode('asset_base')->defaultValue('');
             $twig->children()->variableNode('globals')->defaultValue([]);
+            $twig->children()->booleanNode('strict_variables')->defaultTrue()->end();
+            $twig->children()
+                ->enumNode('auto_reload')
+                ->values([true, false, null])
+                ->defaultNull()
+                ->end();
         }
 
         return $builder;

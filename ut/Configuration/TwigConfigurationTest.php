@@ -14,7 +14,7 @@ class TwigConfigurationTest extends TestCase
     /** @var TwigConfiguration */
     private $configuration;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->processor     = new Processor();
         $this->configuration = new TwigConfiguration();

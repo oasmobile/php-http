@@ -3,6 +3,7 @@
 namespace Oasis\Mlib\Http\Test\Configuration;
 
 use Oasis\Mlib\Http\Configuration\HttpConfiguration;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\Config\Definition\Processor;
@@ -15,7 +16,7 @@ class HttpConfigurationTest extends TestCase
     /** @var HttpConfiguration */
     private $configuration;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->processor     = new Processor();
         $this->configuration = new HttpConfiguration();
@@ -68,9 +69,7 @@ class HttpConfigurationTest extends TestCase
     // Variable nodes accept arbitrary values
     //----------------------------------------------------------------------
 
-    /**
-     * @dataProvider variableNodeProvider
-     */
+    #[DataProvider('variableNodeProvider')]
     public function testVariableNodeAcceptsArbitraryValue($nodeName, $value)
     {
         $result = $this->process([$nodeName => $value]);
@@ -78,7 +77,7 @@ class HttpConfigurationTest extends TestCase
         $this->assertSame($value, $result[$nodeName]);
     }
 
-    public function variableNodeProvider()
+    public static function variableNodeProvider(): array
     {
         return [
             'routing — array'          => ['routing', ['path' => '/routes.yml']],
@@ -127,7 +126,7 @@ class HttpConfigurationTest extends TestCase
 
     public function testUnknownKeyThrowsException()
     {
-        $this->setExpectedException(InvalidConfigurationException::class);
+        $this->expectException(InvalidConfigurationException::class);
 
         $this->process(['unknown_key' => 'value']);
     }

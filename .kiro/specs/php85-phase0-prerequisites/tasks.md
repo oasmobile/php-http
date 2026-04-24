@@ -4,76 +4,76 @@
 
 ## Tasks
 
-- [ ] 1. Composer_JSON 变更 + 依赖安装 + Silex 可加载性验证（R1–R3）
-  - [ ] 1.1 修改 `composer.json`：`php` 版本约束从 `>=7.0.0` 改为 `>=8.5`
+- [x] 1. Composer_JSON 变更 + 依赖安装 + Silex 可加载性验证（R1–R3）
+  - [x] 1.1 修改 `composer.json`：`php` 版本约束从 `>=7.0.0` 改为 `>=8.5`
     - _Requirements: R1 AC1_
-  - [ ] 1.2 修改 `composer.json`：`oasis/logging` 从 `^1.1` 改为 PHP 8.5 兼容的 `^` 语义化约束，`oasis/utils` 从 `^1.6` 改为 PHP 8.5 兼容的 `^` 语义化约束
+  - [x] 1.2 修改 `composer.json`：`oasis/logging` 从 `^1.1` 改为 PHP 8.5 兼容的 `^` 语义化约束，`oasis/utils` 从 `^1.6` 改为 PHP 8.5 兼容的 `^` 语义化约束
     - Design §1.2 使用 `^3.0` 为示意，实际版本号在 `composer update` 时确认
     - _Requirements: R2 AC1, R2 AC2_
-  - [ ] 1.3 修改 `composer.json`：`require-dev` 中 `phpunit/phpunit` 从 `^5.2` 改为 `^13.0`
+  - [x] 1.3 修改 `composer.json`：`require-dev` 中 `phpunit/phpunit` 从 `^5.2` 改为 `^13.0`
     - _Requirements: R3 AC1_
-  - [ ] 1.4 执行 `composer update`，确认依赖解析成功
+  - [x] 1.4 执行 `composer update`，确认依赖解析成功
     - 验证 `composer validate` 通过
     - 验证 `vendor/bin/phpunit --version` 输出 PHPUnit 13.x
     - _Requirements: R1 AC2, R2 AC3, R3 AC2, R3 AC3_
-  - [ ] 1.5 验证 `Silex\Application` 类在 PHP 8.5 下的可加载性（CR Q2=B）
+  - [x] 1.5 验证 `Silex\Application` 类在 PHP 8.5 下的可加载性（CR Q2=B）
     - 编写或执行简单脚本，确认 `Silex\Application` 类是否可加载（不触发 fatal error）
     - 记录结果，供后续 Task 5（间接框架依赖修复）选择修复路径
     - _Requirements: R12 AC2（前置信息收集）_
-  - [ ] 1.6 Checkpoint: `composer validate` 通过、`vendor/bin/phpunit --version` 输出 13.x、Silex 可加载性结果已记录，commit
+  - [x] 1.6 Checkpoint: `composer validate` 通过、`vendor/bin/phpunit --version` 输出 13.x、Silex 可加载性结果已记录，commit
 
-- [ ] 2. PHPUnit_Config 适配 + Bootstrap_File 适配（R4–R5）
-  - [ ] 2.1 修改 `phpunit.xml`：XML schema 引用从 `http://schema.phpunit.de/5.7/phpunit.xsd` 改为 `vendor/phpunit/phpunit/phpunit.xsd`
+- [x] 2. PHPUnit_Config 适配 + Bootstrap_File 适配（R4–R5）
+  - [x] 2.1 修改 `phpunit.xml`：XML schema 引用从 `http://schema.phpunit.de/5.7/phpunit.xsd` 改为 `vendor/phpunit/phpunit/phpunit.xsd`
     - _Requirements: R4 AC1_
-  - [ ] 2.2 修改 `phpunit.xml`：`all` suite 从逐文件 `<file>` 列表改为 `<directory>ut</directory>`（CR Q2=B from requirements）
+  - [x] 2.2 修改 `phpunit.xml`：`all` suite 从逐文件 `<file>` 列表改为 `<directory>ut</directory>`（CR Q2=B from requirements）
     - 确保 suite 覆盖的测试集合不变
     - _Requirements: R4 AC2_
-  - [ ] 2.3 修改 `phpunit.xml`：`exceptions` suite 移除 `ut/HttpExceptionTest.php`，改为引用 `ut/Misc/UniquenessViolationHttpExceptionTest.php`（Design §5.1）
+  - [x] 2.3 修改 `phpunit.xml`：`exceptions` suite 移除 `ut/HttpExceptionTest.php`，改为引用 `ut/Misc/UniquenessViolationHttpExceptionTest.php`（Design §5.1）
     - `HttpExceptionTest` 继承 `Silex\WebTestCase`，属于 Framework_Dependent，不应在 Framework_Independent 的 `exceptions` suite 中
     - _Requirements: R4 AC2, R11 AC5_
-  - [ ] 2.4 检查 PHPUnit 13.x 移除/变更的 XML 配置元素，确认当前 `phpunit.xml` 无需额外处理（Design §2.3）
+  - [x] 2.4 检查 PHPUnit 13.x 移除/变更的 XML 配置元素，确认当前 `phpunit.xml` 无需额外处理（Design §2.3）
     - _Requirements: R4 AC3_
-  - [ ] 2.5 确认 `phpunit.xml` 保留 `bootstrap="ut/bootstrap.php"` 引用
+  - [x] 2.5 确认 `phpunit.xml` 保留 `bootstrap="ut/bootstrap.php"` 引用
     - _Requirements: R4 AC4_
-  - [ ] 2.6 修改 `ut/bootstrap.php`：恢复 autoloader 加载（取消注释 `require __DIR__ . "/../vendor/autoload.php"`），清理已注释的旧代码（`Debug::enable()` 等），确保 PHP 8.5 下可加载
+  - [x] 2.6 修改 `ut/bootstrap.php`：恢复 autoloader 加载（取消注释 `require __DIR__ . "/../vendor/autoload.php"`），清理已注释的旧代码（`Debug::enable()` 等），确保 PHP 8.5 下可加载
     - 验证 `LocalFileHandler::install()` 在 `oasis/logging` 新版本下正常工作
     - _Requirements: R5 AC1, R5 AC2, R5 AC3_
-  - [ ] 2.7 Checkpoint: `vendor/bin/phpunit --list-suites` 输出所有 14 个 suite、bootstrap 加载无错误，commit
+  - [x] 2.7 Checkpoint: `vendor/bin/phpunit --list-suites` 输出所有 14 个 suite、bootstrap 加载无错误，commit
 
-- [ ] 3. Test_Adaptation — Configuration 模块（R6–R10）
-  - [ ] 3.1 适配 `ut/Configuration/HttpConfigurationTest.php`
+- [-] 3. Test_Adaptation — Configuration 模块（R6–R10）
+  - [x] 3.1 适配 `ut/Configuration/HttpConfigurationTest.php`
     - `setUp()` 添加 `: void` 返回类型（R6 AC1）
     - `setExpectedException` → `expectException`（1 处，R7 AC1–AC2）
     - `@dataProvider variableNodeProvider` → `#[DataProvider('variableNodeProvider')]`（R8 AC1–AC2）
     - `variableNodeProvider()` 改为 `public static function variableNodeProvider(): array`（R8 AC3）
     - 添加 `use PHPUnit\Framework\Attributes\DataProvider;`（R10 AC3）
     - _Requirements: R6 AC1, R7 AC1–AC2, R8 AC1–AC4, R10 AC3_
-  - [ ] 3.2 适配 `ut/Configuration/SecurityConfigurationTest.php`
+  - [x] 3.2 适配 `ut/Configuration/SecurityConfigurationTest.php`
     - `setUp()` 添加 `: void` 返回类型
     - _Requirements: R6 AC1_
-  - [ ] 3.3 适配 `ut/Configuration/CacheableRouterConfigurationTest.php`
+  - [x] 3.3 适配 `ut/Configuration/CacheableRouterConfigurationTest.php`
     - `setUp()` 添加 `: void` 返回类型
     - _Requirements: R6 AC1_
-  - [ ] 3.4 适配 `ut/Configuration/TwigConfigurationTest.php`
+  - [x] 3.4 适配 `ut/Configuration/TwigConfigurationTest.php`
     - `setUp()` 添加 `: void` 返回类型
     - _Requirements: R6 AC1_
-  - [ ] 3.5 适配 `ut/Configuration/SimpleAccessRuleConfigurationTest.php`
+  - [x] 3.5 适配 `ut/Configuration/SimpleAccessRuleConfigurationTest.php`
     - `setUp()` 添加 `: void` 返回类型（R6 AC1）
     - `setExpectedException` → `expectException`（3 处，R7 AC1–AC2）
     - _Requirements: R6 AC1, R7 AC1–AC2_
-  - [ ] 3.6 适配 `ut/Configuration/SimpleFirewallConfigurationTest.php`
+  - [x] 3.6 适配 `ut/Configuration/SimpleFirewallConfigurationTest.php`
     - `setUp()` 添加 `: void` 返回类型（R6 AC1）
     - `setExpectedException` → `expectException`（3 处，R7 AC1–AC2）
     - _Requirements: R6 AC1, R7 AC1–AC2_
-  - [ ] 3.7 适配 `ut/Configuration/CrossOriginResourceSharingConfigurationTest.php`
+  - [x] 3.7 适配 `ut/Configuration/CrossOriginResourceSharingConfigurationTest.php`
     - `setUp()` 添加 `: void` 返回类型（R6 AC1）
     - `setExpectedException` → `expectException`（1 处，R7 AC1–AC2）
     - _Requirements: R6 AC1, R7 AC1–AC2_
-  - [ ] 3.8 适配 `ut/Configuration/ConfigurationValidationTraitTest.php`
+  - [x] 3.8 适配 `ut/Configuration/ConfigurationValidationTraitTest.php`
     - `setUp()` 添加 `: void` 返回类型（R6 AC1）
     - `setExpectedException` → `expectException`（1 处，R7 AC1–AC2）
     - _Requirements: R6 AC1, R7 AC1–AC2_
-  - [ ] 3.9 Checkpoint: 运行 `vendor/bin/phpunit --testsuite configuration`，全部通过无 fatal error，commit
+  - [-] 3.9 Checkpoint: 运行 `vendor/bin/phpunit --testsuite configuration`，全部通过无 fatal error，commit
     - _Requirements: R10 AC4, R11 AC1_
 
 - [ ] 4. Test_Adaptation — ErrorHandlers + Views + Misc 模块（R6–R10）
@@ -126,7 +126,9 @@
     - `vendor/bin/phpunit --testsuite middlewares`
     - 如有失败，按 Design §6.2 失败处理流程修复
     - _Requirements: R11 AC1–AC7_
-  - [ ] 6.3 Checkpoint: 7 个 Framework_Independent_Suite 全部通过，commit
+  - [ ] 6.3 运行 `vendor/bin/phpunit --list-suites`，确认输出所有 14 个 suite（承接 Task 2.7 延迟验证）
+    - _Requirements: R4 AC2_
+  - [ ] 6.4 Checkpoint: 7 个 Framework_Independent_Suite 全部通过、`--list-suites` 输出 14 个 suite，commit
 
 - [ ] 7. Framework_Dependent_Suite 预期失败确认（R12）
   - [ ] 7.1 运行 `vendor/bin/phpunit --testsuite cors`，确认预期失败并记录失败原因

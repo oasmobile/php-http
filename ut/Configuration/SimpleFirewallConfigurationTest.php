@@ -14,7 +14,7 @@ class SimpleFirewallConfigurationTest extends TestCase
     /** @var SimpleFirewallConfiguration */
     private $configuration;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->processor     = new Processor();
         $this->configuration = new SimpleFirewallConfiguration();
@@ -53,7 +53,7 @@ class SimpleFirewallConfigurationTest extends TestCase
 
     public function testPatternIsRequired()
     {
-        $this->setExpectedException(\Exception::class);
+        $this->expectException(\Exception::class);
 
         $this->process([
             'policies' => ['basic'],
@@ -63,7 +63,7 @@ class SimpleFirewallConfigurationTest extends TestCase
 
     public function testPoliciesIsRequired()
     {
-        $this->setExpectedException(\Exception::class);
+        $this->expectException(\Exception::class);
 
         $this->process([
             'pattern' => '^/',
@@ -73,7 +73,7 @@ class SimpleFirewallConfigurationTest extends TestCase
 
     public function testUsersIsRequired()
     {
-        $this->setExpectedException(\Exception::class);
+        $this->expectException(\Exception::class);
 
         $this->process([
             'pattern'  => '^/',

@@ -33,7 +33,17 @@ tools: ["read", "write", "shell"]
 
 优先校验最新生成的文档（即没有 Gatekeep Log 的文档中最靠后的阶段）。
 
-确定阶段后，读取对应的 steering 文件获取该阶段的详细校验指引，然后按指引执行。
+确定阶段后，执行 Graphify 就绪检测（见下方），然后读取对应的 steering 文件获取该阶段的详细校验指引，按指引执行。
+
+### Graphify 就绪检测
+
+在进入具体校验步骤之前，执行一次性检测：
+
+1. 检查 `graphify-out/GRAPH_REPORT.md` 是否存在
+2. 检查 `graphify` 命令是否可用（`which graphify`）
+3. 两者都满足 → 设置 `graphify_ready = true`；否则 `graphify_ready = false`
+
+后续所有步骤中涉及 graphify 的校验项，统一以 `graphify_ready` 为前提条件，不再重复检查文件或命令是否存在。
 
 ### Spec 类型与目录
 

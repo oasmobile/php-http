@@ -39,7 +39,15 @@ FILES=(
   .kiro/agents/gitflow-starter.md
   .kiro/agents/spec-gatekeeper.md
 
+  # Kiro skills
+  .kiro/skills/graphify/SKILL.md
+  .kiro/skills/graphify/references/incremental-and-modes.md
+  .kiro/skills/graphify/references/integrations.md
+  .kiro/skills/graphify/references/pipeline-steps.md
+  .kiro/skills/graphify/references/query-commands.md
+
   # Kiro steering
+  .kiro/steering/graphify.md
   .kiro/steering/kiro-scope.md
   .kiro/steering/doc/writing-conventions.md
   .kiro/steering/git/branch-overview.md

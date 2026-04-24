@@ -25,6 +25,7 @@ Symfony Security 组件从 5.x 起经历了重大重构，引入了新的 authen
 - 适配 `SimpleSecurityProvider` 的 firewall 和 access rule 注册机制
 - 重写 `AuthenticationPolicyInterface`、`FirewallInterface`、`AccessRuleInterface` 等接口定义
 - 确保安全功能行为不变（认证、授权、防火墙规则）
+- 大量补充 Property-Based Testing（Eris 1.x，Phase 1 已引入），为 access rule 组合、firewall 匹配、认证策略等建立 property 验证
 
 ## Non-Goals
 
@@ -77,3 +78,4 @@ Security 组件完整重写，authenticator 系统适配 Symfony 7.x。
 
 - 依赖 Phase 1 完成（Symfony 组件已升级到 7.x）
 - Phase 1 中对 Security 组件仅做最小可编译适配，本 Phase 完成完整重写
+- Eris 1.x 已在 Phase 1 引入，本 Phase 是 PBT 的主要产出阶段——Security 组件的组合爆炸（access rule × firewall × 认证策略）天然适合 property-based 验证

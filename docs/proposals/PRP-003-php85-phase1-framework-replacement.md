@@ -27,6 +27,7 @@
 - 迁移中间件机制
 - 迁移所有 service provider 到新框架的等价模式
 - 确保迁移后现有功能行为不变
+- 引入 Property-Based Testing（Eris 1.x），为路由解析、middleware 链、请求分发等核心行为建立 property 验证，确保框架替换前后行为不变
 
 ## Non-Goals
 
@@ -92,3 +93,4 @@ Silex 被移除，Symfony 组件升级到 7.x，`SilexKernel` 重写为 Symfony 
 - 依赖 PRP-001（测试覆盖补全）和 PRP-002（Phase 0 依赖升级）完成
 - Symfony Security 组件虽然在此 Phase 升级到 7.x，但 authenticator 系统的重写放在 Phase 3 单独处理；本 Phase 仅做最小可编译的适配
 - `symfony/twig-bridge` 版本约束随 Symfony 组件统一升级到 7.x，但 Twig 本体（`twig/twig`）的升级和模板适配放在 Phase 2
+- 本 Phase 引入 Eris 1.x 作为 PBT 框架，`composer.json` 的 `require-dev` 中添加 `giorgiosironi/eris`；Phase 3 Security 重写时将大量补充 access rule / firewall 组合的 property test

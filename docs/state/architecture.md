@@ -16,18 +16,20 @@
 
 ```
 src/
-├── MicroKernel.php                  # 核心入口
-├── Configuration/                   # Symfony Config 定义（校验 bootstrap 数组）
+├── MicroKernel.php                    # 核心入口
+├── ChainedParameterBagDataProvider.php # 链式参数包数据提供者
+├── Configuration/                     # Symfony Config 定义（校验 bootstrap 数组）
 ├── ServiceProviders/
-│   ├── Routing/                     # 可缓存路由（YAML → Symfony Routing）
-│   ├── Security/                    # 安全：Firewall + Policy + AccessRule
-│   ├── Cors/                        # CORS 策略与 preflight 处理
-│   ├── Twig/                        # Twig 模板集成
-│   └── Cookie/                      # Response Cookie 管理
-├── Middlewares/                     # Before / After 中间件抽象
-├── Views/                           # View Handler 与 Response Renderer
-├── ErrorHandlers/                   # 异常包装与 JSON 错误处理
-├── Exceptions/                      # 自定义 HTTP 异常
+│   ├── Routing/                       # 可缓存路由（YAML → Symfony Routing）
+│   ├── Security/                      # 安全：Firewall + Policy + AccessRule
+│   ├── Cors/                          # CORS 策略与 preflight 处理
+│   ├── Twig/                          # Twig 模板集成
+│   └── Cookie/                        # Response Cookie 管理
+├── Middlewares/                       # Before / After 中间件抽象
+├── Views/                             # View Handler 与 Response Renderer
+├── EventSubscribers/                  # 事件订阅器（ViewHandlerSubscriber）
+├── ErrorHandlers/                     # 异常包装与 JSON 错误处理
+├── Exceptions/                        # 自定义 HTTP 异常
 ├── ExtendedArgumentValueResolver.php  # 控制器参数自动注入
 └── ExtendedExceptionListnerWrapper.php # 异常监听器扩展
 ```
@@ -47,7 +49,7 @@ src/
 | `twig.strict_variables` | boolean，默认 `true`。启用 Twig 严格变量模式，引用未定义变量时抛出异常 |
 | `twig.auto_reload` | boolean/null，默认 `null`。模板自动重载：`true` 强制开启，`false` 强制关闭，`null` 根据 debug 模式自动判定 |
 | `middlewares` | `MiddlewareInterface` 实例数组 |
-| `providers` | `ServiceProviderInterface` 实例数组 |
+| `providers` | `CompilerPassInterface` / `ExtensionInterface` 实例数组 |
 | `view_handlers` | callable 数组，处理非 Response 返回值 |
 | `error_handlers` | callable 数组，处理异常 |
 | `injected_args` | 控制器参数自动注入候选对象 |

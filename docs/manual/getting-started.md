@@ -4,6 +4,12 @@
 
 ---
 
+## 环境要求
+
+- PHP >= 8.5
+
+---
+
 ## 安装
 
 ```bash
@@ -14,7 +20,7 @@ composer require oasis/http
 
 ## Web Server 配置
 
-所有示例依赖正确配置的 Web Server。请参考 [Silex Web Server Configuration](http://silex.sensiolabs.org/doc/master/web_servers.html)。
+所有示例依赖正确配置的 Web Server。请参考 [Symfony Web Server Configuration](https://symfony.com/doc/current/setup/web_server_configuration.html)。
 
 ---
 
@@ -23,16 +29,17 @@ composer require oasis/http
 ```php
 <?php
 
-use Oasis\Mlib\Http\SilexKernel;
+use Oasis\Mlib\Http\MicroKernel;
 use Symfony\Component\HttpFoundation\Response;
 
-$config = [];
+$config = [
+    'routing' => [
+        'path' => 'routes.yml',
+        'namespaces' => ['App\\Controllers\\'],
+    ],
+];
 $isDebug = true;
-$kernel = new SilexKernel($config, $isDebug);
-
-$kernel->get('/', function() {
-    return new Response("Hello world!");
-});
+$kernel = new MicroKernel($config, $isDebug);
 
 $kernel->run();
 ```
@@ -43,4 +50,4 @@ $kernel->run();
 
 ## 前置知识
 
-`SilexKernel` 继承自 [Silex](http://silex.sensiolabs.org/)，建议先了解 Silex 的基本概念。
+`MicroKernel` 基于 [Symfony HttpKernel](https://symfony.com/doc/current/components/http_kernel.html)，建议先了解 Symfony 的基本概念。

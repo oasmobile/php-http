@@ -22,7 +22,7 @@ Design CR 决策：
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7_
   - [x] 1.2 Checkpoint: 运行 `composer dump-autoload` 确认无 autoload 错误，确认接口文件无语法错误，commit
 
-- [-] 2. 抽象类层：新建 AbstractPreAuthenticator 和重写 AbstractSimplePreAuthenticationPolicy
+- [x] 2. 抽象类层：新建 AbstractPreAuthenticator 和重写 AbstractSimplePreAuthenticationPolicy
   - [x] 2.1 新建 `src/ServiceProviders/Security/AbstractPreAuthenticator.php`
     - 实现 `AuthenticatorInterface`，用模板方法封装 Symfony 7.x 认证 API
     - `supports()` 委托给 `getCredentialsFromRequest()`，返回值非 null 则 true
@@ -52,10 +52,10 @@ Design CR 决策：
     - 验证 `getAuthenticatorConfig()` 默认返回空数组
     - 验证 `getEntryPoint()` 返回 `NullEntryPoint` 实例
     - _Requirements: 4.1, 4.2, 4.3, 4.5_
-  - [-] 2.5 Checkpoint: 运行 `composer dump-autoload` 确认无 autoload 错误，运行已有测试确认无回归，commit
+  - [x] 2.5 Checkpoint: 运行 `composer dump-autoload` 确认无 autoload 错误，运行已有测试确认无回归，commit
 
-- [~] 3. 确认 UserProvider 无需修改 + 废弃旧 Authenticator + 配置层兼容确认
-  - [ ] 3.1 确认 `src/ServiceProviders/Security/AbstractSimplePreAuthenticateUserProvider.php` 无需修改
+- [x] 3. 确认 UserProvider 无需修改 + 废弃旧 Authenticator + 配置层兼容确认
+  - [x] 3.1 确认 `src/ServiceProviders/Security/AbstractSimplePreAuthenticateUserProvider.php` 无需修改
     - 继续实现 `SimplePreAuthenticateUserProviderInterface`（扩展 `UserProviderInterface`）
     - `authenticateAndGetUser()` 保留为核心抽象方法
     - `loadUserByIdentifier()` 继续抛出 `LogicException`
@@ -63,19 +63,19 @@ Design CR 决策：
     - `supportsClass()` 继续基于声明的受支持用户类判断
     - 验证现有代码已满足 R2 所有 AC，无需改动
     - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5_
-  - [ ] 3.2 修改 `src/ServiceProviders/Security/AbstractSimplePreAuthenticator.php`
+  - [x] 3.2 修改 `src/ServiceProviders/Security/AbstractSimplePreAuthenticator.php`
     - 添加类级 `@deprecated` 注解，指向 `AbstractPreAuthenticator` 作为替代
     - 将 `createToken()`、`authenticateToken()`、`supportsToken()` 从 abstract 改为 concrete 方法，方法体抛出 `LogicException`
     - 保持 `abstract class` 声明（`getCredentialsFromRequest()` 仍为 abstract）
     - 保持 `getCredentialsFromRequest()` 为 abstract（Design CR Q3=A）
     - _Requirements: 7.1, 7.2_
-  - [ ] 3.3 确认配置层组件无需修改
+  - [x] 3.3 确认配置层组件无需修改
     - 确认 `FirewallInterface`、`SimpleFirewall`、`AccessRuleInterface`、`SimpleAccessRule`、`NullEntryPoint`、`SecurityConfiguration`、`SimpleFirewallConfiguration`、`SimpleAccessRuleConfiguration`、`SimplePreAuthenticateUserProviderInterface` 保持兼容，无需改动
     - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 6.6_
-  - [ ] 3.4 Checkpoint: 运行 `composer dump-autoload` 确认无 autoload 错误，运行已有测试确认无回归，commit
+  - [x] 3.4 Checkpoint: 运行 `composer dump-autoload` 确认无 autoload 错误，运行已有测试确认无回归，commit
 
-- [~] 4. 集成层：SimpleSecurityProvider.register() 重写
-  - [ ] 4.1 重写 `src/ServiceProviders/Security/SimpleSecurityProvider.php` 的 `register()` 方法
+- [-] 4. 集成层：SimpleSecurityProvider.register() 重写
+  - [x] 4.1 重写 `src/ServiceProviders/Security/SimpleSecurityProvider.php` 的 `register()` 方法
     - 保持现有配置合并逻辑不变
     - 新增 TokenStorage 创建和 `$kernel->setTokenStorage()`
     - 新增 RoleHierarchy + RoleHierarchyVoter + AccessDecisionManager(voters, UnanimousStrategy) 配置
@@ -85,7 +85,7 @@ Design CR 决策：
     - 保持 `getFirewalls()`、`getAccessRules()`、`getRoleHierarchy()`、`getPolicies()` 返回格式不变
     - 保持 `getConfigDataProvider()` 在 `register()` 前调用时抛出 `LogicException`
     - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 5.7, 5.8_
-  - [ ] 4.2 实现 `registerFirewallListener()` protected 方法
+  - [x] 4.2 实现 `registerFirewallListener()` protected 方法
     - 注册 `KernelEvents::REQUEST` listener，优先级 `MicroKernel::BEFORE_PRIORITY_FIREWALL`（= 8）
     - 遍历 firewalls，URL pattern 匹配后遍历 policies
     - 通过 `AuthenticationPolicyInterface::getAuthenticator()` 获取 authenticator
@@ -96,7 +96,7 @@ Design CR 决策：
     - stateless firewall 不创建 session 存储 token
     - 完整代码参见 Design Components §4 `registerFirewallListener()`
     - _Requirements: 5.3, 5.4, 9.1, 9.2, 9.3, 10.1, 10.2, 10.5_
-  - [ ] 4.3 实现 `registerAccessRuleListener()` protected 方法
+  - [x] 4.3 实现 `registerAccessRuleListener()` protected 方法
     - 注册 `KernelEvents::REQUEST` listener，优先级 `MicroKernel::BEFORE_PRIORITY_FIREWALL - 1`（= 7，Design CR Q4=A 硬编码）
     - 遍历 access rules，按注册顺序匹配，第一个匹配的 rule 生效
     - 无角色要求 → 允许；token 为 null 或缺少角色 → 抛出 `AccessDeniedHttpException`
@@ -104,21 +104,21 @@ Design CR 决策：
     - 仅处理 main request
     - 完整代码参见 Design Components §4 `registerAccessRuleListener()`
     - _Requirements: 5.5, 9.4, 9.5, 10.3, 10.4_
-  - [ ] 4.4 实现 `requestMatchesPattern()` protected 方法
+  - [x] 4.4 实现 `requestMatchesPattern()` protected 方法
     - 支持 string（正则）和 `RequestMatcherInterface` 两种 pattern 类型
     - string pattern 使用 `preg_match('{' . $pattern . '}', rawurldecode($request->getPathInfo()))`
     - 完整代码参见 Design Components §4 `requestMatchesPattern()`
     - _Requirements: 10.1, 10.2_
-  - [ ] 4.5 编写 access rule listener 单元测试
+  - [x] 4.5 编写 access rule listener 单元测试
     - 验证按注册顺序匹配，第一个匹配的 rule 生效
     - 验证无角色要求时允许访问
     - 验证 token 为 null 时抛出 `AccessDeniedHttpException`
     - 验证角色不足时抛出 `AccessDeniedHttpException`
     - 验证 role hierarchy 正确传递继承关系
     - _Requirements: 9.4, 9.5, 10.3, 10.4, 10.5_
-  - [ ] 4.6 Checkpoint: 运行 `composer dump-autoload` 确认无 autoload 错误，运行已有测试确认无回归，commit
+  - [-] 4.6 Checkpoint: 运行 `composer dump-autoload` 确认无 autoload 错误，运行已有测试确认无回归，commit
 
-- [ ] 5. 配置层 PBT
+- [~] 5. 配置层 PBT
   - [ ] 5.1 编写 SimpleAccessRule 的 property tests — `ut/PBT/AccessRulePropertyTest.php`
     - **Property 5: Access rule 配置 round-trip** — pattern / roles / channel 构造后 getter 返回原值
     - **Property 6: Access rule invariant** — `getPattern()` 非空，`getRequiredRoles()` 为数组
@@ -142,7 +142,7 @@ Design CR 决策：
     - _Requirements: 2.4, 15.1, 15.2, 15.3_
   - [ ] 5.5 Checkpoint: 运行 `phpunit --testsuite pbt` 确认所有 PBT 通过，commit
 
-- [ ] 6. 测试辅助类重写
+- [~] 6. 测试辅助类重写
   - [ ] 6.1 重写 `ut/Helpers/Security/TestApiUserPreAuthenticator.php`
     - 改为继承 `AbstractPreAuthenticator`（新类）
     - `getCredentialsFromRequest()` 从 request query 参数 `sig` 提取凭证，无 `sig` 返回 null
@@ -161,7 +161,7 @@ Design CR 决策：
     - _Requirements: 8.4, 8.5, 8.6_
   - [ ] 6.4 Checkpoint: 运行 `composer dump-autoload` 确认无 autoload 错误，commit
 
-- [ ] 7. 现有安全测试适配
+- [~] 7. 现有安全测试适配
   - [ ] 7.1 适配 `ut/Security/SecurityServiceProviderTest.php`
     - 将旧 API 调用（`getAuthenticationProvider()`、`getAuthenticationListener()`）替换为新 API（`getAuthenticator()`）
     - 更新测试中的 mock/stub 以匹配新 `AuthenticationPolicyInterface`

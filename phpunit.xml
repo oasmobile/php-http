@@ -19,6 +19,7 @@
             <file>ut/Security/SecurityServiceProviderTest.php</file>
             <file>ut/Security/SecurityServiceProviderConfigurationTest.php</file>
             <file>ut/Security/NullEntryPointTest.php</file>
+            <file>ut/Security/AccessRuleListenerTest.php</file>
         </testsuite>
         <testsuite name="twig">
             <file>ut/Twig/TwigServiceProviderTest.php</file>

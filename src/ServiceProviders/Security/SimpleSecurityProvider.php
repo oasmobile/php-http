@@ -12,16 +12,28 @@ use Oasis\Mlib\Http\Configuration\ConfigurationValidationTrait;
 use Oasis\Mlib\Http\Configuration\SecurityConfiguration;
 use Oasis\Mlib\Http\MicroKernel;
 use Oasis\Mlib\Utils\DataProviderInterface;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestMatcherInterface;
+use Symfony\Component\HttpKernel\Event\RequestEvent;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\KernelEvents;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Security\Core\Authorization\AccessDecisionManager;
+use Symfony\Component\Security\Core\Authorization\AccessDecisionManagerInterface;
+use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
+use Symfony\Component\Security\Core\Authorization\Strategy\UnanimousStrategy;
+use Symfony\Component\Security\Core\Authorization\Voter\RoleHierarchyVoter;
+use Symfony\Component\Security\Core\Exception\AuthenticationException;
+use Symfony\Component\Security\Core\Role\RoleHierarchy;
 
 /**
- * Security provider rewritten for Symfony 7.x / MicroKernel.
+ * Security provider for Symfony 7.x / MicroKernel.
  *
- * Silex SecurityServiceProvider inheritance and Pimple dependency have been removed.
- * This class retains the configuration API (addFirewall, addAccessRule, addAuthenticationPolicy,
- * addRoleHierarchy) and the register() method for MicroKernel integration.
- *
- * Note: The actual security firewall/authenticator system is NOT functional in Phase 1.
- * This is a minimal compilable adaptation. Authenticator system rewrite is Phase 3 (PRP-005).
+ * Manages firewall, access rule, authentication policy, and role hierarchy
+ * configuration. The register() method parses configuration, creates
+ * TokenStorage / AuthorizationChecker, and registers firewall + access rule
+ * event listeners on KernelEvents::REQUEST.
  */
 class SimpleSecurityProvider
 {
@@ -80,7 +92,8 @@ class SimpleSecurityProvider
      * Register security services into MicroKernel.
      *
      * Processes the security configuration (merging programmatic additions with
-     * config-based settings) and stores the validated config data provider.
+     * config-based settings), creates TokenStorage and AuthorizationChecker,
+     * and registers firewall + access rule event listeners.
      *
      * @param MicroKernel $kernel
      * @param array       $securityConfig The security config from Bootstrap_Config (optional)
@@ -116,6 +129,23 @@ class SimpleSecurityProvider
         }
         
         $this->configDataProvider = $this->processConfiguration($securityConfig, new SecurityConfiguration());
+        
+        // Create TokenStorage
+        $tokenStorage = new TokenStorage();
+        $kernel->setTokenStorage($tokenStorage);
+        
+        // Configure RoleHierarchy + AccessDecisionManager
+        $roleHierarchy = new RoleHierarchy($this->getRoleHierarchy());
+        $roleHierarchyVoter = new RoleHierarchyVoter($roleHierarchy);
+        $accessDecisionManager = new AccessDecisionManager([$roleHierarchyVoter], new UnanimousStrategy());
+        $authorizationChecker = new AuthorizationChecker($tokenStorage, $accessDecisionManager);
+        $kernel->setAuthorizationChecker($authorizationChecker);
+        
+        // Register firewall event listener
+        $this->registerFirewallListener($kernel, $tokenStorage);
+        
+        // Register access rule event listener
+        $this->registerAccessRuleListener($kernel, $tokenStorage, $accessDecisionManager);
     }
     
     /** @return DataProviderInterface */
@@ -222,5 +252,129 @@ class SimpleSecurityProvider
         $setting              = array_merge($setting, $firewall->getOtherSettings());
         
         return $setting;
+    }
+    
+    /**
+     * Register firewall event listener to KernelEvents::REQUEST.
+     *
+     * Uses BEFORE_PRIORITY_FIREWALL (= 8) priority. For each incoming main
+     * request, iterates firewalls in registration order; the first matching
+     * firewall's policies are evaluated. For each policy, the authenticator's
+     * supports() → authenticate() → createToken() chain is invoked.
+     * AuthenticationException is caught silently (token stays null).
+     */
+    protected function registerFirewallListener(MicroKernel $kernel, TokenStorageInterface $tokenStorage): void
+    {
+        $firewalls = $this->getFirewalls();
+        $policies = $this->getPolicies();
+        
+        $kernel->getContainer()->get('event_dispatcher')->addListener(
+            KernelEvents::REQUEST,
+            function (RequestEvent $event) use ($kernel, $firewalls, $policies, $tokenStorage) {
+                if (!$event->isMainRequest()) {
+                    return;
+                }
+                $request = $event->getRequest();
+                
+                foreach ($firewalls as $firewallName => $firewallConfig) {
+                    $pattern = $firewallConfig['pattern'];
+                    if (!$this->requestMatchesPattern($request, $pattern)) {
+                        continue;
+                    }
+                    
+                    // First matching firewall — iterate its policies
+                    foreach ($firewallConfig as $policyName => $policyOptions) {
+                        if (!isset($policies[$policyName])) {
+                            continue;
+                        }
+                        /** @var AuthenticationPolicyInterface $policy */
+                        $policy = $policies[$policyName];
+                        $options = is_array($policyOptions) ? $policyOptions : [];
+                        
+                        $authenticator = $policy->getAuthenticator($kernel, $firewallName, $options);
+                        
+                        try {
+                            if (!$authenticator->supports($request)) {
+                                continue;
+                            }
+                            $passport = $authenticator->authenticate($request);
+                            $token = $authenticator->createToken($passport, $firewallName);
+                            $tokenStorage->setToken($token);
+                        } catch (AuthenticationException $e) {
+                            // Authentication failed: don't set token, let request continue.
+                            // Access rule listener will decide whether to deny.
+                        }
+                    }
+                    break; // First matching firewall takes effect
+                }
+            },
+            MicroKernel::BEFORE_PRIORITY_FIREWALL
+        );
+    }
+    
+    /**
+     * Register access rule event listener.
+     *
+     * Runs at priority BEFORE_PRIORITY_FIREWALL - 1 (= 7), after the firewall
+     * listener. Iterates access rules in registration order; the first matching
+     * rule takes effect. If the rule requires roles and the token is missing or
+     * lacks the required roles, throws AccessDeniedHttpException.
+     */
+    protected function registerAccessRuleListener(
+        MicroKernel $kernel,
+        TokenStorageInterface $tokenStorage,
+        AccessDecisionManagerInterface $accessDecisionManager
+    ): void {
+        $accessRules = $this->getAccessRules();
+        
+        $kernel->getContainer()->get('event_dispatcher')->addListener(
+            KernelEvents::REQUEST,
+            function (RequestEvent $event) use ($accessRules, $tokenStorage, $accessDecisionManager) {
+                if (!$event->isMainRequest()) {
+                    return;
+                }
+                $request = $event->getRequest();
+                $token = $tokenStorage->getToken();
+                
+                foreach ($accessRules as [$pattern, $roles, $channel]) {
+                    if (!$this->requestMatchesPattern($request, $pattern)) {
+                        continue;
+                    }
+                    
+                    // First matching rule takes effect
+                    if (empty($roles)) {
+                        return; // No role requirement — allow access
+                    }
+                    
+                    if (!$token || !$token->getUser()) {
+                        throw new AccessDeniedHttpException('Access Denied');
+                    }
+                    
+                    if (!$accessDecisionManager->decide($token, (array)$roles)) {
+                        throw new AccessDeniedHttpException('Access Denied');
+                    }
+                    
+                    return; // Authorization passed
+                }
+            },
+            MicroKernel::BEFORE_PRIORITY_FIREWALL - 1
+        );
+    }
+    
+    /**
+     * Check whether a request matches a firewall/access-rule pattern.
+     *
+     * @param Request $request
+     * @param mixed   $pattern string (regex) or RequestMatcherInterface
+     *
+     * @return bool
+     */
+    protected function requestMatchesPattern(Request $request, mixed $pattern): bool
+    {
+        if ($pattern instanceof RequestMatcherInterface) {
+            return $pattern->matches($request);
+        }
+        
+        return (bool)preg_match('{' . $pattern . '}', rawurldecode($request->getPathInfo()));
     }
 }

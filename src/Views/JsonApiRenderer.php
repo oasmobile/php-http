@@ -16,13 +16,7 @@ use Symfony\Component\HttpFoundation\Response;
 class JsonApiRenderer implements ResponseRendererInterface
 {
     
-    /**
-     * @param mixed       $result
-     * @param MicroKernel $kernel
-     *
-     * @return Response
-     */
-    public function renderOnSuccess($result, MicroKernel $kernel)
+    public function renderOnSuccess(mixed $result, MicroKernel $kernel): Response
     {
         if (!is_array($result)) {
             $result = ['result' => $result];
@@ -31,13 +25,7 @@ class JsonApiRenderer implements ResponseRendererInterface
         return new JsonResponse($result);
     }
     
-    /**
-     * @param WrappedExceptionInfo $exceptionInfo
-     * @param MicroKernel          $kernel
-     *
-     * @return Response
-     */
-    public function renderOnException(WrappedExceptionInfo $exceptionInfo, MicroKernel $kernel)
+    public function renderOnException(WrappedExceptionInfo $exceptionInfo, MicroKernel $kernel): Response
     {
         return new JsonResponse(
             $exceptionInfo,

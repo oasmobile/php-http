@@ -14,19 +14,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 interface ResponseRendererInterface
 {
-    /**
-     * @param mixed       $result
-     * @param MicroKernel $kernel
-     *
-     * @return Response
-     */
-    public function renderOnSuccess($result, MicroKernel $kernel);
+    public function renderOnSuccess(mixed $result, MicroKernel $kernel): Response;
     
-    /**
-     * @param WrappedExceptionInfo $exceptionInfo
-     * @param MicroKernel          $kernel
-     *
-     * @return Response
-     */
-    public function renderOnException(WrappedExceptionInfo $exceptionInfo, MicroKernel $kernel);
+    public function renderOnException(WrappedExceptionInfo $exceptionInfo, MicroKernel $kernel): Response;
 }

@@ -38,7 +38,7 @@ class ConcreteSmartViewHandler extends AbstractSmartViewHandler
      *
      * @return bool
      */
-    public function shouldHandle(Request $request)
+    public function shouldHandle(Request $request): bool
     {
         return parent::shouldHandle($request);
     }
@@ -46,7 +46,7 @@ class ConcreteSmartViewHandler extends AbstractSmartViewHandler
     /**
      * {@inheritdoc}
      */
-    protected function getCompatibleTypes()
+    protected function getCompatibleTypes(): array
     {
         return $this->compatibleTypes;
     }

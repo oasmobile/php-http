@@ -36,10 +36,7 @@ class JsonViewHandler extends AbstractSmartViewHandler
         return is_scalar($rawResult) || is_null($rawResult) ? ["result" => $rawResult] : $rawResult;
     }
 
-    /**
-     * @return array
-     */
-    protected function getCompatibleTypes()
+    protected function getCompatibleTypes(): array
     {
         return ['application/json', 'text/json'];
     }

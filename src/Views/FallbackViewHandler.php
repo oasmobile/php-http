@@ -11,34 +11,23 @@ namespace Oasis\Mlib\Http\Views;
 use Oasis\Mlib\Http\ErrorHandlers\WrappedExceptionInfo;
 use Oasis\Mlib\Http\MicroKernel;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class FallbackViewHandler
 {
-    /**
-     * @var MicroKernel
-     */
-    protected $kernel;
-    /**
-     * @var ResponseRendererResolverInterface
-     */
-    protected $rendererResolver;
+    protected ResponseRendererResolverInterface $rendererResolver;
     
-    /**
-     * FallbackViewHandler constructor.
-     *
-     * @param MicroKernel                       $kernel
-     * @param ResponseRendererResolverInterface $rendererResolver
-     */
-    public function __construct(MicroKernel $kernel, $rendererResolver = null)
-    {
-        if ($rendererResolver == null) {
+    public function __construct(
+        protected readonly MicroKernel $kernel,
+        ?ResponseRendererResolverInterface $rendererResolver = null
+    ) {
+        if ($rendererResolver === null) {
             $rendererResolver = new RouteBasedResponseRendererResolver();
         }
-        $this->kernel           = $kernel;
         $this->rendererResolver = $rendererResolver;
     }
     
-    public function __invoke($result, Request $request)
+    public function __invoke(mixed $result, Request $request): Response
     {
         $renderer = $this->rendererResolver->resolveRequest($request);
         if ($result instanceof WrappedExceptionInfo) {

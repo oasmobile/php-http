@@ -12,7 +12,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 abstract class AbstractSmartViewHandler
 {
-    protected function shouldHandle(Request $request)
+    protected function shouldHandle(Request $request): bool
     {
         $compatible    = $this->getCompatibleTypes();
         $acceptedTypes = $request->getAcceptableContentTypes();
@@ -21,14 +21,14 @@ abstract class AbstractSmartViewHandler
         }
 
         foreach ($acceptedTypes as $acceptedType) {
-            if ($acceptedType == "*/*") {
+            if ($acceptedType === "*/*") {
                 return true;
             }
             list($acceptedGroup, $acceptedSubtype) = explode("/", strtolower($acceptedType), 2);
             foreach ($compatible as $type) {
                 list($group, $subtype) = explode("/", strtolower($type), 2);
-                if ($acceptedGroup == "*" || $acceptedGroup == $group) {
-                    if ($acceptedSubtype == "*" || $acceptedSubtype == $subtype) {
+                if ($acceptedGroup === "*" || $acceptedGroup === $group) {
+                    if ($acceptedSubtype === "*" || $acceptedSubtype === $subtype) {
                         return true;
                     }
                 }
@@ -38,8 +38,5 @@ abstract class AbstractSmartViewHandler
         return false;
     }
 
-    /**
-     * @return array
-     */
-    abstract protected function getCompatibleTypes();
+    abstract protected function getCompatibleTypes(): array;
 }

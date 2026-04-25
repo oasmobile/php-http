@@ -15,13 +15,7 @@ use Symfony\Component\HttpFoundation\Response;
 class DefaultHtmlRenderer implements ResponseRendererInterface
 {
     
-    /**
-     * @param mixed       $result
-     * @param MicroKernel $kernel
-     *
-     * @return Response
-     */
-    public function renderOnSuccess($result, MicroKernel $kernel)
+    public function renderOnSuccess(mixed $result, MicroKernel $kernel): Response
     {
         if (is_object($result) && method_exists($result, '__toString')) {
             $result = (string)$result;
@@ -48,13 +42,7 @@ class DefaultHtmlRenderer implements ResponseRendererInterface
         return new Response($result);
     }
     
-    /**
-     * @param WrappedExceptionInfo $exceptionInfo
-     * @param MicroKernel          $kernel
-     *
-     * @return Response
-     */
-    public function renderOnException(WrappedExceptionInfo $exceptionInfo, MicroKernel $kernel)
+    public function renderOnException(WrappedExceptionInfo $exceptionInfo, MicroKernel $kernel): Response
     {
         $twig = $kernel->getTwig();
         if (!$twig) {

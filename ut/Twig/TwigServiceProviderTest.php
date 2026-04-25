@@ -235,6 +235,7 @@ class TwigServiceProviderTest extends WebTestCase
      */
     public function testNoCacheDirTemplateRendering()
     {
+        $cacheDir = static::createTempCacheDir();
         $app = require __DIR__ . "/app.twig-no-cache.php";
 
         $this->app = $app;
@@ -252,6 +253,7 @@ class TwigServiceProviderTest extends WebTestCase
      */
     public function testNoCacheDirTwigHasNoCache()
     {
+        $cacheDir = static::createTempCacheDir();
         $app = require __DIR__ . "/app.twig-no-cache.php";
         $app->boot();
 

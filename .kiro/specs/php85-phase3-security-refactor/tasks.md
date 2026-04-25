@@ -190,7 +190,7 @@ Design CR 决策：
     - _Requirements: 9.1, 10.1_
   - [x] 8.2 Checkpoint: 运行全量测试 `phpunit --testsuite security --testsuite integration --testsuite pbt` 确认全部通过，commit
 
-- [-] 9. 手工测试
+- [x] 9. 手工测试
   - [x] 9.1 验证认证流程端到端行为
     - 使用测试 bootstrap 配置启动 MicroKernel，发送带有效凭证（`sig=abcd`）的请求，确认返回 200 且 token storage 中有已认证 token
     - 发送带无效凭证（`sig=invalid`）的请求，确认请求不被阻断（认证失败但请求继续），access rule 返回 403
@@ -206,11 +206,11 @@ Design CR 决策：
     - 确认 `AbstractSimplePreAuthenticator` 的 `@deprecated` 注解存在
     - 确认调用 `createToken()`、`authenticateToken()`、`supportsToken()` 抛出 `LogicException`
     - _Requirements: 7.1, 7.2_
-  - [-] 9.4 Checkpoint: 手工测试全部通过，commit
+  - [x] 9.4 Checkpoint: 手工测试全部通过，commit
 
-- [~] 10. Code Review
-  - [ ] 10.1 委托给 code-reviewer agent 执行
-  - [ ] 10.2 Checkpoint: Code review 通过，处理所有 review 意见，commit
+- [x] 10. Code Review
+  - [x] 10.1 委托给 code-reviewer agent 执行
+  - [x] 10.2 Checkpoint: Code review 通过，处理所有 review 意见，commit
 
 ## Socratic Review
 

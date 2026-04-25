@@ -74,7 +74,7 @@ Design CR 决策：
     - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 6.6_
   - [x] 3.4 Checkpoint: 运行 `composer dump-autoload` 确认无 autoload 错误，运行已有测试确认无回归，commit
 
-- [-] 4. 集成层：SimpleSecurityProvider.register() 重写
+- [x] 4. 集成层：SimpleSecurityProvider.register() 重写
   - [x] 4.1 重写 `src/ServiceProviders/Security/SimpleSecurityProvider.php` 的 `register()` 方法
     - 保持现有配置合并逻辑不变
     - 新增 TokenStorage 创建和 `$kernel->setTokenStorage()`
@@ -116,31 +116,31 @@ Design CR 决策：
     - 验证角色不足时抛出 `AccessDeniedHttpException`
     - 验证 role hierarchy 正确传递继承关系
     - _Requirements: 9.4, 9.5, 10.3, 10.4, 10.5_
-  - [-] 4.6 Checkpoint: 运行 `composer dump-autoload` 确认无 autoload 错误，运行已有测试确认无回归，commit
+  - [x] 4.6 Checkpoint: 运行 `composer dump-autoload` 确认无 autoload 错误，运行已有测试确认无回归，commit
 
-- [~] 5. 配置层 PBT
-  - [ ] 5.1 编写 SimpleAccessRule 的 property tests — `ut/PBT/AccessRulePropertyTest.php`
+- [-] 5. 配置层 PBT
+  - [x] 5.1 编写 SimpleAccessRule 的 property tests — `ut/PBT/AccessRulePropertyTest.php`
     - **Property 5: Access rule 配置 round-trip** — pattern / roles / channel 构造后 getter 返回原值
     - **Property 6: Access rule invariant** — `getPattern()` 非空，`getRequiredRoles()` 为数组
     - 使用 Eris 生成随机 pattern 字符串、roles 数组、channel 值
     - _Requirements: 11.1, 11.2, 11.3, 11.4, 11.5_
-  - [ ] 5.2 编写 SimpleFirewall 的 property tests — `ut/PBT/FirewallPropertyTest.php`
+  - [x] 5.2 编写 SimpleFirewall 的 property tests — `ut/PBT/FirewallPropertyTest.php`
     - **Property 7: Firewall 配置 round-trip** — pattern / policies / stateless 构造后 getter 返回原值
     - **Property 8: Firewall 解析输出 invariant** — `parseFirewall()` 输出包含 `pattern`、`users`、`stateless` 键
     - **Property 9: Firewall 缺失必填字段 error condition** — 缺少 pattern/policies/users 时抛出配置校验异常
     - _Requirements: 12.1, 12.2, 12.3, 12.4, 12.5_
-  - [ ] 5.3 编写 RoleHierarchy 的 property tests — `ut/PBT/RoleHierarchyPropertyTest.php`
+  - [x] 5.3 编写 RoleHierarchy 的 property tests — `ut/PBT/RoleHierarchyPropertyTest.php`
     - **Property 10: Role hierarchy merge idempotence** — 重复 `addRoleHierarchy()` 后语义结果不变
     - **Property 11: Role hierarchy 继承链传递性** — A → B → C 时解析 A 包含 B 和 C
     - **Property 12: Role hierarchy single-level round-trip** — A → [B, C] 时 `getRoleHierarchy()` 输出包含 B 和 C
     - _Requirements: 13.1, 13.2, 13.3_
-  - [ ] 5.4 编写 SecurityConfiguration 的 property tests — `ut/PBT/SecurityConfigPropertyTest.php`
+  - [x] 5.4 编写 SecurityConfiguration 的 property tests — `ut/PBT/SecurityConfigPropertyTest.php`
     - **Property 13: Security 配置注册 invariant** — 有效配置 `register()` 不抛异常
     - **Property 14: 配置合并顺序 confluence** — programmatic additions 追加在 config-based settings 之后
     - **Property 15: Role hierarchy string 归一化 round-trip** — string 值自动转为单元素数组
     - **Property 16: RefreshUser identity** — `refreshUser(user)` 返回同一用户对象
     - _Requirements: 2.4, 15.1, 15.2, 15.3_
-  - [ ] 5.5 Checkpoint: 运行 `phpunit --testsuite pbt` 确认所有 PBT 通过，commit
+  - [-] 5.5 Checkpoint: 运行 `phpunit --testsuite pbt` 确认所有 PBT 通过，commit
 
 - [~] 6. 测试辅助类重写
   - [ ] 6.1 重写 `ut/Helpers/Security/TestApiUserPreAuthenticator.php`

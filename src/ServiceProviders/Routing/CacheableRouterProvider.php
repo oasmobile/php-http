@@ -20,9 +20,7 @@ class CacheableRouterProvider
 {
     use ConfigurationValidationTrait;
 
-    /** @var Router */
     protected ?Router $router = null;
-    /** @var MicroKernel */
     protected ?MicroKernel $kernel = null;
 
     public function __construct()

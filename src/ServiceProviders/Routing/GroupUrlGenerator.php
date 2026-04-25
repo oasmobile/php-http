@@ -16,7 +16,6 @@ use Symfony\Component\Routing\RequestContext;
 
 class GroupUrlGenerator implements UrlGeneratorInterface
 {
-    /** @var  RequestContext */
     protected RequestContext $context;
 
     protected bool $contextExplicitlySet = false;

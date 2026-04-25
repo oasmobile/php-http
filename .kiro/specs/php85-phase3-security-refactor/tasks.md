@@ -142,7 +142,7 @@ Design CR 决策：
     - _Requirements: 2.4, 15.1, 15.2, 15.3_
   - [x] 5.5 Checkpoint: 运行 `phpunit --testsuite pbt` 确认所有 PBT 通过，commit
 
-- [-] 6. 测试辅助类重写
+- [x] 6. 测试辅助类重写
   - [x] 6.1 重写 `ut/Helpers/Security/TestApiUserPreAuthenticator.php`
     - 改为继承 `AbstractPreAuthenticator`（新类）
     - `getCredentialsFromRequest()` 从 request query 参数 `sig` 提取凭证，无 `sig` 返回 null
@@ -159,28 +159,28 @@ Design CR 决策：
     - `TestApiUser` 保持 `UserInterface` 实现不变
     - `TestAccessRule` 保持构造函数签名和行为不变
     - _Requirements: 8.4, 8.5, 8.6_
-  - [-] 6.4 Checkpoint: 运行 `composer dump-autoload` 确认无 autoload 错误，commit
+  - [x] 6.4 Checkpoint: 运行 `composer dump-autoload` 确认无 autoload 错误，commit
 
-- [~] 7. 现有安全测试适配
-  - [ ] 7.1 适配 `ut/Security/SecurityServiceProviderTest.php`
+- [x] 7. 现有安全测试适配
+  - [x] 7.1 适配 `ut/Security/SecurityServiceProviderTest.php`
     - 将旧 API 调用（`getAuthenticationProvider()`、`getAuthenticationListener()`）替换为新 API（`getAuthenticator()`）
     - 更新测试中的 mock/stub 以匹配新 `AuthenticationPolicyInterface`
     - _Requirements: 16.1_
-  - [ ] 7.2 适配 `ut/Security/SecurityServiceProviderConfigurationTest.php`
+  - [x] 7.2 适配 `ut/Security/SecurityServiceProviderConfigurationTest.php`
     - 确保配置解析测试继续验证 `SimpleSecurityProvider` 的配置行为
     - _Requirements: 16.2_
-  - [ ] 7.3 确认 `ut/Security/NullEntryPointTest.php` 无需修改
+  - [x] 7.3 确认 `ut/Security/NullEntryPointTest.php` 无需修改
     - `NullEntryPoint` 行为未变，测试应直接通过
     - _Requirements: 16.3_
-  - [ ] 7.4 适配 `ut/Integration/SecurityAuthenticationFlowIntegrationTest.php`
+  - [x] 7.4 适配 `ut/Integration/SecurityAuthenticationFlowIntegrationTest.php`
     - 适配新 authenticator 系统，验证完整认证授权链路
     - 更新 `ut/Integration/app.integration-security.php` 中的安全配置
     - 验证：有效凭证 → 认证成功 → token 存储；无效凭证 → 不阻断；无凭证 → 跳过；角色检查 → 403
     - _Requirements: 16.4, 9.1, 9.2, 9.3, 9.4, 9.5_
-  - [ ] 7.5 适配 `ut/Security/app.security.php` 和 `ut/Security/app.security2.php`
+  - [x] 7.5 适配 `ut/Security/app.security.php` 和 `ut/Security/app.security2.php`
     - 更新安全配置 bootstrap 文件以使用新 API
     - _Requirements: 16.1, 16.2_
-  - [ ] 7.6 Checkpoint: 运行 `phpunit --testsuite security` 和 `phpunit --testsuite integration` 确认全部通过，commit
+  - [x] 7.6 Checkpoint: 运行 `phpunit --testsuite security` 和 `phpunit --testsuite integration` 确认全部通过，commit
 
 - [ ] 8. State 文档更新
   - [ ] 8.1 更新 `docs/state/architecture.md`

@@ -1,19 +1,22 @@
 <?php
+
 namespace Oasis\Mlib\Http\Test\Security;
 
+use Oasis\Mlib\Http\Test\Helpers\RouteCacheCleaner;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 
 require_once "SecurityServiceProviderTest.php";
 
 /**
- * Created by PhpStorm.
- * User: minhao
- * Date: 2016-03-09
- * Time: 12:22
+ * Tests SecurityServiceProvider using config-based setup (app.security2.php).
+ *
+ * Inherits all test methods from SecurityServiceProviderTest but uses a
+ * different bootstrap file that passes security config via MicroKernel constructor.
  */
 class SecurityServiceProviderConfigurationTest extends SecurityServiceProviderTest
 {
-    
+    use RouteCacheCleaner;
+
     /**
      * Creates the application.
      *
@@ -21,10 +24,9 @@ class SecurityServiceProviderConfigurationTest extends SecurityServiceProviderTe
      */
     public function createApplication()
     {
+        $cacheDir = static::createTempCacheDir();
         $app = require __DIR__ . "/app.security2.php";
-        
-        $app['session.test'] = true;
-        
+
         return $app;
     }
 }

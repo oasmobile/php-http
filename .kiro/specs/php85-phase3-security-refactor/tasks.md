@@ -182,33 +182,33 @@ Design CR 决策：
     - _Requirements: 16.1, 16.2_
   - [x] 7.6 Checkpoint: 运行 `phpunit --testsuite security` 和 `phpunit --testsuite integration` 确认全部通过，commit
 
-- [ ] 8. State 文档更新
-  - [ ] 8.1 更新 `docs/state/architecture.md`
+- [x] 8. State 文档更新
+  - [x] 8.1 更新 `docs/state/architecture.md`
     - 更新 `## 安全模型` section，反映新的 authenticator 系统（`AuthenticatorInterface` 替代三件套）
     - 补充 firewall event listener 和 access rule listener 的注册机制
     - 更新 `## 请求处理流程` 第 3 步 "Firewall（priority 8）" 的描述，补充 authenticator 调用链路
     - _Requirements: 9.1, 10.1_
-  - [ ] 8.2 Checkpoint: 运行全量测试 `phpunit --testsuite security --testsuite integration --testsuite pbt` 确认全部通过，commit
+  - [x] 8.2 Checkpoint: 运行全量测试 `phpunit --testsuite security --testsuite integration --testsuite pbt` 确认全部通过，commit
 
-- [ ] 9. 手工测试
-  - [ ] 9.1 验证认证流程端到端行为
+- [-] 9. 手工测试
+  - [x] 9.1 验证认证流程端到端行为
     - 使用测试 bootstrap 配置启动 MicroKernel，发送带有效凭证（`sig=abcd`）的请求，确认返回 200 且 token storage 中有已认证 token
     - 发送带无效凭证（`sig=invalid`）的请求，确认请求不被阻断（认证失败但请求继续），access rule 返回 403
     - 发送不带凭证的请求，确认 authenticator 跳过认证（`supports()` 返回 false）
     - _Requirements: 9.1, 9.2, 9.3_
-  - [ ] 9.2 验证防火墙和授权行为
+  - [x] 9.2 验证防火墙和授权行为
     - 确认请求 URL 匹配 firewall pattern 时触发认证流程
     - 确认请求 URL 不匹配任何 firewall pattern 时跳过认证
     - 确认 access rule 按注册顺序匹配，第一个匹配的 rule 生效
     - 确认 role hierarchy 继承关系正确（ROLE_ADMIN 用户可访问 ROLE_USER 资源）
     - _Requirements: 10.1, 10.2, 10.3, 10.4_
-  - [ ] 9.3 验证旧类废弃标记
+  - [x] 9.3 验证旧类废弃标记
     - 确认 `AbstractSimplePreAuthenticator` 的 `@deprecated` 注解存在
     - 确认调用 `createToken()`、`authenticateToken()`、`supportsToken()` 抛出 `LogicException`
     - _Requirements: 7.1, 7.2_
-  - [ ] 9.4 Checkpoint: 手工测试全部通过，commit
+  - [-] 9.4 Checkpoint: 手工测试全部通过，commit
 
-- [ ] 10. Code Review
+- [~] 10. Code Review
   - [ ] 10.1 委托给 code-reviewer agent 执行
   - [ ] 10.2 Checkpoint: Code review 通过，处理所有 review 意见，commit
 

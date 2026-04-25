@@ -10,7 +10,7 @@ namespace Oasis\Mlib\Http\ServiceProviders\Cors;
 
 use Oasis\Mlib\Http\Configuration\ConfigurationValidationTrait;
 use Oasis\Mlib\Http\Configuration\CrossOriginResourceSharingConfiguration;
-use Oasis\Mlib\Utils\DataProviderInterface;
+use Oasis\Mlib\Utils\DataType;
 use Symfony\Component\HttpFoundation\ChainRequestMatcher;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestMatcher\HostRequestMatcher;
@@ -43,12 +43,12 @@ class CrossOriginResourceSharingStrategy
     {
         $dp = $this->processConfiguration($configuration, new CrossOriginResourceSharingConfiguration());
         
-        $pattern                  = $dp->getMandatory('pattern', DataProviderInterface::MIXED_TYPE);
-        $this->originsAllowed     = $dp->getMandatory('origins', DataProviderInterface::ARRAY_TYPE);
-        $this->headersAllowed     = $dp->getOptional('headers', DataProviderInterface::ARRAY_TYPE, []);
-        $this->headersExposed     = $dp->getOptional('headers_exposed', DataProviderInterface::ARRAY_TYPE, []);
-        $this->maxAge             = $dp->getOptional('max_age', DataProviderInterface::INT_TYPE, 86400);
-        $this->credentialsAllowed = $dp->getOptional('credentials_allowed', DataProviderInterface::BOOL_TYPE, false);
+        $pattern                  = $dp->getMandatory('pattern', DataType::Mixed);
+        $this->originsAllowed     = $dp->getMandatory('origins', DataType::Array);
+        $this->headersAllowed     = $dp->getOptional('headers', DataType::Array, []);
+        $this->headersExposed     = $dp->getOptional('headers_exposed', DataType::Array, []);
+        $this->maxAge             = $dp->getOptional('max_age', DataType::Int, 86400);
+        $this->credentialsAllowed = $dp->getOptional('credentials_allowed', DataType::Bool, false);
         
         if (is_string($pattern)) {
             if ($pattern === "*") {

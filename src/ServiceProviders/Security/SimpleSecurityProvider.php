@@ -12,6 +12,7 @@ use Oasis\Mlib\Http\Configuration\ConfigurationValidationTrait;
 use Oasis\Mlib\Http\Configuration\SecurityConfiguration;
 use Oasis\Mlib\Http\MicroKernel;
 use Oasis\Mlib\Utils\DataProviderInterface;
+use Oasis\Mlib\Utils\DataType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestMatcherInterface;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
@@ -166,7 +167,7 @@ class SimpleSecurityProvider
     public function getFirewalls(): array
     {
         $dp = $this->getConfigDataProvider();
-        $firewalls = $dp->getOptional('firewalls', DataProviderInterface::ARRAY_TYPE, []);
+        $firewalls = $dp->getOptional('firewalls', DataType::Array, []);
         
         $result = [];
         foreach ($firewalls as $firewallName => $firewall) {
@@ -187,7 +188,7 @@ class SimpleSecurityProvider
     public function getAccessRules(): array
     {
         $dp = $this->getConfigDataProvider();
-        $rules = $dp->getOptional('access_rules', DataProviderInterface::ARRAY_TYPE, []);
+        $rules = $dp->getOptional('access_rules', DataType::Array, []);
         
         $result = [];
         foreach ($rules as $rule) {
@@ -212,7 +213,7 @@ class SimpleSecurityProvider
     public function getRoleHierarchy(): array
     {
         $dp = $this->getConfigDataProvider();
-        $hierarchy = $dp->getOptional('role_hierarchy', DataProviderInterface::ARRAY_TYPE, []);
+        $hierarchy = $dp->getOptional('role_hierarchy', DataType::Array, []);
         
         $result = [];
         foreach ($hierarchy as $parentName => $children) {
@@ -233,7 +234,7 @@ class SimpleSecurityProvider
     {
         $dp = $this->getConfigDataProvider();
         
-        return $dp->getOptional('policies', DataProviderInterface::ARRAY_TYPE, []);
+        return $dp->getOptional('policies', DataType::Array, []);
     }
     
     /**

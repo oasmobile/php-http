@@ -12,6 +12,7 @@ use Oasis\Mlib\Http\Configuration\CacheableRouterConfiguration;
 use Oasis\Mlib\Http\Configuration\ConfigurationValidationTrait;
 use Oasis\Mlib\Http\MicroKernel;
 use Oasis\Mlib\Utils\DataProviderInterface;
+use Oasis\Mlib\Utils\DataType;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\Router;
@@ -72,7 +73,7 @@ class CacheableRouterProvider
                 $routerPath = dirname($routerPath);
             }
 
-            $cacheDir                = strcasecmp($this->getConfigDataProvider()->getOptional('cache_dir', DataProviderInterface::STRING_TYPE, ''), "false") === 0 ? null :
+            $cacheDir                = strcasecmp($this->getConfigDataProvider()->getOptional('cache_dir', DataType::String, ''), "false") === 0 ? null :
                 ($this->getConfigDataProvider()->getOptional('cache_dir') ?: $this->kernel->getCacheDir() . "/routing");
             $locator                 = new FileLocator([$routerPath]);
             $this->router            = new CacheableRouter(
@@ -101,7 +102,7 @@ class CacheableRouterProvider
     {
         $namespaces = $this->getConfigDataProvider()->getOptional(
             'namespaces',
-            DataProviderInterface::ARRAY_TYPE,
+            DataType::Array,
             []
         );
 

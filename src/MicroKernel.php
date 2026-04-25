@@ -15,7 +15,7 @@ use Oasis\Mlib\Http\ServiceProviders\Security\SimpleSecurityProvider;
 use Oasis\Mlib\Http\ServiceProviders\Twig\SimpleTwigServiceProvider;
 use Oasis\Mlib\Http\ServiceProviders\Routing\CacheableRouterProvider;
 use Oasis\Mlib\Utils\ArrayDataProvider;
-use Oasis\Mlib\Utils\DataProviderInterface;
+use Oasis\Mlib\Utils\DataType;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\Matcher\RequestMatcherInterface;
 use Symfony\Component\Routing\RequestContext;
@@ -121,7 +121,7 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
         // trusted_proxies
         if ($trustedProxiesConfig = $this->httpDataProvider->getOptional(
             'trusted_proxies',
-            DataProviderInterface::MIXED_TYPE
+            DataType::Mixed
         )) {
             if (!is_array($trustedProxiesConfig)) {
                 $trustedProxiesConfig = [$trustedProxiesConfig];
@@ -135,7 +135,7 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
         // trusted_header_set
         if ($trustedHeaderSet = $this->httpDataProvider->getOptional(
             'trusted_header_set',
-            DataProviderInterface::MIXED_TYPE
+            DataType::Mixed
         )) {
             if (\is_string($trustedHeaderSet) && \constant(Request::class . "::" . $trustedHeaderSet) !== null) {
                 $trustedHeaderSet = \constant(Request::class . "::" . $trustedHeaderSet);
@@ -146,7 +146,7 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
         // middlewares
         if ($middlewaresConfig = $this->httpDataProvider->getOptional(
             'middlewares',
-            DataProviderInterface::MIXED_TYPE
+            DataType::Mixed
         )) {
             if (!is_array($middlewaresConfig)) {
                 $middlewaresConfig = [$middlewaresConfig];
@@ -168,7 +168,7 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
         // view_handlers
         if ($viewHandlersConfig = $this->httpDataProvider->getOptional(
             'view_handlers',
-            DataProviderInterface::MIXED_TYPE
+            DataType::Mixed
         )) {
             if (!is_array($viewHandlersConfig)) {
                 $viewHandlersConfig = [$viewHandlersConfig];
@@ -188,7 +188,7 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
         // error_handlers
         if ($errorHandlersConfig = $this->httpDataProvider->getOptional(
             'error_handlers',
-            DataProviderInterface::MIXED_TYPE
+            DataType::Mixed
         )) {
             if (!is_array($errorHandlersConfig)) {
                 $errorHandlersConfig = [$errorHandlersConfig];
@@ -208,7 +208,7 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
         // injected_args
         if ($injectedArgs = $this->httpDataProvider->getOptional(
             'injected_args',
-            DataProviderInterface::MIXED_TYPE
+            DataType::Mixed
         )) {
             if (!is_array($injectedArgs)) {
                 $injectedArgs = [$injectedArgs];
@@ -221,7 +221,7 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
         // providers (CompilerPassInterface / ExtensionInterface)
         if ($providersConfig = $this->httpDataProvider->getOptional(
             'providers',
-            DataProviderInterface::MIXED_TYPE
+            DataType::Mixed
         )) {
             if (!is_array($providersConfig)) {
                 $providersConfig = [$providersConfig];
@@ -274,7 +274,7 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
     {
         if ($this->httpDataProvider->getMandatory(
             'behind_elb',
-            DataProviderInterface::BOOL_TYPE
+            DataType::Bool
         )) {
             $trustedProxies   = Request::getTrustedProxies();
             $trustedProxies[] = $request->server->get('REMOTE_ADDR');
@@ -283,7 +283,7 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
 
         if ($this->httpDataProvider->getMandatory(
             'trust_cloudfront_ips',
-            DataProviderInterface::BOOL_TYPE
+            DataType::Bool
         )) {
             $this->setCloudfrontTrustedProxies();
         }
@@ -514,7 +514,7 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
     {
         $corsConfig = $this->httpDataProvider->getOptional(
             'cors',
-            DataProviderInterface::MIXED_TYPE
+            DataType::Mixed
         );
 
         if (!$corsConfig || !\is_array($corsConfig)) {
@@ -536,7 +536,7 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
     {
         $twigConfig = $this->httpDataProvider->getOptional(
             'twig',
-            DataProviderInterface::MIXED_TYPE
+            DataType::Mixed
         );
 
         if (!$twigConfig || !\is_array($twigConfig)) {
@@ -557,7 +557,7 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
     {
         $securityConfig = $this->httpDataProvider->getOptional(
             'security',
-            DataProviderInterface::MIXED_TYPE
+            DataType::Mixed
         );
 
         if (!$securityConfig || !\is_array($securityConfig)) {
@@ -578,7 +578,7 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
     {
         $routingConfig = $this->httpDataProvider->getOptional(
             'routing',
-            DataProviderInterface::MIXED_TYPE
+            DataType::Mixed
         );
 
         if (!$routingConfig || !is_array($routingConfig)) {

@@ -5,7 +5,7 @@ namespace Oasis\Mlib\Http\ServiceProviders\Twig;
 use Oasis\Mlib\Http\Configuration\ConfigurationValidationTrait;
 use Oasis\Mlib\Http\Configuration\TwigConfiguration;
 use Oasis\Mlib\Http\MicroKernel;
-use Oasis\Mlib\Utils\DataProviderInterface;
+use Oasis\Mlib\Utils\DataType;
 use Twig\Environment as TwigEnvironment;
 use Twig\Loader\FilesystemLoader;
 use Twig\TwigFunction;
@@ -36,10 +36,10 @@ class SimpleTwigServiceProvider
 
         $templateDir     = $dataProvider->getMandatory('template_dir');
         $cacheDir        = $dataProvider->getOptional('cache_dir');
-        $assetBase       = $dataProvider->getOptional('asset_base', DataProviderInterface::STRING_TYPE, '');
-        $globals         = $dataProvider->getOptional('globals', DataProviderInterface::ARRAY_TYPE, []);
-        $strictVariables = $dataProvider->getOptional('strict_variables', DataProviderInterface::BOOL_TYPE, true);
-        $autoReload      = $dataProvider->getOptional('auto_reload', DataProviderInterface::MIXED_TYPE);
+        $assetBase       = $dataProvider->getOptional('asset_base', DataType::String, '');
+        $globals         = $dataProvider->getOptional('globals', DataType::Array, []);
+        $strictVariables = $dataProvider->getOptional('strict_variables', DataType::Bool, true);
+        $autoReload      = $dataProvider->getOptional('auto_reload', DataType::Mixed);
 
         // Build Twig options
         $options = [];

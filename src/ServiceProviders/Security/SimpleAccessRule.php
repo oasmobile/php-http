@@ -10,7 +10,7 @@ namespace Oasis\Mlib\Http\ServiceProviders\Security;
 
 use Oasis\Mlib\Http\Configuration\ConfigurationValidationTrait;
 use Oasis\Mlib\Http\Configuration\SimpleAccessRuleConfiguration;
-use Oasis\Mlib\Utils\DataProviderInterface;
+use Oasis\Mlib\Utils\DataType;
 use Symfony\Component\HttpFoundation\RequestMatcherInterface;
 
 class SimpleAccessRule implements AccessRuleInterface
@@ -25,9 +25,9 @@ class SimpleAccessRule implements AccessRuleInterface
     {
         $dp = $this->processConfiguration($ruleConfiguration, new SimpleAccessRuleConfiguration());
 
-        $this->pattern         = $dp->getMandatory('pattern', DataProviderInterface::MIXED_TYPE);
-        $this->requiredRoles   = $dp->getMandatory('roles', DataProviderInterface::ARRAY_TYPE);
-        $this->requiredChannel = $dp->getOptional('channel', DataProviderInterface::STRING_TYPE);
+        $this->pattern         = $dp->getMandatory('pattern', DataType::Mixed);
+        $this->requiredRoles   = $dp->getMandatory('roles', DataType::Array);
+        $this->requiredChannel = $dp->getOptional('channel', DataType::String);
     }
 
     /**

@@ -3,6 +3,7 @@
 namespace Oasis\Mlib\Http\Test\Misc;
 
 use Oasis\Mlib\Http\ChainedParameterBagDataProvider;
+use Oasis\Mlib\Utils\DataType;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\HeaderBag;
 use Symfony\Component\HttpFoundation\ParameterBag;
@@ -89,7 +90,7 @@ class ChainedParameterBagDataProviderTest extends TestCase
 
         // AbstractDataProvider::getOptional defaults to STRING_TYPE validator,
         // use MIXED_TYPE to get the raw value
-        $this->assertSame(42, $provider->getOptional('count', 'requireInt'));
+        $this->assertSame(42, $provider->getOptional('count', DataType::Int));
     }
 
     //----------------------------------------------------------------------
@@ -115,7 +116,7 @@ class ChainedParameterBagDataProviderTest extends TestCase
 
         $provider = new ChainedParameterBagDataProvider($bag);
 
-        $result = $provider->getOptional('x-multi', 'requireArray');
+        $result = $provider->getOptional('x-multi', DataType::Array);
         $this->assertIsArray($result);
         $this->assertCount(2, $result);
         $this->assertContains('val1', $result);

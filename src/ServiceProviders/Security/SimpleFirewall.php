@@ -10,7 +10,7 @@ namespace Oasis\Mlib\Http\ServiceProviders\Security;
 
 use Oasis\Mlib\Http\Configuration\ConfigurationValidationTrait;
 use Oasis\Mlib\Http\Configuration\SimpleFirewallConfiguration;
-use Oasis\Mlib\Utils\DataProviderInterface;
+use Oasis\Mlib\Utils\DataType;
 use Symfony\Component\Routing\Matcher\RequestMatcherInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 
@@ -27,11 +27,11 @@ class SimpleFirewall implements FirewallInterface
     public function __construct(array $firewallConfiguration)
     {
         $dp                  = $this->processConfiguration($firewallConfiguration, new SimpleFirewallConfiguration());
-        $this->pattern       = $dp->getMandatory('pattern', DataProviderInterface::MIXED_TYPE);
-        $this->policies      = $dp->getMandatory('policies', DataProviderInterface::ARRAY_TYPE);
-        $this->userProvider  = $dp->getMandatory('users', DataProviderInterface::MIXED_TYPE);
-        $this->stateless     = $dp->getMandatory('stateless', DataProviderInterface::BOOL_TYPE);
-        $this->otherSettings = $dp->getMandatory('misc', DataProviderInterface::ARRAY_TYPE);
+        $this->pattern       = $dp->getMandatory('pattern', DataType::Mixed);
+        $this->policies      = $dp->getMandatory('policies', DataType::Array);
+        $this->userProvider  = $dp->getMandatory('users', DataType::Mixed);
+        $this->stateless     = $dp->getMandatory('stateless', DataType::Bool);
+        $this->otherSettings = $dp->getMandatory('misc', DataType::Array);
 
     }
 

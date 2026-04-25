@@ -1,45 +1,23 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: minhao
- * Date: 2016-03-14
- * Time: 15:58
- */
 
 namespace Oasis\Mlib\Http\Test\Helpers\Security;
 
 use Oasis\Mlib\Http\MicroKernel;
 use Oasis\Mlib\Http\ServiceProviders\Security\AbstractSimplePreAuthenticationPolicy;
-use Symfony\Component\Security\Core\Authentication\Provider\AuthenticationProviderInterface;
+use Symfony\Component\Security\Http\Authenticator\AuthenticatorInterface;
 
+/**
+ * Test authentication policy for pre-auth.
+ *
+ * Extends AbstractSimplePreAuthenticationPolicy and provides a
+ * TestApiUserPreAuthenticator backed by TestApiUserProvider.
+ */
 class TestAuthenticationPolicy extends AbstractSimplePreAuthenticationPolicy
 {
-    /**
-     * Phase 3 stub: returns the pre-authenticator instance.
-     * Previously used by SimpleAuthenticationProvider (removed in Symfony 6.0).
-     *
-     * @return TestApiUserPreAuthenticator
-     */
-    public function getPreAuthenticator()
+    public function getAuthenticator(MicroKernel $kernel, string $firewallName, array $options): AuthenticatorInterface
     {
-        return new TestApiUserPreAuthenticator();
-    }
+        $userProvider = new TestApiUserProvider();
 
-    /**
-     * @inheritDoc
-     * Phase 3 stub — not functional in Phase 1.
-     */
-    public function getAuthenticationProvider(MicroKernel $kernel, $firewallName, $options): string|AuthenticationProviderInterface
-    {
-        throw new \LogicException("Security authenticator system not yet implemented — Phase 3 (PRP-005)");
-    }
-
-    /**
-     * @inheritDoc
-     * Phase 3 stub — not functional in Phase 1.
-     */
-    public function getAuthenticationListener(MicroKernel $kernel, $firewallName, $options): mixed
-    {
-        throw new \LogicException("Security authenticator system not yet implemented — Phase 3 (PRP-005)");
+        return new TestApiUserPreAuthenticator($userProvider);
     }
 }

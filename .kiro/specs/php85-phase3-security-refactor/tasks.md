@@ -118,7 +118,7 @@ Design CR 决策：
     - _Requirements: 9.4, 9.5, 10.3, 10.4, 10.5_
   - [x] 4.6 Checkpoint: 运行 `composer dump-autoload` 确认无 autoload 错误，运行已有测试确认无回归，commit
 
-- [-] 5. 配置层 PBT
+- [x] 5. 配置层 PBT
   - [x] 5.1 编写 SimpleAccessRule 的 property tests — `ut/PBT/AccessRulePropertyTest.php`
     - **Property 5: Access rule 配置 round-trip** — pattern / roles / channel 构造后 getter 返回原值
     - **Property 6: Access rule invariant** — `getPattern()` 非空，`getRequiredRoles()` 为数组
@@ -140,26 +140,26 @@ Design CR 决策：
     - **Property 15: Role hierarchy string 归一化 round-trip** — string 值自动转为单元素数组
     - **Property 16: RefreshUser identity** — `refreshUser(user)` 返回同一用户对象
     - _Requirements: 2.4, 15.1, 15.2, 15.3_
-  - [-] 5.5 Checkpoint: 运行 `phpunit --testsuite pbt` 确认所有 PBT 通过，commit
+  - [x] 5.5 Checkpoint: 运行 `phpunit --testsuite pbt` 确认所有 PBT 通过，commit
 
-- [~] 6. 测试辅助类重写
-  - [ ] 6.1 重写 `ut/Helpers/Security/TestApiUserPreAuthenticator.php`
+- [-] 6. 测试辅助类重写
+  - [x] 6.1 重写 `ut/Helpers/Security/TestApiUserPreAuthenticator.php`
     - 改为继承 `AbstractPreAuthenticator`（新类）
     - `getCredentialsFromRequest()` 从 request query 参数 `sig` 提取凭证，无 `sig` 返回 null
     - `authenticateAndGetUser()` 委托给注入的 `SimplePreAuthenticateUserProviderInterface`
     - 构造函数接受 `SimplePreAuthenticateUserProviderInterface` 参数
     - 完整代码参见 Design Components §8
     - _Requirements: 8.1, 8.2_
-  - [ ] 6.2 重写 `ut/Helpers/Security/TestAuthenticationPolicy.php`
+  - [x] 6.2 重写 `ut/Helpers/Security/TestAuthenticationPolicy.php`
     - 实现新版 `AuthenticationPolicyInterface`（继承 `AbstractSimplePreAuthenticationPolicy`）
     - `getAuthenticator()` 返回基于 `TestApiUserPreAuthenticator` + `TestApiUserProvider` 的 authenticator 实例
     - _Requirements: 8.3_
-  - [ ] 6.3 确认 `TestApiUserProvider`、`TestApiUser`、`TestAccessRule` 无需修改
+  - [x] 6.3 确认 `TestApiUserProvider`、`TestApiUser`、`TestAccessRule` 无需修改
     - `TestApiUserProvider` 保持 `authenticateAndGetUser()` 凭证-用户映射不变（`abcd` → admin、`parent` → parent、`child` → child）
     - `TestApiUser` 保持 `UserInterface` 实现不变
     - `TestAccessRule` 保持构造函数签名和行为不变
     - _Requirements: 8.4, 8.5, 8.6_
-  - [ ] 6.4 Checkpoint: 运行 `composer dump-autoload` 确认无 autoload 错误，commit
+  - [-] 6.4 Checkpoint: 运行 `composer dump-autoload` 确认无 autoload 错误，commit
 
 - [~] 7. 现有安全测试适配
   - [ ] 7.1 适配 `ut/Security/SecurityServiceProviderTest.php`

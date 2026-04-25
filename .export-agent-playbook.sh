@@ -19,11 +19,21 @@ FILES=(
   .cursor/rules/doc/writing-conventions.mdc
   .cursor/rules/git/branch-overview.mdc
   .cursor/rules/git/git-conventions.mdc
+  .cursor/rules/graphify.mdc
   .cursor/rules/safety/command-safety.mdc
   .cursor/rules/safety/config-safety.mdc
   .cursor/rules/spec/manual-testing.mdc
   .cursor/rules/spec/spec-execution.mdc
+  .cursor/rules/spec/spec-goal.mdc
+  .cursor/rules/spec/spec-planning.mdc
   .cursor/rules/plugin/superpowers-integration.mdc
+
+  # Cursor skills
+  .cursor/skills/graphify/SKILL.md
+  .cursor/skills/graphify/references/incremental-and-modes.md
+  .cursor/skills/graphify/references/integrations.md
+  .cursor/skills/graphify/references/pipeline-steps.md
+  .cursor/skills/graphify/references/query-commands.md
 
   # Cursor sub-agents
   .cursor/agents/code-reviewer.md

@@ -252,7 +252,7 @@
     - _Requirements: 12.1, 12.3_
   - [x] 9.3 Checkpoint: 运行 `phpunit --testsuite all` 确认全量通过，无 deprecation notice，commit
 
-- [-] 10. 手工测试
+- [x] 10. 手工测试
   - [x] 10.1 验证兼容性修复完整性
     - 确认 `src/` 和 `ut/` 中无隐式 nullable 参数残留（grep 验证 `Type $param = null` 模式不存在）
     - 确认 `src/` 和 `ut/` 中无松散比较残留（grep 验证 `==` 和 `!=` 仅出现在注释或排除项中）
@@ -273,11 +273,11 @@
     - 确认 `composer.json` 的 `description` 不再引用 Silex
     - 确认 `docs/state/architecture.md` 中 `SilexKernel` 引用已全部修正为 `MicroKernel`
     - _Requirements: 11.1, 11.2, 12.3_
-  - [-] 10.5 Checkpoint: 手工测试全部通过，commit
+  - [x] 10.5 Checkpoint: 手工测试全部通过，commit
 
-- [~] 11. Code Review
-  - [ ] 11.1 委托给 code-reviewer agent 执行
-  - [ ] 11.2 Checkpoint: Code review 通过，处理所有 review 意见，commit
+- [x] 11. Code Review
+  - [x] 11.1 委托给 code-reviewer agent 执行
+  - [x] 11.2 Checkpoint: Code review 通过，处理所有 review 意见，commit
 
 ## Socratic Review
 

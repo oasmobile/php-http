@@ -12,7 +12,7 @@ Design CR 决策：
 
 ## Tasks
 
-- [-] 1. 接口层：重新设计 AuthenticationPolicyInterface
+- [x] 1. 接口层：重新设计 AuthenticationPolicyInterface
   - [x] 1.1 重写 `src/ServiceProviders/Security/AuthenticationPolicyInterface.php`
     - 移除 `getAuthenticationProvider()` 和 `getAuthenticationListener()` 方法
     - 新增 `getAuthenticator(MicroKernel $kernel, string $firewallName, array $options): AuthenticatorInterface`
@@ -20,10 +20,10 @@ Design CR 决策：
     - 保留 `getAuthenticationType(): string`、`getEntryPoint()` 和所有 `AUTH_TYPE_*` 常量
     - 所有方法使用强类型声明（参见 Design Components §2）
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7_
-  - [-] 1.2 Checkpoint: 运行 `composer dump-autoload` 确认无 autoload 错误，确认接口文件无语法错误，commit
+  - [x] 1.2 Checkpoint: 运行 `composer dump-autoload` 确认无 autoload 错误，确认接口文件无语法错误，commit
 
-- [~] 2. 抽象类层：新建 AbstractPreAuthenticator 和重写 AbstractSimplePreAuthenticationPolicy
-  - [ ] 2.1 新建 `src/ServiceProviders/Security/AbstractPreAuthenticator.php`
+- [-] 2. 抽象类层：新建 AbstractPreAuthenticator 和重写 AbstractSimplePreAuthenticationPolicy
+  - [x] 2.1 新建 `src/ServiceProviders/Security/AbstractPreAuthenticator.php`
     - 实现 `AuthenticatorInterface`，用模板方法封装 Symfony 7.x 认证 API
     - `supports()` 委托给 `getCredentialsFromRequest()`，返回值非 null 则 true
     - `authenticate()` 依次调用 `getCredentialsFromRequest()` + `authenticateAndGetUser()`，返回 `SelfValidatingPassport`
@@ -32,14 +32,14 @@ Design CR 决策：
     - 声明 `getCredentialsFromRequest(Request): mixed` 和 `authenticateAndGetUser(mixed): UserInterface` 为 abstract protected
     - 完整代码参见 Design Components §1
     - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9_
-  - [ ] 2.2 编写 AbstractPreAuthenticator 的 property tests — `ut/PBT/AuthenticatorPropertyTest.php`
+  - [x] 2.2 编写 AbstractPreAuthenticator 的 property tests — `ut/PBT/AuthenticatorPropertyTest.php`
     - **Property 1: Supports ↔ Credentials 一致性** — `supports()` 返回值等于 `getCredentialsFromRequest() !== null`
     - **Property 2: Authenticate round-trip** — 有效凭证 → Passport.user 等于 `authenticateAndGetUser()` 返回的用户
     - **Property 3: Authenticate error condition** — 无效凭证 → 抛出 `AuthenticationException`
     - **Property 4: CreateToken invariant** — `token.getUser() === passport.getUser()` 且 `token.getRoleNames()` 包含用户所有角色
     - 使用 Eris 1.x 生成随机凭证输入，通过测试子类（concrete implementation）验证
     - _Requirements: 1.2, 1.3, 1.4, 1.5, 14.1, 14.2, 14.3, 14.4, 14.5_
-  - [ ] 2.3 重写 `src/ServiceProviders/Security/AbstractSimplePreAuthenticationPolicy.php`
+  - [x] 2.3 重写 `src/ServiceProviders/Security/AbstractSimplePreAuthenticationPolicy.php`
     - 实现新版 `AuthenticationPolicyInterface`
     - `getAuthenticationType()` 返回 `AUTH_TYPE_PRE_AUTH`
     - `getAuthenticator()` 声明为 abstract
@@ -47,12 +47,12 @@ Design CR 决策：
     - `getEntryPoint()` 默认返回 `NullEntryPoint` 实例
     - 完整代码参见 Design Components §3
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5_
-  - [ ] 2.4 编写 AbstractSimplePreAuthenticationPolicy 的单元测试
+  - [x] 2.4 编写 AbstractSimplePreAuthenticationPolicy 的单元测试
     - 通过测试子类验证 `getAuthenticationType()` 返回 `AUTH_TYPE_PRE_AUTH`
     - 验证 `getAuthenticatorConfig()` 默认返回空数组
     - 验证 `getEntryPoint()` 返回 `NullEntryPoint` 实例
     - _Requirements: 4.1, 4.2, 4.3, 4.5_
-  - [ ] 2.5 Checkpoint: 运行 `composer dump-autoload` 确认无 autoload 错误，运行已有测试确认无回归，commit
+  - [-] 2.5 Checkpoint: 运行 `composer dump-autoload` 确认无 autoload 错误，运行已有测试确认无回归，commit
 
 - [~] 3. 确认 UserProvider 无需修改 + 废弃旧 Authenticator + 配置层兼容确认
   - [ ] 3.1 确认 `src/ServiceProviders/Security/AbstractSimplePreAuthenticateUserProvider.php` 无需修改

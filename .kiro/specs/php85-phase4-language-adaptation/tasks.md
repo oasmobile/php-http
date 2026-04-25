@@ -14,7 +14,7 @@
 
 ## Tasks
 
-- [-] 1. PBT 测试先行：编写 Property-Based Tests
+- [x] 1. PBT 测试先行：编写 Property-Based Tests
   - [x] 1.1 新建 `ut/PBT/WrappedExceptionInfoPropertyTest.php`
     - **Property 1: Status code normalization invariant** — 对任意整数 HTTP status code，`getCode()` 在输入为 0 时返回 500，非 0 时返回原值
     - **Property 2: Serialization code field metamorphic property** — 对任意 Exception，`serializeException()` 输出仅在 code 非 0 时包含 `code` 字段
@@ -33,145 +33,145 @@
     - **Property 8: UniquenessViolationHttpException construction round-trip** — `getStatusCode()` 始终 400，`getMessage()`/`getPrevious()`/`getCode()` 匹配输入
     - 使用 Eris 1.x 生成随机配置参数
     - _Requirements: 17.1, 17.2, 17.3_
-  - [-] 1.4 Checkpoint: 运行 `phpunit --testsuite pbt` 确认所有 PBT 在当前代码上通过，commit
+  - [x] 1.4 Checkpoint: 运行 `phpunit --testsuite pbt` 确认所有 PBT 在当前代码上通过，commit
 
-- [ ] 2. ErrorHandlers 模块
-  - [ ] 2.1 修改 `src/ErrorHandlers/WrappedExceptionInfo.php`
+- [x] 2. ErrorHandlers 模块
+  - [x] 2.1 修改 `src/ErrorHandlers/WrappedExceptionInfo.php`
     - R3: `$this->code == 0` → `=== 0`（S1）；`$e->getCode() != 0` → `!== 0`（S2）
     - R5 AC5: `jsonSerialize()` 添加 `mixed` 返回类型
     - R8: 构造函数 `$httpStatusCode` 添加 `int` 类型；`getAttribute(string $key): mixed`；`getAttributes(): array`；`getCode(): int`；`setCode(int $code): void`；`getException(): \Exception`；`getOriginalCode(): int`；`getShortExceptionType(): string`；`setAttribute(string $key, mixed $value): void`；`serializeException(\Exception $e): array`；`toArray(bool $rich = false): array`
     - R8: 属性类型声明 — `protected \Exception $exception`、`protected string $shortExceptionType`、`protected int $code`、`protected int $originalCode`、`protected array $attributes = []`
     - 不加 readonly（`$code` 有 setter，其他属性 protected 可被子类访问）
     - _Requirements: 3.3, 5.5, 8.1, 8.2, 8.3_
-  - [ ] 2.2 修改 `src/ErrorHandlers/ExceptionWrapper.php`
+  - [x] 2.2 修改 `src/ErrorHandlers/ExceptionWrapper.php`
     - R8: `__invoke(\Exception $e, Request $request, int $httpStatusCode): WrappedExceptionInfo`
     - R8: `furtherProcessException(WrappedExceptionInfo $info, \Exception $e): void`
     - 注意：`switch (true)` 含 fall-through 语义，不替换为 match（R7 AC3）
     - _Requirements: 8.1, 8.2_
-  - [ ] 2.3 修改 `src/ErrorHandlers/JsonErrorHandler.php`
+  - [x] 2.3 修改 `src/ErrorHandlers/JsonErrorHandler.php`
     - R8: `__invoke(\Exception $e, int $code): array`
     - _Requirements: 8.1, 8.2_
-  - [ ] 2.4 Checkpoint: 运行 `phpunit --testsuite error-handlers --testsuite pbt` 确认通过，commit
+  - [x] 2.4 Checkpoint: 运行 `phpunit --testsuite error-handlers --testsuite pbt` 确认通过，commit
 
-- [ ] 3. Views 模块
-  - [ ] 3.1 修改 `src/Views/ResponseRendererInterface.php`
+- [x] 3. Views 模块
+  - [x] 3.1 修改 `src/Views/ResponseRendererInterface.php`
     - R8: `renderOnSuccess(mixed $result, MicroKernel $kernel): Response`；`renderOnException(WrappedExceptionInfo $exceptionInfo, MicroKernel $kernel): Response`
     - 接口变更，实现类（DefaultHtmlRenderer、JsonApiRenderer）必须同步更新
     - _Requirements: 8.1, 8.2_
-  - [ ] 3.2 修改 `src/Views/ResponseRendererResolverInterface.php`
+  - [x] 3.2 修改 `src/Views/ResponseRendererResolverInterface.php`
     - R8: `resolveRequest(Request $request): ResponseRendererInterface`
     - _Requirements: 8.1, 8.2_
-  - [ ] 3.3 修改 `src/Views/DefaultHtmlRenderer.php`
+  - [x] 3.3 修改 `src/Views/DefaultHtmlRenderer.php`
     - R8: `renderOnSuccess(mixed $result, MicroKernel $kernel): Response`；`renderOnException(WrappedExceptionInfo $exceptionInfo, MicroKernel $kernel): Response`
     - _Requirements: 8.1, 8.2_
-  - [ ] 3.4 修改 `src/Views/JsonApiRenderer.php`
+  - [x] 3.4 修改 `src/Views/JsonApiRenderer.php`
     - R8: `renderOnSuccess(mixed $result, MicroKernel $kernel): Response`；`renderOnException(WrappedExceptionInfo $exceptionInfo, MicroKernel $kernel): Response`
     - _Requirements: 8.1, 8.2_
-  - [ ] 3.5 修改 `src/Views/RouteBasedResponseRendererResolver.php`
+  - [x] 3.5 修改 `src/Views/RouteBasedResponseRendererResolver.php`
     - R7 AC1: `switch ($format)` → `match ($format)` 表达式
     - R8: `resolveRequest(Request $request): ResponseRendererInterface`
     - _Requirements: 7.1, 7.2, 8.1, 8.2_
-  - [ ] 3.6 修改 `src/Views/AbstractSmartViewHandler.php`
+  - [x] 3.6 修改 `src/Views/AbstractSmartViewHandler.php`
     - R3 AC8: 5 处松散比较 → 严格比较（S4–S8）
     - R8: `shouldHandle(Request $request): bool`；`getCompatibleTypes(): array`
     - _Requirements: 3.8, 8.1, 8.2_
-  - [ ] 3.7 修改 `src/Views/FallbackViewHandler.php`
+  - [x] 3.7 修改 `src/Views/FallbackViewHandler.php`
     - R3 AC4: `$rendererResolver == null` → `=== null`（S3）
     - R6: `$kernel` 适用 promotion + readonly（直接赋值无逻辑）
     - R10: `$kernel` 声明为 `protected readonly MicroKernel`
     - R8: `__invoke(mixed $result, Request $request): Response`；属性类型声明
     - 注意：`$rendererResolver` 有条件逻辑（`=== null` 时创建默认实例），不适用 promotion，需保留为显式属性
     - _Requirements: 3.4, 6.1, 6.3, 6.4, 8.1, 8.2, 10.1_
-  - [ ] 3.8 修改 `src/Views/PrefilightResponse.php`
+  - [x] 3.8 修改 `src/Views/PrefilightResponse.php`
     - R8: 属性类型声明 `protected array $allowedMethods = []`、`protected bool $frozen = false`
     - R8: `getAllowedMethods(): array`；`addAllowedMethod(string $method): void`；`isFrozen(): bool`；`freeze(): void`
     - 不加 readonly（`$frozen` 和 `$allowedMethods` 均有修改方法）
     - _Requirements: 8.1, 8.2, 8.3_
-  - [ ] 3.9 Checkpoint: 运行 `phpunit --testsuite views --testsuite pbt` 确认通过，commit
+  - [x] 3.9 Checkpoint: 运行 `phpunit --testsuite views --testsuite pbt` 确认通过，commit
 
-- [ ] 4. Routing 模块
-  - [ ] 4.1 修改 `src/ServiceProviders/Routing/CacheableRouterUrlMatcherWrapper.php`
+- [x] 4. Routing 模块
+  - [x] 4.1 修改 `src/ServiceProviders/Routing/CacheableRouterUrlMatcherWrapper.php`
     - R9 AC1: `strpos($result['_controller'], "::") !== false` → `str_contains($result['_controller'], "::")`
     - R6 + R10: `$other` 和 `$namespaces` 均可 promotion + readonly
     - R8: 属性类型声明
     - _Requirements: 6.1, 6.3, 6.4, 8.1, 8.3, 9.1, 10.1_
-  - [ ] 4.2 修改 `src/ServiceProviders/Routing/GroupUrlMatcher.php`
+  - [x] 4.2 修改 `src/ServiceProviders/Routing/GroupUrlMatcher.php`
     - R3 AC6: `$matched == $total` → `=== $total`（S9）
     - R6: `$matchers` 可 promotion + readonly；`$context` 有 setter，可 promotion 但不加 readonly
     - R8: 属性类型声明
     - _Requirements: 3.6, 6.1, 6.3, 8.1, 8.3, 10.1_
-  - [ ] 4.3 修改 `src/ServiceProviders/Routing/GroupUrlGenerator.php`
+  - [x] 4.3 修改 `src/ServiceProviders/Routing/GroupUrlGenerator.php`
     - R3: `$found == $total` → `=== $total`（S10）
     - R8: 属性类型声明
     - 注意：`$context` 和 `$contextExplicitlySet` 有 setter，不适用 readonly
     - _Requirements: 3.1, 8.1, 8.3_
-  - [ ] 4.4 修改 `src/ServiceProviders/Routing/CacheableRouterProvider.php`
+  - [x] 4.4 修改 `src/ServiceProviders/Routing/CacheableRouterProvider.php`
     - R3 AC7: `strcasecmp(...) == 0` → `=== 0`（S11）
     - R8: `getConfigDataProvider(): DataProviderInterface`；`getRouter(RequestContext $requestContext): Router`；属性类型声明
     - _Requirements: 3.7, 8.1, 8.2_
-  - [ ] 4.5 修改 `src/ServiceProviders/Routing/CacheableRouter.php`
+  - [x] 4.5 修改 `src/ServiceProviders/Routing/CacheableRouter.php`
     - R8: 属性类型声明 `private MicroKernel $kernel`、`private bool $isParamReplaced = false`
     - R8: 构造函数 `$resource` 添加 `mixed` 类型
     - _Requirements: 8.1, 8.3_
-  - [ ] 4.6 确认 `src/ServiceProviders/Routing/InheritableRouteCollection.php` 和 `src/ServiceProviders/Routing/InheritableYamlFileLoader.php` 无需修改
+  - [x] 4.6 确认 `src/ServiceProviders/Routing/InheritableRouteCollection.php` 和 `src/ServiceProviders/Routing/InheritableYamlFileLoader.php` 无需修改
     - `InheritableRouteCollection` 已有类型声明
     - `InheritableYamlFileLoader` 已有完整类型声明
     - _Requirements: 8.5_
-  - [ ] 4.7 Checkpoint: 运行 `phpunit --testsuite routing --testsuite pbt` 确认通过，commit
+  - [x] 4.7 Checkpoint: 运行 `phpunit --testsuite routing --testsuite pbt` 确认通过，commit
 
-- [ ] 5. Security 模块
-  - [ ] 5.1 修改 `src/ServiceProviders/Security/AccessRuleInterface.php`
+- [x] 5. Security 模块
+  - [x] 5.1 修改 `src/ServiceProviders/Security/AccessRuleInterface.php`
     - R8: `getPattern(): string|RequestMatcherInterface`；`getRequiredRoles(): string|array`；`getRequiredChannel(): ?string`
     - 接口变更，实现类（SimpleAccessRule、TestAccessRule）必须同步更新
     - _Requirements: 8.1, 8.2_
-  - [ ] 5.2 修改 `src/ServiceProviders/Security/FirewallInterface.php`
+  - [x] 5.2 修改 `src/ServiceProviders/Security/FirewallInterface.php`
     - R8: `getPattern(): string|RequestMatcherInterface`；`isStateless(): bool`；`getPolicies(): array`；`getUserProvider(): array|UserProviderInterface`；`getOtherSettings(): array`
     - 接口变更，实现类（SimpleFirewall）必须同步更新
     - _Requirements: 8.1, 8.2_
-  - [ ] 5.3 修改 `src/ServiceProviders/Security/SimplePreAuthenticateUserProviderInterface.php`
+  - [x] 5.3 修改 `src/ServiceProviders/Security/SimplePreAuthenticateUserProviderInterface.php`
     - R8: `authenticateAndGetUser(mixed $credentials): UserInterface`
     - 接口变更，实现类（AbstractSimplePreAuthenticateUserProvider、TestApiUserProvider）必须同步更新
     - _Requirements: 8.1, 8.2_
-  - [ ] 5.4 修改 `src/ServiceProviders/Security/SimpleAccessRule.php`
+  - [x] 5.4 修改 `src/ServiceProviders/Security/SimpleAccessRule.php`
     - R8: `getPattern(): string|RequestMatcherInterface`；`setPattern(string|RequestMatcherInterface $pattern): void`；`getRequiredRoles(): array`；`setRequiredRoles(array $requiredRoles): void`；`getRequiredChannel(): ?string`；`setRequiredChannel(?string $requiredChannel): void`
     - 不适用 promotion（构造函数调用 `processConfiguration()` 后赋值，有转换逻辑）
     - 不适用 readonly（属性均有 setter）
     - _Requirements: 8.1, 8.2, 8.3_
-  - [ ] 5.5 修改 `src/ServiceProviders/Security/SimpleFirewall.php`
+  - [x] 5.5 修改 `src/ServiceProviders/Security/SimpleFirewall.php`
     - R8: `getPattern(): string|RequestMatcherInterface`；`isStateless(): bool`；`getPolicies(): array`；`getUserProvider(): array|UserProviderInterface`；`getOtherSettings(): array`；属性类型声明
     - 不适用 promotion（构造函数调用 `processConfiguration()` 后赋值）
     - _Requirements: 8.1, 8.2, 8.3_
-  - [ ] 5.6 修改 `src/ServiceProviders/Security/AbstractSimplePreAuthenticateUserProvider.php`
+  - [x] 5.6 修改 `src/ServiceProviders/Security/AbstractSimplePreAuthenticateUserProvider.php`
     - R3 AC11: `$class == $this->supportedUserClassname` → `=== $this->supportedUserClassname`（S17）
     - R6 + R10: `$supportedUserClassname` 在构造后不再修改 → `private readonly string $supportedUserClassname` promotion
     - R8: `authenticateAndGetUser(mixed $credentials): UserInterface`（匹配接口变更）
     - _Requirements: 3.11, 6.1, 6.3, 6.4, 8.1, 8.2, 10.1_
-  - [ ] 5.7 修改 `src/ServiceProviders/Security/SimpleSecurityProvider.php`
+  - [x] 5.7 修改 `src/ServiceProviders/Security/SimpleSecurityProvider.php`
     - R8: `addAccessRule(AccessRuleInterface|array $rule): void`；`addAuthenticationPolicy(string $policyName, ...): void`；`addFirewall(string $firewallName, FirewallInterface|array $firewall): void`；`addRoleHierarchy(string $role, string|array $children): void`；`register(MicroKernel $kernel, array $securityConfig = []): void`；`getConfigDataProvider(): DataProviderInterface`；`parseFirewall(FirewallInterface $firewall): array`
     - _Requirements: 8.1, 8.2_
-  - [ ] 5.8 修改 `src/ServiceProviders/Security/AbstractSimplePreAuthenticator.php`（deprecated）
+  - [x] 5.8 修改 `src/ServiceProviders/Security/AbstractSimplePreAuthenticator.php`（deprecated）
     - R8: `createToken(Request $request, string $providerKey): TokenInterface`；`authenticateToken(...): TokenInterface`；`supportsToken(...): bool`；`getCredentialsFromRequest(Request $request): mixed`
     - 已标记 `@deprecated`，添加返回类型声明以消除 deprecation notice
     - _Requirements: 8.1, 8.2_
-  - [ ] 5.9 确认无需修改的 Security 文件
+  - [x] 5.9 确认无需修改的 Security 文件
     - `AbstractPreAuthenticator.php`（Phase 3 新建，已有完整类型声明）
     - `AbstractSimplePreAuthenticationPolicy.php`（Phase 3 新建，已有完整类型声明）
     - `AuthenticationPolicyInterface.php`（Phase 3 新建，已有完整类型声明）
     - `NullEntryPoint.php`（已有完整类型声明）
     - _Requirements: 8.5_
-  - [ ] 5.10 Checkpoint: 运行 `phpunit --testsuite security --testsuite pbt` 确认通过，commit
+  - [x] 5.10 Checkpoint: 运行 `phpunit --testsuite security --testsuite pbt` 确认通过，commit
 
-- [ ] 6. CORS 模块
-  - [ ] 6.1 修改 `src/ServiceProviders/Cors/CrossOriginResourceSharingStrategy.php`
+- [-] 6. CORS 模块
+  - [x] 6.1 修改 `src/ServiceProviders/Cors/CrossOriginResourceSharingStrategy.php`
     - R3 AC5: `$pattern == "*"` → `=== "*"`（S12）
     - R8: 属性类型声明；`matches(Request $request): bool`；`isOriginAllowed(string $origin): bool`；`isWildcardOriginAllowed(): bool`；`isHeaderAllowed(string $header): bool`；`isCredentialsAllowed(): bool`；`getMaxAge(): int`；`getAllowedHeaders(): string`；`getExposedHeaders(): string`
     - _Requirements: 3.5, 8.1, 8.2, 8.3_
-  - [ ] 6.2 确认 `src/ServiceProviders/Cors/CrossOriginResourceSharingProvider.php` 无需修改
+  - [x] 6.2 确认 `src/ServiceProviders/Cors/CrossOriginResourceSharingProvider.php` 无需修改
     - Phase 3 已更新，方法已有类型声明，仅需确认属性类型声明是否完整
     - _Requirements: 8.5_
-  - [ ] 6.3 Checkpoint: 运行 `phpunit --testsuite cors --testsuite pbt` 确认通过，commit
+  - [-] 6.3 Checkpoint: 运行 `phpunit --testsuite cors --testsuite pbt` 确认通过，commit
 
-- [ ] 7. Core 模块（MicroKernel、Middleware、Configuration、Cookie、EventSubscribers、Exceptions）
+- [~] 7. Core 模块（MicroKernel、Middleware、Configuration、Cookie、EventSubscribers、Exceptions）
   - [ ] 7.1 修改 `src/MicroKernel.php`
     - R3 AC9: `$awsResponse->getStatusCode() != Response::HTTP_OK` → `!== Response::HTTP_OK`（S13）
     - R3 AC10: `$info['service'] == "CLOUDFRONT"` → `=== "CLOUDFRONT"`（S14）
@@ -218,7 +218,7 @@
     - _Requirements: 8.5_
   - [ ] 7.13 Checkpoint: 运行 `phpunit --testsuite all` 确认 `src/` 全部修改后测试通过，commit
 
-- [ ] 8. 测试辅助类和测试文件修改（`ut/`）
+- [~] 8. 测试辅助类和测试文件修改（`ut/`）
   - [ ] 8.1 修改 `ut/Helpers/Security/TestAccessRule.php`
     - R1: `$channel = null` → `?string $channel = null`（隐式 nullable 修复）
     - R8: `$pattern` → `string|RequestMatcherInterface $pattern`；`$roles` → `string|array $roles`
@@ -241,7 +241,7 @@
     - _Requirements: 3.1_
   - [ ] 8.7 Checkpoint: 运行 `phpunit --testsuite all` 确认全部通过，无 deprecation notice，commit
 
-- [ ] 9. 元数据和文档更新（Design CR Q4=C）
+- [~] 9. 元数据和文档更新（Design CR Q4=C）
   - [ ] 9.1 修改 `composer.json`
     - R11: `"description"` 从 `"An extension to Silex, for HTTP related routing, middleware, and so on."` 改为 `"A Symfony MicroKernel-based HTTP framework for routing, middleware, security, and more."`
     - 其他字段保持不变
@@ -252,7 +252,7 @@
     - _Requirements: 12.1, 12.3_
   - [ ] 9.3 Checkpoint: 运行 `phpunit --testsuite all` 确认全量通过，无 deprecation notice，commit
 
-- [ ] 10. 手工测试
+- [~] 10. 手工测试
   - [ ] 10.1 验证兼容性修复完整性
     - 确认 `src/` 和 `ut/` 中无隐式 nullable 参数残留（grep 验证 `Type $param = null` 模式不存在）
     - 确认 `src/` 和 `ut/` 中无松散比较残留（grep 验证 `==` 和 `!=` 仅出现在注释或排除项中）
@@ -275,7 +275,7 @@
     - _Requirements: 11.1, 11.2, 12.3_
   - [ ] 10.5 Checkpoint: 手工测试全部通过，commit
 
-- [ ] 11. Code Review
+- [~] 11. Code Review
   - [ ] 11.1 委托给 code-reviewer agent 执行
   - [ ] 11.2 Checkpoint: Code review 通过，处理所有 review 意见，commit
 

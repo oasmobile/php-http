@@ -31,18 +31,15 @@ class CrossOriginResourceSharingStrategy
     
     use ConfigurationValidationTrait;
     
-    /** @var RequestMatcherInterface */
-    protected $matcher            = null;
-    protected $originsAllowed     = [];
-    protected $headersAllowed     = [];
-    protected $headersExposed     = [];
-    protected $maxAge             = 0;
-    protected $credentialsAllowed = false;
+    protected ?RequestMatcherInterface $matcher = null;
+    protected array $originsAllowed            = [];
+    protected array $headersAllowed            = [];
+    protected array $headersExposed            = [];
+    protected int $maxAge                      = 0;
+    protected bool $credentialsAllowed         = false;
+    protected ?Request $request                = null;
     
-    /** @var  Request|null */
-    protected $request;
-    
-    function __construct(array $configuration)
+    public function __construct(array $configuration)
     {
         $dp = $this->processConfiguration($configuration, new CrossOriginResourceSharingConfiguration());
         
@@ -54,7 +51,7 @@ class CrossOriginResourceSharingStrategy
         $this->credentialsAllowed = $dp->getOptional('credentials_allowed', DataProviderInterface::BOOL_TYPE, false);
         
         if (is_string($pattern)) {
-            if ($pattern == "*") {
+            if ($pattern === "*") {
                 $this->matcher = new ChainRequestMatcher([new PathRequestMatcher('.*')]);
             }
             else {
@@ -71,7 +68,7 @@ class CrossOriginResourceSharingStrategy
         }
     }
     
-    public function matches(Request $request)
+    public function matches(Request $request): bool
     {
         if ($this->matcher->matches($request)) {
             $this->request = $request;
@@ -85,7 +82,7 @@ class CrossOriginResourceSharingStrategy
         }
     }
     
-    public function isOriginAllowed($origin)
+    public function isOriginAllowed(string $origin): bool
     {
         if (!preg_match(self::DOMAIN_MATCHING_PATTERN, $origin, $matches)) {
             return false;
@@ -103,12 +100,12 @@ class CrossOriginResourceSharingStrategy
         }
     }
     
-    public function isWildcardOriginAllowed()
+    public function isWildcardOriginAllowed(): bool
     {
         return in_array("*", $this->originsAllowed);
     }
     
-    public function isHeaderAllowed($header)
+    public function isHeaderAllowed(string $header): bool
     {
         $header = strtolower($header);
         
@@ -124,28 +121,22 @@ class CrossOriginResourceSharingStrategy
         }
     }
     
-    /**
-     * @return bool
-     */
-    public function isCredentialsAllowed()
+    public function isCredentialsAllowed(): bool
     {
         return $this->credentialsAllowed;
     }
     
-    /**
-     * @return int|mixed
-     */
-    public function getMaxAge()
+    public function getMaxAge(): int
     {
         return $this->maxAge;
     }
     
-    public function getAllowedHeaders()
+    public function getAllowedHeaders(): string
     {
         return implode(", ", $this->headersAllowed);
     }
     
-    public function getExposedHeaders()
+    public function getExposedHeaders(): string
     {
         return implode(", ", $this->headersExposed);
     }

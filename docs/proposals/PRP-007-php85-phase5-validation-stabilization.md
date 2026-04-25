@@ -1,6 +1,6 @@
 # PHP 8.5 Upgrade — Phase 5: Validation & Stabilization
 
-> Proposal：全量测试、静态分析提升、CI 矩阵覆盖，确保项目在 PHP 8.4 和 8.5 下稳定运行。
+> Proposal：全量测试、静态分析提升，确保项目在 PHP 8.5 下稳定运行。
 
 ## Status
 
@@ -8,42 +8,46 @@
 
 ## Background
 
-经过 Phase 0–4 的依赖升级、框架替换、安全组件重构和语言适配后，项目代码已在 PHP 8.5 下可编译运行。本 Phase 作为收尾阶段，通过全量测试、静态分析和 CI 配置确保升级的完整性和稳定性。
+经过 Phase 0–4 的依赖升级、框架替换、安全组件重构和语言适配后，项目代码已在 PHP 8.5 下可编译运行。本 Phase 作为收尾阶段，通过内部依赖升级、全量测试、静态分析和文档全面 review 确保升级的完整性和稳定性。
 
 ## Problem
 
 - 前序 Phase 的变更覆盖面广，可能存在遗漏的兼容性问题
-- 当前项目缺少静态分析工具（PHPStan / Psalm）的高级别检查
-- CI 矩阵尚未覆盖 PHP 8.5 版本
+- 当前项目缺少静态分析工具（PHPStan）的高级别检查
+- `oasis/utils` 和 `oasis/logging` 仍为 `^2.0`，需要升级到 `^3.0`
 - 需要一个系统性的验证阶段确认所有变更的正确性
+- `PROJECT.md`、`docs/state/`、`docs/manual/` 等文档在 Phase 0–4 完成后可能存在过时内容
 
 ## Goals
 
+- 将 `oasis/utils` 从 `^2.0` 升级到 `^3.0`，排查并适配所有 API 变更
+- 将 `oasis/logging` 从 `^2.0` 升级到 `^3.0`，排查并适配所有 API 变更
 - 全量运行测试套件，确保所有测试在 PHP 8.5 下通过
-- 引入或提升 PHPStan / Psalm 的分析级别，发现潜在类型问题
-- 配置 CI 矩阵覆盖 PHP 8.5
+- 引入 PHPStan 静态分析，发现潜在类型问题
 - 修复验证过程中发现的所有问题
 - 确认无 deprecation notice 输出
-- 更新项目文档（`README.md`、`docs/state/architecture.md` 等）反映新的 PHP 版本要求和依赖版本
+- 全面更新项目文档（`PROJECT.md`、`README.md`、`docs/state/`、`docs/manual/`）反映 Phase 0–5 完成后的系统现状
 
 ## Non-Goals
 
 - 不引入新功能
-- 不进行代码现代化重构（如采用 PHP 8.x 新语法）
+- 不进行代码现代化重构（已在 Phase 4 完成）
 - 不涉及性能优化
+- 不配置 CI 矩阵
 
 ## Scope
 
-- CI 配置文件（如 `.github/workflows/` 或等价 CI 配置）
-- PHPStan / Psalm 配置文件
-- `composer.json` — 开发依赖中添加静态分析工具
-- `docs/state/architecture.md` — 更新架构文档
+- `composer.json` — `oasis/utils`、`oasis/logging` 版本约束更新 + 开发依赖中添加 PHPStan
+- PHPStan 配置文件
+- `PROJECT.md` — 全面更新技术栈描述
 - `README.md` — 更新版本要求说明
+- `docs/state/` — 全面 review 并更新架构文档
+- `docs/manual/` — 全面 review 并更新使用文档
 - 验证过程中发现的任何需要修复的文件
 
 ## Risks
 
-- PHP 8.5 GA 时间为 2025 年 11 月，若在此之前执行本 Phase，CI 矩阵中的 8.5 覆盖可能需要使用 RC 版本
+- `oasis/utils` ^3.0 可能引入 breaking changes，项目中使用面广（`ArrayDataProvider`、`DataProviderInterface` 等贯穿配置层）
 - 静态分析提升级别后可能暴露大量历史问题，需评估修复范围
 
 ## Branch Strategy
@@ -62,8 +66,7 @@ PRP-002 至 PRP-007（Phase 0–5）共享同一个长生命周期 feature branc
 **预期通过：**
 
 - `--testsuite all` 全量通过
-- PHPStan / Psalm 静态分析通过（目标级别在 spec design 阶段确定）
-- CI 矩阵覆盖 PHP 8.4 + 8.5，全绿
+- PHPStan 静态分析通过
 - 无 deprecation notice
 
 全部通过后，`feature/php85-upgrade` merge 回 develop。

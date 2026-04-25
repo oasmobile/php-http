@@ -40,7 +40,7 @@ abstract class AbstractSimplePreAuthenticator
      *
      * @throws \LogicException always
      */
-    public function createToken(Request $request, $providerKey)
+    public function createToken(Request $request, string $providerKey): TokenInterface
     {
         throw new \LogicException(
             sprintf(
@@ -65,7 +65,7 @@ abstract class AbstractSimplePreAuthenticator
      *
      * @throws \LogicException always
      */
-    public function authenticateToken(TokenInterface $token, UserProviderInterface $userProvider, $providerKey)
+    public function authenticateToken(TokenInterface $token, UserProviderInterface $userProvider, string $providerKey): TokenInterface
     {
         throw new \LogicException(
             sprintf(
@@ -89,7 +89,7 @@ abstract class AbstractSimplePreAuthenticator
      *
      * @throws \LogicException always
      */
-    public function supportsToken(TokenInterface $token, $providerKey)
+    public function supportsToken(TokenInterface $token, string $providerKey): bool
     {
         throw new \LogicException(
             sprintf(
@@ -107,5 +107,5 @@ abstract class AbstractSimplePreAuthenticator
      *
      * @return mixed
      */
-    abstract public function getCredentialsFromRequest(Request $request);
+    abstract public function getCredentialsFromRequest(Request $request): mixed;
 }

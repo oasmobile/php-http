@@ -18,16 +18,11 @@ class SimpleFirewall implements FirewallInterface
 {
     use ConfigurationValidationTrait;
 
-    /** @var  string|RequestMatcherInterface */
-    protected $pattern;
-    /** @var  array */
-    protected $policies;
-    /** @var  array|UserProviderInterface */
-    protected $userProvider;
-    /** @var  bool */
-    protected $stateless;
-    /** @var  array */
-    protected $otherSettings;
+    protected string|RequestMatcherInterface $pattern;
+    protected array $policies;
+    protected array|UserProviderInterface $userProvider;
+    protected bool $stateless;
+    protected array $otherSettings;
 
     public function __construct(array $firewallConfiguration)
     {
@@ -43,7 +38,7 @@ class SimpleFirewall implements FirewallInterface
     /**
      * @return string|RequestMatcherInterface
      */
-    public function getPattern()
+    public function getPattern(): string|RequestMatcherInterface
     {
         return $this->pattern;
     }
@@ -51,7 +46,7 @@ class SimpleFirewall implements FirewallInterface
     /**
      * @return boolean
      */
-    public function isStateless()
+    public function isStateless(): bool
     {
         return $this->stateless;
     }
@@ -59,7 +54,7 @@ class SimpleFirewall implements FirewallInterface
     /**
      * @return array
      */
-    public function getPolicies()
+    public function getPolicies(): array
     {
         return $this->policies;
     }
@@ -67,7 +62,7 @@ class SimpleFirewall implements FirewallInterface
     /**
      * @return array|UserProviderInterface
      */
-    public function getUserProvider()
+    public function getUserProvider(): array|UserProviderInterface
     {
         return $this->userProvider;
     }
@@ -75,7 +70,7 @@ class SimpleFirewall implements FirewallInterface
     /**
      * @return array
      */
-    public function getOtherSettings()
+    public function getOtherSettings(): array
     {
         return $this->otherSettings;
     }

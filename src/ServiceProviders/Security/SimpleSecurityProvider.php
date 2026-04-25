@@ -65,22 +65,22 @@ class SimpleSecurityProvider
     /**
      * @param AccessRuleInterface|array $rule
      */
-    public function addAccessRule($rule)
+    public function addAccessRule(AccessRuleInterface|array $rule): void
     {
         $this->accessRules[] = $rule;
     }
     
-    public function addAuthenticationPolicy($policyName, AuthenticationPolicyInterface $policy)
+    public function addAuthenticationPolicy(string $policyName, AuthenticationPolicyInterface $policy): void
     {
         $this->authPolicies[$policyName] = $policy;
     }
     
-    public function addFirewall($firewallName, $firewall)
+    public function addFirewall(string $firewallName, FirewallInterface|array $firewall): void
     {
         $this->firewalls[$firewallName] = $firewall;
     }
     
-    public function addRoleHierarchy($role, $children)
+    public function addRoleHierarchy(string $role, string|array $children): void
     {
         $old = isset($this->roleHierarchy[$role]) ? $this->roleHierarchy[$role] : [];
         $old = array_merge($old, (array)$children);
@@ -98,7 +98,7 @@ class SimpleSecurityProvider
      * @param MicroKernel $kernel
      * @param array       $securityConfig The security config from Bootstrap_Config (optional)
      */
-    public function register(MicroKernel $kernel, array $securityConfig = [])
+    public function register(MicroKernel $kernel, array $securityConfig = []): void
     {
         $this->kernel = $kernel;
         
@@ -149,7 +149,7 @@ class SimpleSecurityProvider
     }
     
     /** @return DataProviderInterface */
-    public function getConfigDataProvider()
+    public function getConfigDataProvider(): DataProviderInterface
     {
         if (!$this->configDataProvider) {
             throw new \LogicException("Cannot get config data provider before registration");
@@ -243,7 +243,7 @@ class SimpleSecurityProvider
      *
      * @return array
      */
-    protected function parseFirewall(FirewallInterface $firewall)
+    protected function parseFirewall(FirewallInterface $firewall): array
     {
         $setting              = $firewall->getPolicies();
         $setting['pattern']   = $firewall->getPattern();

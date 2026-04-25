@@ -14,14 +14,9 @@ use Symfony\Component\Security\Core\User\UserInterface;
 
 abstract class AbstractSimplePreAuthenticateUserProvider implements SimplePreAuthenticateUserProviderInterface
 {
-    /**
-     * @var string
-     */
-    private $supportedUserClassname;
-
-    public function __construct($supportedUserClassname)
-    {
-        $this->supportedUserClassname = $supportedUserClassname;
+    public function __construct(
+        private readonly string $supportedUserClassname
+    ) {
     }
 
     /**
@@ -68,6 +63,6 @@ abstract class AbstractSimplePreAuthenticateUserProvider implements SimplePreAut
      */
     public function supportsClass(string $class): bool
     {
-        return $class == $this->supportedUserClassname || is_subclass_of($class, $this->supportedUserClassname, true);
+        return $class === $this->supportedUserClassname || is_subclass_of($class, $this->supportedUserClassname, true);
     }
 }

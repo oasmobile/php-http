@@ -17,12 +17,9 @@ class SimpleAccessRule implements AccessRuleInterface
 {
     use ConfigurationValidationTrait;
 
-    /** @var  string|RequestMatcherInterface */
-    protected $pattern;
-    /** @var  array */
-    protected $requiredRoles;
-    /** @var  string|null */
-    protected $requiredChannel;
+    protected string|RequestMatcherInterface $pattern;
+    protected array $requiredRoles;
+    protected ?string $requiredChannel;
 
     public function __construct(array $ruleConfiguration)
     {
@@ -36,15 +33,15 @@ class SimpleAccessRule implements AccessRuleInterface
     /**
      * @return string|RequestMatcherInterface
      */
-    public function getPattern()
+    public function getPattern(): string|RequestMatcherInterface
     {
         return $this->pattern;
     }
 
     /**
-     * @param string $pattern
+     * @param string|RequestMatcherInterface $pattern
      */
-    public function setPattern($pattern)
+    public function setPattern(string|RequestMatcherInterface $pattern): void
     {
         $this->pattern = $pattern;
     }
@@ -52,7 +49,7 @@ class SimpleAccessRule implements AccessRuleInterface
     /**
      * @return array
      */
-    public function getRequiredRoles()
+    public function getRequiredRoles(): array
     {
         return $this->requiredRoles;
     }
@@ -60,7 +57,7 @@ class SimpleAccessRule implements AccessRuleInterface
     /**
      * @param array $requiredRoles
      */
-    public function setRequiredRoles($requiredRoles)
+    public function setRequiredRoles(array $requiredRoles): void
     {
         $this->requiredRoles = $requiredRoles;
     }
@@ -68,7 +65,7 @@ class SimpleAccessRule implements AccessRuleInterface
     /**
      * @return null|string
      */
-    public function getRequiredChannel()
+    public function getRequiredChannel(): ?string
     {
         return $this->requiredChannel;
     }
@@ -76,7 +73,7 @@ class SimpleAccessRule implements AccessRuleInterface
     /**
      * @param null|string $requiredChannel
      */
-    public function setRequiredChannel($requiredChannel)
+    public function setRequiredChannel(?string $requiredChannel): void
     {
         $this->requiredChannel = $requiredChannel;
     }

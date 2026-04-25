@@ -21,5 +21,5 @@ interface SimplePreAuthenticateUserProviderInterface extends UserProviderInterfa
      *
      * @throws AuthenticationException throws authentication exception if authentication by credentials failed
      */
-    public function authenticateAndGetUser($credentials);
+    public function authenticateAndGetUser(mixed $credentials): UserInterface;
 }

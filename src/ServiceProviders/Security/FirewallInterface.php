@@ -16,28 +16,28 @@ interface FirewallInterface
     /**
      * @return string|RequestMatcherInterface
      */
-    public function getPattern();
+    public function getPattern(): string|RequestMatcherInterface;
 
     /**
      * @return bool
      */
-    public function isStateless();
+    public function isStateless(): bool;
 
     /**
      * @return array    Array of policies
      *                  key is policy name,
      *                  and value is an option array or bool-true
      */
-    public function getPolicies();
+    public function getPolicies(): array;
 
     /**
      * @return array|UserProviderInterface
      */
-    public function getUserProvider();
+    public function getUserProvider(): array|UserProviderInterface;
 
     /**
      * @return array    Other values to be merged to firewall setting
      */
-    public function getOtherSettings();
+    public function getOtherSettings(): array;
 
 }

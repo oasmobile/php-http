@@ -171,7 +171,7 @@
     - _Requirements: 8.5_
   - [x] 6.3 Checkpoint: 运行 `phpunit --testsuite cors --testsuite pbt` 确认通过，commit
 
-- [-] 7. Core 模块（MicroKernel、Middleware、Configuration、Cookie、EventSubscribers、Exceptions）
+- [x] 7. Core 模块（MicroKernel、Middleware、Configuration、Cookie、EventSubscribers、Exceptions）
   - [x] 7.1 修改 `src/MicroKernel.php`
     - R3 AC9: `$awsResponse->getStatusCode() != Response::HTTP_OK` → `!== Response::HTTP_OK`（S13）
     - R3 AC10: `$info['service'] == "CLOUDFRONT"` → `=== "CLOUDFRONT"`（S14）
@@ -216,64 +216,64 @@
   - [x] 7.12 确认无需修改的文件
     - `src/ServiceProviders/Twig/SimpleTwigServiceProvider.php`（Phase 2 新建，已有完整类型声明）
     - _Requirements: 8.5_
-  - [-] 7.13 Checkpoint: 运行 `phpunit --testsuite all` 确认 `src/` 全部修改后测试通过，commit
+  - [x] 7.13 Checkpoint: 运行 `phpunit --testsuite all` 确认 `src/` 全部修改后测试通过，commit
 
-- [~] 8. 测试辅助类和测试文件修改（`ut/`）
-  - [ ] 8.1 修改 `ut/Helpers/Security/TestAccessRule.php`
+- [x] 8. 测试辅助类和测试文件修改（`ut/`）
+  - [x] 8.1 修改 `ut/Helpers/Security/TestAccessRule.php`
     - R1: `$channel = null` → `?string $channel = null`（隐式 nullable 修复）
     - R8: `$pattern` → `string|RequestMatcherInterface $pattern`；`$roles` → `string|array $roles`
     - _Requirements: 1.1, 1.2, 8.1_
-  - [ ] 8.2 修改 `ut/Helpers/Security/TestApiUser.php`
+  - [x] 8.2 修改 `ut/Helpers/Security/TestApiUser.php`
     - R6 + R10: `$username` 和 `$roles` 在构造后不再修改 → promotion + readonly
     - R8: 构造函数参数类型 `string $username, array $roles`
     - _Requirements: 6.1, 6.3, 6.4, 8.1, 10.1_
-  - [ ] 8.3 修改 `ut/Helpers/Security/TestApiUserProvider.php`
+  - [x] 8.3 修改 `ut/Helpers/Security/TestApiUserProvider.php`
     - R8: `authenticateAndGetUser(mixed $credentials): UserInterface`（匹配接口变更）
     - _Requirements: 8.1, 8.2_
-  - [ ] 8.4 修改 `ut/Helpers/Security/TestApiUserPreAuthenticator.php`
+  - [x] 8.4 修改 `ut/Helpers/Security/TestApiUserPreAuthenticator.php`
     - R6 + R10: `$userProvider` 在构造后不再修改 → `private readonly SimplePreAuthenticateUserProviderInterface $userProvider` promotion
     - _Requirements: 6.1, 6.3, 6.4, 10.1_
-  - [ ] 8.5 确认 `ut/Helpers/Security/TestAuthenticationPolicy.php` 无需修改
+  - [x] 8.5 确认 `ut/Helpers/Security/TestAuthenticationPolicy.php` 无需修改
     - Phase 3 新建，已有完整类型声明
     - _Requirements: 8.5_
-  - [ ] 8.6 修改 `ut/AwsTests/ElbTrustedProxyTest.php`
+  - [x] 8.6 修改 `ut/AwsTests/ElbTrustedProxyTest.php`
     - R3: 3 处 `$info['service'] == "CLOUDFRONT"` → `=== "CLOUDFRONT"`（T1–T3）
     - _Requirements: 3.1_
-  - [ ] 8.7 Checkpoint: 运行 `phpunit --testsuite all` 确认全部通过，无 deprecation notice，commit
+  - [x] 8.7 Checkpoint: 运行 `phpunit --testsuite all` 确认全部通过，无 deprecation notice，commit
 
-- [~] 9. 元数据和文档更新（Design CR Q4=C）
-  - [ ] 9.1 修改 `composer.json`
+- [x] 9. 元数据和文档更新（Design CR Q4=C）
+  - [x] 9.1 修改 `composer.json`
     - R11: `"description"` 从 `"An extension to Silex, for HTTP related routing, middleware, and so on."` 改为 `"A Symfony MicroKernel-based HTTP framework for routing, middleware, security, and more."`
     - 其他字段保持不变
     - _Requirements: 11.1, 11.2, 11.3_
-  - [ ] 9.2 修改 `docs/state/architecture.md`
+  - [x] 9.2 修改 `docs/state/architecture.md`
     - R12 AC3: 修正 `SilexKernel` → `MicroKernel` 引用不一致
     - 具体涉及：核心类 section 的类名和文件名、模块结构图中的 `SilexKernel.php`、Bootstrap Config section 中的 `SilexKernel` 引用
     - _Requirements: 12.1, 12.3_
-  - [ ] 9.3 Checkpoint: 运行 `phpunit --testsuite all` 确认全量通过，无 deprecation notice，commit
+  - [x] 9.3 Checkpoint: 运行 `phpunit --testsuite all` 确认全量通过，无 deprecation notice，commit
 
-- [~] 10. 手工测试
-  - [ ] 10.1 验证兼容性修复完整性
+- [-] 10. 手工测试
+  - [x] 10.1 验证兼容性修复完整性
     - 确认 `src/` 和 `ut/` 中无隐式 nullable 参数残留（grep 验证 `Type $param = null` 模式不存在）
     - 确认 `src/` 和 `ut/` 中无松散比较残留（grep 验证 `==` 和 `!=` 仅出现在注释或排除项中）
     - 确认 `src/` 和 `ut/` 中无动态属性使用
     - 确认 `src/` 和 `ut/` 中内部函数调用无类型不匹配（Design 审计结论为无需修复，此处做最终确认）
     - _Requirements: 1.1, 1.2, 2.1, 2.3, 3.1, 3.2, 4.1_
-  - [ ] 10.2 验证代码现代化应用
+  - [x] 10.2 验证代码现代化应用
     - 确认 `RouteBasedResponseRendererResolver` 使用 `match` 表达式
     - 确认 `CacheableRouterUrlMatcherWrapper` 使用 `str_contains()`
     - 确认 constructor promotion + readonly 已应用于所有适用的类（`CacheableRouterUrlMatcherWrapper`、`GroupUrlMatcher`、`AbstractSimplePreAuthenticateUserProvider`、`ViewHandlerSubscriber`、`TestApiUser`、`TestApiUserPreAuthenticator`）
     - 确认所有接口方法和实现类方法已添加原生类型声明
     - _Requirements: 6.1, 7.1, 8.1, 9.1, 10.1_
-  - [ ] 10.3 验证零 deprecation notice
+  - [x] 10.3 验证零 deprecation notice
     - 运行 `phpunit --testsuite all`，确认输出中无 deprecation notice（来自 `src/` 和 `ut/` 的代码）
     - 如有第三方依赖产生的 deprecation notice，记录但不要求修复
     - _Requirements: 13.1, 13.2_
-  - [ ] 10.4 验证元数据更新
+  - [x] 10.4 验证元数据更新
     - 确认 `composer.json` 的 `description` 不再引用 Silex
     - 确认 `docs/state/architecture.md` 中 `SilexKernel` 引用已全部修正为 `MicroKernel`
     - _Requirements: 11.1, 11.2, 12.3_
-  - [ ] 10.5 Checkpoint: 手工测试全部通过，commit
+  - [-] 10.5 Checkpoint: 手工测试全部通过，commit
 
 - [~] 11. Code Review
   - [ ] 11.1 委托给 code-reviewer agent 执行

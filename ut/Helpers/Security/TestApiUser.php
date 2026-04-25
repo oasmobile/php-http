@@ -66,6 +66,6 @@ class TestApiUser implements UserInterface, \JsonSerializable
      */
     public function jsonSerialize(): mixed
     {
-        return $this->getUsername();
+        return $this->getUserIdentifier();
     }
 }

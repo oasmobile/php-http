@@ -32,13 +32,10 @@ class TestApiUserProvider extends AbstractSimplePreAuthenticateUserProvider
         switch ($credentials) {
             case 'abcd':
                 return new TestApiUser('admin', ['ROLE_GOOD', 'ROLE_ADMIN']);
-                break;
             case 'parent':
                 return new TestApiUser('parent', ['ROLE_PARENT']);
-                break;
             case 'child':
                 return new TestApiUser('child', ['ROLE_CHILD']);
-                break;
             default:
                 throw new UserNotFoundException("apikey $credentials doesn't match any user!");
         }

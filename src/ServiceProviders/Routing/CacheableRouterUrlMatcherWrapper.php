@@ -15,15 +15,10 @@ use Symfony\Component\Routing\RequestContext;
 
 class CacheableRouterUrlMatcherWrapper implements UrlMatcherInterface
 {
-    /** @var  UrlMatcherInterface */
-    protected $other;
-    /** @var  array */
-    protected $namespaces;
-    
-    public function __construct(UrlMatcherInterface $other, array $namespaces)
-    {
-        $this->other      = $other;
-        $this->namespaces = $namespaces;
+    public function __construct(
+        protected readonly UrlMatcherInterface $other,
+        protected readonly array $namespaces
+    ) {
     }
     
     /**
@@ -64,7 +59,7 @@ class CacheableRouterUrlMatcherWrapper implements UrlMatcherInterface
         /** @var string[] $result */
         $result = $this->other->match($pathinfo);
         
-        if (\is_string($result['_controller']) && strpos($result['_controller'], "::") !== false) {
+        if (\is_string($result['_controller']) && str_contains($result['_controller'], "::")) {
             // check if we should prepend controller namespace
             /** @noinspection PhpUnusedLocalVariableInspection */
             list($className, $methodName) = explode("::", $result['_controller'], 2);

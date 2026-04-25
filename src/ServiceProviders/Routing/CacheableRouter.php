@@ -18,10 +18,8 @@ use Symfony\Component\Routing\Router;
 
 class CacheableRouter extends Router
 {
-    /** @var MicroKernel */
-    private $kernel;
-    /** @var bool */
-    private $isParamReplaced = false;
+    private MicroKernel $kernel;
+    private bool $isParamReplaced = false;
     
     /**
      * CacheableRouter constructor.
@@ -36,7 +34,7 @@ class CacheableRouter extends Router
     public function __construct(
         MicroKernel $kernel,
         LoaderInterface $loader,
-        $resource,
+        mixed $resource,
         array $options = [],
         ?RequestContext $context = null,
         ?LoggerInterface $logger = null)

@@ -17,23 +17,16 @@ use Symfony\Component\Routing\RequestContext;
 
 class GroupUrlMatcher implements UrlMatcherInterface, RequestMatcherInterface
 {
-    /** @var  RequestContext */
-    protected $context;
-    /** @var  UrlMatcherInterface[] */
-    protected $matchers;
-    
     /**
      * GroupUrlMatcher constructor.
      *
      * @param RequestContext        $context
      * @param UrlMatcherInterface[] $matchers
      */
-    public function __construct(RequestContext $context,
-                                array $matchers
-    )
-    {
-        $this->context  = $context;
-        $this->matchers = $matchers;
+    public function __construct(
+        protected RequestContext $context,
+        protected readonly array $matchers
+    ) {
     }
     
     /**
@@ -81,7 +74,7 @@ class GroupUrlMatcher implements UrlMatcherInterface, RequestMatcherInterface
                 // matched
                 return $result;
             } catch (ResourceNotFoundException $e) {
-                if ($matched == $total) {
+                if ($matched === $total) {
                     // already last matcher
                     throw $e;
                 }

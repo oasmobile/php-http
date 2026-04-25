@@ -16,23 +16,18 @@ use Symfony\Component\Routing\RequestContext;
 
 class GroupUrlGenerator implements UrlGeneratorInterface
 {
-    /** @var  UrlGeneratorInterface[] */
-    protected $generators;
-    
     /** @var  RequestContext */
-    protected $context;
+    protected RequestContext $context;
 
-    /** @var bool Whether setContext() has been explicitly called */
-    protected $contextExplicitlySet = false;
+    protected bool $contextExplicitlySet = false;
     
     /**
      * GroupUrlGenerator constructor.
      *
      * @param UrlGeneratorInterface[] $generators
      */
-    public function __construct(array $generators)
+    public function __construct(protected readonly array $generators)
     {
-        $this->generators = $generators;
         $this->context    = new RequestContext();
     }
     
@@ -97,7 +92,7 @@ class GroupUrlGenerator implements UrlGeneratorInterface
                 
                 return $generator->generate($name, $parameters, $referenceType);
             } catch (RouteNotFoundException $e) {
-                if ($found == $total) {
+                if ($found === $total) {
                     // already last url generator
                     throw $e;
                 }

@@ -21,9 +21,9 @@ class CacheableRouterProvider
     use ConfigurationValidationTrait;
 
     /** @var Router */
-    protected $router;
+    protected ?Router $router = null;
     /** @var MicroKernel */
-    protected $kernel;
+    protected ?MicroKernel $kernel = null;
 
     public function __construct()
     {
@@ -44,7 +44,7 @@ class CacheableRouterProvider
     }
 
     /** @return DataProviderInterface */
-    public function getConfigDataProvider()
+    public function getConfigDataProvider(): DataProviderInterface
     {
         if (!$this->kernel) {
             throw new \LogicException("Cannot get config data provider before registration");
@@ -58,7 +58,7 @@ class CacheableRouterProvider
      *
      * @return Router
      */
-    public function getRouter(RequestContext $requestContext)
+    public function getRouter(RequestContext $requestContext): Router
     {
         if (!$this->router) {
             if (!$this->getConfigDataProvider()) {
@@ -74,7 +74,7 @@ class CacheableRouterProvider
                 $routerPath = dirname($routerPath);
             }
 
-            $cacheDir                = strcasecmp($this->getConfigDataProvider()->getOptional('cache_dir', DataProviderInterface::STRING_TYPE, ''), "false") == 0 ? null :
+            $cacheDir                = strcasecmp($this->getConfigDataProvider()->getOptional('cache_dir', DataProviderInterface::STRING_TYPE, ''), "false") === 0 ? null :
                 ($this->getConfigDataProvider()->getOptional('cache_dir') ?: $this->kernel->getCacheDir() . "/routing");
             $locator                 = new FileLocator([$routerPath]);
             $this->router            = new CacheableRouter(

@@ -110,13 +110,11 @@ class AuthenticatorPropertyTest extends TestCase
             'valid-key' => ['identifier' => 'user1', 'roles' => ['ROLE_USER']],
         ]);
 
+        // Use names() instead of string() to avoid null bytes and special
+        // characters that break query-parameter round-trip through Request::create().
         $this->forAll(
-            // Generate either a non-empty string (credential present) or empty string (no credential)
             Generators::oneOf(
-                Generators::suchThat(
-                    fn(string $s) => $s !== '',
-                    Generators::string()
-                ),
+                Generators::suchThat(fn(string $s) => $s !== '', Generators::names()),
                 Generators::constant('')
             )
         )->then(function (string $sig) use ($authenticator) {
@@ -149,16 +147,14 @@ class AuthenticatorPropertyTest extends TestCase
      */
     public function testAuthenticateRoundTrip(): void
     {
-        // Generate random valid credential keys and user data
+        // Use names() instead of string() to generate URL-safe credential keys
+        // and usernames. Generators::string() can produce null bytes and special
+        // characters that break query-parameter round-trip through Request::create().
+        // Wrap with suchThat to filter out empty strings (names() returns '' at size 0).
+        $nonEmptyName = Generators::suchThat(fn(string $s) => $s !== '', Generators::names());
         $this->forAll(
-            Generators::suchThat(
-                fn(string $s) => $s !== '' && strlen($s) <= 50,
-                Generators::string()
-            ),
-            Generators::suchThat(
-                fn(string $s) => $s !== '' && strlen($s) <= 50,
-                Generators::string()
-            ),
+            $nonEmptyName,
+            $nonEmptyName,
             Generators::choose(0, 3)
         )->then(function (string $credentialKey, string $username, int $roleCount) {
             $roles = [];
@@ -200,10 +196,7 @@ class AuthenticatorPropertyTest extends TestCase
         $authenticator = new StubPreAuthenticator([]);
 
         $this->forAll(
-            Generators::suchThat(
-                fn(string $s) => $s !== '' && strlen($s) <= 100,
-                Generators::string()
-            )
+            Generators::suchThat(fn(string $s) => $s !== '', Generators::names())
         )->then(function (string $invalidKey) use ($authenticator) {
             $request = Request::create('/', 'GET', ['sig' => $invalidKey]);
 
@@ -224,19 +217,12 @@ class AuthenticatorPropertyTest extends TestCase
      */
     public function testCreateTokenInvariant(): void
     {
+        // Use names() instead of string() — same rationale as testAuthenticateRoundTrip.
+        $nonEmptyName = Generators::suchThat(fn(string $s) => $s !== '', Generators::names());
         $this->forAll(
-            Generators::suchThat(
-                fn(string $s) => $s !== '' && strlen($s) <= 50,
-                Generators::string()
-            ),
-            Generators::suchThat(
-                fn(string $s) => $s !== '' && strlen($s) <= 50,
-                Generators::string()
-            ),
-            Generators::suchThat(
-                fn(string $s) => $s !== '' && strlen($s) <= 50,
-                Generators::string()
-            ),
+            $nonEmptyName,
+            $nonEmptyName,
+            $nonEmptyName,
             Generators::choose(1, 4)
         )->then(function (string $credentialKey, string $username, string $firewallName, int $roleCount) {
             $roles = [];

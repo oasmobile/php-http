@@ -30,7 +30,7 @@ class SimpleCookieProviderTest extends TestCase
 
         $provider = new SimpleCookieProvider($cookieContainer);
 
-        $kernel   = $this->createMock(HttpKernelInterface::class);
+        $kernel   = $this->createStub(HttpKernelInterface::class);
         $request  = Request::create('/test');
         $response = new Response('ok');
         $event    = new ResponseEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST, $response);
@@ -51,7 +51,7 @@ class SimpleCookieProviderTest extends TestCase
 
         $provider = new SimpleCookieProvider($cookieContainer);
 
-        $kernel   = $this->createMock(HttpKernelInterface::class);
+        $kernel   = $this->createStub(HttpKernelInterface::class);
         $request  = Request::create('/test');
         $response = new Response('ok');
         $event    = new ResponseEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST, $response);
@@ -71,7 +71,7 @@ class SimpleCookieProviderTest extends TestCase
         $cookieContainer = new ResponseCookieContainer();
         $provider        = new SimpleCookieProvider($cookieContainer);
 
-        $kernel   = $this->createMock(HttpKernelInterface::class);
+        $kernel   = $this->createStub(HttpKernelInterface::class);
         $request  = Request::create('/test');
         $response = new Response('ok');
         $event    = new ResponseEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST, $response);

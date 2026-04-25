@@ -104,7 +104,7 @@ class ExtendedExceptionListnerWrapperTest extends TestCase
      */
     private function createExceptionEvent(): ExceptionEvent
     {
-        $kernel  = $this->createMock(HttpKernelInterface::class);
+        $kernel  = $this->createStub(HttpKernelInterface::class);
         $request = Request::create('/');
 
         return new ExceptionEvent(

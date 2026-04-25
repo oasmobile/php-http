@@ -5,11 +5,9 @@
         bootstrap="ut/bootstrap.php"
 >
     <testsuites>
-        <testsuite name="all">
-            <directory>ut</directory>
-        </testsuite>
         <testsuite name="exceptions">
             <file>ut/Misc/UniquenessViolationHttpExceptionTest.php</file>
+            <file>ut/HttpExceptionTest.php</file>
         </testsuite>
         <testsuite name="cors">
             <file>ut/Cors/CrossOriginResourceSharingTest.php</file>
@@ -20,6 +18,7 @@
             <file>ut/Security/SecurityServiceProviderConfigurationTest.php</file>
             <file>ut/Security/NullEntryPointTest.php</file>
             <file>ut/Security/AccessRuleListenerTest.php</file>
+            <file>ut/Security/AbstractSimplePreAuthenticationPolicyTest.php</file>
         </testsuite>
         <testsuite name="twig">
             <file>ut/Twig/TwigServiceProviderTest.php</file>
@@ -71,7 +70,6 @@
             <file>ut/Misc/ExtendedArgumentValueResolverTest.php</file>
             <file>ut/Misc/ExtendedExceptionListnerWrapperTest.php</file>
             <file>ut/Misc/ChainedParameterBagDataProviderTest.php</file>
-            <file>ut/Misc/UniquenessViolationHttpExceptionTest.php</file>
         </testsuite>
         <testsuite name="integration">
             <file>ut/Integration/BootstrapConfigurationIntegrationTest.php</file>

@@ -206,9 +206,7 @@ class ExtendedArgumentValueResolverTest extends TestCase
      */
     private function createArgumentMetadata(?string $type): ArgumentMetadata
     {
-        $argument = $this->getMockBuilder(ArgumentMetadata::class)
-                         ->disableOriginalConstructor()
-                         ->getMock();
+        $argument = $this->createStub(ArgumentMetadata::class);
         $argument->method('getType')->willReturn($type);
 
         return $argument;

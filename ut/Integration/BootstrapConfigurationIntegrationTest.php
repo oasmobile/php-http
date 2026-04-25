@@ -31,6 +31,15 @@ class BootstrapConfigurationIntegrationTest extends TestCase
         $this->cleanRouteCache(__DIR__ . '/../cache');
     }
 
+    /**
+     * Restore exception handlers that Symfony Kernel may have set during boot/handle.
+     */
+    protected function tearDown(): void
+    {
+        restore_exception_handler();
+        parent::tearDown();
+    }
+
     // ---------------------------------------------------------------
     // AC 1: routing configured → CacheableRouterProvider registered,
     //        routes matchable

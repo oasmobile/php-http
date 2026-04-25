@@ -39,16 +39,6 @@ class SecurityServiceProviderTest extends WebTestCase
         return $app;
     }
     
-    public function testBasicAuth()
-    {
-        $this->markTestSkipped('HTTP basic auth policy not yet implemented (deferred to future phase)');
-    }
-    
-    public function testFormAuth()
-    {
-        $this->markTestSkipped('Form login auth policy not yet implemented (deferred to future phase)');
-    }
-    
     public function testPreAuth()
     {
         //$this->markTestSkipped();
@@ -183,22 +173,6 @@ class SecurityServiceProviderTest extends WebTestCase
     }
     
     /**
-     * Basic auth failure: wrong password returns 401 Unauthorized.
-     */
-    public function testBasicAuthWrongPassword()
-    {
-        $this->markTestSkipped('HTTP basic auth policy not yet implemented (deferred to future phase)');
-    }
-    
-    /**
-     * Basic auth failure: non-existent user returns 401 Unauthorized.
-     */
-    public function testBasicAuthNonExistentUser()
-    {
-        $this->markTestSkipped('HTTP basic auth policy not yet implemented (deferred to future phase)');
-    }
-    
-    /**
      * AccessRule boundary: ROLE_ADMIN required, user has ROLE_ADMIN → 200.
      */
     public function testAccessRuleAdminWithAdminRole()
@@ -329,19 +303,4 @@ class SecurityServiceProviderTest extends WebTestCase
         $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
     }
     
-    /**
-     * Form auth failure: wrong password redirects back to login page.
-     */
-    public function testFormAuthWrongPassword()
-    {
-        $this->markTestSkipped('Form login auth policy not yet implemented (deferred to future phase)');
-    }
-    
-    /**
-     * Form auth failure: non-existent user redirects back to login page.
-     */
-    public function testFormAuthNonExistentUser()
-    {
-        $this->markTestSkipped('Form login auth policy not yet implemented (deferred to future phase)');
-    }
 }

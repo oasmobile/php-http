@@ -22,15 +22,13 @@ class CacheableRouterTest extends TestCase
      */
     private function createRouter(RouteCollection $collection, array $parameters = [])
     {
-        $kernel = $this->getMockBuilder(MicroKernel::class)
-                       ->disableOriginalConstructor()
-                       ->getMock();
+        $kernel = $this->createStub(MicroKernel::class);
         $kernel->method('getParameter')
                ->willReturnCallback(function ($key) use ($parameters) {
                    return isset($parameters[$key]) ? $parameters[$key] : null;
                });
 
-        $loader = $this->getMockBuilder(LoaderInterface::class)->getMock();
+        $loader = $this->createStub(LoaderInterface::class);
         $loader->method('load')
                ->willReturn($collection);
 

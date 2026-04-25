@@ -50,7 +50,8 @@ class SilexKernelTest extends TestCase
     public function testCreationWithOkConfig()
     {
         $cacheDir = static::createTempCacheDir();
-        require __DIR__ . '/app.php';
+        $app = require __DIR__ . '/app.php';
+        $this->assertInstanceOf(MicroKernel::class, $app);
     }
     
     public function testProductionMode()
@@ -256,7 +257,7 @@ class SilexKernelTest extends TestCase
     {
         $app = new MicroKernel([], true);
 
-        $checker = $this->getMockBuilder(AuthorizationCheckerInterface::class)->getMock();
+        $checker = $this->createStub(AuthorizationCheckerInterface::class);
         $checker->method('isGranted')
             ->willThrowException(new AuthenticationCredentialsNotFoundException('No credentials'));
 
@@ -269,7 +270,7 @@ class SilexKernelTest extends TestCase
     {
         $app = new MicroKernel([], true);
 
-        $checker = $this->getMockBuilder(AuthorizationCheckerInterface::class)->getMock();
+        $checker = $this->createStub(AuthorizationCheckerInterface::class);
         $checker->method('isGranted')->willReturn(true);
 
         $app->setAuthorizationChecker($checker);
@@ -281,7 +282,7 @@ class SilexKernelTest extends TestCase
     {
         $app = new MicroKernel([], true);
 
-        $checker = $this->getMockBuilder(AuthorizationCheckerInterface::class)->getMock();
+        $checker = $this->createStub(AuthorizationCheckerInterface::class);
         $checker->method('isGranted')->willReturn(false);
 
         $app->setAuthorizationChecker($checker);
@@ -384,8 +385,8 @@ class SilexKernelTest extends TestCase
     {
         $app = new MicroKernel([], true);
 
-        $token = $this->getMockBuilder(TokenInterface::class)->getMock();
-        $tokenStorage = $this->getMockBuilder(TokenStorageInterface::class)->getMock();
+        $token = $this->createStub(TokenInterface::class);
+        $tokenStorage = $this->createStub(TokenStorageInterface::class);
         $tokenStorage->method('getToken')->willReturn($token);
 
         $app->setTokenStorage($tokenStorage);
@@ -408,11 +409,11 @@ class SilexKernelTest extends TestCase
     {
         $app = new MicroKernel([], true);
 
-        $user = $this->getMockBuilder(UserInterface::class)->getMock();
-        $token = $this->getMockBuilder(TokenInterface::class)->getMock();
+        $user = $this->createStub(UserInterface::class);
+        $token = $this->createStub(TokenInterface::class);
         $token->method('getUser')->willReturn($user);
 
-        $tokenStorage = $this->getMockBuilder(TokenStorageInterface::class)->getMock();
+        $tokenStorage = $this->createStub(TokenStorageInterface::class);
         $tokenStorage->method('getToken')->willReturn($token);
 
         $app->setTokenStorage($tokenStorage);

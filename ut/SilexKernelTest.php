@@ -49,6 +49,7 @@ class SilexKernelTest extends TestCase
 
     public function testCreationWithOkConfig()
     {
+        $cacheDir = static::createTempCacheDir();
         require __DIR__ . '/app.php';
     }
     

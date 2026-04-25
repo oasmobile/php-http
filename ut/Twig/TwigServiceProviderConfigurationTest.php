@@ -17,6 +17,7 @@ class TwigServiceProviderConfigurationTest extends TwigServiceProviderTest
      */
     public function createApplication()
     {
+        $cacheDir = static::createTempCacheDir();
         return require __DIR__ . "/app.twig2.php";
     }
 }

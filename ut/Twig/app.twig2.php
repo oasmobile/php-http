@@ -9,7 +9,7 @@ use Oasis\Mlib\Http\Test\Helpers\TwigHelper;
 use Oasis\Mlib\Http\Views\JsonViewHandler;
 
 $config = [
-    'cache_dir'      => sys_get_temp_dir() . '/oasis-http-ut',
+    'cache_dir'      => isset($cacheDir) ? $cacheDir : sys_get_temp_dir() . '/oasis-http-ut',
     'routing'        => [
         'path'       => __DIR__ . '/../routes.yml',
         'namespaces' => [

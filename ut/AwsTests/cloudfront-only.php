@@ -9,7 +9,7 @@
  */
 
 use Oasis\Mlib\Http\ErrorHandlers\JsonErrorHandler;
-use Oasis\Mlib\Http\SilexKernel;
+use Oasis\Mlib\Http\MicroKernel;
 use Oasis\Mlib\Http\Views\JsonViewHandler;
 
 if (!isset($cacheDir)) {
@@ -26,11 +26,11 @@ $config = [
             'Oasis\\Mlib\\Http\\Test\\Helpers\\Controllers\\',
         ],
     ],
+    'view_handlers'  => [new JsonViewHandler()],
+    'error_handlers' => [new JsonErrorHandler()],
+    'injected_args'  => [new JsonViewHandler()],
+    'trusted_proxies' => ['127.0.0.1', '1.2.3.4', '5.6.7.8/16'],
 ];
-/** @var SilexKernel $app */
-$app                 = new SilexKernel($config, true);
-$app->view_handlers  = [new JsonViewHandler()];
-$app->error_handlers = [new JsonErrorHandler()];
-$app->injected_args  = [new JsonViewHandler()];
-$app->trusted_proxies = ['127.0.0.1', '1.2.3.4', '5.6.7.8/16'];
+/** @var MicroKernel $app */
+$app = new MicroKernel($config, true);
 return $app;

@@ -14,7 +14,7 @@ class TwigConfigurationTest extends TestCase
     /** @var TwigConfiguration */
     private $configuration;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->processor     = new Processor();
         $this->configuration = new TwigConfiguration();
@@ -111,5 +111,53 @@ class TwigConfigurationTest extends TestCase
         $result = $this->process(['globals' => $globals]);
 
         $this->assertSame($globals, $result['globals']);
+    }
+
+    //----------------------------------------------------------------------
+    // strict_variables — defaults to true (R4 AC3)
+    //----------------------------------------------------------------------
+
+    public function testStrictVariablesDefaultsToTrue()
+    {
+        $result = $this->process([]);
+
+        $this->assertArrayHasKey('strict_variables', $result);
+        $this->assertTrue($result['strict_variables']);
+    }
+
+    public function testStrictVariablesExplicitFalse()
+    {
+        $result = $this->process(['strict_variables' => false]);
+
+        $this->assertArrayHasKey('strict_variables', $result);
+        $this->assertFalse($result['strict_variables']);
+    }
+
+    //----------------------------------------------------------------------
+    // auto_reload — defaults to null (R4 AC4)
+    //----------------------------------------------------------------------
+
+    public function testAutoReloadDefaultsToNull()
+    {
+        $result = $this->process([]);
+
+        $this->assertArrayHasKey('auto_reload', $result);
+        $this->assertNull($result['auto_reload']);
+    }
+
+    public function testAutoReloadExplicitTrue()
+    {
+        $result = $this->process(['auto_reload' => true]);
+
+        $this->assertArrayHasKey('auto_reload', $result);
+        $this->assertTrue($result['auto_reload']);
+    }
+
+    public function testAutoReloadExplicitFalse()
+    {
+        $result = $this->process(['auto_reload' => false]);
+
+        $this->assertArrayHasKey('auto_reload', $result);
+        $this->assertFalse($result['auto_reload']);
     }
 }

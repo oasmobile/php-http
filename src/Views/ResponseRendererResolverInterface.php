@@ -12,10 +12,5 @@ use Symfony\Component\HttpFoundation\Request;
 
 interface ResponseRendererResolverInterface
 {
-    /**
-     * @param Request $request
-     *
-     * @return ResponseRendererInterface
-     */
-    public function resolveRequest(Request $request);
+    public function resolveRequest(Request $request): ResponseRendererInterface;
 }

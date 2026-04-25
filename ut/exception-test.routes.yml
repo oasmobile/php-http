@@ -1,0 +1,5 @@
+exception_uniq:
+    path: /uniq
+    defaults:
+        _controller: 'Oasis\Mlib\Http\Test\Helpers\Controllers\ExceptionTestController::throwUniquenessViolationExceptionAction'
+        format: api

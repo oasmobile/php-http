@@ -8,7 +8,7 @@
 
 use Composer\Autoload\ClassLoader;
 use Oasis\Mlib\Http\ErrorHandlers\JsonErrorHandler;
-use Oasis\Mlib\Http\SilexKernel;
+use Oasis\Mlib\Http\MicroKernel;
 use Oasis\Mlib\Http\Views\JsonViewHandler;
 
 /** @var ClassLoader $loader */
@@ -22,14 +22,13 @@ $config = [
             "path"       => __DIR__ . "/zxc/routes.yml",
             "namespaces" => ["Oasis\\Mlib\\Http\\Test\\Helpers\\"],
         ],
+    'view_handlers'  => [new JsonViewHandler()],
+    'error_handlers' => [new JsonErrorHandler()],
 ];
 
-$kernel = new SilexKernel(
+$kernel = new MicroKernel(
     $config,
     true
 );
-
-$kernel->view(new JsonViewHandler());
-$kernel->error(new JsonErrorHandler());
 
 $kernel->run();

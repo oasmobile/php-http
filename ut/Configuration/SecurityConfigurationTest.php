@@ -14,7 +14,7 @@ class SecurityConfigurationTest extends TestCase
     /** @var SecurityConfiguration */
     private $configuration;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->processor     = new Processor();
         $this->configuration = new SecurityConfiguration();

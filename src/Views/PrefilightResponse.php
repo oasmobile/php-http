@@ -12,9 +12,10 @@ use Symfony\Component\HttpFoundation\Response;
 
 class PrefilightResponse extends Response
 {
-    protected $allowedMethods = [];
+    /** @var array<string> */
+    protected array $allowedMethods = [];
     
-    protected $frozen = false;
+    protected bool $frozen = false;
     
     public function __construct()
     {
@@ -22,27 +23,24 @@ class PrefilightResponse extends Response
     }
     
     /**
-     * @return array
+     * @return array<string>
      */
-    public function getAllowedMethods()
+    public function getAllowedMethods(): array
     {
         return $this->allowedMethods;
     }
     
-    public function addAllowedMethod($method)
+    public function addAllowedMethod(string $method): void
     {
         $this->allowedMethods[] = $method;
     }
     
-    /**
-     * @return boolean
-     */
-    public function isFrozen()
+    public function isFrozen(): bool
     {
         return $this->frozen;
     }
     
-    public function freeze()
+    public function freeze(): void
     {
         $this->frozen = true;
     }

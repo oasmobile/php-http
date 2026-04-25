@@ -12,18 +12,8 @@ use Symfony\Component\Routing\Loader\YamlFileLoader;
 
 class InheritableYamlFileLoader extends YamlFileLoader
 {
-    //protected function parseImport(RouteCollection $collection, array $config, $path, $file)
-    //{
-    //    $inheritableCollection = new InheritableRouteCollection($collection);
-    //
-    //    parent::parseImport($inheritableCollection, $config, $path, $file);
-    //
-    //    $collection->addCollection($inheritableCollection);
-    //}
-    
-    public function import($resource, $type = null, $ignoreErrors = false, $sourceResource = null)
+    public function import(mixed $resource, ?string $type = null, bool $ignoreErrors = false, ?string $sourceResource = null, string|array|null $exclude = null): mixed
     {
-        return new InheritableRouteCollection(parent::import($resource, $type, $ignoreErrors, $sourceResource));
+        return new InheritableRouteCollection(parent::import($resource, $type, $ignoreErrors, $sourceResource, $exclude));
     }
-    
 }

@@ -12,65 +12,37 @@ use Symfony\Component\Security\Core\User\UserInterface;
 
 class TestApiUser implements UserInterface, \JsonSerializable
 {
-    protected $username;
-    protected $roles;
-    
-    public function __construct($username, $roles)
-    {
-        $this->roles    = $roles;
-        $this->username = $username;
+    public function __construct(
+        protected readonly string $username,
+        protected readonly array $roles
+    ) {
     }
     
     /**
      * Returns the roles granted to the user.
      *
-     * <code>
-     * public function getRoles()
-     * {
-     *     return array('ROLE_USER');
-     * }
-     * </code>
-     *
-     * Alternatively, the roles might be stored on a ``roles`` property,
-     * and populated in any number of different ways when the user object
-     * is created.
-     *
-     * @return array (Role|string)[] The user roles
+     * @return array The user roles
      */
-    public function getRoles()
+    public function getRoles(): array
     {
         return $this->roles;
     }
     
     /**
-     * Returns the password used to authenticate the user.
+     * Returns the identifier for this user (e.g. username or email address).
      *
-     * This should be the encoded password. On authentication, a plain-text
-     * password will be salted, encoded, and then compared to this value.
-     *
-     * @return string The password
+     * @return string The user identifier
      */
-    public function getPassword()
+    public function getUserIdentifier(): string
     {
-        return '';
-    }
-    
-    /**
-     * Returns the salt that was originally used to encode the password.
-     *
-     * This can return null if the password was not encoded using a salt.
-     *
-     * @return string|null The salt
-     */
-    public function getSalt()
-    {
-        return null;
+        return $this->username;
     }
     
     /**
      * Returns the username used to authenticate the user.
      *
      * @return string The username
+     * @deprecated Use getUserIdentifier() instead
      */
     public function getUsername()
     {
@@ -79,24 +51,18 @@ class TestApiUser implements UserInterface, \JsonSerializable
     
     /**
      * Removes sensitive data from the user.
-     *
-     * This is important if, at any given point, sensitive information like
-     * the plain-text password is stored on this object.
      */
-    public function eraseCredentials()
+    public function eraseCredentials(): void
     {
     }
     
     /**
      * Specify data which should be serialized to JSON
      *
-     * @link  http://php.net/manual/en/jsonserializable.jsonserialize.php
-     * @return mixed data which can be serialized by <b>json_encode</b>,
-     *        which is a value of any type other than a resource.
-     * @since 5.4.0
+     * @return mixed data which can be serialized by json_encode
      */
-    function jsonSerialize()
+    public function jsonSerialize(): mixed
     {
-        return $this->getUsername();
+        return $this->getUserIdentifier();
     }
 }

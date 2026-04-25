@@ -2,8 +2,8 @@
 
 namespace Oasis\Mlib\Http\Test\Routing;
 
+use Oasis\Mlib\Http\MicroKernel;
 use Oasis\Mlib\Http\ServiceProviders\Routing\CacheableRouter;
-use Oasis\Mlib\Http\SilexKernel;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\Routing\Route;
@@ -13,7 +13,7 @@ class CacheableRouterTest extends TestCase
 {
     /**
      * Create a CacheableRouter with a mock loader that returns the given RouteCollection,
-     * and a mock SilexKernel with configurable getParameter() behavior.
+     * and a mock MicroKernel with configurable getParameter() behavior.
      *
      * @param RouteCollection $collection
      * @param array           $parameters  key => value map for getParameter()
@@ -22,15 +22,13 @@ class CacheableRouterTest extends TestCase
      */
     private function createRouter(RouteCollection $collection, array $parameters = [])
     {
-        $kernel = $this->getMockBuilder(SilexKernel::class)
-                       ->disableOriginalConstructor()
-                       ->getMock();
+        $kernel = $this->createStub(MicroKernel::class);
         $kernel->method('getParameter')
                ->willReturnCallback(function ($key) use ($parameters) {
                    return isset($parameters[$key]) ? $parameters[$key] : null;
                });
 
-        $loader = $this->getMockBuilder(LoaderInterface::class)->getMock();
+        $loader = $this->createStub(LoaderInterface::class);
         $loader->method('load')
                ->willReturn($collection);
 

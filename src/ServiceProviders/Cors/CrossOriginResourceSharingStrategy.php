@@ -10,9 +10,12 @@ namespace Oasis\Mlib\Http\ServiceProviders\Cors;
 
 use Oasis\Mlib\Http\Configuration\ConfigurationValidationTrait;
 use Oasis\Mlib\Http\Configuration\CrossOriginResourceSharingConfiguration;
-use Oasis\Mlib\Utils\DataProviderInterface;
+use Oasis\Mlib\Utils\DataType;
+use Symfony\Component\HttpFoundation\ChainRequestMatcher;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\RequestMatcher;
+use Symfony\Component\HttpFoundation\RequestMatcher\HostRequestMatcher;
+use Symfony\Component\HttpFoundation\RequestMatcher\PathRequestMatcher;
+use Symfony\Component\HttpFoundation\RequestMatcherInterface;
 
 class CrossOriginResourceSharingStrategy
 {
@@ -28,37 +31,40 @@ class CrossOriginResourceSharingStrategy
     
     use ConfigurationValidationTrait;
     
-    /** @var RequestMatcher */
-    protected $matcher            = null;
-    protected $originsAllowed     = [];
-    protected $headersAllowed     = [];
-    protected $headersExposed     = [];
-    protected $maxAge             = 0;
-    protected $credentialsAllowed = false;
+    protected ?RequestMatcherInterface $matcher = null;
+    /** @var array<string> */
+    protected array $originsAllowed            = [];
+    /** @var array<string> */
+    protected array $headersAllowed            = [];
+    /** @var array<string> */
+    protected array $headersExposed            = [];
+    protected int $maxAge                      = 0;
+    protected bool $credentialsAllowed         = false;
+    protected ?Request $request                = null;
     
-    /** @var  Request|null */
-    protected $request;
-    
-    function __construct(array $configuration)
+    /**
+     * @param array<string, mixed> $configuration
+     */
+    public function __construct(array $configuration)
     {
         $dp = $this->processConfiguration($configuration, new CrossOriginResourceSharingConfiguration());
         
-        $pattern                  = $dp->getMandatory('pattern', DataProviderInterface::MIXED_TYPE);
-        $this->originsAllowed     = $dp->getMandatory('origins', DataProviderInterface::ARRAY_TYPE);
-        $this->headersAllowed     = $dp->getOptional('headers', DataProviderInterface::ARRAY_TYPE, []);
-        $this->headersExposed     = $dp->getOptional('headers_exposed', DataProviderInterface::ARRAY_TYPE, []);
-        $this->maxAge             = $dp->getOptional('max_age', DataProviderInterface::INT_TYPE, 86400);
-        $this->credentialsAllowed = $dp->getOptional('credentials_allowed', DataProviderInterface::BOOL_TYPE, false);
+        $pattern                  = $dp->getMandatory('pattern', DataType::Mixed);
+        $this->originsAllowed     = $dp->getMandatory('origins', DataType::Array);
+        $this->headersAllowed     = $dp->getOptional('headers', DataType::Array, []);
+        $this->headersExposed     = $dp->getOptional('headers_exposed', DataType::Array, []);
+        $this->maxAge             = $dp->getOptional('max_age', DataType::Int, 86400);
+        $this->credentialsAllowed = $dp->getOptional('credentials_allowed', DataType::Bool, false);
         
         if (is_string($pattern)) {
-            if ($pattern == "*") {
-                $this->matcher = new RequestMatcher('.*');
+            if ($pattern === "*") {
+                $this->matcher = new ChainRequestMatcher([new PathRequestMatcher('.*')]);
             }
             else {
-                $this->matcher = new RequestMatcher($pattern);
+                $this->matcher = new ChainRequestMatcher([new PathRequestMatcher($pattern)]);
             }
         }
-        elseif ($pattern instanceof RequestMatcher) {
+        elseif ($pattern instanceof RequestMatcherInterface) {
             $this->matcher = $pattern;
         }
         else {
@@ -68,9 +74,9 @@ class CrossOriginResourceSharingStrategy
         }
     }
     
-    public function matches(Request $request)
+    public function matches(Request $request): bool
     {
-        if ($this->matcher->matches($request)) {
+        if ($this->matcher !== null && $this->matcher->matches($request)) {
             $this->request = $request;
             
             return true;
@@ -82,7 +88,7 @@ class CrossOriginResourceSharingStrategy
         }
     }
     
-    public function isOriginAllowed($origin)
+    public function isOriginAllowed(string $origin): bool
     {
         if (!preg_match(self::DOMAIN_MATCHING_PATTERN, $origin, $matches)) {
             return false;
@@ -100,12 +106,12 @@ class CrossOriginResourceSharingStrategy
         }
     }
     
-    public function isWildcardOriginAllowed()
+    public function isWildcardOriginAllowed(): bool
     {
         return in_array("*", $this->originsAllowed);
     }
     
-    public function isHeaderAllowed($header)
+    public function isHeaderAllowed(string $header): bool
     {
         $header = strtolower($header);
         
@@ -121,28 +127,22 @@ class CrossOriginResourceSharingStrategy
         }
     }
     
-    /**
-     * @return bool
-     */
-    public function isCredentialsAllowed()
+    public function isCredentialsAllowed(): bool
     {
         return $this->credentialsAllowed;
     }
     
-    /**
-     * @return int|mixed
-     */
-    public function getMaxAge()
+    public function getMaxAge(): int
     {
         return $this->maxAge;
     }
     
-    public function getAllowedHeaders()
+    public function getAllowedHeaders(): string
     {
         return implode(", ", $this->headersAllowed);
     }
     
-    public function getExposedHeaders()
+    public function getExposedHeaders(): string
     {
         return implode(", ", $this->headersExposed);
     }

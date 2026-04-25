@@ -14,7 +14,7 @@ class CrossOriginResourceSharingConfigurationTest extends TestCase
     /** @var CrossOriginResourceSharingConfiguration */
     private $configuration;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->processor     = new Processor();
         $this->configuration = new CrossOriginResourceSharingConfiguration();
@@ -41,7 +41,7 @@ class CrossOriginResourceSharingConfigurationTest extends TestCase
 
     public function testPatternIsRequired()
     {
-        $this->setExpectedException(\Exception::class);
+        $this->expectException(\Exception::class);
 
         $this->process([]);
     }

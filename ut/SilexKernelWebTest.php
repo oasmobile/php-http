@@ -1,9 +1,9 @@
 <?php
-use Oasis\Mlib\Http\SilexKernel;
+use Oasis\Mlib\Http\MicroKernel;
 use Oasis\Mlib\Http\Test\Helpers\RouteCacheCleaner;
+use Oasis\Mlib\Http\Test\Helpers\WebTestCase;
 use Oasis\Mlib\Http\Views\JsonViewHandler;
 use Oasis\Mlib\Utils\StringUtils;
-use Silex\WebTestCase;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
@@ -18,7 +18,7 @@ class SilexKernelWebTest extends WebTestCase
 {
     use RouteCacheCleaner;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->cleanRouteCache(__DIR__ . '/cache');
         parent::setUp();
@@ -31,7 +31,8 @@ class SilexKernelWebTest extends WebTestCase
      */
     public function createApplication()
     {
-        /** @var SilexKernel $app */
+        $cacheDir = static::createTempCacheDir();
+        /** @var MicroKernel $app */
         $app = require __DIR__ . '/app.php';
         $app->addExtraParameters(
             [
@@ -355,7 +356,7 @@ class SilexKernelWebElbTest extends WebTestCase
 {
     use RouteCacheCleaner;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->cleanRouteCache(__DIR__ . '/cache');
         parent::setUp();
@@ -368,6 +369,7 @@ class SilexKernelWebElbTest extends WebTestCase
      */
     public function createApplication()
     {
+        $cacheDir = static::createTempCacheDir();
         return require __DIR__ . '/AwsTests/elb.php';
     }
 

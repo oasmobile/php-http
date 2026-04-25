@@ -10,58 +10,84 @@ namespace Oasis\Mlib\Http\ServiceProviders\Security;
 
 use Oasis\Mlib\Http\Configuration\ConfigurationValidationTrait;
 use Oasis\Mlib\Http\Configuration\SecurityConfiguration;
-use Oasis\Mlib\Http\SilexKernel;
+use Oasis\Mlib\Http\MicroKernel;
 use Oasis\Mlib\Utils\DataProviderInterface;
-use Pimple\Container;
-use Silex\Application;
-use Silex\Provider\SecurityServiceProvider;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\Security\Core\Authentication\Provider\AuthenticationProviderInterface;
-use Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface;
+use Oasis\Mlib\Utils\DataType;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestMatcherInterface;
+use Symfony\Component\HttpKernel\Event\RequestEvent;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\KernelEvents;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Security\Core\Authorization\AccessDecisionManager;
+use Symfony\Component\Security\Core\Authorization\AccessDecisionManagerInterface;
+use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
+use Symfony\Component\Security\Core\Authorization\Strategy\UnanimousStrategy;
+use Symfony\Component\Security\Core\Authorization\Voter\RoleHierarchyVoter;
+use Symfony\Component\Security\Core\Exception\AuthenticationException;
+use Symfony\Component\Security\Core\Role\RoleHierarchy;
 
-class SimpleSecurityProvider extends SecurityServiceProvider
+/**
+ * Security provider for Symfony 7.x / MicroKernel.
+ *
+ * Manages firewall, access rule, authentication policy, and role hierarchy
+ * configuration. The register() method parses configuration, creates
+ * TokenStorage / AuthorizationChecker, and registers firewall + access rule
+ * event listeners on KernelEvents::REQUEST.
+ */
+class SimpleSecurityProvider
 {
     use ConfigurationValidationTrait;
     
-    /** @var SilexKernel */
+    /** @var MicroKernel|null */
     protected $kernel = null;
     
     // --- start of intermediate variables holding config data ---
     
-    /** @var FirewallInterface[]|array */
+    /** @var array<string, FirewallInterface|array<string, mixed>> */
     protected $firewalls = [];
-    /** @var AccessRuleInterface[]|array */
+    /** @var array<AccessRuleInterface|array<string, mixed>> */
     protected $accessRules = [];
     /** @var AuthenticationPolicyInterface[] */
     protected $authPolicies = [];
-    /** @var array */
+    /** @var array<string, array<string>> */
     protected $roleHierarchy = [];
     
-    // --- end of intermidate variables ---
+    // --- end of intermediate variables ---
+    
+    /** @var DataProviderInterface|null */
+    protected $configDataProvider = null;
     
     public function __construct()
     {
     }
     
     /**
-     * @param AccessRuleInterface|array $rule
+     * @param AccessRuleInterface|array<string, mixed> $rule
      */
-    public function addAccessRule($rule)
+    public function addAccessRule(AccessRuleInterface|array $rule): void
     {
         $this->accessRules[] = $rule;
     }
     
-    public function addAuthenticationPolicy($policyName, AuthenticationPolicyInterface $policy)
+    public function addAuthenticationPolicy(string $policyName, AuthenticationPolicyInterface $policy): void
     {
         $this->authPolicies[$policyName] = $policy;
     }
     
-    public function addFirewall($firewallName, $firewall)
+    /**
+     * @param FirewallInterface|array<string, mixed> $firewall
+     */
+    public function addFirewall(string $firewallName, FirewallInterface|array $firewall): void
     {
         $this->firewalls[$firewallName] = $firewall;
     }
     
-    public function addRoleHierarchy($role, $children)
+    /**
+     * @param string|array<string> $children
+     */
+    public function addRoleHierarchy(string $role, string|array $children): void
     {
         $old = isset($this->roleHierarchy[$role]) ? $this->roleHierarchy[$role] : [];
         $old = array_merge($old, (array)$children);
@@ -69,198 +95,163 @@ class SimpleSecurityProvider extends SecurityServiceProvider
         $this->roleHierarchy[$role] = $old;
     }
     
-    public function subscribe(Container $app, EventDispatcherInterface $dispatcher)
+    /**
+     * Register security services into MicroKernel.
+     *
+     * Processes the security configuration (merging programmatic additions with
+     * config-based settings), creates TokenStorage and AuthorizationChecker,
+     * and registers firewall + access rule event listeners.
+     *
+     * @param MicroKernel $kernel
+     * @param array<string, mixed> $securityConfig The security config from Bootstrap_Config (optional)
+     */
+    public function register(MicroKernel $kernel, array $securityConfig = []): void
     {
-        // install additional policies
-        foreach ($app['security.config.policies'] as $policyName => $policy) {
-            $this->installAuthenticationFactory($policyName, $policy, $app);
+        $this->kernel = $kernel;
+        
+        // Merge programmatic additions into config
+        if ($this->authPolicies) {
+            $securityConfig['policies'] = array_merge(
+                isset($securityConfig['policies']) ? $securityConfig['policies'] : [],
+                $this->authPolicies
+            );
+        }
+        if ($this->firewalls) {
+            $securityConfig['firewalls'] = array_merge(
+                isset($securityConfig['firewalls']) ? $securityConfig['firewalls'] : [],
+                $this->firewalls
+            );
+        }
+        if ($this->accessRules) {
+            $securityConfig['access_rules'] = array_merge(
+                isset($securityConfig['access_rules']) ? $securityConfig['access_rules'] : [],
+                $this->accessRules
+            );
+        }
+        if ($this->roleHierarchy) {
+            $securityConfig['role_hierarchy'] = array_merge(
+                isset($securityConfig['role_hierarchy']) ? $securityConfig['role_hierarchy'] : [],
+                $this->roleHierarchy
+            );
         }
         
-        $firewallSetting = [];
-        foreach ($app['security.config.firewalls'] as $firewallName => $firewall) {
+        $this->configDataProvider = $this->processConfiguration($securityConfig, new SecurityConfiguration());
+        
+        // Create TokenStorage
+        $tokenStorage = new TokenStorage();
+        $kernel->setTokenStorage($tokenStorage);
+        
+        // Configure RoleHierarchy + AccessDecisionManager
+        $roleHierarchy = new RoleHierarchy($this->getRoleHierarchy());
+        $roleHierarchyVoter = new RoleHierarchyVoter($roleHierarchy);
+        $accessDecisionManager = new AccessDecisionManager([$roleHierarchyVoter], new UnanimousStrategy());
+        $authorizationChecker = new AuthorizationChecker($tokenStorage, $accessDecisionManager);
+        $kernel->setAuthorizationChecker($authorizationChecker);
+        
+        // Register firewall event listener
+        $this->registerFirewallListener($kernel, $tokenStorage);
+        
+        // Register access rule event listener
+        $this->registerAccessRuleListener($kernel, $tokenStorage, $accessDecisionManager);
+    }
+    
+    /** @return DataProviderInterface */
+    public function getConfigDataProvider(): DataProviderInterface
+    {
+        if (!$this->configDataProvider) {
+            throw new \LogicException("Cannot get config data provider before registration");
+        }
+        
+        return $this->configDataProvider;
+    }
+    
+    /**
+     * Get the parsed firewalls configuration.
+     *
+     * @return array<string, array<string, mixed>>
+     */
+    public function getFirewalls(): array
+    {
+        $dp = $this->getConfigDataProvider();
+        $firewalls = $dp->getOptional('firewalls', DataType::Array, []);
+        
+        $result = [];
+        foreach ($firewalls as $firewallName => $firewall) {
             if (!$firewall instanceof FirewallInterface) {
                 $firewall = new SimpleFirewall($firewall);
             }
-            $firewallSetting[$firewallName] = $this->parseFirewall($firewall, $app);
+            $result[$firewallName] = $this->parseFirewall($firewall);
         }
-        $app['security.firewalls'] = $firewallSetting;
         
-        $rulesSetting = [];
-        foreach ($app['security.config.access_rules'] as $rule) {
+        return $result;
+    }
+    
+    /**
+     * Get the parsed access rules configuration.
+     *
+     * @return array<array{0: string|\Symfony\Component\HttpFoundation\RequestMatcherInterface, 1: string|array<string>, 2: string|null}>
+     */
+    public function getAccessRules(): array
+    {
+        $dp = $this->getConfigDataProvider();
+        $rules = $dp->getOptional('access_rules', DataType::Array, []);
+        
+        $result = [];
+        foreach ($rules as $rule) {
             if (!$rule instanceof AccessRuleInterface) {
                 $rule = new SimpleAccessRule($rule);
             }
-            $rulesSetting[] = [
+            $result[] = [
                 $rule->getPattern(),
                 $rule->getRequiredRoles(),
                 $rule->getRequiredChannel(),
             ];
         }
-        $app['security.access_rules'] = $rulesSetting;
         
-        $rolesSetting = [];
-        foreach ($app['security.config.role_hierarchy'] as $parentName => $children) {
-            $old = isset($rolesSetting[$parentName]) ? $rolesSetting[$parentName] : [];
-            $old = array_merge($old, (array)$children);
-            
-            $rolesSetting[$parentName] = $old;
-        }
-        $app['security.role_hierarchy'] = $rolesSetting;
-        
-        parent::subscribe($app, $dispatcher);
-    }
-    
-    public function boot(Application $app)
-    {
-        parent::boot($app);
-        
-    }
-    
-    public function register(Container $app)
-    {
-        $this->kernel = $app;
-        
-        $app['security.config.data_provider']  = function ($app) {
-            $config = isset($app['security.config']) ? $app['security.config'] : [];
-            if ($this->authPolicies) {
-                $config['policies'] = array_merge(
-                    isset($config['policies']) ? $config['policies'] : [],
-                    $this->authPolicies
-                );
-            }
-            if ($this->firewalls) {
-                $config['firewalls'] = array_merge(
-                    isset($config['firewalls']) ? $config['firewalls'] : [],
-                    $this->firewalls
-                );
-            }
-            if ($this->accessRules) {
-                $config['access_rules'] = array_merge(
-                    isset($config['access_rules']) ? $config['access_rules'] : [],
-                    $this->accessRules
-                );
-            }
-            if ($this->authPolicies) {
-                $config['role_hierarchy'] = array_merge(
-                    isset($config['role_hierarchy']) ? $config['role_hierarchy'] : [],
-                    $this->roleHierarchy
-                );
-            }
-            
-            $dp = $this->processConfiguration($config, new SecurityConfiguration());
-            
-            return $dp;
-        };
-        $app['security.config.policies']       = function () {
-            return $this->getConfigDataProvider()->getOptional(
-                'policies',
-                DataProviderInterface::ARRAY_TYPE,
-                []
-            );
-        };
-        $app['security.config.firewalls']      = function () {
-            return $this->getConfigDataProvider()->getOptional(
-                'firewalls',
-                DataProviderInterface::ARRAY_TYPE,
-                []
-            );
-        };
-        $app['security.config.access_rules']   = function () {
-            return $this->getConfigDataProvider()->getOptional(
-                'access_rules',
-                DataProviderInterface::ARRAY_TYPE,
-                []
-            );
-        };
-        $app['security.config.role_hierarchy'] = function () {
-            return $this->getConfigDataProvider()->getOptional(
-                'role_hierarchy',
-                DataProviderInterface::ARRAY_TYPE,
-                []
-            );
-        };
-        parent::register($app);
-    }
-    
-    /** @return DataProviderInterface */
-    public function getConfigDataProvider()
-    {
-        if (!$this->kernel) {
-            throw new \LogicException("Cannot get config data provider before registration");
-        }
-        
-        return $this->kernel['security.config.data_provider'];
-    }
-    
-    protected function installAuthenticationFactory($policyName,
-                                                    AuthenticationPolicyInterface $policy,
-                                                    Container $app)
-    {
-        $factoryName       = 'security.authentication_listener.factory.' . $policyName;
-        $app[$factoryName] = $app->protect(
-            function ($firewallName, $options) use ($policyName, $policy, $app) {
-                
-                $authProviderId = 'security.authentication_provider.' . $firewallName . '.' . $policyName;
-                if (!isset($app[$authProviderId])) {
-                    $app[$authProviderId] = function () use ($policy, $app, $firewallName, $options) {
-                        $provider = $policy->getAuthenticationProvider($app, $firewallName, $options);
-                        if ($provider instanceof AuthenticationProviderInterface) {
-                            return $provider;
-                        }
-                        else {
-                            return $app['security.authentication_provider.' . $provider . '._proto'](
-                                $firewallName
-                            );
-                        }
-                    };
-                }
-                
-                $authListenerId = 'security.authentication_listener.' . $firewallName . '.' . $policyName;
-                if (!isset($app[$authListenerId])) {
-                    $app[$authListenerId] = function () use ($policy, $app, $firewallName, $options) {
-                        return $policy->getAuthenticationListener(
-                            $app,
-                            $firewallName,
-                            $options
-                        );
-                    };
-                }
-                
-                $entryId = 'security.entry_point.' . $firewallName;
-                if (!isset($app[$entryId])) {
-                    $app[$entryId] = function () use ($policy, $app, $firewallName, $options) {
-                        $entryPoint = $policy->getEntryPoint($app, $firewallName, $options);
-                        if (!$entryPoint instanceof AuthenticationEntryPointInterface) {
-                            $entryPoint = new NullEntryPoint();
-                        }
-                        
-                        return $entryPoint;
-                    };
-                    
-                }
-                
-                return [
-                    $authProviderId,
-                    $authListenerId,
-                    $entryId,
-                    $policy->getAuthenticationType(),
-                ];
-            }
-        );
+        return $result;
     }
     
     /**
+     * Get the parsed role hierarchy configuration.
      *
-     * Parses firewall into silex compatible array data
+     * @return array<string, list<string>>
+     */
+    public function getRoleHierarchy(): array
+    {
+        $dp = $this->getConfigDataProvider();
+        $hierarchy = $dp->getOptional('role_hierarchy', DataType::Array, []);
+        
+        $result = [];
+        foreach ($hierarchy as $parentName => $children) {
+            $old = isset($result[$parentName]) ? $result[$parentName] : [];
+            /** @var list<string> $merged */
+            $merged = array_values(array_merge($old, (array)$children));
+            $result[$parentName] = $merged;
+        }
+        
+        return $result;
+    }
+    
+    /**
+     * Get the parsed authentication policies.
+     *
+     * @return AuthenticationPolicyInterface[]
+     */
+    public function getPolicies(): array
+    {
+        $dp = $this->getConfigDataProvider();
+        
+        return $dp->getOptional('policies', DataType::Array, []);
+    }
+    
+    /**
+     * Parses firewall into array data.
      *
      * @param FirewallInterface $firewall
-     * @param Container         $app
      *
-     * @return array
+     * @return array<string, mixed>
      */
-    protected function parseFirewall(FirewallInterface $firewall,
-        /** @noinspection PhpUnusedParameterInspection */
-                                     Container $app)
+    protected function parseFirewall(FirewallInterface $firewall): array
     {
         $setting              = $firewall->getPolicies();
         $setting['pattern']   = $firewall->getPattern();
@@ -271,4 +262,131 @@ class SimpleSecurityProvider extends SecurityServiceProvider
         return $setting;
     }
     
+    /**
+     * Register firewall event listener to KernelEvents::REQUEST.
+     *
+     * Uses BEFORE_PRIORITY_FIREWALL (= 8) priority. For each incoming main
+     * request, iterates firewalls in registration order; the first matching
+     * firewall's policies are evaluated. For each policy, the authenticator's
+     * supports() → authenticate() → createToken() chain is invoked.
+     * AuthenticationException is caught silently (token stays null).
+     */
+    protected function registerFirewallListener(MicroKernel $kernel, TokenStorageInterface $tokenStorage): void
+    {
+        $firewalls = $this->getFirewalls();
+        $policies = $this->getPolicies();
+        
+        /** @var \Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher */
+        $dispatcher = $kernel->getContainer()->get('event_dispatcher');
+        $dispatcher->addListener(
+            KernelEvents::REQUEST,
+            function (RequestEvent $event) use ($kernel, $firewalls, $policies, $tokenStorage) {
+                if (!$event->isMainRequest()) {
+                    return;
+                }
+                $request = $event->getRequest();
+                
+                foreach ($firewalls as $firewallName => $firewallConfig) {
+                    $pattern = $firewallConfig['pattern'];
+                    if (!$this->requestMatchesPattern($request, $pattern)) {
+                        continue;
+                    }
+                    
+                    // First matching firewall — iterate its policies
+                    foreach ($firewallConfig as $policyName => $policyOptions) {
+                        if (!isset($policies[$policyName])) {
+                            continue;
+                        }
+                        /** @var AuthenticationPolicyInterface $policy */
+                        $policy = $policies[$policyName];
+                        $options = is_array($policyOptions) ? $policyOptions : [];
+                        
+                        $authenticator = $policy->getAuthenticator($kernel, $firewallName, $options);
+                        
+                        try {
+                            if (!$authenticator->supports($request)) {
+                                continue;
+                            }
+                            $passport = $authenticator->authenticate($request);
+                            $token = $authenticator->createToken($passport, $firewallName);
+                            $tokenStorage->setToken($token);
+                        } catch (AuthenticationException $e) {
+                            // Authentication failed: don't set token, let request continue.
+                            // Access rule listener will decide whether to deny.
+                        }
+                    }
+                    break; // First matching firewall takes effect
+                }
+            },
+            MicroKernel::BEFORE_PRIORITY_FIREWALL
+        );
+    }
+    
+    /**
+     * Register access rule event listener.
+     *
+     * Runs at priority BEFORE_PRIORITY_FIREWALL - 1 (= 7), after the firewall
+     * listener. Iterates access rules in registration order; the first matching
+     * rule takes effect. If the rule requires roles and the token is missing or
+     * lacks the required roles, throws AccessDeniedHttpException.
+     */
+    protected function registerAccessRuleListener(
+        MicroKernel $kernel,
+        TokenStorageInterface $tokenStorage,
+        AccessDecisionManagerInterface $accessDecisionManager
+    ): void {
+        $accessRules = $this->getAccessRules();
+        
+        /** @var \Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher */
+        $dispatcher = $kernel->getContainer()->get('event_dispatcher');
+        $dispatcher->addListener(
+            KernelEvents::REQUEST,
+            function (RequestEvent $event) use ($accessRules, $tokenStorage, $accessDecisionManager) {
+                if (!$event->isMainRequest()) {
+                    return;
+                }
+                $request = $event->getRequest();
+                $token = $tokenStorage->getToken();
+                
+                foreach ($accessRules as [$pattern, $roles, $channel]) {
+                    if (!$this->requestMatchesPattern($request, $pattern)) {
+                        continue;
+                    }
+                    
+                    // First matching rule takes effect
+                    if (empty($roles)) {
+                        return; // No role requirement — allow access
+                    }
+                    
+                    if (!$token || !$token->getUser()) {
+                        throw new AccessDeniedHttpException('Access Denied');
+                    }
+                    
+                    if (!$accessDecisionManager->decide($token, (array)$roles)) {
+                        throw new AccessDeniedHttpException('Access Denied');
+                    }
+                    
+                    return; // Authorization passed
+                }
+            },
+            MicroKernel::BEFORE_PRIORITY_FIREWALL - 1
+        );
+    }
+    
+    /**
+     * Check whether a request matches a firewall/access-rule pattern.
+     *
+     * @param Request $request
+     * @param mixed   $pattern string (regex) or RequestMatcherInterface
+     *
+     * @return bool
+     */
+    protected function requestMatchesPattern(Request $request, mixed $pattern): bool
+    {
+        if ($pattern instanceof RequestMatcherInterface) {
+            return $pattern->matches($request);
+        }
+        
+        return (bool)preg_match('{' . $pattern . '}', rawurldecode($request->getPathInfo()));
+    }
 }

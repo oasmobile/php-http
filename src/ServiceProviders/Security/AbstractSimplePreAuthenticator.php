@@ -9,84 +9,103 @@
 namespace Oasis\Mlib\Http\ServiceProviders\Security;
 
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Security\Core\Authentication\Token\PreAuthenticatedToken;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
-use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
-use Symfony\Component\Security\Http\Authentication\SimplePreAuthenticatorInterface;
 
-abstract class AbstractSimplePreAuthenticator implements SimplePreAuthenticatorInterface
+/**
+ * @deprecated Use {@see AbstractPreAuthenticator} instead.
+ *
+ * Legacy pre-authenticator stub from the Symfony 4.x era.
+ * In Symfony 7.x the SimplePreAuthenticatorInterface has been removed.
+ * Migrate to AbstractPreAuthenticator which implements the unified
+ * AuthenticatorInterface.
+ *
+ * The three legacy API methods (createToken, authenticateToken,
+ * supportsToken) are now concrete and throw LogicException to give
+ * callers a clear migration signal. getCredentialsFromRequest()
+ * remains abstract so that existing subclasses continue to compile.
+ */
+abstract class AbstractSimplePreAuthenticator
 {
-
-    public function createToken(Request $request, $providerKey)
+    /**
+     * @deprecated Use AbstractPreAuthenticator instead.
+     *
+     * Previously created a PreAuthenticatedToken from request credentials.
+     * Now throws LogicException — migrate to AbstractPreAuthenticator.
+     *
+     * @param Request $request
+     * @param string  $providerKey
+     *
+     * @return TokenInterface
+     *
+     * @throws \LogicException always
+     */
+    public function createToken(Request $request, string $providerKey): TokenInterface
     {
-        $credentials = $this->getCredentialsFromRequest($request);
-        $username    = $this->getUsernameFromRequest($request);
-
-        return new PreAuthenticatedToken($username, $credentials, $providerKey);
-    }
-
-    public function authenticateToken(TokenInterface $token, UserProviderInterface $userProvider, $providerKey)
-    {
-        if (!$userProvider instanceof SimplePreAuthenticateUserProviderInterface) {
-            throw new \InvalidArgumentException(
-                "User provider must implement " . SimplePreAuthenticateUserProviderInterface::class
-            );
-        }
-
-        $credentials = $token->getCredentials();
-        $user = $userProvider->authenticateAndGetUser($credentials);
-
-        return $this->createAuthenticatedToken($user, $credentials, $providerKey);
-    }
-
-    public function supportsToken(TokenInterface $token, $providerKey)
-    {
-        return (
-            $token instanceof PreAuthenticatedToken
-            && $token->getProviderKey() === $providerKey
+        throw new \LogicException(
+            sprintf(
+                '%s is deprecated. Migrate to %s which implements AuthenticatorInterface.',
+                __METHOD__,
+                AbstractPreAuthenticator::class
+            )
         );
     }
 
     /**
-     * Parse the given request, and extract the username from the request.
+     * @deprecated Use AbstractPreAuthenticator instead.
      *
-     * If username cannot be parsed from request, "anon." should be returned.
+     * Previously authenticated a token using SimplePreAuthenticateUserProviderInterface.
+     * Now throws LogicException — migrate to AbstractPreAuthenticator.
      *
-     * NOTE: this method should only parse the request, and should NOT load username from any resouce except the request
+     * @param TokenInterface                                                                                $token
+     * @param UserProviderInterface<\Symfony\Component\Security\Core\User\UserInterface> $userProvider
+     * @param string                                                                                       $providerKey
      *
-     * @param Request $request
+     * @return TokenInterface
      *
-     * @return string
+     * @throws \LogicException always
      */
-    protected function getUsernameFromRequest(/** @noinspection PhpUnusedParameterInspection */
-        Request $request)
+    public function authenticateToken(TokenInterface $token, UserProviderInterface $userProvider, string $providerKey): TokenInterface
     {
-        return "anon.";
+        throw new \LogicException(
+            sprintf(
+                '%s is deprecated. Migrate to %s which implements AuthenticatorInterface.',
+                __METHOD__,
+                AbstractPreAuthenticator::class
+            )
+        );
     }
 
     /**
-     * Creates an authenticated token upon authentication success.
+     * @deprecated Use AbstractPreAuthenticator instead.
      *
-     * Inherited class can override this method to provide their own pre-authenticated token implementation
+     * Previously checked if the token was a PreAuthenticatedToken matching the provider key.
+     * Now throws LogicException — migrate to AbstractPreAuthenticator.
      *
-     * @param string|UserInterface $user        The user
-     * @param mixed                $credentials The user credentials
-     * @param string               $providerKey The provider key
+     * @param TokenInterface $token
+     * @param string         $providerKey
      *
-     * @return PreAuthenticatedToken
+     * @return bool
+     *
+     * @throws \LogicException always
      */
-    protected function createAuthenticatedToken($user, $credentials, $providerKey)
+    public function supportsToken(TokenInterface $token, string $providerKey): bool
     {
-        return new PreAuthenticatedToken($user, $credentials, $providerKey, $user->getRoles());
+        throw new \LogicException(
+            sprintf(
+                '%s is deprecated. Migrate to %s which implements AuthenticatorInterface.',
+                __METHOD__,
+                AbstractPreAuthenticator::class
+            )
+        );
     }
 
     /**
-     * Parse the given request, and extract the credential information from the request
+     * Parse the given request, and extract the credential information from the request.
      *
      * @param Request $request
      *
      * @return mixed
      */
-    abstract public function getCredentialsFromRequest(Request $request);
+    abstract public function getCredentialsFromRequest(Request $request): mixed;
 }

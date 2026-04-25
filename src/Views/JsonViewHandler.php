@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 class JsonViewHandler extends AbstractSmartViewHandler
 {
-    function __invoke($rawResult, Request $request)
+    public function __invoke(mixed $rawResult, Request $request): ?JsonResponse
     {
         if ($this->shouldHandle($request)) {
             return new JsonResponse($this->wrapResult($rawResult));
@@ -27,19 +27,19 @@ class JsonViewHandler extends AbstractSmartViewHandler
      *
      * Any custom protocol should override this method to wrap the result in the desired format
      *
-     * @param $rawResult
+     * @param mixed $rawResult
      *
-     * @return array
+     * @return array<string, mixed>
      */
-    protected function wrapResult($rawResult)
+    protected function wrapResult(mixed $rawResult): array
     {
         return is_scalar($rawResult) || is_null($rawResult) ? ["result" => $rawResult] : $rawResult;
     }
 
     /**
-     * @return array
+     * @return array<string>
      */
-    protected function getCompatibleTypes()
+    protected function getCompatibleTypes(): array
     {
         return ['application/json', 'text/json'];
     }

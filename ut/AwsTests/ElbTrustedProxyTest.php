@@ -8,8 +8,7 @@
 
 namespace AwsTests;
 
-use GuzzleHttp\Client;
-use Silex\WebTestCase;
+use Oasis\Mlib\Http\Test\Helpers\WebTestCase;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 
 class ElbTrustedProxyTest extends WebTestCase
@@ -17,7 +16,7 @@ class ElbTrustedProxyTest extends WebTestCase
     /** @var string Isolated temp cache dir shared across all tests in this class */
     private static $tempCacheDir;
     
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass(): void
     {
         self::$tempCacheDir = \sys_get_temp_dir() . '/oasis-http-aws-test-' . \getmypid();
         \mkdir(self::$tempCacheDir, 0777, true);
@@ -29,15 +28,28 @@ class ElbTrustedProxyTest extends WebTestCase
         }
     }
     
-    public static function tearDownAfterClass()
+    public static function tearDownAfterClass(): void
     {
         if (self::$tempCacheDir && \is_dir(self::$tempCacheDir)) {
-            foreach (\glob(self::$tempCacheDir . '/*') as $file) {
-                \unlink($file);
-            }
-            \rmdir(self::$tempCacheDir);
+            self::removeDirectory(self::$tempCacheDir);
         }
         self::$tempCacheDir = null;
+    }
+    
+    private static function removeDirectory(string $dir): void
+    {
+        foreach (\scandir($dir) as $entry) {
+            if ($entry === '.' || $entry === '..') {
+                continue;
+            }
+            $path = $dir . '/' . $entry;
+            if (\is_dir($path)) {
+                self::removeDirectory($path);
+            } else {
+                \unlink($path);
+            }
+        }
+        \rmdir($dir);
     }
     
     /**
@@ -52,7 +64,7 @@ class ElbTrustedProxyTest extends WebTestCase
     }
     
     /**
-     * Load AWS IP ranges from local cache (written by SilexKernel when trust_cloudfront_ips = true).
+     * Load AWS IP ranges from local cache (written by MicroKernel when trust_cloudfront_ips = true).
      * Falls back to live HTTP request only if cache is missing.
      *
      * @return array
@@ -63,27 +75,27 @@ class ElbTrustedProxyTest extends WebTestCase
         $fixturePath = __DIR__ . '/../fixtures/aws.ips';
         if (\file_exists($fixturePath)) {
             $content = \file_get_contents($fixturePath);
-            $awsIps  = \GuzzleHttp\json_decode($content, true);
+            $awsIps  = \json_decode($content, true, 512, JSON_THROW_ON_ERROR);
             if (isset($awsIps['prefixes'])) {
                 return $awsIps;
             }
         }
         
-        // Fallback: runtime cache written by SilexKernel
+        // Fallback: runtime cache written by MicroKernel
         $cacheFile = __DIR__ . '/../cache/aws.ips';
         if (\file_exists($cacheFile)) {
             $content = \file_get_contents($cacheFile);
-            $awsIps  = \GuzzleHttp\json_decode($content, true);
+            $awsIps  = \json_decode($content, true, 512, JSON_THROW_ON_ERROR);
             if (isset($awsIps['prefixes'])) {
                 return $awsIps;
             }
         }
         
         // Last resort: fetch from AWS (slow, ~1-2s network request)
-        $guzzle   = new Client();
+        $guzzle   = new \GuzzleHttp\Client();
         $response = $guzzle->request('GET', 'https://ip-ranges.amazonaws.com/ip-ranges.json');
         
-        return \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
+        return \json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
     }
     
     public function testCloudfrontTrustedIps()
@@ -95,7 +107,7 @@ class ElbTrustedProxyTest extends WebTestCase
         // Testing all ~200 prefixes takes 12+ seconds; the trust logic is identical for each.
         $cloudfrontPrefixes = [];
         foreach ($awsIps['prefixes'] as $info) {
-            if (\array_key_exists('ip_prefix', $info) && $info['service'] == "CLOUDFRONT") {
+            if (\array_key_exists('ip_prefix', $info) && $info['service'] === "CLOUDFRONT") {
                 $cloudfrontPrefixes[] = $info['ip_prefix'];
             }
         }
@@ -125,7 +137,7 @@ class ElbTrustedProxyTest extends WebTestCase
                 ]
             );
             $response = $client->getResponse();
-            $json     = \GuzzleHttp\json_decode($response->getContent(), true);
+            $json     = \json_decode($response->getContent(), true, 512, JSON_THROW_ON_ERROR);
             $this->assertEquals('9.8.7.6', $json['ip'], "Failed for CloudFront prefix: $prefix");
         }
         
@@ -145,7 +157,7 @@ class ElbTrustedProxyTest extends WebTestCase
             ]
         );
         $response = $client->getResponse();
-        $json     = \GuzzleHttp\json_decode($response->getContent(), true);
+        $json     = \json_decode($response->getContent(), true, 512, JSON_THROW_ON_ERROR);
         $this->assertEquals('9.7.8.9', $json['ip']);
         
     }
@@ -226,7 +238,7 @@ class ElbTrustedProxyTest extends WebTestCase
             ]
         );
         $response = $client->getResponse();
-        $json     = \GuzzleHttp\json_decode($response->getContent(), true);
+        $json     = \json_decode($response->getContent(), true, 512, JSON_THROW_ON_ERROR);
         $this->assertEquals('203.0.113.50', $json['ip']);
     }
     
@@ -271,7 +283,7 @@ class ElbTrustedProxyTest extends WebTestCase
         // Find the first CloudFront prefix
         $cfIp = null;
         foreach ($awsIps['prefixes'] as $info) {
-            if (\array_key_exists('ip_prefix', $info) && $info['service'] == "CLOUDFRONT") {
+            if (\array_key_exists('ip_prefix', $info) && $info['service'] === "CLOUDFRONT") {
                 list($cfIp,) = \explode('/', $info['ip_prefix']);
                 break;
             }
@@ -290,7 +302,7 @@ class ElbTrustedProxyTest extends WebTestCase
             ]
         );
         $response = $client->getResponse();
-        $json     = \GuzzleHttp\json_decode($response->getContent(), true);
+        $json     = \json_decode($response->getContent(), true, 512, JSON_THROW_ON_ERROR);
         $this->assertEquals('198.51.100.10', $json['ip']);
     }
     
@@ -316,7 +328,7 @@ class ElbTrustedProxyTest extends WebTestCase
             ]
         );
         $response = $client->getResponse();
-        $json     = \GuzzleHttp\json_decode($response->getContent(), true);
+        $json     = \json_decode($response->getContent(), true, 512, JSON_THROW_ON_ERROR);
         // 192.0.2.99 is not in trusted_proxies, so X-Forwarded-For is not trusted
         $this->assertEquals('192.0.2.99', $json['ip']);
     }
@@ -359,7 +371,7 @@ class ElbTrustedProxyTest extends WebTestCase
         
         $cfIp = null;
         foreach ($awsIps['prefixes'] as $info) {
-            if (\array_key_exists('ip_prefix', $info) && $info['service'] == "CLOUDFRONT") {
+            if (\array_key_exists('ip_prefix', $info) && $info['service'] === "CLOUDFRONT") {
                 list($cfIp,) = \explode('/', $info['ip_prefix']);
                 break;
             }
@@ -378,7 +390,7 @@ class ElbTrustedProxyTest extends WebTestCase
             ]
         );
         $response = $client->getResponse();
-        $json     = \GuzzleHttp\json_decode($response->getContent(), true);
+        $json     = \json_decode($response->getContent(), true, 512, JSON_THROW_ON_ERROR);
         // Both ELB (10.0.0.1 via behind_elb) and CloudFront IP are trusted
         // so the real client IP 203.0.113.50 should be resolved
         $this->assertEquals('203.0.113.50', $json['ip']);
@@ -404,7 +416,7 @@ class ElbTrustedProxyTest extends WebTestCase
             ]
         );
         $response = $client->getResponse();
-        $json     = \GuzzleHttp\json_decode($response->getContent(), true);
+        $json     = \json_decode($response->getContent(), true, 512, JSON_THROW_ON_ERROR);
         $this->assertEquals('203.0.113.1', $json['ip']);
         
         // Second request from a different ELB at 10.0.0.2
@@ -419,7 +431,7 @@ class ElbTrustedProxyTest extends WebTestCase
             ]
         );
         $response = $client->getResponse();
-        $json     = \GuzzleHttp\json_decode($response->getContent(), true);
+        $json     = \json_decode($response->getContent(), true, 512, JSON_THROW_ON_ERROR);
         $this->assertEquals('203.0.113.2', $json['ip']);
     }
     
@@ -442,7 +454,7 @@ class ElbTrustedProxyTest extends WebTestCase
             ]
         );
         $response = $client->getResponse();
-        $json     = \GuzzleHttp\json_decode($response->getContent(), true);
+        $json     = \json_decode($response->getContent(), true, 512, JSON_THROW_ON_ERROR);
         // 1.2.3.4 is in trusted_proxies, so X-Forwarded-For is trusted
         $this->assertEquals('203.0.113.99', $json['ip']);
     }

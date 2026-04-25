@@ -14,7 +14,7 @@ class SimpleAccessRuleConfigurationTest extends TestCase
     /** @var SimpleAccessRuleConfiguration */
     private $configuration;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->processor     = new Processor();
         $this->configuration = new SimpleAccessRuleConfiguration();
@@ -41,7 +41,7 @@ class SimpleAccessRuleConfigurationTest extends TestCase
 
     public function testPatternIsRequired()
     {
-        $this->setExpectedException(\Exception::class);
+        $this->expectException(\Exception::class);
 
         $this->process(['roles' => ['ROLE_USER']]);
     }
@@ -62,7 +62,7 @@ class SimpleAccessRuleConfigurationTest extends TestCase
 
     public function testRolesIsRequired()
     {
-        $this->setExpectedException(\Exception::class);
+        $this->expectException(\Exception::class);
 
         $this->process(['pattern' => '^/admin']);
     }
@@ -132,7 +132,7 @@ class SimpleAccessRuleConfigurationTest extends TestCase
 
     public function testChannelRejectsInvalidValue()
     {
-        $this->setExpectedException(\Exception::class);
+        $this->expectException(\Exception::class);
 
         $this->process([
             'pattern' => '^/admin',

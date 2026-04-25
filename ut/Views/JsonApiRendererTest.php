@@ -3,7 +3,7 @@
 namespace Oasis\Mlib\Http\Test\Views;
 
 use Oasis\Mlib\Http\ErrorHandlers\WrappedExceptionInfo;
-use Oasis\Mlib\Http\SilexKernel;
+use Oasis\Mlib\Http\MicroKernel;
 use Oasis\Mlib\Http\Views\JsonApiRenderer;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -11,11 +11,11 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 class JsonApiRendererTest extends TestCase
 {
     /**
-     * @return SilexKernel
+     * @return MicroKernel
      */
     private function createMinimalKernel()
     {
-        return new SilexKernel([], true);
+        return new MicroKernel([], true);
     }
 
     //----------------------------------------------------------------------

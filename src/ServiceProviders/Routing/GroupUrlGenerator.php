@@ -16,20 +16,18 @@ use Symfony\Component\Routing\RequestContext;
 
 class GroupUrlGenerator implements UrlGeneratorInterface
 {
-    /** @var  UrlGeneratorInterface[] */
-    protected $generators;
-    
-    /** @var  RequestContext */
-    protected $context;
+    protected RequestContext $context;
+
+    protected bool $contextExplicitlySet = false;
     
     /**
      * GroupUrlGenerator constructor.
      *
      * @param UrlGeneratorInterface[] $generators
      */
-    public function __construct(array $generators)
+    public function __construct(protected readonly array $generators)
     {
-        $this->generators = $generators;
+        $this->context    = new RequestContext();
     }
     
     /**
@@ -37,9 +35,10 @@ class GroupUrlGenerator implements UrlGeneratorInterface
      *
      * @param RequestContext $context The context
      */
-    public function setContext(RequestContext $context)
+    public function setContext(RequestContext $context): void
     {
-        $this->context = $context;
+        $this->context              = $context;
+        $this->contextExplicitlySet = true;
     }
     
     /**
@@ -47,7 +46,7 @@ class GroupUrlGenerator implements UrlGeneratorInterface
      *
      * @return RequestContext The context
      */
-    public function getContext()
+    public function getContext(): RequestContext
     {
         return $this->context;
     }
@@ -67,9 +66,9 @@ class GroupUrlGenerator implements UrlGeneratorInterface
      *
      * If there is no route with the given name, the generator must throw the RouteNotFoundException.
      *
-     * @param string $name          The name of the route
-     * @param mixed  $parameters    An array of parameters
-     * @param int    $referenceType The type of reference to be generated (one of the constants)
+     * @param string                $name          The name of the route
+     * @param array<string, mixed>  $parameters    An array of parameters
+     * @param int                   $referenceType The type of reference to be generated (one of the constants)
      *
      * @return string The generated URL
      *
@@ -78,7 +77,7 @@ class GroupUrlGenerator implements UrlGeneratorInterface
      * @throws InvalidParameterException           When a parameter value for a placeholder is not correct because
      *                                             it does not match the requirement
      */
-    public function generate($name, $parameters = [], $referenceType = self::ABSOLUTE_PATH)
+    public function generate(string $name, array $parameters = [], int $referenceType = self::ABSOLUTE_PATH): string
     {
         $total = sizeof($this->generators);
         $found = 0;
@@ -86,13 +85,13 @@ class GroupUrlGenerator implements UrlGeneratorInterface
         foreach ($this->generators as $generator) {
             $found++;
             try {
-                if ($this->getContext()) {
+                if ($this->contextExplicitlySet) {
                     $generator->setContext($this->getContext());
                 }
                 
                 return $generator->generate($name, $parameters, $referenceType);
             } catch (RouteNotFoundException $e) {
-                if ($found == $total) {
+                if ($found === $total) {
                     // already last url generator
                     throw $e;
                 }

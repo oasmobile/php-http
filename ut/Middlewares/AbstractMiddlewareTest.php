@@ -2,9 +2,9 @@
 
 namespace Oasis\Mlib\Http\Test\Middlewares;
 
+use Oasis\Mlib\Http\MicroKernel;
 use Oasis\Mlib\Http\Test\Helpers\Middlewares\TestMiddleware;
 use PHPUnit\Framework\TestCase;
-use Silex\Application;
 
 class AbstractMiddlewareTest extends TestCase
 {
@@ -17,12 +17,12 @@ class AbstractMiddlewareTest extends TestCase
     public function testGetAfterPriorityDefaultsToLateEvent()
     {
         $middleware = new TestMiddleware();
-        $this->assertSame(Application::LATE_EVENT, $middleware->getAfterPriority());
+        $this->assertSame(MicroKernel::AFTER_PRIORITY_LATEST, $middleware->getAfterPriority());
     }
 
     public function testGetBeforePriorityDefaultsToEarlyEvent()
     {
         $middleware = new TestMiddleware();
-        $this->assertSame(Application::EARLY_EVENT, $middleware->getBeforePriority());
+        $this->assertSame(MicroKernel::BEFORE_PRIORITY_EARLIEST, $middleware->getBeforePriority());
     }
 }

@@ -17,23 +17,16 @@ use Symfony\Component\Routing\RequestContext;
 
 class GroupUrlMatcher implements UrlMatcherInterface, RequestMatcherInterface
 {
-    /** @var  RequestContext */
-    protected $context;
-    /** @var  UrlMatcherInterface[] */
-    protected $matchers;
-    
     /**
      * GroupUrlMatcher constructor.
      *
      * @param RequestContext        $context
      * @param UrlMatcherInterface[] $matchers
      */
-    public function __construct(RequestContext $context,
-                                array $matchers
-    )
-    {
-        $this->context  = $context;
-        $this->matchers = $matchers;
+    public function __construct(
+        protected RequestContext $context,
+        protected readonly array $matchers
+    ) {
     }
     
     /**
@@ -41,7 +34,7 @@ class GroupUrlMatcher implements UrlMatcherInterface, RequestMatcherInterface
      *
      * @param RequestContext $context The context
      */
-    public function setContext(RequestContext $context)
+    public function setContext(RequestContext $context): void
     {
         $this->context = $context;
     }
@@ -51,7 +44,7 @@ class GroupUrlMatcher implements UrlMatcherInterface, RequestMatcherInterface
      *
      * @return RequestContext The context
      */
-    public function getContext()
+    public function getContext(): RequestContext
     {
         return $this->context;
     }
@@ -64,12 +57,12 @@ class GroupUrlMatcher implements UrlMatcherInterface, RequestMatcherInterface
      *
      * @param string $pathinfo The path info to be parsed (raw format, i.e. not urldecoded)
      *
-     * @return array An array of parameters
+     * @return array<string, mixed> An array of parameters
      *
      * @throws ResourceNotFoundException If the resource could not be found
      * @throws MethodNotAllowedException If the resource was found but the request method is not allowed
      */
-    public function match($pathinfo)
+    public function match(string $pathinfo): array
     {
         $total   = sizeof($this->matchers);
         $matched = 0;
@@ -81,7 +74,7 @@ class GroupUrlMatcher implements UrlMatcherInterface, RequestMatcherInterface
                 // matched
                 return $result;
             } catch (ResourceNotFoundException $e) {
-                if ($matched == $total) {
+                if ($matched === $total) {
                     // already last matcher
                     throw $e;
                 }
@@ -99,19 +92,13 @@ class GroupUrlMatcher implements UrlMatcherInterface, RequestMatcherInterface
      *
      * @param Request $request The request to match
      *
-     * @return array An array of parameters
+     * @return array<string, mixed> An array of parameters
      *
      * @throws ResourceNotFoundException If no matching resource could be found
      * @throws MethodNotAllowedException If a matching resource was found but the request method is not allowed
      */
-    public function matchRequest(Request $request)
+    public function matchRequest(Request $request): array
     {
-        $this->request = $request;
-        
-        $ret = $this->match($request->getPathInfo());
-        
-        $this->request = null;
-        
-        return $ret;
+        return $this->match($request->getPathInfo());
     }
 }

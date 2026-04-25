@@ -1,6 +1,6 @@
 # Bootstrap Configuration
 
-`SilexKernel` 的 bootstrap 配置项总览与基本用法。
+`MicroKernel` 的 bootstrap 配置项总览与基本用法。
 
 ---
 
@@ -13,7 +13,7 @@
 | `cors` | CORS 策略 | [CORS](cors.md) |
 | `twig` | Twig 模板引擎 | 本文 |
 | `middlewares` | Before / After 中间件 | 本文 |
-| `providers` | Silex Service Provider | 本文 |
+| `providers` | CompilerPass / Extension | 本文 |
 | `view_handlers` | View Handler 链 | 本文 |
 | `error_handlers` | Error Handler 链 | 本文 |
 | `injected_args` | 控制器参数注入 | 本文 |
@@ -83,17 +83,15 @@ $config = [
 
 ## Providers
 
-安装 Silex Service Provider：
+注册 `CompilerPassInterface` 或 `ExtensionInterface` 实例：
 
 ```php
 $config = [
     "providers" => [
-        new HttpCacheServiceProvider(),
+        new MyCompilerPass(),
     ],
 ];
 ```
-
-也可通过 `$kernel->register()` 动态注册。
 
 ---
 
@@ -143,7 +141,7 @@ $config = [
 
 ## Injected Arguments
 
-控制器参数自动注入。默认注入 `Request` 和 `SilexKernel`，可通过 `injected_args` 添加更多：
+控制器参数自动注入。默认注入 `Request` 和 `MicroKernel`，可通过 `injected_args` 添加更多：
 
 ```php
 $config = [

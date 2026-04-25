@@ -12,7 +12,7 @@ use Oasis\Mlib\Http\ChainedParameterBagDataProvider;
 use Oasis\Mlib\Http\ServiceProviders\Cookie\ResponseCookieContainer;
 use Oasis\Mlib\Http\Views\AbstractSmartViewHandler;
 use Oasis\Mlib\Http\Views\JsonViewHandler;
-use Oasis\Mlib\Utils\DataProviderInterface;
+use Oasis\Mlib\Utils\DataType;
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -101,8 +101,8 @@ class TestController
         $chainedBag = new ChainedParameterBagDataProvider($request->attributes, $request->query, $request->request);
         
         $name   = $chainedBag->getMandatory('name');
-        $age    = $chainedBag->getMandatory('age', DataProviderInterface::INT_TYPE);
-        $salary = $chainedBag->getOptional('salary', DataProviderInterface::FLOAT_TYPE, 999.99);
+        $age    = $chainedBag->getMandatory('age', DataType::Int);
+        $salary = $chainedBag->getOptional('salary', DataType::Float, 999.99);
         
         return [
             'called' => $this->createTestString(__CLASS__, __FUNCTION__),

@@ -9,20 +9,14 @@
 namespace Oasis\Mlib\Http\Views;
 
 use Oasis\Mlib\Http\ErrorHandlers\WrappedExceptionInfo;
-use Oasis\Mlib\Http\SilexKernel;
+use Oasis\Mlib\Http\MicroKernel;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 
 class JsonApiRenderer implements ResponseRendererInterface
 {
     
-    /**
-     * @param mixed       $result
-     * @param SilexKernel $silexKernel
-     *
-     * @return Response
-     */
-    public function renderOnSuccess($result, SilexKernel $silexKernel)
+    public function renderOnSuccess(mixed $result, MicroKernel $kernel): Response
     {
         if (!is_array($result)) {
             $result = ['result' => $result];
@@ -31,13 +25,7 @@ class JsonApiRenderer implements ResponseRendererInterface
         return new JsonResponse($result);
     }
     
-    /**
-     * @param WrappedExceptionInfo $exceptionInfo
-     * @param SilexKernel          $silexKernel
-     *
-     * @return Response
-     */
-    public function renderOnException(WrappedExceptionInfo $exceptionInfo, SilexKernel $silexKernel)
+    public function renderOnException(WrappedExceptionInfo $exceptionInfo, MicroKernel $kernel): Response
     {
         return new JsonResponse(
             $exceptionInfo,

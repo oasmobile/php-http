@@ -9,19 +9,13 @@
 namespace Oasis\Mlib\Http\Views;
 
 use Oasis\Mlib\Http\ErrorHandlers\WrappedExceptionInfo;
-use Oasis\Mlib\Http\SilexKernel;
+use Oasis\Mlib\Http\MicroKernel;
 use Symfony\Component\HttpFoundation\Response;
 
 class DefaultHtmlRenderer implements ResponseRendererInterface
 {
     
-    /**
-     * @param mixed       $result
-     * @param SilexKernel $silexKernel
-     *
-     * @return Response
-     */
-    public function renderOnSuccess($result, SilexKernel $silexKernel)
+    public function renderOnSuccess(mixed $result, MicroKernel $kernel): Response
     {
         if (is_object($result) && method_exists($result, '__toString')) {
             $result = (string)$result;
@@ -33,42 +27,37 @@ class DefaultHtmlRenderer implements ResponseRendererInterface
             $result = (string)$result;
         }
         elseif (is_array($result)) {
-            $result = nl2br(str_replace(' ', '&nbsp;', json_encode($result, JSON_PRETTY_PRINT)));
+            $encoded = json_encode($result, JSON_PRETTY_PRINT);
+            $result = nl2br(str_replace(' ', '&nbsp;', $encoded !== false ? $encoded : ''));
         }
-        elseif (!is_string($result)) {
+        else {
             return $this->renderOnException(
                 new WrappedExceptionInfo(
                     new \RuntimeException("Unsupported type of result: " . print_r($result, true)),
                     Response::HTTP_INTERNAL_SERVER_ERROR
                 ),
-                $silexKernel
+                $kernel
             );
         }
         
         return new Response($result);
     }
     
-    /**
-     * @param WrappedExceptionInfo $exceptionInfo
-     * @param SilexKernel          $silexKernel
-     *
-     * @return Response
-     */
-    public function renderOnException(WrappedExceptionInfo $exceptionInfo, SilexKernel $silexKernel)
+    public function renderOnException(WrappedExceptionInfo $exceptionInfo, MicroKernel $kernel): Response
     {
-        $twig = $silexKernel->getTwig();
+        $twig = $kernel->getTwig();
         if (!$twig) {
-            $response = $this->renderOnSuccess($exceptionInfo->jsonSerialize(), $silexKernel);
+            $response = $this->renderOnSuccess($exceptionInfo->jsonSerialize(), $kernel);
         }
         else {
             try {
                 $templateName = sprintf("%d.twig", $exceptionInfo->getCode());
                 
                 $response = new Response(
-                    $twig->render($templateName, $exceptionInfo->toArray($silexKernel['debug']))
+                    $twig->render($templateName, $exceptionInfo->toArray($kernel->isDebug()))
                 );
-            } catch (\Twig_Error_Loader $e) {
-                $response = $this->renderOnSuccess($exceptionInfo->jsonSerialize(), $silexKernel);
+            } catch (\Twig\Error\LoaderError $e) {
+                $response = $this->renderOnSuccess($exceptionInfo->jsonSerialize(), $kernel);
             }
         }
         

@@ -1,24 +1,23 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: minhao
- * Date: 2016-03-14
- * Time: 15:58
- */
 
 namespace Oasis\Mlib\Http\Test\Helpers\Security;
 
+use Oasis\Mlib\Http\MicroKernel;
 use Oasis\Mlib\Http\ServiceProviders\Security\AbstractSimplePreAuthenticationPolicy;
-use Silex\Application;
-use Symfony\Component\Security\Http\Authentication\SimplePreAuthenticatorInterface;
+use Symfony\Component\Security\Http\Authenticator\AuthenticatorInterface;
 
+/**
+ * Test authentication policy for pre-auth.
+ *
+ * Extends AbstractSimplePreAuthenticationPolicy and provides a
+ * TestApiUserPreAuthenticator backed by TestApiUserProvider.
+ */
 class TestAuthenticationPolicy extends AbstractSimplePreAuthenticationPolicy
 {
-    /**
-     * @return SimplePreAuthenticatorInterface
-     */
-    public function getPreAuthenticator()
+    public function getAuthenticator(MicroKernel $kernel, string $firewallName, array $options): AuthenticatorInterface
     {
-        return new TestApiUserPreAuthenticator();
+        $userProvider = new TestApiUserProvider();
+
+        return new TestApiUserPreAuthenticator($userProvider);
     }
 }

@@ -14,27 +14,18 @@ use Symfony\Component\HttpFoundation\ParameterBag;
 
 class ChainedParameterBagDataProvider extends AbstractDataProvider
 {
-    /** @var ParameterBag[]|HeaderBag[] */
+    /** @var array<ParameterBag|HeaderBag> */
     protected $bags;
     
-    public function __construct(...$bags)
+    /**
+     * @param ParameterBag|HeaderBag ...$bags
+     */
+    public function __construct(ParameterBag|HeaderBag ...$bags)
     {
-        foreach ($bags as $bag) {
-            if (!$bag instanceof ParameterBag
-                && !$bag instanceof HeaderBag
-            ) {
-                throw new \InvalidArgumentException("Only ParameterBag|HeaderBag object can be chained.");
-            }
-        }
         $this->bags = $bags;
     }
     
-    /**
-     * @param string $key the key to be used to read a value from the data provider
-     *
-     * @return mixed|null       null indicates the value is not presented in the data provider
-     */
-    protected function getValue($key)
+    protected function getValue(string $key): mixed
     {
         foreach ($this->bags as $bag) {
             if (!$bag->has($key)) {
@@ -46,19 +37,14 @@ class ChainedParameterBagDataProvider extends AbstractDataProvider
             }
             elseif ($bag instanceof HeaderBag) {
                 // when header is presented only once, string value is returned, otherwise, array value is returned
-                $value = $bag->get($key, null, false);
-                if (is_array($value)) {
-                    if (count($value) == 1) {
-                        $value = $value[0];
-                    }
-                    elseif (count($value) == 0) {
-                        $value = null;
-                    }
-                    /** @noinspection PhpStatementHasEmptyBodyInspection */
-                    else {
-                        // $value = $value;
-                    }
+                $value = $bag->all($key);
+                if (count($value) === 1) {
+                    $value = $value[0];
                 }
+                elseif (count($value) === 0) {
+                    $value = null;
+                }
+                // else: multiple values, keep as array
             }
             else {
                 throw new \LogicException("Bag type invalid!");

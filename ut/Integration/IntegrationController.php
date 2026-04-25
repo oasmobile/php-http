@@ -8,7 +8,7 @@
 namespace Oasis\Mlib\Http\Test\Integration;
 
 use Oasis\Mlib\Http\ServiceProviders\Cookie\ResponseCookieContainer;
-use Oasis\Mlib\Http\SilexKernel;
+use Oasis\Mlib\Http\MicroKernel;
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -16,7 +16,7 @@ class IntegrationController
 {
     // --- Security routes (R10) ---
 
-    public function securedAdmin(SilexKernel $app)
+    public function securedAdmin(MicroKernel $app)
     {
         return [
             'called' => __CLASS__ . '::' . __FUNCTION__ . '()',
@@ -25,7 +25,7 @@ class IntegrationController
         ];
     }
 
-    public function securedUser(SilexKernel $app)
+    public function securedUser(MicroKernel $app)
     {
         return [
             'called' => __CLASS__ . '::' . __FUNCTION__ . '()',
@@ -33,7 +33,7 @@ class IntegrationController
         ];
     }
 
-    public function securedParent(SilexKernel $app)
+    public function securedParent(MicroKernel $app)
     {
         return [
             'called' => __CLASS__ . '::' . __FUNCTION__ . '()',
@@ -42,7 +42,7 @@ class IntegrationController
         ];
     }
 
-    public function securedChild(SilexKernel $app)
+    public function securedChild(MicroKernel $app)
     {
         return [
             'called' => __CLASS__ . '::' . __FUNCTION__ . '()',

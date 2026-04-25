@@ -19,10 +19,10 @@ class SimpleFirewallConfiguration implements ConfigurationInterface
      *
      * @return \Symfony\Component\Config\Definition\Builder\TreeBuilder The tree builder
      */
-    public function getConfigTreeBuilder()
+    public function getConfigTreeBuilder(): TreeBuilder
     {
-        $builder  = new TreeBuilder();
-        $firewall = $builder->root('firewall');
+        $builder  = new TreeBuilder('firewall');
+        $firewall = $builder->getRootNode();
         {
             $firewall->children()->variableNode('pattern')->isRequired();
             $firewall->children()->variableNode('policies')->isRequired();

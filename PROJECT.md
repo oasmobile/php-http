@@ -1,6 +1,6 @@
 # Project
 
-`oasis/http` — 基于 Silex 微框架的 HTTP 组件，提供路由、安全、CORS、模板、中间件等 Web 应用基础能力。
+`oasis/http` — 基于 Symfony MicroKernel 的 HTTP 框架，提供路由、安全、CORS、模板、中间件等 Web 应用基础能力。
 
 ---
 
@@ -8,15 +8,17 @@
 
 | 层 | 技术 |
 |----|------|
-| 语言 | PHP ≥ 7.0 |
-| 框架 | Silex 2.x（已 archived，基于 Symfony 4 组件） |
-| DI | Pimple |
-| 模板 | Twig 1.x |
-| HTTP | Symfony HttpFoundation 4.x |
-| 路由 | Symfony Routing 4.2.x（YAML 配置 + 缓存） |
-| 安全 | Symfony Security 4.x |
-| HTTP 客户端 | Guzzle 6.x |
-| 测试 | PHPUnit 5.x |
+| 语言 | PHP ≥ 8.5 |
+| 框架 | Symfony MicroKernel（Symfony 7.x 组件） |
+| 模板 | Twig 3.x |
+| HTTP | Symfony HttpFoundation 7.x |
+| 路由 | Symfony Routing 7.x（YAML 配置 + 缓存） |
+| 安全 | Symfony Security 7.x |
+| HTTP 客户端 | Guzzle 7.x |
+| 测试 | PHPUnit 13.x |
+| 静态分析 | PHPStan（level 8） |
+| PBT | Eris 1.x |
+| 内部依赖 | oasis/utils ^3.0、oasis/logging ^3.0 |
 | 包管理 | Composer |
 
 ---
@@ -30,7 +32,7 @@
 
 ## 核心入口
 
-- `src/SilexKernel.php` — 核心类，继承 `Silex\Application`，通过 bootstrap config 数组初始化
+- `src/MicroKernel.php` — 核心类，继承 Symfony `HttpKernel`，通过 bootstrap config 数组初始化
 
 ---
 
@@ -49,20 +51,40 @@ composer install
 ./vendor/bin/phpunit --testsuite twig
 ./vendor/bin/phpunit --testsuite aws
 ./vendor/bin/phpunit --testsuite exceptions
+
+# 运行 PBT 测试
+./vendor/bin/phpunit --testsuite pbt
+
+# 静态分析
+./vendor/bin/phpstan analyse
+
+# 对重复失败的 suite，用 --log-junit 输出日志以缩小定位
+./vendor/bin/phpunit --testsuite <suite> --log-junit build/junit-<suite>.xml
 ```
 
 ---
 
 ## 测试 Suite
 
-| Suite | 文件 |
+| Suite | 内容 |
 |-------|------|
-| all | `SilexKernelTest`, `SilexKernelWebTest`, `FallbackViewHandlerTest` |
-| exceptions | `HttpExceptionTest` |
+| exceptions | `UniquenessViolationHttpExceptionTest`, `HttpExceptionTest` |
 | cors | `CrossOriginResourceSharingTest`, `CrossOriginResourceSharingAdvancedTest` |
-| security | `SecurityServiceProviderTest`, `SecurityServiceProviderConfigurationTest` |
+| security | `SecurityServiceProviderTest`, `SecurityServiceProviderConfigurationTest`, `NullEntryPointTest`, `AccessRuleListenerTest`, `AbstractSimplePreAuthenticationPolicyTest` |
 | twig | `TwigServiceProviderTest`, `TwigServiceProviderConfigurationTest` |
 | aws | `ElbTrustedProxyTest` |
+| error-handlers | `WrappedExceptionInfoTest`, `ExceptionWrapperTest`, `JsonErrorHandlerTest` |
+| configuration | `HttpConfigurationTest`, `SecurityConfigurationTest`, `CrossOriginResourceSharingConfigurationTest`, `TwigConfigurationTest`, `CacheableRouterConfigurationTest`, `SimpleAccessRuleConfigurationTest`, `SimpleFirewallConfigurationTest`, `ConfigurationValidationTraitTest` |
+| views | `AbstractSmartViewHandlerTest`, `JsonViewHandlerTest`, `DefaultHtmlRendererTest`, `JsonApiRendererTest`, `PrefilightResponseTest`, `RouteBasedResponseRendererResolverTest` |
+| routing | `GroupUrlMatcherTest`, `GroupUrlGeneratorTest`, `CacheableRouterUrlMatcherWrapperTest`, `InheritableRouteCollectionTest`, `InheritableYamlFileLoaderTest`, `CacheableRouterTest`, `CacheableRouterProviderTest` |
+| cookie | `ResponseCookieContainerTest`, `SimpleCookieProviderTest` |
+| middlewares | `AbstractMiddlewareTest` |
+| misc | `ExtendedArgumentValueResolverTest`, `ExtendedExceptionListnerWrapperTest`, `ChainedParameterBagDataProviderTest` |
+| integration | `BootstrapConfigurationIntegrationTest`, `SecurityAuthenticationFlowIntegrationTest`, `SilexKernelCrossCommunityIntegrationTest` |
+| SilexKernelTest | `SilexKernelTest` |
+| SilexKernelWebTest | `SilexKernelWebTest` |
+| FallbackViewHandlerTest | `FallbackViewHandlerTest` |
+| pbt | `ut/PBT/` 目录下所有 PBT 测试 |
 
 ---
 

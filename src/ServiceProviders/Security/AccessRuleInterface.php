@@ -15,15 +15,15 @@ interface AccessRuleInterface
     /**
      * @return string|RequestMatcherInterface
      */
-    public function getPattern();
+    public function getPattern(): string|RequestMatcherInterface;
 
     /**
-     * @return string|array
+     * @return array<string>|string
      */
-    public function getRequiredRoles();
+    public function getRequiredRoles(): string|array;
 
     /**
      * @return string|null
      */
-    public function getRequiredChannel();
+    public function getRequiredChannel(): ?string;
 }

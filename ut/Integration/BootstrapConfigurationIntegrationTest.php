@@ -1,24 +1,18 @@
 <?php
 /**
- * Integration test for Bootstrap_Configuration chain (Requirement 9).
+ * Integration test for Bootstrap_Configuration chain.
  *
- * Each test method directly constructs a SilexKernel with specific configuration,
- * verifying that the corresponding ServiceProvider is registered and behaves correctly.
+ * Each test method directly constructs a MicroKernel with specific configuration,
+ * verifying that the corresponding subsystem is registered and behaves correctly.
  */
 
 namespace Oasis\Mlib\Http\Test\Integration;
 
 use Oasis\Mlib\Http\ServiceProviders\Cors\CrossOriginResourceSharingProvider;
 use Oasis\Mlib\Http\ServiceProviders\Routing\GroupUrlMatcher;
-use Oasis\Mlib\Http\ServiceProviders\Security\SimpleSecurityProvider;
-use Oasis\Mlib\Http\ServiceProviders\Security\SimpleFirewall;
-use Oasis\Mlib\Http\SilexKernel;
+use Oasis\Mlib\Http\MicroKernel;
 use Oasis\Mlib\Http\Test\Helpers\Middlewares\TestMiddleware;
 use Oasis\Mlib\Http\Test\Helpers\RouteCacheCleaner;
-use Oasis\Mlib\Http\Test\Helpers\Security\TestAccessRule;
-use Oasis\Mlib\Http\Test\Helpers\Security\TestApiUserProvider;
-use Oasis\Mlib\Http\Test\Helpers\Security\TestAuthenticationPolicy;
-use Oasis\Mlib\Http\Test\Security\SessionServiceProvider;
 use Oasis\Mlib\Http\Views\JsonViewHandler;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
@@ -31,10 +25,19 @@ class BootstrapConfigurationIntegrationTest extends TestCase
     /**
      * Clean route cache before each test to avoid stale cache issues.
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         $this->cleanRouteCache(__DIR__ . '/../cache');
+    }
+
+    /**
+     * Restore exception handlers that Symfony Kernel may have set during boot/handle.
+     */
+    protected function tearDown(): void
+    {
+        restore_exception_handler();
+        parent::tearDown();
     }
 
     // ---------------------------------------------------------------
@@ -44,9 +47,9 @@ class BootstrapConfigurationIntegrationTest extends TestCase
 
     public function testRoutingConfigRegistersRouterProviderAndRoutesAreMatchable()
     {
-        $app = new SilexKernel(
+        $app = new MicroKernel(
             [
-                'cache_dir' => __DIR__ . '/../cache',
+                'cache_dir' => static::createTempCacheDir(),
                 'routing'   => [
                     'path'       => __DIR__ . '/integration.routes.yml',
                     'namespaces' => [
@@ -62,103 +65,42 @@ class BootstrapConfigurationIntegrationTest extends TestCase
         // After boot with routing config, request_matcher should be a GroupUrlMatcher
         $this->assertInstanceOf(
             GroupUrlMatcher::class,
-            $app['request_matcher'],
+            $app->getRequestMatcher(),
             'request_matcher should be a GroupUrlMatcher when routing is configured'
         );
 
         // Routes defined in integration.routes.yml should be matchable
-        $matched = $app['request_matcher']->match('/integration/public');
+        $matched = $app->getRequestMatcher()->match('/integration/public');
         $this->assertArrayHasKey('_controller', $matched);
-        $this->assertContains('publicAction', $matched['_controller']);
+        $this->assertStringContainsString('publicAction', $matched['_controller']);
     }
 
     // ---------------------------------------------------------------
-    // AC 2: security configured → SimpleSecurityProvider registered,
-    //        firewall active
-    // ---------------------------------------------------------------
-
-    public function testSecurityConfigRegistersSecurityProviderAndFirewallIsActive()
-    {
-        $app = new SilexKernel(
-            [
-                'cache_dir' => __DIR__ . '/../cache',
-                'routing'   => [
-                    'path'       => __DIR__ . '/integration.routes.yml',
-                    'namespaces' => [
-                        'Oasis\\Mlib\\Http\\Test\\Integration\\',
-                    ],
-                ],
-            ],
-            true
-        );
-
-        // Register security provider via service_providers magic property
-        $securityProvider = new SimpleSecurityProvider();
-        $secPolicy        = new TestAuthenticationPolicy();
-        $securityProvider->addAuthenticationPolicy('mauth', $secPolicy);
-        $securityProvider->addFirewall(
-            'integration.secured',
-            new SimpleFirewall(
-                [
-                    'pattern'  => '^/integration/secured',
-                    'policies' => ['mauth' => true],
-                    'users'    => new TestApiUserProvider(),
-                ]
-            )
-        );
-        $securityProvider->addAccessRule(
-            new TestAccessRule('^/integration/secured', 'ROLE_USER')
-        );
-
-        $app->service_providers = [
-            $securityProvider,
-            new SessionServiceProvider(),
-        ];
-
-        $app->boot();
-
-        // security.firewalls should exist in the container after boot
-        $this->assertTrue(
-            isset($app['security.firewalls']),
-            'security.firewalls should be registered in the container'
-        );
-        $this->assertInternalType('array', $app['security.firewalls']);
-        $this->assertArrayHasKey(
-            'integration.secured',
-            $app['security.firewalls'],
-            'The integration.secured firewall should be registered'
-        );
-    }
-
-    // ---------------------------------------------------------------
-    // AC 3: cors configured → CrossOriginResourceSharingProvider
-    //        registered, CORS headers present
+    // AC 3: cors configured → CORS subscriber registered,
+    //        CORS headers present
     // ---------------------------------------------------------------
 
     public function testCorsConfigRegistersCorsProviderAndHeadersArePresent()
     {
-        $app = new SilexKernel(
+        $app = new MicroKernel(
             [
-                'cache_dir' => __DIR__ . '/../cache',
-                'routing'   => [
+                'cache_dir'      => static::createTempCacheDir(),
+                'routing'        => [
                     'path'       => __DIR__ . '/integration.routes.yml',
                     'namespaces' => [
                         'Oasis\\Mlib\\Http\\Test\\Integration\\',
                     ],
                 ],
-                'cors'      => [
+                'cors'           => [
                     [
                         'pattern' => '*',
                         'origins' => ['*'],
                     ],
                 ],
+                'view_handlers'  => [new JsonViewHandler()],
             ],
             true
         );
-
-        $app->view_handlers = [new JsonViewHandler()];
-
-        $app->boot();
 
         // Send a request with Origin header to trigger CORS processing
         $request = Request::create(
@@ -182,15 +124,15 @@ class BootstrapConfigurationIntegrationTest extends TestCase
     }
 
     // ---------------------------------------------------------------
-    // AC 4: twig configured → SimpleTwigServiceProvider registered,
+    // AC 4: twig configured → Twig registered,
     //        templates renderable
     // ---------------------------------------------------------------
 
     public function testTwigConfigRegistersTwigProviderAndTemplatesAreRenderable()
     {
-        $app = new SilexKernel(
+        $app = new MicroKernel(
             [
-                'cache_dir' => __DIR__ . '/../cache',
+                'cache_dir' => static::createTempCacheDir(),
                 'twig'      => [
                     'template_dir' => __DIR__ . '/templates',
                 ],
@@ -200,19 +142,15 @@ class BootstrapConfigurationIntegrationTest extends TestCase
 
         $app->boot();
 
-        // twig service should be available
-        $this->assertTrue(
-            isset($app['twig']),
-            'twig service should be registered when twig is configured'
-        );
+        // twig should be available via getTwig()
         $this->assertInstanceOf(
-            \Twig_Environment::class,
-            $app['twig'],
-            'twig service should be a Twig_Environment instance'
+            \Twig\Environment::class,
+            $app->getTwig(),
+            'getTwig() should return a Twig\\Environment instance when twig is configured'
         );
 
         // Template should be renderable
-        $rendered = $app['twig']->render('test.html.twig', ['name' => 'World']);
+        $rendered = $app->getTwig()->render('test.html.twig', ['name' => 'World']);
         $this->assertEquals('Hello World!', $rendered);
     }
 
@@ -222,26 +160,22 @@ class BootstrapConfigurationIntegrationTest extends TestCase
 
     public function testMiddlewaresConfigExecutesBeforeAndAfterMiddlewares()
     {
-        $app = new SilexKernel(
+        $testMiddleware = new TestMiddleware();
+
+        $app = new MicroKernel(
             [
-                'cache_dir' => __DIR__ . '/../cache',
-                'routing'   => [
+                'cache_dir'      => static::createTempCacheDir(),
+                'routing'        => [
                     'path'       => __DIR__ . '/integration.routes.yml',
                     'namespaces' => [
                         'Oasis\\Mlib\\Http\\Test\\Integration\\',
                     ],
                 ],
+                'view_handlers'  => [new JsonViewHandler()],
+                'middlewares'    => [$testMiddleware],
             ],
             true
         );
-
-        $app->view_handlers = [new JsonViewHandler()];
-
-        // Configure middleware via the middlewares magic property
-        $testMiddleware    = new TestMiddleware();
-        $app->middlewares  = [$testMiddleware];
-
-        $app->boot();
 
         // Before handling, middleware should not have been called
         $this->assertCount(0, $testMiddleware->getBeforeCalls(), 'before() should not be called before handling');

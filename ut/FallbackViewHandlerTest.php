@@ -7,18 +7,18 @@
  */
 
 use Oasis\Mlib\Http\ErrorHandlers\ExceptionWrapper;
-use Oasis\Mlib\Http\SilexKernel;
+use Oasis\Mlib\Http\MicroKernel;
 use Oasis\Mlib\Http\Test\Helpers\RouteCacheCleaner;
+use Oasis\Mlib\Http\Test\Helpers\WebTestCase;
 use Oasis\Mlib\Http\Views\FallbackViewHandler;
 use Oasis\Mlib\Http\Views\RouteBasedResponseRendererResolver;
-use Silex\WebTestCase;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 
 class FallbackViewHandlerTest extends WebTestCase
 {
     use RouteCacheCleaner;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->cleanRouteCache(__DIR__ . '/cache');
         parent::setUp();
@@ -27,26 +27,40 @@ class FallbackViewHandlerTest extends WebTestCase
     /**
      * Creates the application.
      *
+     * FallbackViewHandler needs the kernel instance at construction time.
+     * We use a lazy callable wrapper that defers FallbackViewHandler creation
+     * until the first invocation, at which point $app is fully initialized.
+     *
      * @return HttpKernelInterface
      */
     public function createApplication()
     {
-        $config              = [
-            'routing' => [
+        // Use a lazy wrapper: the FallbackViewHandler is created on first call
+        $lazyViewHandler = null;
+        $appRef = null;
+
+        $viewHandlerCallable = function ($result, $request) use (&$lazyViewHandler, &$appRef) {
+            if ($lazyViewHandler === null) {
+                $lazyViewHandler = new FallbackViewHandler($appRef, new RouteBasedResponseRendererResolver());
+            }
+            return $lazyViewHandler($result, $request);
+        };
+
+        $config = [
+            'cache_dir'      => static::createTempCacheDir(),
+            'routing'        => [
                 'path'       => __DIR__ . "/fallback-test.routes.yml",
                 'namespaces' => [
                     'Oasis\\Mlib\\Http\\Test\\Helpers\\Controllers\\',
                 ],
             ],
+            'view_handlers'  => [$viewHandlerCallable],
+            'error_handlers' => [new ExceptionWrapper()],
         ];
-        $app                 = new SilexKernel($config, true);
-        $app->view_handlers  = [
-            new FallbackViewHandler($app, new RouteBasedResponseRendererResolver()),
-        ];
-        $app->error_handlers = [
-            new ExceptionWrapper(),
-        ];
-        
+
+        $app = new MicroKernel($config, true);
+        $appRef = $app;
+
         return $app;
     }
     
@@ -55,7 +69,7 @@ class FallbackViewHandlerTest extends WebTestCase
         $client = $this->createClient();
         $client->request(
             'GET',
-            'panel/ok'
+            '/panel/ok'
         );
         $response = $client->getResponse();
         $this->assertEquals("Hello world!", $response->getContent());
@@ -66,7 +80,7 @@ class FallbackViewHandlerTest extends WebTestCase
         $client = $this->createClient();
         $client->request(
             'GET',
-            'panel/error'
+            '/panel/error'
         );
         $response = $client->getResponse();
         $this->assertTrue(preg_match("/RuntimeException/", $response->getContent()) > 0);
@@ -78,7 +92,7 @@ class FallbackViewHandlerTest extends WebTestCase
         $client = $this->createClient();
         $client->request(
             'GET',
-            'api/ok'
+            '/api/ok'
         );
         $response = $client->getResponse();
         $this->assertEquals(json_encode(["result" => "Hello world!"]), $response->getContent());
@@ -89,7 +103,7 @@ class FallbackViewHandlerTest extends WebTestCase
         $client = $this->createClient();
         $client->request(
             'GET',
-            'api/error'
+            '/api/error'
         );
         $response = $client->getResponse();
         $json     = json_decode($response->getContent(), true);

@@ -15,15 +15,11 @@ use Symfony\Component\Routing\RequestContext;
 
 class CacheableRouterUrlMatcherWrapper implements UrlMatcherInterface
 {
-    /** @var  UrlMatcherInterface */
-    protected $other;
-    /** @var  array */
-    protected $namespaces;
-    
-    public function __construct(UrlMatcherInterface $other, array $namespaces)
-    {
-        $this->other      = $other;
-        $this->namespaces = $namespaces;
+    public function __construct(
+        protected readonly UrlMatcherInterface $other,
+        /** @var array<string> */
+        protected readonly array $namespaces
+    ) {
     }
     
     /**
@@ -31,7 +27,7 @@ class CacheableRouterUrlMatcherWrapper implements UrlMatcherInterface
      *
      * @param RequestContext $context The context
      */
-    public function setContext(RequestContext $context)
+    public function setContext(RequestContext $context): void
     {
         $this->other->setContext($context);
     }
@@ -41,7 +37,7 @@ class CacheableRouterUrlMatcherWrapper implements UrlMatcherInterface
      *
      * @return RequestContext The context
      */
-    public function getContext()
+    public function getContext(): RequestContext
     {
         return $this->other->getContext();
     }
@@ -54,17 +50,17 @@ class CacheableRouterUrlMatcherWrapper implements UrlMatcherInterface
      *
      * @param string $pathinfo The path info to be parsed (raw format, i.e. not urldecoded)
      *
-     * @return array An array of parameters
+     * @return array<string, mixed> An array of parameters
      *
      * @throws ResourceNotFoundException If the resource could not be found
      * @throws MethodNotAllowedException If the resource was found but the request method is not allowed
      */
-    public function match($pathinfo)
+    public function match(string $pathinfo): array
     {
-        /** @var string[] $result */
+        /** @var array<string, mixed> $result */
         $result = $this->other->match($pathinfo);
         
-        if (\is_string($result['_controller']) && strpos($result['_controller'], "::") !== false) {
+        if (isset($result['_controller']) && \is_string($result['_controller']) && str_contains($result['_controller'], "::")) {
             // check if we should prepend controller namespace
             /** @noinspection PhpUnusedLocalVariableInspection */
             list($className, $methodName) = explode("::", $result['_controller'], 2);

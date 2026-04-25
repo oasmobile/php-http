@@ -8,17 +8,22 @@
 
 namespace Oasis\Mlib\Http\Test\Helpers\Controllers;
 
-use Oasis\Mlib\Http\SilexKernel;
+use Oasis\Mlib\Http\MicroKernel;
+use Symfony\Component\HttpFoundation\Response;
 
 class TwigController
 {
-    public function a(SilexKernel $kernel)
+    public function a(MicroKernel $kernel)
     {
-        return $kernel->render('a.twig', ['lala' => "hello"]);
+        $twig = $kernel->getTwig();
+
+        return new Response($twig->render('a.twig', ['lala' => "hello"]));
     }
 
-    public function a2(SilexKernel $kernel)
+    public function a2(MicroKernel $kernel)
     {
-        return $kernel->render('a2.twig', ['lala' => "WOW"]);
+        $twig = $kernel->getTwig();
+
+        return new Response($twig->render('a2.twig', ['lala' => "WOW"]));
     }
 }

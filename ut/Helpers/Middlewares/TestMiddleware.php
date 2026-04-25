@@ -2,8 +2,8 @@
 
 namespace Oasis\Mlib\Http\Test\Helpers\Middlewares;
 
+use Oasis\Mlib\Http\MicroKernel;
 use Oasis\Mlib\Http\Middlewares\AbstractMiddleware;
-use Silex\Application;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -23,18 +23,20 @@ class TestMiddleware extends AbstractMiddleware
     /**
      * {@inheritdoc}
      */
-    public function before(Request $request, Application $application)
+    public function before(Request $request, MicroKernel $kernel): ?Response
     {
         $this->beforeCalls[] = [
             'request' => $request,
-            'application' => $application,
+            'kernel' => $kernel,
         ];
+
+        return null;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function after(Request $request, Response $response)
+    public function after(Request $request, Response $response): void
     {
         $this->afterCalls[] = [
             'request' => $request,
@@ -45,7 +47,7 @@ class TestMiddleware extends AbstractMiddleware
     /**
      * @return array
      */
-    public function getBeforeCalls()
+    public function getBeforeCalls(): array
     {
         return $this->beforeCalls;
     }
@@ -53,7 +55,7 @@ class TestMiddleware extends AbstractMiddleware
     /**
      * @return array
      */
-    public function getAfterCalls()
+    public function getAfterCalls(): array
     {
         return $this->afterCalls;
     }
@@ -61,7 +63,7 @@ class TestMiddleware extends AbstractMiddleware
     /**
      * Reset recorded calls.
      */
-    public function reset()
+    public function reset(): void
     {
         $this->beforeCalls = [];
         $this->afterCalls = [];

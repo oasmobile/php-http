@@ -8,7 +8,7 @@
 
 namespace Oasis\Mlib\Http\ServiceProviders\Routing;
 
-use Oasis\Mlib\Http\SilexKernel;
+use Oasis\Mlib\Http\MicroKernel;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\Config\Resource\FileResource;
@@ -18,34 +18,32 @@ use Symfony\Component\Routing\Router;
 
 class CacheableRouter extends Router
 {
-    /** @var SilexKernel */
-    private $kernel;
-    /** @var bool */
-    private $isParamReplaced = false;
+    private MicroKernel $kernel;
+    private bool $isParamReplaced = false;
     
     /**
      * CacheableRouter constructor.
      *
-     * @param SilexKernel          $kernel
+     * @param MicroKernel          $kernel
      * @param LoaderInterface      $loader
      * @param mixed                $resource
-     * @param array                $options
+     * @param array<string, mixed>  $options
      * @param RequestContext|null  $context
      * @param LoggerInterface|null $logger
      */
     public function __construct(
-        SilexKernel $kernel,
+        MicroKernel $kernel,
         LoaderInterface $loader,
-        $resource,
+        mixed $resource,
         array $options = [],
-        RequestContext $context = null,
-        LoggerInterface $logger = null)
+        ?RequestContext $context = null,
+        ?LoggerInterface $logger = null)
     {
         parent::__construct($loader, $resource, $options, $context, $logger);
         $this->kernel = $kernel;
     }
     
-    public function getRouteCollection()
+    public function getRouteCollection(): \Symfony\Component\Routing\RouteCollection
     {
         $collection = parent::getRouteCollection();
         if (!$this->isParamReplaced) {
@@ -64,9 +62,9 @@ class CacheableRouter extends Router
                             $offset += strlen($key) + 2;
                             continue;
                         }
-                        $value = preg_replace("/" . preg_quote($matches[1], '/') . "/", $replacement, $value, 1);
+                        $value = (string) preg_replace("/" . preg_quote($matches[1], '/') . "/", (string) $replacement, $value, 1);
                     }
-                    $value = preg_replace('#%%#', '%', $value);
+                    $value = (string) preg_replace('#%%#', '%', $value);
                     $route->setDefault($name, $value);
                 }
             }

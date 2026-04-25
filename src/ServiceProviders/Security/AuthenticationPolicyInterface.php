@@ -1,17 +1,10 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: minhao
- * Date: 2016-03-11
- * Time: 19:50
- */
 
 namespace Oasis\Mlib\Http\ServiceProviders\Security;
 
-use Pimple\Container;
-use Symfony\Component\Security\Core\Authentication\Provider\AuthenticationProviderInterface;
+use Oasis\Mlib\Http\MicroKernel;
+use Symfony\Component\Security\Http\Authenticator\AuthenticatorInterface;
 use Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface;
-use Symfony\Component\Security\Http\Firewall\ListenerInterface;
 
 interface AuthenticationPolicyInterface
 {
@@ -21,37 +14,31 @@ interface AuthenticationPolicyInterface
     const AUTH_TYPE_HTTP        = "http";
     const AUTH_TYPE_REMEMBER_ME = "remember_me";
     const AUTH_TYPE_ANONYMOUS   = "anonymous";
-    
-    public function getAuthenticationType();
-    
+
     /**
-     * If string is returned, it must be either "anonymous" or "dao"
-     *
-     * @param Container   $app
-     * @param             $firewallName
-     * @param             $options
-     *
-     * @return string|AuthenticationProviderInterface
+     * 返回认证类型标识。
      */
-    public function getAuthenticationProvider(Container $app, $firewallName, $options);
-    
+    public function getAuthenticationType(): string;
+
     /**
-     * @param Container                      $app
-     * @param                                $firewallName
-     * @param                                $options
+     * 创建并返回 authenticator 实例。
+     * 替代旧的 getAuthenticationProvider() + getAuthenticationListener()。
      *
-     * @return ListenerInterface
+     * @param array<string, mixed> $options
      */
-    public function getAuthenticationListener(Container $app,
-                                              $firewallName,
-                                              $options);
-    
+    public function getAuthenticator(MicroKernel $kernel, string $firewallName, array $options): AuthenticatorInterface;
+
     /**
-     * @param Container   $app
-     * @param             $name
-     * @param             $options
+     * 返回 authenticator 的配置选项。
      *
-     * @return AuthenticationEntryPointInterface
+     * @return array<string, mixed>
      */
-    public function getEntryPoint(Container $app, $name, $options);
+    public function getAuthenticatorConfig(): array;
+
+    /**
+     * 返回认证入口点。
+     *
+     * @param array<string, mixed> $options
+     */
+    public function getEntryPoint(MicroKernel $kernel, string $name, array $options): AuthenticationEntryPointInterface;
 }

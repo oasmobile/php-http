@@ -4,7 +4,7 @@ namespace Oasis\Mlib\Http\Test\Cors;
 
 use Oasis\Mlib\Http\ServiceProviders\Cors\CrossOriginResourceSharingProvider;
 use Oasis\Mlib\Http\Test\Helpers\RouteCacheCleaner;
-use Silex\WebTestCase;
+use Oasis\Mlib\Http\Test\Helpers\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 
@@ -18,7 +18,7 @@ class CrossOriginResourceSharingTest extends WebTestCase
 {
     use RouteCacheCleaner;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->cleanRouteCache(__DIR__ . '/../cache');
         parent::setUp();
@@ -31,6 +31,7 @@ class CrossOriginResourceSharingTest extends WebTestCase
      */
     public function createApplication()
     {
+        $cacheDir = static::createTempCacheDir();
         return require __DIR__ . '/app.cors.php';
     }
     
@@ -127,7 +128,7 @@ class CrossOriginResourceSharingTest extends WebTestCase
         $this->assertEquals(Response::HTTP_NO_CONTENT, $response->getStatusCode());
         $this->assertTrue($response->headers->has(CrossOriginResourceSharingProvider::HEADER_ALLOW_ORIGIN));
         $this->assertTrue($response->headers->has(CrossOriginResourceSharingProvider::HEADER_ALLOW_METHODS));
-        $this->assertContains('PUT', $response->headers->get(CrossOriginResourceSharingProvider::HEADER_ALLOW_METHODS));
+        $this->assertStringContainsString('PUT', $response->headers->get(CrossOriginResourceSharingProvider::HEADER_ALLOW_METHODS));
     }
     
     public function testPrefilightOnNotAllowedMethod()
@@ -217,7 +218,7 @@ class CrossOriginResourceSharingTest extends WebTestCase
             'baidu.com',
             $response->headers->get(CrossOriginResourceSharingProvider::HEADER_ALLOW_ORIGIN)
         );
-        $this->assertNotContains('*', $response->headers->get(CrossOriginResourceSharingProvider::HEADER_ALLOW_ORIGIN));
+        $this->assertStringNotContainsString('*', $response->headers->get(CrossOriginResourceSharingProvider::HEADER_ALLOW_ORIGIN));
     }
     
     public function testNormalRequestAfterPreflight()
@@ -260,8 +261,8 @@ class CrossOriginResourceSharingTest extends WebTestCase
         $exposedHeaders = strtolower(
             $response->headers->get(CrossOriginResourceSharingProvider::HEADER_EXPOSE_HEADERS)
         );
-        $this->assertContains('name', $exposedHeaders);
-        $this->assertContains('job', $exposedHeaders);
+        $this->assertStringContainsString('name', $exposedHeaders);
+        $this->assertStringContainsString('job', $exposedHeaders);
     }
     
     // ========================================================================
@@ -445,9 +446,9 @@ class CrossOriginResourceSharingTest extends WebTestCase
         $exposedHeaders = strtolower(
             $response->headers->get(CrossOriginResourceSharingProvider::HEADER_EXPOSE_HEADERS)
         );
-        $this->assertContains('name', $exposedHeaders);
-        $this->assertContains('job', $exposedHeaders);
-        $this->assertContains('content-types', $exposedHeaders);
+        $this->assertStringContainsString('name', $exposedHeaders);
+        $this->assertStringContainsString('job', $exposedHeaders);
+        $this->assertStringContainsString('content-types', $exposedHeaders);
     }
     
     /**

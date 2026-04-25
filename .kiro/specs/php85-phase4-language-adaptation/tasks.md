@@ -14,26 +14,26 @@
 
 ## Tasks
 
-- [ ] 1. PBT 测试先行：编写 Property-Based Tests
-  - [ ] 1.1 新建 `ut/PBT/WrappedExceptionInfoPropertyTest.php`
+- [-] 1. PBT 测试先行：编写 Property-Based Tests
+  - [x] 1.1 新建 `ut/PBT/WrappedExceptionInfoPropertyTest.php`
     - **Property 1: Status code normalization invariant** — 对任意整数 HTTP status code，`getCode()` 在输入为 0 时返回 500，非 0 时返回原值
     - **Property 2: Serialization code field metamorphic property** — 对任意 Exception，`serializeException()` 输出仅在 code 非 0 时包含 `code` 字段
     - **Property 3: WrappedExceptionInfo JSON round-trip** — `json_decode(json_encode(toArray()))` 产生等价数组结构
     - 使用 Eris 1.x 生成随机 status code 和 Exception 对象
     - 基于当前代码验证 property 成立，作为后续修改的回归保护
     - _Requirements: 15.1, 15.2, 15.3, 17.4_
-  - [ ] 1.2 新建 `ut/PBT/ViewHandlerPropertyTest.php`
+  - [x] 1.2 新建 `ut/PBT/ViewHandlerPropertyTest.php`
     - **Property 4: MIME type matching strict comparison invariance** — 对任意有效 MIME type 字符串，`shouldHandle()` 在严格比较下返回与松散比较相同的结果
     - **Property 5: Format-to-renderer mapping correctness** — `html`/`page` → `DefaultHtmlRenderer`，`api`/`json` → `JsonApiRenderer`，其他 → `InvalidConfigurationException`
     - 使用 Eris 1.x 生成随机 MIME type 和 format 字符串
     - _Requirements: 16.1, 16.2, 16.3_
-  - [ ] 1.3 新建 `ut/PBT/ConstructorPromotionPropertyTest.php`
+  - [x] 1.3 新建 `ut/PBT/ConstructorPromotionPropertyTest.php`
     - **Property 6: SimpleAccessRule configuration round-trip** — 构造后 getter 返回等价于输入配置的值
     - **Property 7: SimpleFirewall configuration round-trip** — 构造后 getter 返回等价于输入配置的值
     - **Property 8: UniquenessViolationHttpException construction round-trip** — `getStatusCode()` 始终 400，`getMessage()`/`getPrevious()`/`getCode()` 匹配输入
     - 使用 Eris 1.x 生成随机配置参数
     - _Requirements: 17.1, 17.2, 17.3_
-  - [ ] 1.4 Checkpoint: 运行 `phpunit --testsuite pbt` 确认所有 PBT 在当前代码上通过，commit
+  - [-] 1.4 Checkpoint: 运行 `phpunit --testsuite pbt` 确认所有 PBT 在当前代码上通过，commit
 
 - [ ] 2. ErrorHandlers 模块
   - [ ] 2.1 修改 `src/ErrorHandlers/WrappedExceptionInfo.php`

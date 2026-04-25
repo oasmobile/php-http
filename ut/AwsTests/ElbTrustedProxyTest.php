@@ -107,7 +107,7 @@ class ElbTrustedProxyTest extends WebTestCase
         // Testing all ~200 prefixes takes 12+ seconds; the trust logic is identical for each.
         $cloudfrontPrefixes = [];
         foreach ($awsIps['prefixes'] as $info) {
-            if (\array_key_exists('ip_prefix', $info) && $info['service'] == "CLOUDFRONT") {
+            if (\array_key_exists('ip_prefix', $info) && $info['service'] === "CLOUDFRONT") {
                 $cloudfrontPrefixes[] = $info['ip_prefix'];
             }
         }
@@ -283,7 +283,7 @@ class ElbTrustedProxyTest extends WebTestCase
         // Find the first CloudFront prefix
         $cfIp = null;
         foreach ($awsIps['prefixes'] as $info) {
-            if (\array_key_exists('ip_prefix', $info) && $info['service'] == "CLOUDFRONT") {
+            if (\array_key_exists('ip_prefix', $info) && $info['service'] === "CLOUDFRONT") {
                 list($cfIp,) = \explode('/', $info['ip_prefix']);
                 break;
             }
@@ -371,7 +371,7 @@ class ElbTrustedProxyTest extends WebTestCase
         
         $cfIp = null;
         foreach ($awsIps['prefixes'] as $info) {
-            if (\array_key_exists('ip_prefix', $info) && $info['service'] == "CLOUDFRONT") {
+            if (\array_key_exists('ip_prefix', $info) && $info['service'] === "CLOUDFRONT") {
                 list($cfIp,) = \explode('/', $info['ip_prefix']);
                 break;
             }

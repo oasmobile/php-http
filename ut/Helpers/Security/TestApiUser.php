@@ -12,13 +12,10 @@ use Symfony\Component\Security\Core\User\UserInterface;
 
 class TestApiUser implements UserInterface, \JsonSerializable
 {
-    protected $username;
-    protected $roles;
-    
-    public function __construct($username, $roles)
-    {
-        $this->roles    = $roles;
-        $this->username = $username;
+    public function __construct(
+        protected readonly string $username,
+        protected readonly array $roles
+    ) {
     }
     
     /**

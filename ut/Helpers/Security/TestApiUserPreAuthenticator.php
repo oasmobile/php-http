@@ -15,11 +15,9 @@ use Symfony\Component\Security\Core\User\UserInterface;
  */
 class TestApiUserPreAuthenticator extends AbstractPreAuthenticator
 {
-    private SimplePreAuthenticateUserProviderInterface $userProvider;
-
-    public function __construct(SimplePreAuthenticateUserProviderInterface $userProvider)
-    {
-        $this->userProvider = $userProvider;
+    public function __construct(
+        private readonly SimplePreAuthenticateUserProviderInterface $userProvider
+    ) {
     }
 
     protected function getCredentialsFromRequest(Request $request): mixed

@@ -863,7 +863,7 @@ public function __construct(
 
 ### 验证标准
 
-1. `phpunit --testsuite all` 全量通过（R14 AC1）
+1. `phpunit` 全量通过（R14 AC1）
 2. `phpunit --testsuite pbt` PBT 测试通过（R14 AC2）
 3. 零 deprecation notice（R13 AC1）
 4. 所有现有 suite（`security`、`integration`、`cors`、`twig`、`routing`、`configuration`、`views`、`error-handlers`、`cookie`、`middlewares`、`misc`、`aws`、`exceptions`）继续通过（R14 AC3）

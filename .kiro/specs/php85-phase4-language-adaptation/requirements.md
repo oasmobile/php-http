@@ -36,7 +36,7 @@ Phase 0–3 已完成依赖升级（PHPUnit 13.x、Symfony 7.x、Twig 3.x、Guzz
 - C-2: 依赖 Phase 0–3 完成
 - C-3: `composer.json` 中 PHP 版本约束已在 Phase 0 更新为 `>=8.5`，本 Phase 无需再改
 - C-4: PBT 使用 Eris 1.x
-- C-5: spec 级 DoD：tasks 全部完成 + `--testsuite all` 全量通过，无 deprecation notice
+- C-5: spec 级 DoD：tasks 全部完成 + `phpunit` 全量通过，无 deprecation notice
 - C-6: 预期可能残留的问题：静态分析发现的类型问题（等 Phase 5）、CI 矩阵尚未配置（等 Phase 5）
 
 ---
@@ -226,17 +226,17 @@ Phase 0–3 已完成依赖升级（PHPUnit 13.x、Symfony 7.x、Twig 3.x、Guzz
 
 #### Acceptance Criteria
 
-1. WHEN `phpunit --testsuite all` is executed under PHP 8.5, THE test runner SHALL report zero deprecation notices from project code（`src/` 和 `ut/`）
+1. WHEN `phpunit` is executed under PHP 8.5, THE test runner SHALL report zero deprecation notices from project code（`src/` 和 `ut/`）
 2. THE codebase SHALL NOT contain any PHP 8.x deprecated syntax or API usage
 3. IF third-party dependencies produce deprecation notices, THEN THE notices SHALL be documented but not required to be fixed in this Phase
 
 ### Requirement 14: 全量测试通过
 
-**User Story:** 作为开发者，我希望 Phase 4 完成后 `--testsuite all` 全量通过，以确认所有兼容性修复和现代化改造成功。
+**User Story:** 作为开发者，我希望 Phase 4 完成后 `phpunit` 全量通过，以确认所有兼容性修复和现代化改造成功。
 
 #### Acceptance Criteria
 
-1. WHEN `phpunit --testsuite all` is executed, THE test runner SHALL report all tests passing
+1. WHEN `phpunit` is executed, THE test runner SHALL report all tests passing
 2. WHEN `phpunit --testsuite pbt` is executed, THE PBT tests SHALL pass
 3. FOR ALL existing test suites（`security`、`integration`、`cors`、`twig`、`routing`、`configuration`、`views`、`error-handlers`、`cookie`、`middlewares`、`misc`、`aws`、`exceptions`），THE tests SHALL continue to pass
 

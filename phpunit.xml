@@ -5,9 +5,6 @@
         bootstrap="ut/bootstrap.php"
 >
     <testsuites>
-        <testsuite name="all">
-            <directory>ut</directory>
-        </testsuite>
         <testsuite name="exceptions">
             <file>ut/Misc/UniquenessViolationHttpExceptionTest.php</file>
             <file>ut/HttpExceptionTest.php</file>

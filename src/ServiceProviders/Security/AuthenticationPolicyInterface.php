@@ -1,15 +1,9 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: minhao
- * Date: 2016-03-11
- * Time: 19:50
- */
 
 namespace Oasis\Mlib\Http\ServiceProviders\Security;
 
 use Oasis\Mlib\Http\MicroKernel;
-use Symfony\Component\Security\Core\Authentication\Provider\AuthenticationProviderInterface;
+use Symfony\Component\Security\Http\Authenticator\AuthenticatorInterface;
 use Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface;
 
 interface AuthenticationPolicyInterface
@@ -20,37 +14,25 @@ interface AuthenticationPolicyInterface
     const AUTH_TYPE_HTTP        = "http";
     const AUTH_TYPE_REMEMBER_ME = "remember_me";
     const AUTH_TYPE_ANONYMOUS   = "anonymous";
-    
-    public function getAuthenticationType();
-    
+
     /**
-     * If string is returned, it must be either "anonymous" or "dao"
-     *
-     * @param MicroKernel $kernel
-     * @param             $firewallName
-     * @param             $options
-     *
-     * @return string|AuthenticationProviderInterface
+     * 返回认证类型标识。
      */
-    public function getAuthenticationProvider(MicroKernel $kernel, $firewallName, $options);
-    
+    public function getAuthenticationType(): string;
+
     /**
-     * @param MicroKernel $kernel
-     * @param             $firewallName
-     * @param             $options
-     *
-     * @return mixed
+     * 创建并返回 authenticator 实例。
+     * 替代旧的 getAuthenticationProvider() + getAuthenticationListener()。
      */
-    public function getAuthenticationListener(MicroKernel $kernel,
-                                              $firewallName,
-                                              $options);
-    
+    public function getAuthenticator(MicroKernel $kernel, string $firewallName, array $options): AuthenticatorInterface;
+
     /**
-     * @param MicroKernel $kernel
-     * @param             $name
-     * @param             $options
-     *
-     * @return AuthenticationEntryPointInterface
+     * 返回 authenticator 的配置选项。
      */
-    public function getEntryPoint(MicroKernel $kernel, $name, $options);
+    public function getAuthenticatorConfig(): array;
+
+    /**
+     * 返回认证入口点。
+     */
+    public function getEntryPoint(MicroKernel $kernel, string $name, array $options): AuthenticationEntryPointInterface;
 }

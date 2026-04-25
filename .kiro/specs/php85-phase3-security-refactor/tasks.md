@@ -12,17 +12,17 @@ Design CR 决策：
 
 ## Tasks
 
-- [ ] 1. 接口层：重新设计 AuthenticationPolicyInterface
-  - [ ] 1.1 重写 `src/ServiceProviders/Security/AuthenticationPolicyInterface.php`
+- [-] 1. 接口层：重新设计 AuthenticationPolicyInterface
+  - [x] 1.1 重写 `src/ServiceProviders/Security/AuthenticationPolicyInterface.php`
     - 移除 `getAuthenticationProvider()` 和 `getAuthenticationListener()` 方法
     - 新增 `getAuthenticator(MicroKernel $kernel, string $firewallName, array $options): AuthenticatorInterface`
     - 新增 `getAuthenticatorConfig(): array`
     - 保留 `getAuthenticationType(): string`、`getEntryPoint()` 和所有 `AUTH_TYPE_*` 常量
     - 所有方法使用强类型声明（参见 Design Components §2）
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7_
-  - [ ] 1.2 Checkpoint: 运行 `composer dump-autoload` 确认无 autoload 错误，确认接口文件无语法错误，commit
+  - [-] 1.2 Checkpoint: 运行 `composer dump-autoload` 确认无 autoload 错误，确认接口文件无语法错误，commit
 
-- [ ] 2. 抽象类层：新建 AbstractPreAuthenticator 和重写 AbstractSimplePreAuthenticationPolicy
+- [~] 2. 抽象类层：新建 AbstractPreAuthenticator 和重写 AbstractSimplePreAuthenticationPolicy
   - [ ] 2.1 新建 `src/ServiceProviders/Security/AbstractPreAuthenticator.php`
     - 实现 `AuthenticatorInterface`，用模板方法封装 Symfony 7.x 认证 API
     - `supports()` 委托给 `getCredentialsFromRequest()`，返回值非 null 则 true
@@ -54,7 +54,7 @@ Design CR 决策：
     - _Requirements: 4.1, 4.2, 4.3, 4.5_
   - [ ] 2.5 Checkpoint: 运行 `composer dump-autoload` 确认无 autoload 错误，运行已有测试确认无回归，commit
 
-- [ ] 3. 确认 UserProvider 无需修改 + 废弃旧 Authenticator + 配置层兼容确认
+- [~] 3. 确认 UserProvider 无需修改 + 废弃旧 Authenticator + 配置层兼容确认
   - [ ] 3.1 确认 `src/ServiceProviders/Security/AbstractSimplePreAuthenticateUserProvider.php` 无需修改
     - 继续实现 `SimplePreAuthenticateUserProviderInterface`（扩展 `UserProviderInterface`）
     - `authenticateAndGetUser()` 保留为核心抽象方法
@@ -74,7 +74,7 @@ Design CR 决策：
     - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 6.6_
   - [ ] 3.4 Checkpoint: 运行 `composer dump-autoload` 确认无 autoload 错误，运行已有测试确认无回归，commit
 
-- [ ] 4. 集成层：SimpleSecurityProvider.register() 重写
+- [~] 4. 集成层：SimpleSecurityProvider.register() 重写
   - [ ] 4.1 重写 `src/ServiceProviders/Security/SimpleSecurityProvider.php` 的 `register()` 方法
     - 保持现有配置合并逻辑不变
     - 新增 TokenStorage 创建和 `$kernel->setTokenStorage()`

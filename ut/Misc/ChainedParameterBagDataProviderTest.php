@@ -16,15 +16,14 @@ class ChainedParameterBagDataProviderTest extends TestCase
 
     public function testConstructWithNonBagObjectThrowsException()
     {
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Only ParameterBag|HeaderBag object can be chained.');
+        $this->expectException(\TypeError::class);
 
         new ChainedParameterBagDataProvider(new \stdClass());
     }
 
     public function testConstructWithStringThrowsException()
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(\TypeError::class);
 
         new ChainedParameterBagDataProvider('not a bag');
     }

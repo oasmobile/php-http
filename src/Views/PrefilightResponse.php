@@ -12,6 +12,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class PrefilightResponse extends Response
 {
+    /** @var array<string> */
     protected array $allowedMethods = [];
     
     protected bool $frozen = false;
@@ -21,6 +22,9 @@ class PrefilightResponse extends Response
         parent::__construct('', static::HTTP_NO_CONTENT, ['X-Status-Code' => static::HTTP_NO_CONTENT]);
     }
     
+    /**
+     * @return array<string>
+     */
     public function getAllowedMethods(): array
     {
         return $this->allowedMethods;

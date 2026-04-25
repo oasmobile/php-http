@@ -27,7 +27,7 @@ class CacheableRouter extends Router
      * @param MicroKernel          $kernel
      * @param LoaderInterface      $loader
      * @param mixed                $resource
-     * @param array                $options
+     * @param array<string, mixed>  $options
      * @param RequestContext|null  $context
      * @param LoggerInterface|null $logger
      */
@@ -62,9 +62,9 @@ class CacheableRouter extends Router
                             $offset += strlen($key) + 2;
                             continue;
                         }
-                        $value = preg_replace("/" . preg_quote($matches[1], '/') . "/", $replacement, $value, 1);
+                        $value = (string) preg_replace("/" . preg_quote($matches[1], '/') . "/", (string) $replacement, $value, 1);
                     }
-                    $value = preg_replace('#%%#', '%', $value);
+                    $value = (string) preg_replace('#%%#', '%', $value);
                     $route->setDefault($name, $value);
                 }
             }

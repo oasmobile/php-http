@@ -23,16 +23,22 @@ interface AuthenticationPolicyInterface
     /**
      * 创建并返回 authenticator 实例。
      * 替代旧的 getAuthenticationProvider() + getAuthenticationListener()。
+     *
+     * @param array<string, mixed> $options
      */
     public function getAuthenticator(MicroKernel $kernel, string $firewallName, array $options): AuthenticatorInterface;
 
     /**
      * 返回 authenticator 的配置选项。
+     *
+     * @return array<string, mixed>
      */
     public function getAuthenticatorConfig(): array;
 
     /**
      * 返回认证入口点。
+     *
+     * @param array<string, mixed> $options
      */
     public function getEntryPoint(MicroKernel $kernel, string $name, array $options): AuthenticationEntryPointInterface;
 }

@@ -45,13 +45,13 @@ class SimpleSecurityProvider
     
     // --- start of intermediate variables holding config data ---
     
-    /** @var FirewallInterface[]|array */
+    /** @var array<string, FirewallInterface|array<string, mixed>> */
     protected $firewalls = [];
-    /** @var AccessRuleInterface[]|array */
+    /** @var array<AccessRuleInterface|array<string, mixed>> */
     protected $accessRules = [];
     /** @var AuthenticationPolicyInterface[] */
     protected $authPolicies = [];
-    /** @var array */
+    /** @var array<string, array<string>> */
     protected $roleHierarchy = [];
     
     // --- end of intermediate variables ---
@@ -64,7 +64,7 @@ class SimpleSecurityProvider
     }
     
     /**
-     * @param AccessRuleInterface|array $rule
+     * @param AccessRuleInterface|array<string, mixed> $rule
      */
     public function addAccessRule(AccessRuleInterface|array $rule): void
     {
@@ -76,11 +76,17 @@ class SimpleSecurityProvider
         $this->authPolicies[$policyName] = $policy;
     }
     
+    /**
+     * @param FirewallInterface|array<string, mixed> $firewall
+     */
     public function addFirewall(string $firewallName, FirewallInterface|array $firewall): void
     {
         $this->firewalls[$firewallName] = $firewall;
     }
     
+    /**
+     * @param string|array<string> $children
+     */
     public function addRoleHierarchy(string $role, string|array $children): void
     {
         $old = isset($this->roleHierarchy[$role]) ? $this->roleHierarchy[$role] : [];
@@ -97,7 +103,7 @@ class SimpleSecurityProvider
      * and registers firewall + access rule event listeners.
      *
      * @param MicroKernel $kernel
-     * @param array       $securityConfig The security config from Bootstrap_Config (optional)
+     * @param array<string, mixed> $securityConfig The security config from Bootstrap_Config (optional)
      */
     public function register(MicroKernel $kernel, array $securityConfig = []): void
     {
@@ -162,7 +168,7 @@ class SimpleSecurityProvider
     /**
      * Get the parsed firewalls configuration.
      *
-     * @return array
+     * @return array<string, array<string, mixed>>
      */
     public function getFirewalls(): array
     {
@@ -183,7 +189,7 @@ class SimpleSecurityProvider
     /**
      * Get the parsed access rules configuration.
      *
-     * @return array
+     * @return array<array{0: string|\Symfony\Component\HttpFoundation\RequestMatcherInterface, 1: string|array<string>, 2: string|null}>
      */
     public function getAccessRules(): array
     {
@@ -208,7 +214,7 @@ class SimpleSecurityProvider
     /**
      * Get the parsed role hierarchy configuration.
      *
-     * @return array
+     * @return array<string, list<string>>
      */
     public function getRoleHierarchy(): array
     {
@@ -218,8 +224,9 @@ class SimpleSecurityProvider
         $result = [];
         foreach ($hierarchy as $parentName => $children) {
             $old = isset($result[$parentName]) ? $result[$parentName] : [];
-            $old = array_merge($old, (array)$children);
-            $result[$parentName] = $old;
+            /** @var list<string> $merged */
+            $merged = array_values(array_merge($old, (array)$children));
+            $result[$parentName] = $merged;
         }
         
         return $result;
@@ -242,7 +249,7 @@ class SimpleSecurityProvider
      *
      * @param FirewallInterface $firewall
      *
-     * @return array
+     * @return array<string, mixed>
      */
     protected function parseFirewall(FirewallInterface $firewall): array
     {
@@ -269,7 +276,9 @@ class SimpleSecurityProvider
         $firewalls = $this->getFirewalls();
         $policies = $this->getPolicies();
         
-        $kernel->getContainer()->get('event_dispatcher')->addListener(
+        /** @var \Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher */
+        $dispatcher = $kernel->getContainer()->get('event_dispatcher');
+        $dispatcher->addListener(
             KernelEvents::REQUEST,
             function (RequestEvent $event) use ($kernel, $firewalls, $policies, $tokenStorage) {
                 if (!$event->isMainRequest()) {
@@ -328,7 +337,9 @@ class SimpleSecurityProvider
     ): void {
         $accessRules = $this->getAccessRules();
         
-        $kernel->getContainer()->get('event_dispatcher')->addListener(
+        /** @var \Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher */
+        $dispatcher = $kernel->getContainer()->get('event_dispatcher');
+        $dispatcher->addListener(
             KernelEvents::REQUEST,
             function (RequestEvent $event) use ($accessRules, $tokenStorage, $accessDecisionManager) {
                 if (!$event->isMainRequest()) {

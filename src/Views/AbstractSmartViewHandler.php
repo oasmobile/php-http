@@ -38,5 +38,8 @@ abstract class AbstractSmartViewHandler
         return false;
     }
 
+    /**
+     * @return array<string>
+     */
     abstract protected function getCompatibleTypes(): array;
 }

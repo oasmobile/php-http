@@ -21,6 +21,9 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class JsonErrorHandler
 {
+    /**
+     * @return array<string, mixed>
+     */
     public function __invoke(\Exception $e, Request $request, int $code): array
     {
         mtrace($e, "Exception while processing request, code = $code.");

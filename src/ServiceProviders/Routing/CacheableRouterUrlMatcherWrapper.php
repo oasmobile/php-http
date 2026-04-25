@@ -17,6 +17,7 @@ class CacheableRouterUrlMatcherWrapper implements UrlMatcherInterface
 {
     public function __construct(
         protected readonly UrlMatcherInterface $other,
+        /** @var array<string> */
         protected readonly array $namespaces
     ) {
     }
@@ -49,17 +50,17 @@ class CacheableRouterUrlMatcherWrapper implements UrlMatcherInterface
      *
      * @param string $pathinfo The path info to be parsed (raw format, i.e. not urldecoded)
      *
-     * @return array An array of parameters
+     * @return array<string, mixed> An array of parameters
      *
      * @throws ResourceNotFoundException If the resource could not be found
      * @throws MethodNotAllowedException If the resource was found but the request method is not allowed
      */
     public function match(string $pathinfo): array
     {
-        /** @var string[] $result */
+        /** @var array<string, mixed> $result */
         $result = $this->other->match($pathinfo);
         
-        if (\is_string($result['_controller']) && str_contains($result['_controller'], "::")) {
+        if (isset($result['_controller']) && \is_string($result['_controller']) && str_contains($result['_controller'], "::")) {
             // check if we should prepend controller namespace
             /** @noinspection PhpUnusedLocalVariableInspection */
             list($className, $methodName) = explode("::", $result['_controller'], 2);

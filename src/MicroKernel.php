@@ -62,13 +62,15 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
     protected $isDebug = true;
     /** @var string|null */
     protected $cacheDir               = null;
+    /** @var array<object> */
     protected $controllerInjectedArgs = [];
+    /** @var array<string, mixed> */
     protected $extraParameters        = [];
     /** @var MiddlewareInterface[] */
     protected $middlewares = [];
     /** @var callable[] */
     protected $viewHandlers = [];
-    /** @var array */
+    /** @var array<callable> */
     protected $errorHandlers = [];
     /** @var TwigEnvironment|null */
     protected $twigEnvironment = null;
@@ -76,7 +78,7 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
     protected $tokenStorage = null;
     /** @var AuthorizationCheckerInterface|null */
     protected $authorizationChecker = null;
-    /** @var array */
+    /** @var array<CompilerPassInterface|ExtensionInterface> */
     protected $providers = [];
     /** @var CrossOriginResourceSharingProvider|null */
     protected $corsSubscriber = null;
@@ -102,6 +104,9 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
      */
     protected $slowRequestHandler = null;
 
+    /**
+     * @param array<string, mixed> $httpConfig
+     */
     public function __construct(array $httpConfig, bool $isDebug)
     {
         $this->httpDataProvider = $this->processConfiguration($httpConfig, new HttpConfiguration());
@@ -342,6 +347,9 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
         return $default;
     }
 
+    /**
+     * @param array<string, mixed> $extras
+     */
     public function addExtraParameters(array $extras): void
     {
         $this->extraParameters = array_merge($this->extraParameters, $extras);
@@ -384,6 +392,7 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
      */
     protected function registerMiddlewares(): void
     {
+        /** @var \Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher */
         $dispatcher = $this->getContainer()->get('event_dispatcher');
         foreach ($this->middlewares as $middleware) {
             if (false !== ($priority = $middleware->getBeforePriority())) {
@@ -426,6 +435,7 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
      */
     protected function registerErrorHandlers(): void
     {
+        /** @var \Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher */
         $dispatcher = $this->getContainer()->get('event_dispatcher');
         $kernel = $this;
         foreach ($this->errorHandlers as $handler) {
@@ -482,6 +492,7 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
         }
 
         $subscriber = new ViewHandlerSubscriber($this->viewHandlers);
+        /** @var \Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher */
         $dispatcher = $this->getContainer()->get('event_dispatcher');
         $dispatcher->addSubscriber($subscriber);
     }
@@ -500,6 +511,7 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
         $this->addControllerInjectedArg($cookieContainer);
 
         $cookieSubscriber = new SimpleCookieProvider($cookieContainer);
+        /** @var \Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher */
         $dispatcher       = $this->getContainer()->get('event_dispatcher');
         $dispatcher->addSubscriber($cookieSubscriber);
     }
@@ -522,6 +534,7 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
         }
 
         $this->corsSubscriber = new CrossOriginResourceSharingProvider($corsConfig);
+        /** @var \Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher */
         $dispatcher = $this->getContainer()->get('event_dispatcher');
         $dispatcher->addSubscriber($this->corsSubscriber);
     }
@@ -597,6 +610,7 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
 
         // Build routing services with a fresh RequestContext
         $requestContext       = new RequestContext();
+        assert($this->routerProvider !== null);
         $this->requestMatcher = $this->routerProvider->buildRequestMatcher($requestContext);
         $this->urlGenerator   = $this->routerProvider->buildUrlGenerator($requestContext);
 
@@ -604,6 +618,7 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
         // Our listener uses the custom GroupUrlMatcher to resolve routes.
         // Once _controller is set, Symfony's RouterListener will skip routing.
         $matcher    = $this->requestMatcher;
+        /** @var \Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher */
         $dispatcher = $this->getContainer()->get('event_dispatcher');
         $dispatcher->addListener(
             KernelEvents::REQUEST,
@@ -624,8 +639,8 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
                 } catch (\Symfony\Component\Routing\Exception\ResourceNotFoundException $e) {
                     // Check if the 404 is due to a scheme mismatch (e.g., HTTPS request
                     // to an HTTP-only route). If so, generate a redirect response.
+                    $originalScheme = $requestContext->getScheme();
                     try {
-                        $originalScheme = $requestContext->getScheme();
                         $targetScheme = ($originalScheme === 'https') ? 'http' : 'https';
                         $requestContext->setScheme($targetScheme);
                         $parameters = $matcher->matchRequest($request);
@@ -657,7 +672,12 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
     public function getProjectDir(): string
     {
         // Return the working directory; MicroKernel is a library kernel, not a full app
-        return getcwd();
+        $cwd = getcwd();
+        if ($cwd === false) {
+            throw new \RuntimeException('Unable to determine the current working directory');
+        }
+
+        return $cwd;
     }
 
     public function getCacheDir(): string
@@ -769,6 +789,9 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
                 $cacheFilename = $this->cacheDir . "/aws.ips";
                 if (\file_exists($cacheFilename)) {
                     $content = \file_get_contents($cacheFilename);
+                    if ($content === false) {
+                        $content = '';
+                    }
                     try {
                         $awsIps = \json_decode($content, true, 512, JSON_THROW_ON_ERROR);
                         if (isset($awsIps['expire_at']) && time() > $awsIps['expire_at']) {
@@ -892,7 +915,7 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
     }
 
     /**
-     * @return array
+     * @return array<callable>
      */
     public function getErrorHandlers(): array
     {

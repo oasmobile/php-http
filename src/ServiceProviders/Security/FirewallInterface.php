@@ -24,19 +24,19 @@ interface FirewallInterface
     public function isStateless(): bool;
 
     /**
-     * @return array    Array of policies
+     * @return array<string, mixed>    Array of policies
      *                  key is policy name,
      *                  and value is an option array or bool-true
      */
     public function getPolicies(): array;
 
     /**
-     * @return array|UserProviderInterface
+     * @return array<string, mixed>|UserProviderInterface<\Symfony\Component\Security\Core\User\UserInterface>
      */
     public function getUserProvider(): array|UserProviderInterface;
 
     /**
-     * @return array    Other values to be merged to firewall setting
+     * @return array<string, mixed>    Other values to be merged to firewall setting
      */
     public function getOtherSettings(): array;
 

@@ -46,20 +46,24 @@ class CrossOriginResourceSharingProvider implements EventSubscriberInterface
     protected $preFlightResponse = null;
 
     /**
-     * @param CrossOriginResourceSharingStrategy[] $strategies
+     * @param array<CrossOriginResourceSharingStrategy|array<string, mixed>> $strategies
      */
     public function __construct(array $strategies = [])
     {
-        foreach ($strategies as &$strategy) {
+        /** @var CrossOriginResourceSharingStrategy[] $resolved */
+        $resolved = [];
+        foreach ($strategies as $strategy) {
             if (\is_array($strategy)) {
-                $strategy = new CrossOriginResourceSharingStrategy($strategy);
-            } elseif (!$strategy instanceof CrossOriginResourceSharingStrategy) {
+                $resolved[] = new CrossOriginResourceSharingStrategy($strategy);
+            } elseif ($strategy instanceof CrossOriginResourceSharingStrategy) {
+                $resolved[] = $strategy;
+            } else {
                 throw new \InvalidArgumentException(
                     static::class . " must be constructed with array of " . CrossOriginResourceSharingStrategy::class
                 );
             }
         }
-        $this->strategies = $strategies;
+        $this->strategies = $resolved;
     }
 
     public static function getSubscribedEvents(): array
@@ -115,7 +119,7 @@ class CrossOriginResourceSharingProvider implements EventSubscriberInterface
     {
         if ($this->preFlightResponse) {
             $request = $event->getRequest();
-            $this->preFlightResponse->addAllowedMethod($request->headers->get(static::HEADER_REQUEST_METHOD));
+            $this->preFlightResponse->addAllowedMethod($request->headers->get(static::HEADER_REQUEST_METHOD) ?? '');
 
             $event->setResponse($this->preFlightResponse);
         }
@@ -162,7 +166,7 @@ class CrossOriginResourceSharingProvider implements EventSubscriberInterface
 
                 // 2. skip if origin is not allowed
                 $requestOrigin = $request->headers->get(static::HEADER_REQUEST_ORIGIN);
-                if (!$this->activeStrategy->isOriginAllowed($requestOrigin)) {
+                if ($requestOrigin === null || !$this->activeStrategy->isOriginAllowed($requestOrigin)) {
                     return;
                 }
 
@@ -170,11 +174,11 @@ class CrossOriginResourceSharingProvider implements EventSubscriberInterface
                 if (!$request->headers->has(static::HEADER_REQUEST_METHOD)) {
                     return;
                 }
-                $requestMethod = strtoupper($request->headers->get(static::HEADER_REQUEST_METHOD));
+                $requestMethod = strtoupper((string) $request->headers->get(static::HEADER_REQUEST_METHOD));
 
                 // 4. prepare request headers
                 if ($request->headers->has(static::HEADER_REQUEST_HEADERS)) {
-                    $requestHeaders = explode(",", $request->headers->get(static::HEADER_REQUEST_HEADERS));
+                    $requestHeaders = explode(",", (string) $request->headers->get(static::HEADER_REQUEST_HEADERS));
                 } else {
                     $requestHeaders = [];
                 }
@@ -232,7 +236,7 @@ class CrossOriginResourceSharingProvider implements EventSubscriberInterface
 
                 // 2. skip if origin is not allowed
                 $requestOrigin = $request->headers->get(static::HEADER_REQUEST_ORIGIN);
-                if (!$this->activeStrategy->isOriginAllowed($requestOrigin)) {
+                if ($requestOrigin === null || !$this->activeStrategy->isOriginAllowed($requestOrigin)) {
                     return;
                 }
 

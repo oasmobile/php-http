@@ -17,6 +17,9 @@ class InheritableRouteCollection extends RouteCollection
         $this->addCollection($wrapped);
     }
 
+    /**
+     * @param array<string, mixed> $defaults
+     */
     public function addDefaults(array $defaults): void
     {
         if ($defaults) {

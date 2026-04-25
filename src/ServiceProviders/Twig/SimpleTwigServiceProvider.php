@@ -28,7 +28,7 @@ class SimpleTwigServiceProvider
      * on the kernel via setTwigEnvironment().
      *
      * @param MicroKernel $kernel
-     * @param array       $twigConfig The raw `twig` config array from Bootstrap_Config
+     * @param array<string, mixed> $twigConfig The raw `twig` config array from Bootstrap_Config
      */
     public function register(MicroKernel $kernel, array $twigConfig): void
     {

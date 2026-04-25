@@ -14,6 +14,9 @@ use Symfony\Component\Config\Definition\Processor;
 
 trait ConfigurationValidationTrait
 {
+    /**
+     * @param array<string, mixed> $configArray
+     */
     public function processConfiguration(array $configArray, ConfigurationInterface $configurationInterface): ArrayDataProvider
     {
         $processor    = new Processor();

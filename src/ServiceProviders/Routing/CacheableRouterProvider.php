@@ -49,7 +49,12 @@ class CacheableRouterProvider
             throw new \LogicException("Cannot get config data provider before registration");
         }
 
-        return $this->kernel->getRoutingConfigDataProvider();
+        $dp = $this->kernel->getRoutingConfigDataProvider();
+        if ($dp === null) {
+            throw new \LogicException("Cannot get config data provider: routing not configured");
+        }
+
+        return $dp;
     }
 
     /**
@@ -60,21 +65,21 @@ class CacheableRouterProvider
     public function getRouter(RequestContext $requestContext): Router
     {
         if (!$this->router) {
-            if (!$this->getConfigDataProvider()) {
-                throw new \LogicException(
-                    "Cannot use CacheableRouterProvider because 'routing.config' not configured."
-                );
-            }
+            $configDp = $this->getConfigDataProvider();
 
             $routerFile = 'routes.yml';
-            $routerPath = $this->getConfigDataProvider()->getMandatory('path');
+            $routerPath = $configDp->getMandatory('path');
             if (!is_dir($routerPath)) {
                 $routerFile = basename($routerPath);
                 $routerPath = dirname($routerPath);
             }
 
-            $cacheDir                = strcasecmp($this->getConfigDataProvider()->getOptional('cache_dir', DataType::String, ''), "false") === 0 ? null :
-                ($this->getConfigDataProvider()->getOptional('cache_dir') ?: $this->kernel->getCacheDir() . "/routing");
+            if ($this->kernel === null) {
+                throw new \LogicException("Cannot use CacheableRouterProvider before registration");
+            }
+
+            $cacheDir                = strcasecmp($configDp->getOptional('cache_dir', DataType::String, ''), "false") === 0 ? null :
+                ($configDp->getOptional('cache_dir') ?: $this->kernel->getCacheDir() . "/routing");
             $locator                 = new FileLocator([$routerPath]);
             $this->router            = new CacheableRouter(
                 $this->kernel,
@@ -106,11 +111,16 @@ class CacheableRouterProvider
             []
         );
 
+        $matcher = $this->getRouter($requestContext)->getMatcher();
+        if (!$matcher instanceof \Symfony\Component\Routing\Matcher\UrlMatcherInterface) {
+            throw new \LogicException('Router matcher must implement UrlMatcherInterface');
+        }
+
         return new GroupUrlMatcher(
             $requestContext,
             [
                 new CacheableRouterUrlMatcherWrapper(
-                    $this->getRouter($requestContext)->getMatcher(),
+                    $matcher,
                     $namespaces
                 ),
             ]

@@ -32,13 +32,19 @@ class CrossOriginResourceSharingStrategy
     use ConfigurationValidationTrait;
     
     protected ?RequestMatcherInterface $matcher = null;
+    /** @var array<string> */
     protected array $originsAllowed            = [];
+    /** @var array<string> */
     protected array $headersAllowed            = [];
+    /** @var array<string> */
     protected array $headersExposed            = [];
     protected int $maxAge                      = 0;
     protected bool $credentialsAllowed         = false;
     protected ?Request $request                = null;
     
+    /**
+     * @param array<string, mixed> $configuration
+     */
     public function __construct(array $configuration)
     {
         $dp = $this->processConfiguration($configuration, new CrossOriginResourceSharingConfiguration());
@@ -70,7 +76,7 @@ class CrossOriginResourceSharingStrategy
     
     public function matches(Request $request): bool
     {
-        if ($this->matcher->matches($request)) {
+        if ($this->matcher !== null && $this->matcher->matches($request)) {
             $this->request = $request;
             
             return true;

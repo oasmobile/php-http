@@ -20,13 +20,22 @@ abstract class AbstractSimplePreAuthenticationPolicy implements AuthenticationPo
         return self::AUTH_TYPE_PRE_AUTH;
     }
 
+    /**
+     * @param array<string, mixed> $options
+     */
     abstract public function getAuthenticator(MicroKernel $kernel, string $firewallName, array $options): AuthenticatorInterface;
 
+    /**
+     * @return array<string, mixed>
+     */
     public function getAuthenticatorConfig(): array
     {
         return [];
     }
 
+    /**
+     * @param array<string, mixed> $options
+     */
     public function getEntryPoint(MicroKernel $kernel, string $name, array $options): AuthenticationEntryPointInterface
     {
         return new NullEntryPoint();

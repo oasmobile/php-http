@@ -18,7 +18,7 @@ interface AccessRuleInterface
     public function getPattern(): string|RequestMatcherInterface;
 
     /**
-     * @return string|array
+     * @return array<string>|string
      */
     public function getRequiredRoles(): string|array;
 

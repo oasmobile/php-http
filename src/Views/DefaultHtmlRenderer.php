@@ -27,9 +27,10 @@ class DefaultHtmlRenderer implements ResponseRendererInterface
             $result = (string)$result;
         }
         elseif (is_array($result)) {
-            $result = nl2br(str_replace(' ', '&nbsp;', json_encode($result, JSON_PRETTY_PRINT)));
+            $encoded = json_encode($result, JSON_PRETTY_PRINT);
+            $result = nl2br(str_replace(' ', '&nbsp;', $encoded !== false ? $encoded : ''));
         }
-        elseif (!is_string($result)) {
+        else {
             return $this->renderOnException(
                 new WrappedExceptionInfo(
                     new \RuntimeException("Unsupported type of result: " . print_r($result, true)),

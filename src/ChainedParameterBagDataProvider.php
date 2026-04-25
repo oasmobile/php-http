@@ -14,18 +14,14 @@ use Symfony\Component\HttpFoundation\ParameterBag;
 
 class ChainedParameterBagDataProvider extends AbstractDataProvider
 {
-    /** @var ParameterBag[]|HeaderBag[] */
+    /** @var array<ParameterBag|HeaderBag> */
     protected $bags;
     
-    public function __construct(...$bags)
+    /**
+     * @param ParameterBag|HeaderBag ...$bags
+     */
+    public function __construct(ParameterBag|HeaderBag ...$bags)
     {
-        foreach ($bags as $bag) {
-            if (!$bag instanceof ParameterBag
-                && !$bag instanceof HeaderBag
-            ) {
-                throw new \InvalidArgumentException("Only ParameterBag|HeaderBag object can be chained.");
-            }
-        }
         $this->bags = $bags;
     }
     

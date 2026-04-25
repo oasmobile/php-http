@@ -18,9 +18,13 @@ class SimpleAccessRule implements AccessRuleInterface
     use ConfigurationValidationTrait;
 
     protected string|RequestMatcherInterface $pattern;
+    /** @var array<string> */
     protected array $requiredRoles;
     protected ?string $requiredChannel;
 
+    /**
+     * @param array<string, mixed> $ruleConfiguration
+     */
     public function __construct(array $ruleConfiguration)
     {
         $dp = $this->processConfiguration($ruleConfiguration, new SimpleAccessRuleConfiguration());
@@ -47,7 +51,7 @@ class SimpleAccessRule implements AccessRuleInterface
     }
 
     /**
-     * @return array
+     * @return array<string>
      */
     public function getRequiredRoles(): array
     {
@@ -55,7 +59,7 @@ class SimpleAccessRule implements AccessRuleInterface
     }
 
     /**
-     * @param array $requiredRoles
+     * @param array<string> $requiredRoles
      */
     public function setRequiredRoles(array $requiredRoles): void
     {

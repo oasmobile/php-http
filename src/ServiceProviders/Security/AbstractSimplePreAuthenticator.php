@@ -57,9 +57,9 @@ abstract class AbstractSimplePreAuthenticator
      * Previously authenticated a token using SimplePreAuthenticateUserProviderInterface.
      * Now throws LogicException — migrate to AbstractPreAuthenticator.
      *
-     * @param TokenInterface        $token
-     * @param UserProviderInterface $userProvider
-     * @param string                $providerKey
+     * @param TokenInterface                                                                                $token
+     * @param UserProviderInterface<\Symfony\Component\Security\Core\User\UserInterface> $userProvider
+     * @param string                                                                                       $providerKey
      *
      * @return TokenInterface
      *

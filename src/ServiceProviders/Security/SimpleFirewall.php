@@ -19,11 +19,17 @@ class SimpleFirewall implements FirewallInterface
     use ConfigurationValidationTrait;
 
     protected string|RequestMatcherInterface $pattern;
+    /** @var array<string, mixed> */
     protected array $policies;
+    /** @var array<string, mixed>|UserProviderInterface<\Symfony\Component\Security\Core\User\UserInterface> */
     protected array|UserProviderInterface $userProvider;
     protected bool $stateless;
+    /** @var array<string, mixed> */
     protected array $otherSettings;
 
+    /**
+     * @param array<string, mixed> $firewallConfiguration
+     */
     public function __construct(array $firewallConfiguration)
     {
         $dp                  = $this->processConfiguration($firewallConfiguration, new SimpleFirewallConfiguration());
@@ -52,7 +58,7 @@ class SimpleFirewall implements FirewallInterface
     }
 
     /**
-     * @return array
+     * @return array<string, mixed>
      */
     public function getPolicies(): array
     {
@@ -60,7 +66,7 @@ class SimpleFirewall implements FirewallInterface
     }
 
     /**
-     * @return array|UserProviderInterface
+     * @return array<string, mixed>|UserProviderInterface<\Symfony\Component\Security\Core\User\UserInterface>
      */
     public function getUserProvider(): array|UserProviderInterface
     {
@@ -68,7 +74,7 @@ class SimpleFirewall implements FirewallInterface
     }
 
     /**
-     * @return array
+     * @return array<string, mixed>
      */
     public function getOtherSettings(): array
     {

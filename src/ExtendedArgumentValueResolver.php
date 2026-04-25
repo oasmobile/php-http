@@ -14,8 +14,12 @@ use Symfony\Component\HttpKernel\ControllerMetadata\ArgumentMetadata;
 
 class ExtendedArgumentValueResolver implements ValueResolverInterface
 {
+    /** @var array<class-string, object> */
     protected array $mappingParameters = [];
     
+    /**
+     * @param array<mixed> $autoParameters
+     */
     public function __construct(array $autoParameters)
     {
         foreach ($autoParameters as $parameter) {
@@ -38,7 +42,7 @@ class ExtendedArgumentValueResolver implements ValueResolverInterface
      * @param Request          $request
      * @param ArgumentMetadata $argument
      *
-     * @return iterable
+     * @return iterable<object>
      */
     public function resolve(Request $request, ArgumentMetadata $argument): iterable
     {

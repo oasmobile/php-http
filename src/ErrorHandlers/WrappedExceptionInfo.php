@@ -16,6 +16,7 @@ class WrappedExceptionInfo implements \JsonSerializable
     protected string $shortExceptionType;
     protected int $code;
     protected int $originalCode;
+    /** @var array<string, mixed> */
     protected array $attributes = [];
 
     
@@ -29,6 +30,9 @@ class WrappedExceptionInfo implements \JsonSerializable
         }
     }
     
+    /**
+     * @return array<string, mixed>
+     */
     public function toArray(bool $rich = false): array
     {
         $ret = [
@@ -62,7 +66,7 @@ class WrappedExceptionInfo implements \JsonSerializable
     }
     
     /**
-     * @return array
+     * @return array<string, mixed>
      */
     public function getAttributes(): array
     {
@@ -114,6 +118,9 @@ class WrappedExceptionInfo implements \JsonSerializable
         $this->attributes[$key] = $value;
     }
     
+    /**
+     * @return array<string, mixed>
+     */
     protected function serializeException(\Exception $e): array
     {
         $ret = [

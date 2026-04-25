@@ -1,6 +1,6 @@
 {
     "name"             : "oasis/http",
-    "description"      : "An extension to Silex, for HTTP related routing, middleware, and so on.",
+    "description"      : "A Symfony MicroKernel-based HTTP framework for routing, middleware, security, and more.",
     "minimum-stability": "stable",
     "license"          : "MIT",
     "authors"          : [

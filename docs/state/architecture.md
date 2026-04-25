@@ -6,7 +6,7 @@
 
 ## 核心类
 
-`SilexKernel`（`src/SilexKernel.php`）继承 `Silex\Application`，实现 `AuthorizationCheckerInterface`。
+`MicroKernel`（`src/MicroKernel.php`）继承 Symfony `HttpKernel`，实现 `AuthorizationCheckerInterface`。
 
 通过 bootstrap config 数组驱动初始化，config 经 Symfony Config 组件校验后分发给各 Service Provider。
 
@@ -16,7 +16,7 @@
 
 ```
 src/
-├── SilexKernel.php                  # 核心入口
+├── MicroKernel.php                  # 核心入口
 ├── Configuration/                   # Symfony Config 定义（校验 bootstrap 数组）
 ├── ServiceProviders/
 │   ├── Routing/                     # 可缓存路由（YAML → Symfony Routing）
@@ -36,7 +36,7 @@ src/
 
 ## Bootstrap Config 结构
 
-`SilexKernel` 构造函数接受一个关联数组，支持以下顶层 key：
+`MicroKernel` 构造函数接受一个关联数组，支持以下顶层 key：
 
 | Key | 说明 |
 |-----|------|
@@ -61,7 +61,7 @@ src/
 
 ## 请求处理流程
 
-1. `SilexKernel::run()` 创建 Request
+1. `MicroKernel::run()` 创建 Request
 2. `handle()` 处理 ELB / CloudFront 可信代理
 3. Symfony EventDispatcher 按优先级触发 `KernelEvents::REQUEST`：
    - Routing（priority 32）

@@ -13,15 +13,11 @@ use Symfony\Component\HttpKernel\KernelEvents;
  */
 class ViewHandlerSubscriber implements EventSubscriberInterface
 {
-    /** @var callable[] */
-    private array $handlers;
-
     /**
      * @param callable[] $handlers
      */
-    public function __construct(array $handlers)
+    public function __construct(private readonly array $handlers)
     {
-        $this->handlers = $handlers;
     }
 
     public static function getSubscribedEvents(): array

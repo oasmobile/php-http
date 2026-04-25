@@ -48,10 +48,10 @@ class ChainedParameterBagDataProvider extends AbstractDataProvider
                 // when header is presented only once, string value is returned, otherwise, array value is returned
                 $value = $bag->get($key, null, false);
                 if (is_array($value)) {
-                    if (count($value) == 1) {
+                    if (count($value) === 1) {
                         $value = $value[0];
                     }
-                    elseif (count($value) == 0) {
+                    elseif (count($value) === 0) {
                         $value = null;
                     }
                     /** @noinspection PhpStatementHasEmptyBodyInspection */

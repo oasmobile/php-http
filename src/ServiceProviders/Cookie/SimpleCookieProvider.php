@@ -8,7 +8,7 @@ use Symfony\Component\HttpKernel\KernelEvents;
 
 class SimpleCookieProvider implements EventSubscriberInterface
 {
-    protected ResponseCookieContainer $cookieContainer;
+    protected readonly ResponseCookieContainer $cookieContainer;
 
     public function __construct(?ResponseCookieContainer $cookieContainer = null)
     {

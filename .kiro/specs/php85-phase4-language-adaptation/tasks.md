@@ -161,7 +161,7 @@
     - _Requirements: 8.5_
   - [x] 5.10 Checkpoint: 运行 `phpunit --testsuite security --testsuite pbt` 确认通过，commit
 
-- [-] 6. CORS 模块
+- [x] 6. CORS 模块
   - [x] 6.1 修改 `src/ServiceProviders/Cors/CrossOriginResourceSharingStrategy.php`
     - R3 AC5: `$pattern == "*"` → `=== "*"`（S12）
     - R8: 属性类型声明；`matches(Request $request): bool`；`isOriginAllowed(string $origin): bool`；`isWildcardOriginAllowed(): bool`；`isHeaderAllowed(string $header): bool`；`isCredentialsAllowed(): bool`；`getMaxAge(): int`；`getAllowedHeaders(): string`；`getExposedHeaders(): string`
@@ -169,54 +169,54 @@
   - [x] 6.2 确认 `src/ServiceProviders/Cors/CrossOriginResourceSharingProvider.php` 无需修改
     - Phase 3 已更新，方法已有类型声明，仅需确认属性类型声明是否完整
     - _Requirements: 8.5_
-  - [-] 6.3 Checkpoint: 运行 `phpunit --testsuite cors --testsuite pbt` 确认通过，commit
+  - [x] 6.3 Checkpoint: 运行 `phpunit --testsuite cors --testsuite pbt` 确认通过，commit
 
-- [~] 7. Core 模块（MicroKernel、Middleware、Configuration、Cookie、EventSubscribers、Exceptions）
-  - [ ] 7.1 修改 `src/MicroKernel.php`
+- [-] 7. Core 模块（MicroKernel、Middleware、Configuration、Cookie、EventSubscribers、Exceptions）
+  - [x] 7.1 修改 `src/MicroKernel.php`
     - R3 AC9: `$awsResponse->getStatusCode() != Response::HTTP_OK` → `!== Response::HTTP_OK`（S13）
     - R3 AC10: `$info['service'] == "CLOUDFRONT"` → `=== "CLOUDFRONT"`（S14）
     - R8: 补全缺少返回类型的方法（大部分在 Phase 1/3 已有类型声明，需检查遗漏）
     - _Requirements: 3.9, 3.10, 8.1, 8.2_
-  - [ ] 7.2 修改 `src/ChainedParameterBagDataProvider.php`
+  - [x] 7.2 修改 `src/ChainedParameterBagDataProvider.php`
     - R3: `count($value) == 1` → `=== 1`（S15）；`count($value) == 0` → `=== 0`（S16）
     - R8: `getValue(string $key): mixed`
     - _Requirements: 3.1, 3.2, 8.1, 8.2_
-  - [ ] 7.3 修改 `src/Exceptions/UniquenessViolationHttpException.php`
+  - [x] 7.3 修改 `src/Exceptions/UniquenessViolationHttpException.php`
     - R1 AC3: `\Exception $previous = null` → `?\Exception $previous = null`（隐式 nullable → 显式）
     - R8: `$message` 添加 `?string` 类型，`$code` 添加 `int` 类型
     - 不适用 promotion（构造函数调用 `parent::__construct()`，有转换逻辑）
     - _Requirements: 1.3, 8.1, 8.2_
-  - [ ] 7.4 修改 `src/Middlewares/MiddlewareInterface.php`
+  - [x] 7.4 修改 `src/Middlewares/MiddlewareInterface.php`
     - R8: `before(Request $request, MicroKernel $kernel): Response|null`；`after(Request $request, Response $response): void`
     - 接口变更，实现类（AbstractMiddleware）必须同步更新
     - _Requirements: 8.1, 8.2_
-  - [ ] 7.5 确认 `src/Middlewares/AbstractMiddleware.php` 无需修改
+  - [x] 7.5 确认 `src/Middlewares/AbstractMiddleware.php` 无需修改
     - 已有完整类型声明
     - _Requirements: 8.5_
-  - [ ] 7.6 修改 `src/EventSubscribers/ViewHandlerSubscriber.php`
+  - [x] 7.6 修改 `src/EventSubscribers/ViewHandlerSubscriber.php`
     - R6 + R10: `$handlers` 在构造后不再修改 → `private readonly array $handlers` promotion
     - _Requirements: 6.1, 6.3, 6.4, 10.1_
-  - [ ] 7.7 修改 `src/ServiceProviders/Cookie/ResponseCookieContainer.php`
+  - [x] 7.7 修改 `src/ServiceProviders/Cookie/ResponseCookieContainer.php`
     - R8: `addCookie(Cookie $cookie): void`；`getCookies(): array`
     - _Requirements: 8.1, 8.2_
-  - [ ] 7.8 修改 `src/ServiceProviders/Cookie/SimpleCookieProvider.php`
+  - [x] 7.8 修改 `src/ServiceProviders/Cookie/SimpleCookieProvider.php`
     - R6: 构造函数有条件逻辑（`$cookieContainer ?? new ResponseCookieContainer()`），不适用直接 promotion
     - R10: `$cookieContainer` 在构造后不再修改，可考虑 readonly
     - _Requirements: 6.2, 10.1_
-  - [ ] 7.9 修改 `src/Configuration/ConfigurationValidationTrait.php`
+  - [x] 7.9 修改 `src/Configuration/ConfigurationValidationTrait.php`
     - R8: `processConfiguration(array $configArray, ConfigurationInterface $configurationInterface): ArrayDataProvider`
     - _Requirements: 8.1, 8.2_
-  - [ ] 7.10 修改 `src/ExtendedArgumentValueResolver.php`
+  - [x] 7.10 修改 `src/ExtendedArgumentValueResolver.php`
     - R8: `$mappingParameters` 属性类型声明 `protected array $mappingParameters = []`
     - R8: `__construct(array $autoParameters)`
     - _Requirements: 8.1, 8.3_
-  - [ ] 7.11 修改 `src/ExtendedExceptionListnerWrapper.php`
+  - [x] 7.11 修改 `src/ExtendedExceptionListnerWrapper.php`
     - R8: `ensureResponse(mixed $response, ExceptionEvent $event): void`
     - _Requirements: 8.1, 8.2_
-  - [ ] 7.12 确认无需修改的文件
+  - [x] 7.12 确认无需修改的文件
     - `src/ServiceProviders/Twig/SimpleTwigServiceProvider.php`（Phase 2 新建，已有完整类型声明）
     - _Requirements: 8.5_
-  - [ ] 7.13 Checkpoint: 运行 `phpunit --testsuite all` 确认 `src/` 全部修改后测试通过，commit
+  - [-] 7.13 Checkpoint: 运行 `phpunit --testsuite all` 确认 `src/` 全部修改后测试通过，commit
 
 - [~] 8. 测试辅助类和测试文件修改（`ut/`）
   - [ ] 8.1 修改 `ut/Helpers/Security/TestAccessRule.php`

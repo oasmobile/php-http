@@ -176,7 +176,7 @@ class RecordingMiddleware extends AbstractMiddleware
         $this->shortCircuitResponse = $shortCircuitResponse;
     }
 
-    public function before(Request $request, MicroKernel $kernel)
+    public function before(Request $request, MicroKernel $kernel): ?Response
     {
         self::$executionLog[] = $this->name . ':before';
         if ($this->shortCircuitResponse !== null) {
@@ -185,7 +185,7 @@ class RecordingMiddleware extends AbstractMiddleware
         return null;
     }
 
-    public function after(Request $request, Response $response)
+    public function after(Request $request, Response $response): void
     {
         self::$executionLog[] = $this->name . ':after';
     }

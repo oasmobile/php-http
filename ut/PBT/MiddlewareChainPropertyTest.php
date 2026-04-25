@@ -70,13 +70,13 @@ class RecordingMiddleware extends AbstractMiddleware
         return $this->afterPriority;
     }
 
-    public function before(Request $request, MicroKernel $kernel)
+    public function before(Request $request, MicroKernel $kernel): ?Response
     {
         $this->logContainer['log'][] = 'before:' . $this->id;
         return $this->shortCircuitResponse;
     }
 
-    public function after(Request $request, Response $response)
+    public function after(Request $request, Response $response): void
     {
         $this->logContainer['log'][] = 'after:' . $this->id;
     }

@@ -19,9 +19,9 @@ interface MiddlewareInterface
      */
     public function onlyForMasterRequest(): bool;
 
-    public function before(Request $request, MicroKernel $kernel);
+    public function before(Request $request, MicroKernel $kernel): Response|null;
 
-    public function after(Request $request, Response $response);
+    public function after(Request $request, Response $response): void;
 
     /**
      * @return int|false returns priority of middleware in 'before' phase, false means no 'before' phase

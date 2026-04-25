@@ -793,7 +793,7 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
                     ]
                 );
                 $awsResponse = $guzzleClient->request('GET', 'ip-ranges.json');
-                if ($awsResponse->getStatusCode() != Response::HTTP_OK) {
+                if ($awsResponse->getStatusCode() !== Response::HTTP_OK) {
                     \merror(
                         "Cannot get ip-ranges from aws server, response = %s %s, %s",
                         $awsResponse->getStatusCode(),
@@ -818,7 +818,7 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
             if (\is_array($awsIps) && \array_key_exists('prefixes', $awsIps)) {
                 $trustedCloudfrontIps = [];
                 foreach ($awsIps['prefixes'] as $info) {
-                    if (\array_key_exists('ip_prefix', $info) && $info['service'] == "CLOUDFRONT") {
+                    if (\array_key_exists('ip_prefix', $info) && $info['service'] === "CLOUDFRONT") {
                         $trustedCloudfrontIps[] = $info['ip_prefix'];
                     }
                 }

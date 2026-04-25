@@ -20,8 +20,8 @@ class UniquenessViolationHttpException extends HttpException
      * @param \Exception $previous The previous exception
      * @param int        $code     The internal exception code
      */
-    public function __construct($message = null, \Exception $previous = null, $code = 0)
+    public function __construct(?string $message = null, ?\Exception $previous = null, int $code = 0)
     {
-        parent::__construct(Response::HTTP_BAD_REQUEST, $message, $previous, [], $code);
+        parent::__construct(Response::HTTP_BAD_REQUEST, $message ?? '', $previous, [], $code);
     }
 }

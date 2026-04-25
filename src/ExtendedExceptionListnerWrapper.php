@@ -20,7 +20,7 @@ use Symfony\Component\HttpKernel\Event\ExceptionEvent;
  */
 class ExtendedExceptionListnerWrapper
 {
-    protected function ensureResponse($response, ExceptionEvent $event): void
+    protected function ensureResponse(mixed $response, ExceptionEvent $event): void
     {
         if ($response === null && $event->getResponse() === null) {
             // do not ensure response if error/exception handler returns null and there was no response in $event either

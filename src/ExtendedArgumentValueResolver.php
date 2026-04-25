@@ -14,9 +14,9 @@ use Symfony\Component\HttpKernel\ControllerMetadata\ArgumentMetadata;
 
 class ExtendedArgumentValueResolver implements ValueResolverInterface
 {
-    protected $mappingParameters = [];
+    protected array $mappingParameters = [];
     
-    public function __construct($autoParameters)
+    public function __construct(array $autoParameters)
     {
         foreach ($autoParameters as $parameter) {
             if (!is_object($parameter)) {

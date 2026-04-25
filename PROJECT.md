@@ -49,6 +49,9 @@ composer install
 ./vendor/bin/phpunit --testsuite twig
 ./vendor/bin/phpunit --testsuite aws
 ./vendor/bin/phpunit --testsuite exceptions
+
+# 对重复失败的 suite，用 --log-junit 输出日志以缩小定位
+./vendor/bin/phpunit --testsuite <suite> --log-junit build/junit-<suite>.xml
 ```
 
 ---

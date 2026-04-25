@@ -13,54 +13,95 @@ use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 
 /**
- * Abstract stub for pre-authenticator.
+ * @deprecated Use {@see AbstractPreAuthenticator} instead.
  *
- * In Symfony 6.0+, SimplePreAuthenticatorInterface has been removed.
- * This class no longer implements that interface. All methods that previously
- * depended on the removed API are declared abstract, forcing downstream to
- * provide implementations in Phase 3 (PRP-005).
+ * Legacy pre-authenticator stub from the Symfony 4.x era.
+ * In Symfony 7.x the SimplePreAuthenticatorInterface has been removed.
+ * Migrate to AbstractPreAuthenticator which implements the unified
+ * AuthenticatorInterface.
  *
- * The concrete methods (createToken, authenticateToken, supportsToken) that
- * relied on removed Symfony APIs are now abstract stubs.
+ * The three legacy API methods (createToken, authenticateToken,
+ * supportsToken) are now concrete and throw LogicException to give
+ * callers a clear migration signal. getCredentialsFromRequest()
+ * remains abstract so that existing subclasses continue to compile.
  */
 abstract class AbstractSimplePreAuthenticator
 {
     /**
-     * Must be implemented by downstream in Phase 3.
+     * @deprecated Use AbstractPreAuthenticator instead.
+     *
      * Previously created a PreAuthenticatedToken from request credentials.
+     * Now throws LogicException — migrate to AbstractPreAuthenticator.
      *
      * @param Request $request
      * @param string  $providerKey
      *
      * @return TokenInterface
+     *
+     * @throws \LogicException always
      */
-    abstract public function createToken(Request $request, $providerKey);
+    public function createToken(Request $request, $providerKey)
+    {
+        throw new \LogicException(
+            sprintf(
+                '%s is deprecated. Migrate to %s which implements AuthenticatorInterface.',
+                __METHOD__,
+                AbstractPreAuthenticator::class
+            )
+        );
+    }
 
     /**
-     * Must be implemented by downstream in Phase 3.
+     * @deprecated Use AbstractPreAuthenticator instead.
+     *
      * Previously authenticated a token using SimplePreAuthenticateUserProviderInterface.
+     * Now throws LogicException — migrate to AbstractPreAuthenticator.
      *
      * @param TokenInterface        $token
      * @param UserProviderInterface $userProvider
      * @param string                $providerKey
      *
      * @return TokenInterface
+     *
+     * @throws \LogicException always
      */
-    abstract public function authenticateToken(TokenInterface $token, UserProviderInterface $userProvider, $providerKey);
+    public function authenticateToken(TokenInterface $token, UserProviderInterface $userProvider, $providerKey)
+    {
+        throw new \LogicException(
+            sprintf(
+                '%s is deprecated. Migrate to %s which implements AuthenticatorInterface.',
+                __METHOD__,
+                AbstractPreAuthenticator::class
+            )
+        );
+    }
 
     /**
-     * Must be implemented by downstream in Phase 3.
+     * @deprecated Use AbstractPreAuthenticator instead.
+     *
      * Previously checked if the token was a PreAuthenticatedToken matching the provider key.
+     * Now throws LogicException — migrate to AbstractPreAuthenticator.
      *
      * @param TokenInterface $token
      * @param string         $providerKey
      *
      * @return bool
+     *
+     * @throws \LogicException always
      */
-    abstract public function supportsToken(TokenInterface $token, $providerKey);
+    public function supportsToken(TokenInterface $token, $providerKey)
+    {
+        throw new \LogicException(
+            sprintf(
+                '%s is deprecated. Migrate to %s which implements AuthenticatorInterface.',
+                __METHOD__,
+                AbstractPreAuthenticator::class
+            )
+        );
+    }
 
     /**
-     * Parse the given request, and extract the credential information from the request
+     * Parse the given request, and extract the credential information from the request.
      *
      * @param Request $request
      *

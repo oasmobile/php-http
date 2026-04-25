@@ -8,6 +8,8 @@
 
 namespace Oasis\Mlib\Http\ErrorHandlers;
 
+use Symfony\Component\HttpFoundation\Request;
+
 /**
  * Class JsonErrorHandler
  *
@@ -19,7 +21,7 @@ namespace Oasis\Mlib\Http\ErrorHandlers;
  */
 class JsonErrorHandler
 {
-    function __invoke(\Exception $e, $code)
+    public function __invoke(\Exception $e, Request $request, int $code): array
     {
         mtrace($e, "Exception while processing request, code = $code.");
 

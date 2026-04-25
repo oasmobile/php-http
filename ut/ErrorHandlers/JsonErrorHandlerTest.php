@@ -4,6 +4,7 @@ namespace Oasis\Mlib\Http\Test\ErrorHandlers;
 
 use Oasis\Mlib\Http\ErrorHandlers\JsonErrorHandler;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\HttpFoundation\Request;
 
 class JsonErrorHandlerTest extends TestCase
 {
@@ -22,7 +23,7 @@ class JsonErrorHandlerTest extends TestCase
     public function testInvokeReturnsArrayWithExpectedKeys()
     {
         $exception = new \RuntimeException('test message');
-        $result    = call_user_func($this->handler, $exception, 500);
+        $result    = call_user_func($this->handler, $exception, Request::create('/'), 500);
 
         $this->assertIsArray($result);
         $this->assertArrayHasKey('code', $result);
@@ -35,7 +36,7 @@ class JsonErrorHandlerTest extends TestCase
     public function testInvokeReturnsCorrectValues()
     {
         $exception = new \RuntimeException('something broke');
-        $result    = call_user_func($this->handler, $exception, 503);
+        $result    = call_user_func($this->handler, $exception, Request::create('/'), 503);
 
         $this->assertSame(503, $result['code']);
         $this->assertSame('something broke', $result['message']);
@@ -50,7 +51,7 @@ class JsonErrorHandlerTest extends TestCase
     public function testTypeIsFullClassName()
     {
         $exception = new \RuntimeException('test');
-        $result    = call_user_func($this->handler, $exception, 500);
+        $result    = call_user_func($this->handler, $exception, Request::create('/'), 500);
 
         $this->assertSame('RuntimeException', $result['type']);
     }
@@ -58,7 +59,7 @@ class JsonErrorHandlerTest extends TestCase
     public function testTypeIsFullClassNameForNamespacedException()
     {
         $exception = new \Symfony\Component\HttpKernel\Exception\NotFoundHttpException('not found');
-        $result    = call_user_func($this->handler, $exception, 404);
+        $result    = call_user_func($this->handler, $exception, Request::create('/'), 404);
 
         $this->assertSame(
             'Symfony\Component\HttpKernel\Exception\NotFoundHttpException',
@@ -76,7 +77,7 @@ class JsonErrorHandlerTest extends TestCase
 
         $codes = [200, 400, 403, 404, 500, 503];
         foreach ($codes as $code) {
-            $result = call_user_func($this->handler, $exception, $code);
+            $result = call_user_func($this->handler, $exception, Request::create('/'), $code);
             $this->assertSame($code, $result['code'], "Code $code should pass through");
         }
     }
@@ -84,7 +85,7 @@ class JsonErrorHandlerTest extends TestCase
     public function testCodeZeroPassesThrough()
     {
         $exception = new \RuntimeException('error');
-        $result    = call_user_func($this->handler, $exception, 0);
+        $result    = call_user_func($this->handler, $exception, Request::create('/'), 0);
 
         $this->assertSame(0, $result['code']);
     }

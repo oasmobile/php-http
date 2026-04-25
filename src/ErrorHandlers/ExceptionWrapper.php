@@ -15,7 +15,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class ExceptionWrapper
 {
-    function __invoke(\Exception $e, Request $request, $httpStatusCode)
+    public function __invoke(\Exception $e, Request $request, int $httpStatusCode): WrappedExceptionInfo
     {
         mtrace($e, "Fallback handling exception: ");
         
@@ -25,7 +25,7 @@ class ExceptionWrapper
         return $caughtException;
     }
     
-    protected function furtherProcessException(WrappedExceptionInfo $info, \Exception $e)
+    protected function furtherProcessException(WrappedExceptionInfo $info, \Exception $e): void
     {
         switch (true) {
             case ($e instanceof ExistenceViolationException):

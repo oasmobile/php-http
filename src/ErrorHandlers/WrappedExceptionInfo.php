@@ -12,28 +12,24 @@ use Symfony\Component\HttpFoundation\Response;
 
 class WrappedExceptionInfo implements \JsonSerializable
 {
-    /** @var  \Exception */
-    protected $exception;
-    /** @var  string */
-    protected $shortExceptionType;
-    /** @var  int */
-    protected $code;
-    /** @var  int */
-    protected $originalCode;
-    protected $attributes = [];
+    protected \Exception $exception;
+    protected string $shortExceptionType;
+    protected int $code;
+    protected int $originalCode;
+    protected array $attributes = [];
 
     
-    public function __construct(\Exception $exception, $httpStatusCode)
+    public function __construct(\Exception $exception, int $httpStatusCode)
     {
         $this->exception          = $exception;
         $this->shortExceptionType = (new \ReflectionClass($exception))->getShortName();
         $this->code               = $this->originalCode = $httpStatusCode;
-        if ($this->code == 0) {
+        if ($this->code === 0) {
             $this->code = Response::HTTP_INTERNAL_SERVER_ERROR;
         }
     }
     
-    public function toArray($rich = false)
+    public function toArray(bool $rich = false): array
     {
         $ret = [
             'code'      => $this->getCode(),
@@ -55,12 +51,12 @@ class WrappedExceptionInfo implements \JsonSerializable
      *        which is a value of any type other than a resource.
      * @since 5.4.0
      */
-    function jsonSerialize()
+    public function jsonSerialize(): mixed
     {
         return $this->toArray();
     }
     
-    public function getAttribute($key)
+    public function getAttribute(string $key): mixed
     {
         return isset($this->attributes[$key]) ? $this->attributes[$key] : null;
     }
@@ -68,7 +64,7 @@ class WrappedExceptionInfo implements \JsonSerializable
     /**
      * @return array
      */
-    public function getAttributes()
+    public function getAttributes(): array
     {
         return $this->attributes;
     }
@@ -76,7 +72,7 @@ class WrappedExceptionInfo implements \JsonSerializable
     /**
      * @return int
      */
-    public function getCode()
+    public function getCode(): int
     {
         return $this->code;
     }
@@ -84,7 +80,7 @@ class WrappedExceptionInfo implements \JsonSerializable
     /**
      * @param int $code
      */
-    public function setCode($code)
+    public function setCode(int $code): void
     {
         $this->code = $code;
     }
@@ -92,7 +88,7 @@ class WrappedExceptionInfo implements \JsonSerializable
     /**
      * @return \Exception
      */
-    public function getException()
+    public function getException(): \Exception
     {
         return $this->exception;
     }
@@ -100,7 +96,7 @@ class WrappedExceptionInfo implements \JsonSerializable
     /**
      * @return int
      */
-    public function getOriginalCode()
+    public function getOriginalCode(): int
     {
         return $this->originalCode;
     }
@@ -108,17 +104,17 @@ class WrappedExceptionInfo implements \JsonSerializable
     /**
      * @return string
      */
-    public function getShortExceptionType()
+    public function getShortExceptionType(): string
     {
         return $this->shortExceptionType;
     }
     
-    public function setAttribute($key, $value)
+    public function setAttribute(string $key, mixed $value): void
     {
         $this->attributes[$key] = $value;
     }
     
-    protected function serializeException(\Exception $e)
+    protected function serializeException(\Exception $e): array
     {
         $ret = [
             'type'    => (new \ReflectionClass($e))->getShortName(),
@@ -126,7 +122,7 @@ class WrappedExceptionInfo implements \JsonSerializable
             'file'    => $e->getFile(),
             'line'    => $e->getLine(),
         ];
-        if ($e->getCode() != 0) {
+        if ($e->getCode() !== 0) {
             $ret['code'] = $e->getCode();
         }
         if ($e->getPrevious() instanceof \Exception) {

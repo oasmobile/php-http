@@ -315,8 +315,8 @@ function main(array $argv): int
     $rules    = getRules();
     $findings = scanDirectory($directory, $rules);
 
-    // Check if any PHP files or composer.json were found
-    if (!hasScannableFiles($directory)) {
+    // If scan found nothing and no scannable files exist, report accordingly
+    if (empty($findings) && !hasScannableFiles($directory)) {
         $msg = "No PHP files found in '{$directory}'.\n";
         if ($format === 'json') {
             echo "[]\n";
@@ -330,8 +330,9 @@ function main(array $argv): int
     if (empty($findings)) {
         if ($format === 'json') {
             echo "[]\n";
+        } else {
+            echo "✅ No compatibility issues found. The project appears compatible with oasis/http v3.\n";
         }
-        echo "✅ No compatibility issues found. The project appears compatible with oasis/http v3.\n";
         return 0;
     }
 
@@ -534,10 +535,6 @@ function scanPhpFile(string $filePath, string $content, array $rules, string $ba
 
     // Suppress warnings from token_get_all on malformed PHP
     $tokens = @token_get_all($content);
-    if (!is_array($tokens)) {
-        fwrite(STDERR, "Warning: Failed to tokenize '{$filePath}', skipping.\n");
-        return [];
-    }
 
     // Build rule lookup structures for efficient matching
     $classRules   = []; // type: removed_class, changed_api, old_event
@@ -558,6 +555,12 @@ function scanPhpFile(string $filePath, string $content, array $rules, string $ba
                 break;
             case 'guzzle_pattern':
                 $guzzleRules[] = $rule;
+                // Also register namespace-like patterns for class reference detection
+                foreach ($rule['patterns'] as $pattern) {
+                    if (str_contains($pattern, '\\')) {
+                        $classRules[$pattern] = $rule;
+                    }
+                }
                 break;
         }
     }

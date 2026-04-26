@@ -138,10 +138,13 @@ class MigrateCheckPropertyTest extends TestCase
             \RecursiveIteratorIterator::CHILD_FIRST
         );
         foreach ($items as $item) {
-            if ($item->isDir()) {
-                rmdir($item->getPathname());
+            $path = $item->getPathname();
+            if (is_link($path)) {
+                unlink($path);
+            } elseif ($item->isDir()) {
+                rmdir($path);
             } else {
-                unlink($item->getPathname());
+                unlink($path);
             }
         }
         rmdir($dir);
@@ -195,13 +198,6 @@ class MigrateCheckPropertyTest extends TestCase
      */
     private function runScript(string $directory, string $format = 'text'): array
     {
-        $cmd = sprintf(
-            'php %s --format=%s %s 2>&1',
-            escapeshellarg(self::SCRIPT_PATH),
-            escapeshellarg($format),
-            escapeshellarg($directory)
-        );
-
         // Use proc_open to capture stdout and stderr separately
         $descriptors = [
             0 => ['pipe', 'r'],

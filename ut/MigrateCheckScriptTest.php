@@ -59,10 +59,13 @@ class MigrateCheckScriptTest extends TestCase
             \RecursiveIteratorIterator::CHILD_FIRST
         );
         foreach ($items as $item) {
-            if ($item->isDir()) {
-                rmdir($item->getPathname());
+            $path = $item->getPathname();
+            if (is_link($path)) {
+                unlink($path);
+            } elseif ($item->isDir()) {
+                rmdir($path);
             } else {
-                unlink($item->getPathname());
+                unlink($path);
             }
         }
         rmdir($dir);

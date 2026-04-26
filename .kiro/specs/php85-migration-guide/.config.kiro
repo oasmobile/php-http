@@ -1,0 +1,7 @@
+{
+  "proposal": "docs/proposals/PRP-008-php85-migration-guide.md",
+  "feature": "php85-migration-guide",
+  "branch": "feature/php85-migration-guide",
+  "specType": "feature",
+  "workflowType": "requirements-first"
+}

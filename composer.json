@@ -45,6 +45,9 @@
             "Oasis\\Mlib\\Http\\Test\\": "ut/"
         }
     },
+    "bin": [
+        "bin/oasis-http-migrate-v3-check"
+    ],
     "config": {
         "audit": {
             "block-insecure": false

@@ -115,7 +115,7 @@
 - `oasis/utils` 从 `^2.0` 升级到 `^3.0`
 - `oasis/logging` 从 `^2.0` 升级到 `^3.0`
 - 引入 PHPStan `^2.1`，level 8 静态分析零错误
-- 全量测试通过：510 tests, 16642 assertions
+- 全量测试通过：560 tests, 21182 assertions
 - `PROJECT.md`、`README.md`、`docs/state/`、`docs/manual/` 全面更新
 
 ### Migration Guide & Check Script（PRP-008）
@@ -159,7 +159,7 @@
 
 #### Acceptance Criteria
 
-1. WHEN Release_Branch `release/3.0` is created from `develop`, THE Release_Process SHALL execute `phpunit` and confirm 510 tests and 16642 assertions pass with zero failures and zero errors
+1. WHEN Release_Branch `release/3.0` is created from `develop`, THE Release_Process SHALL execute `phpunit` and confirm 560 tests and 21182 assertions pass with zero failures and zero errors
 2. WHEN Release_Branch `release/3.0` is created from `develop`, THE Release_Process SHALL execute `phpstan analyse` and confirm zero errors at level 8
 3. WHEN Release_Branch `release/3.0` is created from `develop`, THE Release_Process SHALL confirm zero deprecation notices in the test output
 
@@ -195,7 +195,7 @@
 1. WHEN all validations pass, THE CHANGELOG_Generator SHALL create `docs/changes/3.0/CHANGELOG.md`
 2. THE CHANGELOG_Generator SHALL organize changes by type（Added / Changed / Removed）, not by feature
 3. THE CHANGELOG_Generator SHALL merge content from Unreleased_Changes（`php85-upgrade.md` and `php85-migration-guide.md`）into the unified CHANGELOG
-4. THE CHANGELOG_Generator SHALL include a release date, a summary paragraph, and a test coverage section in the CHANGELOG. The test coverage section SHALL include: final test statistics（510 tests, 16642 assertions, PHPStan level 8 零错误）, test types and counts per Phase（PBT properties, integration tests, etc.）, and test coverage percentage（requires running coverage tool）（CR Q1=C）
+4. THE CHANGELOG_Generator SHALL include a release date, a summary paragraph, and a test coverage section in the CHANGELOG. The test coverage section SHALL include: final test statistics（560 tests, 21182 assertions, PHPStan level 8 零错误）, test types and counts per Phase（PBT properties, integration tests, etc.）, and test coverage percentage（requires running coverage tool）（CR Q1=C）
 5. THE CHANGELOG_Generator SHALL include a Resolved Notes section listing notes resolved during the upgrade
 
 ### Requirement 5: 全局 CHANGELOG 更新
@@ -268,8 +268,8 @@
 | 检查项 | 状态 | 说明 |
 |--------|------|------|
 | 所有包含的 feature spec tasks 全部完成 | ✅ | PRP-002 ~ PRP-007: unreleased specs 全部完成；PRP-008: 活跃 spec tasks 全部完成 |
-| 全量测试通过（phpunit） | ⏳ | 需在 release 分支上执行确认（预期 510 tests, 16642 assertions） |
-| 静态分析通过（phpstan analyse level 8） | ⏳ | 需在 release 分支上执行确认 |
+| 全量测试通过（phpunit） | ✅ | 560 tests, 21182 assertions, 0 failures, 0 errors, 0 deprecation notices |
+| 静态分析通过（phpstan analyse level 8） | ✅ | PHPStan level 8 零错误 |
 | Migration Guide 端到端手工验证通过 | ⏳ | 需在 release 分支上执行手工验证（Q1=B） |
 | Check Script 端到端手工验证通过 | ⏳ | 需在 release 分支上执行手工验证（Q1=B） |
 | 无 P0/P1 open issue | ✅ | 无已知 issue |
@@ -292,7 +292,7 @@ A: 完整。`docs/changes/unreleased/` 下有两份变更记录（`php85-upgrade
 A: 合理。本次 release 包含大量 breaking changes：PHP 最低版本从 `>=7.0.0` 提升到 `>=8.5`、核心框架从 Silex 替换为 Symfony MicroKernel、DI 容器从 Pimple 迁移到 Symfony DI、Security 组件完全重写、多个公共 API 接口重新设计。符合 semver major version bump 标准，v3.0.0 是正确的版本号。
 
 **Q: 验证深度是否充分？**
-A: 充分。除全量自动化测试（phpunit 510 tests + phpstan level 8）外，还包含 Migration Guide 和 Check Script 的端到端手工验证（Q1=B）。考虑到 3.0 是 major release 且包含面向下游消费者的迁移工具，手工验证是必要的。
+A: 充分。除全量自动化测试（phpunit 560 tests + phpstan level 8）外，还包含 Migration Guide 和 Check Script 的端到端手工验证（Q1=B）。考虑到 3.0 是 major release 且包含面向下游消费者的迁移工具，手工验证是必要的。
 
 **Q: CHANGELOG 组织方式是否合理？**
 A: 合理。按变更类型（Added / Changed / Removed）统一组织（Q2=B），而非按 feature 拆分。原因是 7 个 proposal 的变更高度交织（如 `oasis/utils` 在 Phase 0 和 Phase 5 分别升级），按类型组织更便于下游消费者快速定位影响。
@@ -354,7 +354,7 @@ A: 版本号由 git tag 管理。release finish 时在 master 上打 `v3.0.0` ta
 **状态**: 已回答
 
 **Q1:** Release 3.0 的 CHANGELOG 中 "测试覆盖" section 应包含哪些信息？
-- A) 仅列出最终测试统计数据（510 tests, 16642 assertions, PHPStan level 8 零错误）
+- A) 仅列出最终测试统计数据（560 tests, 21182 assertions, PHPStan level 8 零错误）
 - B) 除 A 外，还列出各 Phase 新增的测试类型和数量（如 PBT properties 数量、集成测试数量等）
 - C) 除 B 外，还包含测试覆盖率百分比（需额外运行覆盖率工具）
 - D) 其他（请说明）

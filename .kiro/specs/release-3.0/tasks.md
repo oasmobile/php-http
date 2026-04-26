@@ -6,13 +6,13 @@
 
 ## Tasks
 
-- [ ] 1. 自动化验证
-  - [ ] 1.1 在 `release/3.0` 分支上执行全量测试，确认 510 tests / 16642 assertions 全部通过，零 failures、零 errors、零 deprecation notices。测试命令：`php vendor/bin/phpunit`（Ref: Requirement 1, AC 1/3）
-  - [ ] 1.2 执行静态分析，确认 PHPStan level 8 零错误。命令：`php vendor/bin/phpstan analyse`（Ref: Requirement 1, AC 2）
-  - [ ] 1.3 执行覆盖率采集，命令：`php vendor/bin/phpunit --coverage-text`，记录覆盖率百分比用于 CHANGELOG 测试覆盖 section。如因缺少 Xdebug/PCOV 扩展无法运行，记录"覆盖率工具不可用"及原因，不阻塞后续流程（Ref: Requirement 4, AC 4）
-  - [ ] 1.4 Checkpoint: phpunit 输出 510 tests / 16642 assertions / 0 failures / 0 errors / 0 deprecation notices，phpstan 零错误，覆盖率结果已记录。Commit message: `test: release 3.0 自动化验证通过`
+- [-] 1. 自动化验证
+  - [x] 1.1 在 `release/3.0` 分支上执行全量测试，确认 560 tests / 21182 assertions 全部通过，零 failures、零 errors、零 deprecation notices。测试命令：`php vendor/bin/phpunit`（Ref: Requirement 1, AC 1/3）
+  - [x] 1.2 执行静态分析，确认 PHPStan level 8 零错误。命令：`php vendor/bin/phpstan analyse`（Ref: Requirement 1, AC 2）
+  - [x] 1.3 执行覆盖率采集，命令：`php vendor/bin/phpunit --coverage-text`，记录覆盖率百分比用于 CHANGELOG 测试覆盖 section。如因缺少 Xdebug/PCOV 扩展无法运行，记录"覆盖率工具不可用"及原因，不阻塞后续流程（Ref: Requirement 4, AC 4）
+  - [-] 1.4 Checkpoint: phpunit 输出 560 tests / 21182 assertions / 0 failures / 0 errors / 0 deprecation notices，phpstan 零错误，覆盖率结果已记录（覆盖率工具不可用：无 Xdebug/PCOV 扩展）。Commit message: `test: release 3.0 自动化验证通过`
 
-- [ ] 2. 端到端手工验证
+- [~] 2. 端到端手工验证
   - [ ] 2.1 Increment alpha tag：查询已有 alpha tag（`git tag -l 'v3.0.0-alpha*'`），取最大序号 +1，打新 tag（如 `git tag v3.0.0-alpha1`）
   - [ ] 2.2 Migration Guide 手工验证 — 验证对象：`docs/manual/migration-v3.md`
     - [ ] 验证文件存在且包含全部 12 个模块章节（PHP Version → Dependencies → Kernel API → DI Container → Bootstrap Config → Routing → Security → Middleware → Views → Twig → CORS → Cookie）+ PHP 语言适配 + 附录
@@ -52,7 +52,7 @@
     - [ ] `docs/changes/unreleased/specs/` 下无剩余 spec 目录
     - [ ] `docs/changes/unreleased/` 下无本次 release 的变更记录
     - [ ] `docs/proposals/` 下无 PRP-002 ~ PRP-008 文件
-  - [ ] 4.2 执行全量测试确认归档操作未影响测试结果：`php vendor/bin/phpunit`，预期 510 tests / 16642 assertions / 0 failures / 0 errors
+  - [ ] 4.2 执行全量测试确认归档操作未影响测试结果：`php vendor/bin/phpunit`，预期 560 tests / 21182 assertions / 0 failures / 0 errors
   - [ ] 4.3 Checkpoint: 目录结构符合预期，全量测试通过。Commit message: `docs: release 3.0 归档结果验证通过`
 
 - [ ] 5. Code Review

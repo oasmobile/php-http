@@ -21,7 +21,7 @@
 
 当前 develop 分支上的代码状态：
 
-- `phpunit` 全量通过（510 tests, 16642 assertions）
+- `phpunit` 全量通过（560 tests, 21182 assertions）
 - PHPStan level 8 通过，零错误
 - 零 deprecation notice
 - `PROJECT.md`、`README.md`、`docs/state/`、`docs/manual/` 已在 Phase 5 全面更新
@@ -68,7 +68,7 @@
 
 ### Q1: unreleased 变更的验证深度
 
-develop 上的代码已经过各 Phase 的全量测试和 Phase 5 的最终验证（510 tests, 16642 assertions + PHPStan level 8）。release 分支上的验证深度是什么？
+develop 上的代码已经过各 Phase 的全量测试和 Phase 5 的最终验证（560 tests, 21182 assertions + PHPStan level 8）。release 分支上的验证深度是什么？
 
 - 选项: A) 仅运行 `phpunit` + `phpstan analyse`，确认零失败即可 / B) 除 A 外，还需对 Migration Guide 和 Check Script 做一轮端到端手工验证 / C) 补充说明
 - 回答: B — 除全量测试和静态分析外，还需对 Migration Guide 和 Check Script 做一轮端到端手工验证

@@ -21,7 +21,7 @@
     - _Ref: Design Testing Strategy_
   - [x] 1.3 Checkpoint: 运行 `phpunit --testsuite migration-guide-validation`，确认测试文件可编译、测试用例存在且全部 FAIL（RED 状态）。Commit。
 
-- [-] 2. Migration Guide — 编写迁移文档（GREEN）
+- [x] 2. Migration Guide — 编写迁移文档（GREEN）
   - [x] 2.1 创建 `docs/manual/migration-v3.md`，编写 TOC 和概述章节
     - 文件头部包含版本变更摘要、适用范围说明
     - TOC 使用 markdown 锚点链接导航到各模块章节（按 R1 AC4 定义的顺序：PHP Version → Dependencies → Kernel API → DI Container → Bootstrap Config → Routing → Security → Middleware → Views → Twig → CORS → Cookie → PHP 语言适配 → 附录）
@@ -58,11 +58,11 @@
     - PHP 语言适配：隐式 nullable 参数修复（🟡）、动态属性废弃（🟡）、建议下游运行自身 PHP 8.5 兼容性检查
     - 附录：完整 API 变更速查表，包含开发依赖参考（`phpunit/phpunit` `^5.2` → `^13.0`（🟢）、`phpstan/phpstan` 新增 `^2.1`（🟢））
     - _Ref: Requirement 10, AC 2/3/5; Requirement 11, AC 1–3; Design Data Models 映射表 #28–31, 34–35_
-  - [-] 2.8 Checkpoint: 运行 `phpunit --testsuite migration-guide-validation`，确认 Property 1–4 测试全部通过（GREEN）。Commit。
+  - [x] 2.8 Checkpoint: 运行 `phpunit --testsuite migration-guide-validation`，确认 Property 1–4 测试全部通过（GREEN）。Commit。
 
 
-- [~] 3. Check Script — PBT 测试骨架（RED）
-  - [ ] 3.1 创建 `ut/PBT/MigrateCheckPropertyTest.php` 测试文件
+- [x] 3. Check Script — PBT 测试骨架（RED）
+  - [x] 3.1 创建 `ut/PBT/MigrateCheckPropertyTest.php` 测试文件
     - 编写 Property 5 测试：规则检测完整性 — 生成包含随机 Removed_API/Changed_API 引用的 PHP 文件内容（简单规则用模板拼接，复杂模式如 Pimple 访问、Guzzle 选项用预定义片段，CR Q4→C），验证 scanner 对每个文件产生至少一个 Finding
     - 编写 Property 6 测试：递归扫描完整性 — 生成随机深度（1–5 层）的目录结构，随机放置 `.php` 文件，验证发现的文件数等于放置的文件数
     - 编写 Property 7 测试：Finding 字段完整性 — 复用 P5 生成器，检查每个 Finding 包含 file（相对路径）、line（正整数）、issue（非空）、action（非空）四个必需字段
@@ -73,13 +73,13 @@
     - Eris 最小迭代次数 100 次，Tag 格式：`Feature: php85-migration-guide, Property {N}: {title}`
     - 此阶段测试预期全部 FAIL（RED），因为 Check Script 尚不存在
     - _Ref: Requirement 12, AC 1–8; Requirement 13, AC 2/3/6; Requirement 14, AC 5/6; Requirement 15, AC 3/4; Design Correctness Properties 5–11, Testing Strategy PBT_
-  - [ ] 3.2 在 `phpunit.xml` 中注册 `migrate-check-pbt` test suite
+  - [x] 3.2 在 `phpunit.xml` 中注册 `migrate-check-pbt` test suite
     - 添加 `<testsuite name="migrate-check-pbt"><file>ut/PBT/MigrateCheckPropertyTest.php</file></testsuite>`
     - _Ref: Design Testing Strategy_
-  - [ ] 3.3 Checkpoint: 运行 `phpunit --testsuite migrate-check-pbt`，确认测试文件可编译、测试用例存在且全部 FAIL（RED 状态）。Commit。
+  - [x] 3.3 Checkpoint: 运行 `phpunit --testsuite migrate-check-pbt`，确认测试文件可编译、测试用例存在且全部 FAIL（RED 状态）。Commit。
 
-- [~] 4. Check Script — Unit Tests 骨架（RED）
-  - [ ] 4.1 创建 `ut/MigrateCheckScriptTest.php` 测试文件
+- [-] 4. Check Script — Unit Tests 骨架（RED）
+  - [x] 4.1 创建 `ut/MigrateCheckScriptTest.php` 测试文件
     - 编写测试：目录不存在 → stderr 输出错误信息 + exit code 2
     - 编写测试：空目录（无 `.php` 文件）→ 提示信息 + exit code 0
     - 编写测试：`--help` 选项 → 输出 usage 帮助信息
@@ -97,10 +97,10 @@
     - 编写测试：`--format=json` 输出有效 JSON
     - 此阶段测试预期全部 FAIL（RED），因为 Check Script 尚不存在
     - _Ref: Requirement 12, AC 1–8; Requirement 13, AC 1–6; Requirement 14, AC 4/5/6; Requirement 15, AC 1–5; Design Error Handling, Testing Strategy Unit Tests_
-  - [ ] 4.2 在 `phpunit.xml` 中注册 `migrate-check-unit` test suite
+  - [x] 4.2 在 `phpunit.xml` 中注册 `migrate-check-unit` test suite
     - 添加 `<testsuite name="migrate-check-unit"><file>ut/MigrateCheckScriptTest.php</file></testsuite>`
     - _Ref: Design Testing Strategy_
-  - [ ] 4.3 Checkpoint: 运行 `phpunit --testsuite migrate-check-unit`，确认测试文件可编译、测试用例存在且全部 FAIL（RED 状态）。Commit。
+  - [-] 4.3 Checkpoint: 运行 `phpunit --testsuite migrate-check-unit`，确认测试文件可编译、测试用例存在且全部 FAIL（RED 状态）。Commit。
 
 - [~] 5. Check Script — 实现脚本（GREEN）
   - [ ] 5.1 创建 `bin/oasis-http-migrate-v3-check` 脚本文件，实现 Rule Registry

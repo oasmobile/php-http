@@ -88,6 +88,9 @@
         <testsuite name="migration-guide-validation">
             <file>ut/MigrationGuideValidationTest.php</file>
         </testsuite>
+        <testsuite name="migrate-check-unit">
+            <file>ut/MigrateCheckScriptTest.php</file>
+        </testsuite>
         <testsuite name="migrate-check-pbt">
             <file>ut/PBT/MigrateCheckPropertyTest.php</file>
         </testsuite>

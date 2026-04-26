@@ -131,7 +131,6 @@ class JsonViewHandlerTest extends TestCase
 
         // Use reflection to access protected method
         $reflection = new \ReflectionMethod($handler, 'getCompatibleTypes');
-        $reflection->setAccessible(true);
         $types = $reflection->invoke($handler);
 
         $this->assertSame(['application/json', 'text/json'], $types);

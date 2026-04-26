@@ -2,15 +2,14 @@
 
 namespace Oasis\Mlib\Http\Test\Twig;
 
+use Symfony\Component\HttpKernel\HttpKernelInterface;
+
 /**
- * Created by PhpStorm.
- * User: minhao
- * Date: 2016-03-25
- * Time: 11:53
+ * Tests Twig integration using the configuration-driven bootstrap (app.twig2.php).
  */
 class TwigServiceProviderConfigurationTest extends TwigServiceProviderTest
 {
-    
+
     /**
      * Creates the application.
      *
@@ -18,7 +17,7 @@ class TwigServiceProviderConfigurationTest extends TwigServiceProviderTest
      */
     public function createApplication()
     {
+        $cacheDir = static::createTempCacheDir();
         return require __DIR__ . "/app.twig2.php";
     }
-
 }

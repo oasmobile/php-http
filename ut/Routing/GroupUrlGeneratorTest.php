@@ -73,7 +73,7 @@ class GroupUrlGeneratorTest extends TestCase
 
         $group = new GroupUrlGenerator([$gen1, $gen2]);
 
-        $this->setExpectedException(RouteNotFoundException::class);
+        $this->expectException(RouteNotFoundException::class);
         $group->generate('nonexistent');
     }
 
@@ -85,7 +85,7 @@ class GroupUrlGeneratorTest extends TestCase
     {
         $group = new GroupUrlGenerator([]);
 
-        $this->setExpectedException(RouteNotFoundException::class);
+        $this->expectException(RouteNotFoundException::class);
         $group->generate('anything');
     }
 
@@ -133,7 +133,7 @@ class GroupUrlGeneratorTest extends TestCase
         $this->assertSame('/app/home', $result);
     }
 
-    public function testGenerateDoesNotSetContextOnSubGeneratorsWhenContextIsNull()
+    public function testGenerateDoesNotSetContextOnSubGeneratorsWhenContextNotExplicitlySet()
     {
         $gen1 = $this->getMockBuilder(UrlGeneratorInterface::class)->getMock();
         $gen1->expects($this->never())
@@ -143,7 +143,7 @@ class GroupUrlGeneratorTest extends TestCase
              ->willReturn('/home');
 
         $group = new GroupUrlGenerator([$gen1]);
-        // context is null by default
+        // context is default (not explicitly set)
 
         $result = $group->generate('home');
         $this->assertSame('/home', $result);
@@ -160,7 +160,8 @@ class GroupUrlGeneratorTest extends TestCase
 
         $group = new GroupUrlGenerator([]);
 
-        $this->assertNull($group->getContext());
+        // Default context is a RequestContext instance (Symfony 7.x interface requirement)
+        $this->assertInstanceOf(RequestContext::class, $group->getContext());
 
         $group->setContext($context1);
         $this->assertSame($context1, $group->getContext());

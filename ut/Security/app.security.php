@@ -1,99 +1,71 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: minhao
- * Date: 2016-03-08
- * Time: 17:09
+ * MicroKernel configuration for SecurityServiceProviderTest.
+ *
+ * Provides a complete Policy → Firewall → AccessRule → Role Hierarchy chain
+ * using programmatic SimpleSecurityProvider API for testing.
+ *
+ * Note: HTTP basic auth and form login policies are not implemented in Phase 3.
+ * Only pre-auth (mauth) is functional. Tests for http/form auth are skipped.
  */
+
+use Oasis\Mlib\Http\ErrorHandlers\JsonErrorHandler;
+use Oasis\Mlib\Http\MicroKernel;
 use Oasis\Mlib\Http\ServiceProviders\Security\SimpleFirewall;
-use Oasis\Mlib\Http\ServiceProviders\Security\SimpleSecurityProvider;
-use Oasis\Mlib\Http\SilexKernel;
-use Oasis\Mlib\Http\Test\Helpers\Security\TestAccessRule;
 use Oasis\Mlib\Http\Test\Helpers\Security\TestApiUserProvider;
 use Oasis\Mlib\Http\Test\Helpers\Security\TestAuthenticationPolicy;
-use Oasis\Mlib\Http\Test\Security\SessionServiceProvider;
-use Symfony\Component\HttpFoundation\RequestMatcher;
-
-$users = [
-    "admin"  => [
-        "ROLE_ADMIN",
-        
-        // this is for BCrypt encoder, which is default for silex 2
-        '$2y$10$EY4SlT0KGCg4066H23gBYuKorAu0b/oSvrlMj4yaGHo50QQsXTOU2',
-        
-        // this is for MessageDigestPasswordEncoder, which is default for silex 1.3
-        //"Eti36Ru/pWG6WfoIPiDFUBxUuyvgMA4L8+LLuGbGyqV9ATuT9brCWPchBqX5vFTF+DgntacecW+sSGD+GZts2A==",
-    ],
-    //"admin2" => [
-    //    "ROLE_ADMIN",
-    //    "5FZ2Z8QIkA7UTZ4BYkoC+GsReLf569mSKDsfods6LYQ8t+a8EW9oaircfMpmaLbPBh4FOBiiFyLfuZmTSUwzZg==",
-    //],
-];
-
-$preUsers = new TestApiUserProvider();
-
-/** @var SilexKernel $app */
-$app = require __DIR__ . "/../app.php";
-
-$secPolicy = new TestAuthenticationPolicy();
+use Oasis\Mlib\Http\Views\JsonViewHandler;
+use Symfony\Component\HttpFoundation\ChainRequestMatcher;
+use Symfony\Component\HttpFoundation\RequestMatcher\HostRequestMatcher;
+use Symfony\Component\HttpFoundation\RequestMatcher\PathRequestMatcher;
 
 $testFirewall = new SimpleFirewall(
     [
-        "pattern"  => "^/secured/madmin",
-        "policies" => [
-            "mauth" => true,
+        'pattern'  => '^/secured/madmin',
+        'policies' => [
+            'mauth' => true,
         ],
-        "users"    => new TestApiUserProvider(),
-    
+        'users'    => new TestApiUserProvider(),
     ]
 );
 
-$provider = new SimpleSecurityProvider();
-$provider->addAuthenticationPolicy('mauth', $secPolicy);
-$provider->addFirewall(
-    "admin",
-    [
-        "pattern"  => "^/secured/admin",
-        "policies" => ["http" => true],
-        "users"    => $users,
-    ]
-);
-$provider->addFirewall(
-    "form.admin",
-    [
-        "pattern"  => "^/secured/fadmin",
-        "policies" => [
-            "form" => [
-                "login_path" => "/secured/flogin",
-                "check_path" => "/secured/fadmin/check",
+$config = [
+    'cache_dir'      => isset($cacheDir) ? $cacheDir : sys_get_temp_dir() . '/oasis-http-ut-security',
+    'routing'        => [
+        'path'       => __DIR__ . '/../routes.yml',
+        'namespaces' => [
+            'Oasis\\Mlib\\Http\\Test\\Helpers\\Controllers\\',
+        ],
+    ],
+    'view_handlers'  => [new JsonViewHandler()],
+    'error_handlers' => [new JsonErrorHandler()],
+    'security'       => [
+        'policies'       => [
+            'mauth' => new TestAuthenticationPolicy(),
+        ],
+        'firewalls'      => [
+            'minhao.admin' => $testFirewall,
+        ],
+        'access_rules'   => [
+            ['pattern' => '^/secured/madmin/admin', 'roles' => 'ROLE_ADMIN'],
+            [
+                'pattern' => new ChainRequestMatcher([
+                    new PathRequestMatcher('^/secured/madmin/parent'),
+                    new HostRequestMatcher("bai(du|da)\\.com"),
+                ]),
+                'roles'   => ['ROLE_PARENT'],
             ],
+            ['pattern' => '^/secured/madmin/child', 'roles' => 'ROLE_CHILD'],
+            ['pattern' => '^/secured/madmin', 'roles' => 'ROLE_USER'],
         ],
-        "users"    => $users,
-    ]
-);
-$provider->addFirewall("minhao.admin", $testFirewall);
-$provider->addAccessRule(new TestAccessRule('^/secured/madmin/admin', 'ROLE_ADMIN'));
-$provider->addAccessRule(
-    new TestAccessRule(
-        new RequestMatcher('^/secured/madmin/parent', "bai(du|da)\\.com"), ['ROLE_PARENT']
-    )
-);
-$provider->addAccessRule(
-    new TestAccessRule(
-        new RequestMatcher('^/secured/madmin/child'),
-        'ROLE_CHILD'
-    )
-);
-$provider->addAccessRule(new TestAccessRule('^/secured/madmin', 'ROLE_USER'));
-
-$provider->addRoleHierarchy('ROLE_GOOD', 'ROLE_USER');
-$provider->addRoleHierarchy('ROLE_CHILD', 'ROLE_USER');
-$provider->addRoleHierarchy('ROLE_PARENT', 'ROLE_CHILD');
-$provider->addRoleHierarchy('ROLE_PARENT', 'ROLE_USER');
-
-$app->service_providers = [
-    $provider,
-    new SessionServiceProvider(),
+        'role_hierarchy' => [
+            'ROLE_GOOD'   => 'ROLE_USER',
+            'ROLE_CHILD'  => ['ROLE_USER'],
+            'ROLE_PARENT' => ['ROLE_CHILD', 'ROLE_USER'],
+        ],
+    ],
 ];
+
+$app = new MicroKernel($config, true);
 
 return $app;

@@ -1,27 +1,34 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: minhao
- * Date: 2016-03-14
- * Time: 21:21
- */
 
 namespace Oasis\Mlib\Http\Test\Helpers\Security;
 
-use Oasis\Mlib\Http\ServiceProviders\Security\AbstractSimplePreAuthenticator;
+use Oasis\Mlib\Http\ServiceProviders\Security\AbstractPreAuthenticator;
+use Oasis\Mlib\Http\ServiceProviders\Security\SimplePreAuthenticateUserProviderInterface;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Security\Core\Exception\BadCredentialsException;
+use Symfony\Component\Security\Core\User\UserInterface;
 
-class TestApiUserPreAuthenticator extends AbstractSimplePreAuthenticator
+/**
+ * Test pre-authenticator that extracts credentials from the 'sig' query parameter.
+ *
+ * Extends the new AbstractPreAuthenticator (Symfony 7.x authenticator system).
+ * Delegates user lookup to an injected SimplePreAuthenticateUserProviderInterface.
+ */
+class TestApiUserPreAuthenticator extends AbstractPreAuthenticator
 {
-    public function getCredentialsFromRequest(Request $request)
+    public function __construct(
+        private readonly SimplePreAuthenticateUserProviderInterface $userProvider
+    ) {
+    }
+
+    protected function getCredentialsFromRequest(Request $request): mixed
     {
         $apiKey = $request->query->get('sig');
 
-        if (!$apiKey) {
-            throw new BadCredentialsException("sig not found!");
-        }
+        return $apiKey ?: null; // null 表示不支持该请求
+    }
 
-        return $apiKey;
+    protected function authenticateAndGetUser(mixed $credentials): UserInterface
+    {
+        return $this->userProvider->authenticateAndGetUser($credentials);
     }
 }

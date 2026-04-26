@@ -19,10 +19,10 @@ class CacheableRouterConfiguration implements ConfigurationInterface
      *
      * @return \Symfony\Component\Config\Definition\Builder\TreeBuilder The tree builder
      */
-    public function getConfigTreeBuilder()
+    public function getConfigTreeBuilder(): TreeBuilder
     {
-        $builder = new TreeBuilder();
-        $routing = $builder->root('routing');
+        $builder = new TreeBuilder('routing');
+        $routing = $builder->getRootNode();
         {
             $routing->children()->scalarNode('path');
             $routing->children()->scalarNode('cache_dir')->defaultValue(null);

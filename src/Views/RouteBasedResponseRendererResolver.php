@@ -13,29 +13,19 @@ use Symfony\Component\HttpFoundation\Request;
 
 class RouteBasedResponseRendererResolver implements ResponseRendererResolverInterface
 {
-    /**
-     * @param Request $request
-     *
-     * @return ResponseRendererInterface
-     */
-    public function resolveRequest(Request $request)
+    public function resolveRequest(Request $request): ResponseRendererInterface
     {
         $format = $request->attributes->get(
             'format',
             $request->attributes->get('_format', 'html')
         );
         
-        switch ($format) {
-            case 'html':
-            case 'page':
-                return new DefaultHtmlRenderer();
-                break;
-            case 'api':
-            case 'json':
-                return new JsonApiRenderer();
-                break;
-            default:
-                throw new InvalidConfigurationException(sprintf("Unsupported response format %s", $format));
-        }
+        return match ($format) {
+            'html', 'page' => new DefaultHtmlRenderer(),
+            'api', 'json' => new JsonApiRenderer(),
+            default => throw new InvalidConfigurationException(
+                sprintf("Unsupported response format %s", $format)
+            ),
+        };
     }
 }

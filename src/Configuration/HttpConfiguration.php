@@ -19,10 +19,10 @@ class HttpConfiguration implements ConfigurationInterface
      *
      * @return \Symfony\Component\Config\Definition\Builder\TreeBuilder The tree builder
      */
-    public function getConfigTreeBuilder()
+    public function getConfigTreeBuilder(): TreeBuilder
     {
-        $builder = new TreeBuilder();
-        $http    = $builder->root('http');
+        $builder = new TreeBuilder('http');
+        $http    = $builder->getRootNode();
         {
             $http->children()->scalarNode('cache_dir')->defaultValue(null);
             $http->children()->booleanNode('behind_elb')->defaultValue(false);

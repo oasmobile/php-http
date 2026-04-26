@@ -1,51 +1,12 @@
 <!--suppress XmlUnboundNsPrefix -->
 <phpunit
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="http://schema.phpunit.de/5.7/phpunit.xsd"
+        xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
         bootstrap="ut/bootstrap.php"
 >
     <testsuites>
-        <testsuite name="all">
-            <file>ut/SilexKernelTest.php</file>
-            <file>ut/SilexKernelWebTest.php</file>
-            <file>ut/FallbackViewHandlerTest.php</file>
-            <file>ut/ErrorHandlers/WrappedExceptionInfoTest.php</file>
-            <file>ut/ErrorHandlers/ExceptionWrapperTest.php</file>
-            <file>ut/ErrorHandlers/JsonErrorHandlerTest.php</file>
-            <file>ut/Configuration/HttpConfigurationTest.php</file>
-            <file>ut/Configuration/SecurityConfigurationTest.php</file>
-            <file>ut/Configuration/CrossOriginResourceSharingConfigurationTest.php</file>
-            <file>ut/Configuration/TwigConfigurationTest.php</file>
-            <file>ut/Configuration/CacheableRouterConfigurationTest.php</file>
-            <file>ut/Configuration/SimpleAccessRuleConfigurationTest.php</file>
-            <file>ut/Configuration/SimpleFirewallConfigurationTest.php</file>
-            <file>ut/Configuration/ConfigurationValidationTraitTest.php</file>
-            <file>ut/Views/AbstractSmartViewHandlerTest.php</file>
-            <file>ut/Views/JsonViewHandlerTest.php</file>
-            <file>ut/Views/DefaultHtmlRendererTest.php</file>
-            <file>ut/Views/JsonApiRendererTest.php</file>
-            <file>ut/Views/PrefilightResponseTest.php</file>
-            <file>ut/Views/RouteBasedResponseRendererResolverTest.php</file>
-            <file>ut/Routing/GroupUrlMatcherTest.php</file>
-            <file>ut/Routing/GroupUrlGeneratorTest.php</file>
-            <file>ut/Routing/CacheableRouterUrlMatcherWrapperTest.php</file>
-            <file>ut/Routing/InheritableRouteCollectionTest.php</file>
-            <file>ut/Routing/InheritableYamlFileLoaderTest.php</file>
-            <file>ut/Routing/CacheableRouterTest.php</file>
-            <file>ut/Routing/CacheableRouterProviderTest.php</file>
-            <file>ut/Cookie/ResponseCookieContainerTest.php</file>
-            <file>ut/Cookie/SimpleCookieProviderTest.php</file>
-            <file>ut/Middlewares/AbstractMiddlewareTest.php</file>
-            <file>ut/Security/NullEntryPointTest.php</file>
-            <file>ut/Misc/ExtendedArgumentValueResolverTest.php</file>
-            <file>ut/Misc/ExtendedExceptionListnerWrapperTest.php</file>
-            <file>ut/Misc/ChainedParameterBagDataProviderTest.php</file>
-            <file>ut/Misc/UniquenessViolationHttpExceptionTest.php</file>
-            <file>ut/Integration/BootstrapConfigurationIntegrationTest.php</file>
-            <file>ut/Integration/SecurityAuthenticationFlowIntegrationTest.php</file>
-            <file>ut/Integration/SilexKernelCrossCommunityIntegrationTest.php</file>
-        </testsuite>
         <testsuite name="exceptions">
+            <file>ut/Misc/UniquenessViolationHttpExceptionTest.php</file>
             <file>ut/HttpExceptionTest.php</file>
         </testsuite>
         <testsuite name="cors">
@@ -56,6 +17,8 @@
             <file>ut/Security/SecurityServiceProviderTest.php</file>
             <file>ut/Security/SecurityServiceProviderConfigurationTest.php</file>
             <file>ut/Security/NullEntryPointTest.php</file>
+            <file>ut/Security/AccessRuleListenerTest.php</file>
+            <file>ut/Security/AbstractSimplePreAuthenticationPolicyTest.php</file>
         </testsuite>
         <testsuite name="twig">
             <file>ut/Twig/TwigServiceProviderTest.php</file>
@@ -107,12 +70,38 @@
             <file>ut/Misc/ExtendedArgumentValueResolverTest.php</file>
             <file>ut/Misc/ExtendedExceptionListnerWrapperTest.php</file>
             <file>ut/Misc/ChainedParameterBagDataProviderTest.php</file>
-            <file>ut/Misc/UniquenessViolationHttpExceptionTest.php</file>
         </testsuite>
         <testsuite name="integration">
             <file>ut/Integration/BootstrapConfigurationIntegrationTest.php</file>
             <file>ut/Integration/SecurityAuthenticationFlowIntegrationTest.php</file>
             <file>ut/Integration/SilexKernelCrossCommunityIntegrationTest.php</file>
         </testsuite>
+        <testsuite name="SilexKernelTest">
+            <file>ut/SilexKernelTest.php</file>
+        </testsuite>
+        <testsuite name="SilexKernelWebTest">
+            <file>ut/SilexKernelWebTest.php</file>
+        </testsuite>
+        <testsuite name="FallbackViewHandlerTest">
+            <file>ut/FallbackViewHandlerTest.php</file>
+        </testsuite>
+        <testsuite name="migration-guide-validation">
+            <file>ut/MigrationGuideValidationTest.php</file>
+        </testsuite>
+        <testsuite name="migrate-check-unit">
+            <file>ut/MigrateCheckScriptTest.php</file>
+        </testsuite>
+        <testsuite name="migrate-check-pbt">
+            <file>ut/PBT/MigrateCheckPropertyTest.php</file>
+        </testsuite>
+        <testsuite name="pbt">
+            <directory>ut/PBT</directory>
+            <exclude>ut/PBT/MigrateCheckPropertyTest.php</exclude>
+        </testsuite>
     </testsuites>
+    <source>
+        <include>
+            <directory>src</directory>
+        </include>
+    </source>
 </phpunit>

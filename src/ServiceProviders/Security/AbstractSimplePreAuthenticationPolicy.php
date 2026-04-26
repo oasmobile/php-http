@@ -1,86 +1,43 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: minhao
- * Date: 2016-03-16
- * Time: 15:52
- */
 
 namespace Oasis\Mlib\Http\ServiceProviders\Security;
 
-use Pimple\Container;
-use Symfony\Component\Security\Core\Authentication\Provider\AuthenticationProviderInterface;
-use Symfony\Component\Security\Core\Authentication\Provider\SimpleAuthenticationProvider;
-use Symfony\Component\Security\Http\Authentication\SimplePreAuthenticatorInterface;
+use Oasis\Mlib\Http\MicroKernel;
+use Symfony\Component\Security\Http\Authenticator\AuthenticatorInterface;
 use Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface;
-use Symfony\Component\Security\Http\Firewall\ListenerInterface;
-use Symfony\Component\Security\Http\Firewall\SimplePreAuthenticationListener;
 
+/**
+ * Abstract pre-authentication policy.
+ *
+ * Implements AuthenticationPolicyInterface for the pre-auth authentication type.
+ * Subclasses must provide a concrete getAuthenticator() that returns an
+ * AuthenticatorInterface instance (typically an AbstractPreAuthenticator subclass).
+ */
 abstract class AbstractSimplePreAuthenticationPolicy implements AuthenticationPolicyInterface
 {
-    public function getAuthenticationType()
+    public function getAuthenticationType(): string
     {
         return self::AUTH_TYPE_PRE_AUTH;
     }
-    
+
     /**
-     * If string is returned, it must be either "anonymous" or "dao"
-     *
-     * @param Container   $app
-     * @param             $firewallName
-     * @param             $options
-     *
-     * @return string|AuthenticationProviderInterface
+     * @param array<string, mixed> $options
      */
-    public function getAuthenticationProvider(Container $app, $firewallName, $options)
+    abstract public function getAuthenticator(MicroKernel $kernel, string $firewallName, array $options): AuthenticatorInterface;
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function getAuthenticatorConfig(): array
     {
-        return new SimpleAuthenticationProvider(
-            $this->getPreAuthenticator(),
-            $this->getUserProvider($app, $firewallName),
-            $firewallName
-        );
+        return [];
     }
-    
+
     /**
-     * @param Container                      $app
-     * @param                                $firewallName
-     * @param                                $options
-     *
-     * @return ListenerInterface
+     * @param array<string, mixed> $options
      */
-    public function getAuthenticationListener(Container $app,
-                                              $firewallName,
-                                              $options)
-    {
-        return new SimplePreAuthenticationListener(
-            $app['security.token_storage'],
-            $app['security.authentication_manager'],
-            $firewallName,
-            $this->getPreAuthenticator(),
-            $app['logger']
-        );
-    }
-    
-    /**
-     * @param Container   $app
-     * @param             $name
-     * @param             $options
-     *
-     * @return AuthenticationEntryPointInterface
-     */
-    public function getEntryPoint(Container $app, $name, $options)
+    public function getEntryPoint(MicroKernel $kernel, string $name, array $options): AuthenticationEntryPointInterface
     {
         return new NullEntryPoint();
     }
-    
-    protected function getUserProvider(Container $app, $firewallName)
-    {
-        return $app['security.user_provider.' . $firewallName];
-    }
-    
-    /**
-     * @return SimplePreAuthenticatorInterface
-     */
-    abstract protected function getPreAuthenticator();
-    
 }

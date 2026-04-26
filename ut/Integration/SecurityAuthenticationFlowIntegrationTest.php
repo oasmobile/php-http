@@ -1,15 +1,18 @@
 <?php
 /**
- * Integration test for Security_Authentication_Flow (Requirement 10).
+ * Integration test for Security_Authentication_Flow.
  *
  * Verifies the complete Policy → Firewall → AccessRule → Role Hierarchy chain
  * using a full HTTP request lifecycle via WebTestCase.
+ *
+ * Note: Security tests are expected to fail in Phase 1 (except NullEntryPointTest).
+ * The authenticator system rewrite is deferred to Phase 3.
  */
 
 namespace Oasis\Mlib\Http\Test\Integration;
 
 use Oasis\Mlib\Http\Test\Helpers\RouteCacheCleaner;
-use Silex\WebTestCase;
+use Oasis\Mlib\Http\Test\Helpers\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 
@@ -24,14 +27,11 @@ class SecurityAuthenticationFlowIntegrationTest extends WebTestCase
      */
     public function createApplication()
     {
-        $app = require __DIR__ . '/app.integration-security.php';
-
-        $app['session.test'] = true;
-
-        return $app;
+        $cacheDir = static::createTempCacheDir();
+        return require __DIR__ . '/app.integration-security.php';
     }
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->cleanRouteCache(__DIR__ . '/../cache');
         parent::setUp();
@@ -54,7 +54,7 @@ class SecurityAuthenticationFlowIntegrationTest extends WebTestCase
 
         $json = json_decode($response->getContent(), true);
         $this->assertTrue(is_array($json));
-        $this->assertContains('securedAdmin', $json['called']);
+        $this->assertStringContainsString('securedAdmin', $json['called']);
         $this->assertEquals('admin', $json['user']);
         $this->assertTrue($json['admin']);
     }
@@ -72,7 +72,7 @@ class SecurityAuthenticationFlowIntegrationTest extends WebTestCase
 
         $json = json_decode($response->getContent(), true);
         $this->assertTrue(is_array($json));
-        $this->assertContains('securedUser', $json['called']);
+        $this->assertStringContainsString('securedUser', $json['called']);
         $this->assertEquals('admin', $json['user']);
     }
 
@@ -149,7 +149,7 @@ class SecurityAuthenticationFlowIntegrationTest extends WebTestCase
 
         $json = json_decode($response->getContent(), true);
         $this->assertTrue(is_array($json));
-        $this->assertContains('securedChild', $json['called']);
+        $this->assertStringContainsString('securedChild', $json['called']);
         $this->assertEquals('parent', $json['user']);
     }
 
@@ -166,7 +166,7 @@ class SecurityAuthenticationFlowIntegrationTest extends WebTestCase
 
         $json = json_decode($response->getContent(), true);
         $this->assertTrue(is_array($json));
-        $this->assertContains('securedUser', $json['called']);
+        $this->assertStringContainsString('securedUser', $json['called']);
         $this->assertEquals('parent', $json['user']);
     }
 
@@ -183,7 +183,7 @@ class SecurityAuthenticationFlowIntegrationTest extends WebTestCase
 
         $json = json_decode($response->getContent(), true);
         $this->assertTrue(is_array($json));
-        $this->assertContains('securedUser', $json['called']);
+        $this->assertStringContainsString('securedUser', $json['called']);
         $this->assertEquals('child', $json['user']);
     }
 }

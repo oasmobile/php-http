@@ -8,30 +8,28 @@
 
 namespace Oasis\Mlib\Http\Middlewares;
 
-use Silex\Application;
+use Oasis\Mlib\Http\MicroKernel;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 interface MiddlewareInterface
 {
     /**
-     * returns if this middleware is only for master request
-     *
-     * @return bool
+     * Returns if this middleware is only for master request.
      */
-    public function onlyForMasterRequest();
+    public function onlyForMasterRequest(): bool;
 
-    public function before(Request $request, Application $application);
+    public function before(Request $request, MicroKernel $kernel): Response|null;
 
-    public function after(Request $request, Response $response);
+    public function after(Request $request, Response $response): void;
 
     /**
-     * @return integer|false returns priority of middleware in 'before' phase, false means no 'before' phase
+     * @return int|false returns priority of middleware in 'before' phase, false means no 'before' phase
      */
-    public function getBeforePriority();
+    public function getBeforePriority(): int|false;
 
     /**
-     * @return integer|false returns priority of middleware in 'after' phase, false means no 'after' phase
+     * @return int|false returns priority of middleware in 'after' phase, false means no 'after' phase
      */
-    public function getAfterPriority();
+    public function getAfterPriority(): int|false;
 }

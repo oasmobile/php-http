@@ -8,8 +8,7 @@
 
 namespace Oasis\Mlib\Http\Test\Helpers\Controllers;
 
-use Oasis\Mlib\Http\SilexKernel;
-use Silex\Application;
+use Oasis\Mlib\Http\MicroKernel;
 
 class AuthController
 {
@@ -34,7 +33,7 @@ class AuthController
         ];
     }
 
-    public function madmin(SilexKernel $app)
+    public function madmin(MicroKernel $app)
     {
 
         return [
@@ -43,7 +42,7 @@ class AuthController
         ];
     }
 
-    public function madminGood(SilexKernel $app)
+    public function madminGood(MicroKernel $app)
     {
         return [
             'user'   => $app->getUser(),
@@ -52,7 +51,7 @@ class AuthController
         ];
     }
 
-    public function madminParent(SilexKernel $app)
+    public function madminParent(MicroKernel $app)
     {
         return [
             'user'   => $app->getUser(),
@@ -61,7 +60,7 @@ class AuthController
         ];
     }
 
-    public function madminChild(SilexKernel $app)
+    public function madminChild(MicroKernel $app)
     {
         return [
             'user'   => $app->getUser(),

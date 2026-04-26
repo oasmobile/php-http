@@ -3,7 +3,7 @@
 namespace Oasis\Mlib\Http\Test\Views;
 
 use Oasis\Mlib\Http\ErrorHandlers\WrappedExceptionInfo;
-use Oasis\Mlib\Http\SilexKernel;
+use Oasis\Mlib\Http\MicroKernel;
 use Oasis\Mlib\Http\Views\DefaultHtmlRenderer;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Response;
@@ -11,11 +11,11 @@ use Symfony\Component\HttpFoundation\Response;
 class DefaultHtmlRendererTest extends TestCase
 {
     /**
-     * @return SilexKernel
+     * @return MicroKernel
      */
     private function createMinimalKernel()
     {
-        return new SilexKernel([], true);
+        return new MicroKernel([], true);
     }
 
     //----------------------------------------------------------------------
@@ -133,8 +133,8 @@ class DefaultHtmlRendererTest extends TestCase
         $this->assertInstanceOf(Response::class, $response);
         $content = $response->getContent();
         // Content is HTML-encoded (spaces → &nbsp;), so check for HTML-encoded fragments
-        $this->assertContains('Unsupported', $content);
-        $this->assertContains('RuntimeException', $content);
+        $this->assertStringContainsString('Unsupported', $content);
+        $this->assertStringContainsString('RuntimeException', $content);
     }
 
     //----------------------------------------------------------------------
@@ -152,7 +152,7 @@ class DefaultHtmlRendererTest extends TestCase
         // falls to unsupported type branch
         $this->assertInstanceOf(Response::class, $response);
         $content = $response->getContent();
-        $this->assertContains('Unsupported', $content);
+        $this->assertStringContainsString('Unsupported', $content);
     }
 
     //----------------------------------------------------------------------
@@ -170,8 +170,8 @@ class DefaultHtmlRendererTest extends TestCase
         $this->assertInstanceOf(Response::class, $response);
         $content = $response->getContent();
         // Without Twig, it falls back to renderOnSuccess(jsonSerialize()), which renders the array as HTML
-        $this->assertContains('RuntimeException', $content);
-        $this->assertContains('test&nbsp;error', $content);
+        $this->assertStringContainsString('RuntimeException', $content);
+        $this->assertStringContainsString('test&nbsp;error', $content);
     }
 
     //----------------------------------------------------------------------
@@ -184,17 +184,15 @@ class DefaultHtmlRendererTest extends TestCase
         $exceptionInfo = new WrappedExceptionInfo(new \RuntimeException('twig error'), 404);
 
         // Create a mock Twig environment that returns a rendered string
-        $twig = $this->getMockBuilder(\Twig_Environment::class)
-                     ->disableOriginalConstructor()
-                     ->getMock();
+        $twig = $this->createMock(\Twig\Environment::class);
         $twig->expects($this->once())
              ->method('render')
              ->with('404.twig', $this->anything())
              ->willReturn('<h1>Not Found</h1>');
 
         // Create a minimal kernel with Twig registered
-        $kernel        = $this->createMinimalKernel();
-        $kernel['twig'] = $twig;
+        $kernel = $this->createMinimalKernel();
+        $kernel->setTwigEnvironment($twig);
 
         $response = $renderer->renderOnException($exceptionInfo, $kernel);
 
@@ -211,23 +209,21 @@ class DefaultHtmlRendererTest extends TestCase
         $renderer      = new DefaultHtmlRenderer();
         $exceptionInfo = new WrappedExceptionInfo(new \RuntimeException('missing template'), 500);
 
-        // Create a mock Twig environment that throws Twig_Error_Loader
-        $twig = $this->getMockBuilder(\Twig_Environment::class)
-                     ->disableOriginalConstructor()
-                     ->getMock();
+        // Create a mock Twig environment that throws Twig\Error\LoaderError
+        $twig = $this->createMock(\Twig\Environment::class);
         $twig->expects($this->once())
              ->method('render')
-             ->willThrowException(new \Twig_Error_Loader('Template not found'));
+             ->willThrowException(new \Twig\Error\LoaderError('Template not found'));
 
-        $kernel        = $this->createMinimalKernel();
-        $kernel['twig'] = $twig;
+        $kernel = $this->createMinimalKernel();
+        $kernel->setTwigEnvironment($twig);
 
         $response = $renderer->renderOnException($exceptionInfo, $kernel);
 
         $this->assertInstanceOf(Response::class, $response);
         $content = $response->getContent();
         // Falls back to renderOnSuccess(jsonSerialize())
-        $this->assertContains('RuntimeException', $content);
-        $this->assertContains('missing&nbsp;template', $content);
+        $this->assertStringContainsString('RuntimeException', $content);
+        $this->assertStringContainsString('missing&nbsp;template', $content);
     }
 }

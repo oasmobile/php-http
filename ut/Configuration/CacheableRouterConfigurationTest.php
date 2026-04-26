@@ -14,7 +14,7 @@ class CacheableRouterConfigurationTest extends TestCase
     /** @var CacheableRouterConfiguration */
     private $configuration;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->processor     = new Processor();
         $this->configuration = new CacheableRouterConfiguration();

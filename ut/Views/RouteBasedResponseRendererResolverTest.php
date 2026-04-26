@@ -81,10 +81,8 @@ class RouteBasedResponseRendererResolverTest extends TestCase
         $request  = Request::create('/', 'GET');
         $request->attributes->set('format', 'xml');
 
-        $this->setExpectedException(
-            InvalidConfigurationException::class,
-            'Unsupported response format xml'
-        );
+        $this->expectException(InvalidConfigurationException::class);
+        $this->expectExceptionMessage('Unsupported response format xml');
 
         $resolver->resolveRequest($request);
     }

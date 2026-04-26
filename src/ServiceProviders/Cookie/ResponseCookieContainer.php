@@ -13,16 +13,16 @@ use Symfony\Component\HttpFoundation\Cookie;
 class ResponseCookieContainer
 {
     /** @var Cookie[] */
-    protected $cookies = [];
+    protected array $cookies = [];
     
-    public function addCookie(Cookie $cookie){
+    public function addCookie(Cookie $cookie): void {
         $this->cookies[] = $cookie;
     }
 
     /**
      * @return \Symfony\Component\HttpFoundation\Cookie[]
      */
-    public function getCookies() {
+    public function getCookies(): array {
         return $this->cookies;
     }
 }

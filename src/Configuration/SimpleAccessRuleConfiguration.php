@@ -19,10 +19,10 @@ class SimpleAccessRuleConfiguration implements ConfigurationInterface
      *
      * @return \Symfony\Component\Config\Definition\Builder\TreeBuilder The tree builder
      */
-    public function getConfigTreeBuilder()
+    public function getConfigTreeBuilder(): TreeBuilder
     {
-        $builder = new TreeBuilder();
-        $rule    = $builder->root('rule');
+        $builder = new TreeBuilder('rule');
+        $rule    = $builder->getRootNode();
         {
             $rule->children()->variableNode('pattern')->isRequired();
             $rule->children()->variableNode('roles')->isRequired()->beforeNormalization()->ifString()->then(

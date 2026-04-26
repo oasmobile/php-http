@@ -4,10 +4,9 @@ namespace Oasis\Mlib\Http\Test\Misc;
 
 use Oasis\Mlib\Http\ExtendedExceptionListnerWrapper;
 use PHPUnit\Framework\TestCase;
-use Silex\Application;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
+use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 
 /**
@@ -15,7 +14,7 @@ use Symfony\Component\HttpKernel\HttpKernelInterface;
  */
 class TestableExceptionListnerWrapper extends ExtendedExceptionListnerWrapper
 {
-    public function callEnsureResponse($response, GetResponseForExceptionEvent $event)
+    public function callEnsureResponse($response, ExceptionEvent $event): void
     {
         $this->ensureResponse($response, $event);
     }
@@ -29,9 +28,8 @@ class ExtendedExceptionListnerWrapperTest extends TestCase
 
     public function testEnsureResponseDoesNothingWhenBothNull()
     {
-        $app     = $this->createApplication();
-        $wrapper = new TestableExceptionListnerWrapper($app, function () {});
-        $event   = $this->createExceptionEvent($app);
+        $wrapper = new TestableExceptionListnerWrapper();
+        $event   = $this->createExceptionEvent();
 
         // Ensure event has no response initially
         $this->assertNull($event->getResponse());
@@ -43,65 +41,58 @@ class ExtendedExceptionListnerWrapperTest extends TestCase
     }
 
     //----------------------------------------------------------------------
-    // ensureResponse — response is a Response object → delegates to parent
+    // ensureResponse — response is a Response object → sets event response
     //----------------------------------------------------------------------
 
     public function testEnsureResponseWithResponseObjectSetsEventResponse()
     {
-        $app      = $this->createApplication();
-        $wrapper  = new TestableExceptionListnerWrapper($app, function () {});
-        $event    = $this->createExceptionEvent($app);
+        $wrapper  = new TestableExceptionListnerWrapper();
+        $event    = $this->createExceptionEvent();
         $response = new Response('OK', 200);
 
         $wrapper->callEnsureResponse($response, $event);
 
-        // Parent's ensureResponse sets the response on the event when it's a Response instance
         $this->assertSame($response, $event->getResponse());
     }
 
     //----------------------------------------------------------------------
-    // ensureResponse — response null but event already has response → delegates to parent
+    // ensureResponse — response null but event already has response → delegates (no-op for null)
     //----------------------------------------------------------------------
 
     public function testEnsureResponseDelegatesToParentWhenEventHasResponse()
     {
-        $app      = $this->createApplication();
-        $wrapper  = new TestableExceptionListnerWrapper($app, function () {});
-        $event    = $this->createExceptionEvent($app);
+        $wrapper  = new TestableExceptionListnerWrapper();
+        $event    = $this->createExceptionEvent();
 
         // Pre-set a response on the event
         $existingResponse = new Response('Existing', 200);
         $event->setResponse($existingResponse);
 
-        // response param is null, but event already has a response → should delegate to parent
-        // Parent's ensureResponse will dispatch VIEW event for null response,
-        // but the event already has a response so it won't be cleared
+        // response param is null, but event already has a response → should NOT early-return
+        // (the condition is: null response AND null event response → early return)
+        // Since event has a response, the code falls through to the Response instanceof check,
+        // which is false for null, so nothing changes — but the key point is no early return.
         $wrapper->callEnsureResponse(null, $event);
 
-        // The event should still have a response (parent was invoked)
-        $this->assertNotNull($event->getResponse());
+        // The event should still have the existing response
+        $this->assertSame($existingResponse, $event->getResponse());
     }
 
     //----------------------------------------------------------------------
     // ensureResponse — non-null non-Response value + event has no response
     //----------------------------------------------------------------------
 
-    public function testEnsureResponseWithNonNullNonResponseDelegatesToParent()
+    public function testEnsureResponseWithNonNullNonResponseDoesNotSetResponse()
     {
-        $app     = $this->createApplication();
-        $wrapper = new TestableExceptionListnerWrapper($app, function () {});
-        $event   = $this->createExceptionEvent($app);
+        $wrapper = new TestableExceptionListnerWrapper();
+        $event   = $this->createExceptionEvent();
 
-        // A non-null, non-Response value should trigger parent's ensureResponse
-        // which dispatches KernelEvents::VIEW. The dispatcher is registered on the app.
-        // Since no view listener converts it, the event response may remain null,
-        // but the important thing is that parent::ensureResponse was called (no early return).
+        // A non-null, non-Response value: the condition (null && null) is false,
+        // so it falls through. But since 'some string' is not instanceof Response,
+        // no response is set on the event.
         $wrapper->callEnsureResponse('some string', $event);
 
-        // We can't easily assert parent was called without side effects,
-        // but the fact that no exception was thrown confirms the code path was executed.
-        // The key behavioral difference is: when both are null, ensureResponse returns early.
-        $this->assertTrue(true);
+        $this->assertNull($event->getResponse());
     }
 
     //----------------------------------------------------------------------
@@ -109,30 +100,17 @@ class ExtendedExceptionListnerWrapperTest extends TestCase
     //----------------------------------------------------------------------
 
     /**
-     * @return Application
+     * @return ExceptionEvent
      */
-    private function createApplication()
+    private function createExceptionEvent(): ExceptionEvent
     {
-        $app = new Application();
-        $app->boot();
-
-        return $app;
-    }
-
-    /**
-     * @param Application $app
-     *
-     * @return GetResponseForExceptionEvent
-     */
-    private function createExceptionEvent(Application $app)
-    {
-        $kernel  = $app['kernel'];
+        $kernel  = $this->createStub(HttpKernelInterface::class);
         $request = Request::create('/');
 
-        return new GetResponseForExceptionEvent(
+        return new ExceptionEvent(
             $kernel,
             $request,
-            HttpKernelInterface::MASTER_REQUEST,
+            HttpKernelInterface::MAIN_REQUEST,
             new \RuntimeException('test exception')
         );
     }

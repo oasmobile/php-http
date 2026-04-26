@@ -1,11 +1,10 @@
 <?php
 
-use Oasis\Mlib\Http\SilexKernel;
+use Oasis\Mlib\Http\MicroKernel;
 use Oasis\Mlib\Http\Test\Helpers\Middlewares\TestMiddleware;
 use Oasis\Mlib\Http\Test\Helpers\RouteCacheCleaner;
 use Oasis\Mlib\Http\Views\JsonViewHandler;
 use PHPUnit\Framework\TestCase;
-use Pimple\ServiceProviderInterface;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -30,33 +29,37 @@ class SilexKernelTest extends TestCase
     /** @var array saved trusted proxies before each test */
     private $savedTrustedProxies;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
-        $this->cleanRouteCache(__DIR__ . '/cache');
         $this->savedTrustedProxies   = Request::getTrustedProxies();
         $this->savedTrustedHeaderSet = Request::getTrustedHeaderSet();
     }
 
-    protected function tearDown()
+    protected function tearDown(): void
     {
         // Restore global Request state
         Request::setTrustedProxies($this->savedTrustedProxies, $this->savedTrustedHeaderSet);
+
+        // Restore exception handlers that Symfony Kernel may have set
+        restore_exception_handler();
+
         parent::tearDown();
     }
 
     public function testCreationWithOkConfig()
     {
-        require __DIR__ . '/app.php';
+        $cacheDir = static::createTempCacheDir();
+        $app = require __DIR__ . '/app.php';
+        $this->assertInstanceOf(MicroKernel::class, $app);
     }
     
     public function testProductionMode()
     {
-        $config = [
-        
-        ];
-        $kernel = new SilexKernel($config, false);
-        $kernel['resolver'];
+        $config = [];
+        $kernel = new MicroKernel($config, false);
+        // MicroKernel should be constructable in production mode
+        $this->assertInstanceOf(MicroKernel::class, $kernel);
     }
     
     public function testCreationWithWrongConfiguration()
@@ -72,84 +75,42 @@ class SilexKernelTest extends TestCase
         
         $this->expectException(InvalidConfigurationException::class);
         
-        new SilexKernel($config, true);
-    }
-    
-    public function testSlowRequest()
-    {
-        $config                        = [
-        ];
-        $slowCalled                    = false;
-        $app                           = new SilexKernel($config, true);
-        $app['slow_request_threshold'] = 300;
-        $app['slow_request_handler']   = $app->protect(
-            function (Request $request, $start, $sent, $end) use (&$slowCalled) {
-                $this->assertEquals('/abc', $request->getPathInfo());
-                $this->assertLessThan($end, $start);
-                $this->assertLessThan($sent, $start);
-                $this->assertLessThan($end, $sent);
-                $slowCalled = true;
-            }
-        );
-        $app->get(
-            '/abc',
-            function () {
-                usleep(400000);
-                
-                return new Response('');
-            }
-        );
-        $app->run(Request::create("/abc"));
-        $this->assertTrue($slowCalled);
+        new MicroKernel($config, true);
     }
 
     // ---------------------------------------------------------------
-    // __set() magic properties — trusted_proxies
+    // Bootstrap_Config — trusted_proxies
     // ---------------------------------------------------------------
 
-    public function testSetTrustedProxiesMergesIntoRequestTrustedProxies()
+    public function testConfigTrustedProxiesMergesIntoRequestTrustedProxies()
     {
         // Reset to known state
         Request::setTrustedProxies([], Request::getTrustedHeaderSet());
 
-        $app = new SilexKernel([], true);
-        $app->trusted_proxies = ['10.0.0.1', '10.0.0.2'];
+        new MicroKernel(['trusted_proxies' => ['10.0.0.1', '10.0.0.2']], true);
 
         $proxies = Request::getTrustedProxies();
         $this->assertContains('10.0.0.1', $proxies);
         $this->assertContains('10.0.0.2', $proxies);
     }
 
-    public function testSetTrustedProxiesNonArrayAutoWrapped()
-    {
-        Request::setTrustedProxies([], Request::getTrustedHeaderSet());
-
-        $app = new SilexKernel([], true);
-        $app->trusted_proxies = '192.168.1.1';
-
-        $proxies = Request::getTrustedProxies();
-        $this->assertContains('192.168.1.1', $proxies);
-    }
-
     // ---------------------------------------------------------------
-    // __set() magic properties — trusted_header_set
+    // Bootstrap_Config — trusted_header_set
     // ---------------------------------------------------------------
 
-    public function testSetTrustedHeaderSetWithStringConstant()
+    public function testConfigTrustedHeaderSetWithStringConstant()
     {
-        $app = new SilexKernel([], true);
-        $app->trusted_header_set = 'HEADER_X_FORWARDED_ALL';
+        new MicroKernel(['trusted_header_set' => 'HEADER_X_FORWARDED_FOR'], true);
 
         $this->assertEquals(
-            Request::HEADER_X_FORWARDED_ALL,
+            Request::HEADER_X_FORWARDED_FOR,
             Request::getTrustedHeaderSet()
         );
     }
 
-    public function testSetTrustedHeaderSetWithIntegerPassThrough()
+    public function testConfigTrustedHeaderSetWithIntegerPassThrough()
     {
-        $app = new SilexKernel([], true);
-        $app->trusted_header_set = Request::HEADER_X_FORWARDED_FOR;
+        new MicroKernel(['trusted_header_set' => Request::HEADER_X_FORWARDED_FOR], true);
 
         $this->assertEquals(
             Request::HEADER_X_FORWARDED_FOR,
@@ -158,138 +119,80 @@ class SilexKernelTest extends TestCase
     }
 
     // ---------------------------------------------------------------
-    // __set() magic properties — service_providers
+    // Bootstrap_Config — middlewares validation
     // ---------------------------------------------------------------
 
-    public function testSetServiceProvidersSingleProvider()
+    public function testConfigMiddlewaresValidMiddleware()
     {
-        $app = new SilexKernel([], true);
-
-        $provider = $this->getMockBuilder(ServiceProviderInterface::class)->getMock();
-        $provider->expects($this->once())->method('register');
-
-        $app->service_providers = [$provider];
-    }
-
-    public function testSetServiceProvidersTupleWithParams()
-    {
-        $app = new SilexKernel([], true);
-
-        $provider = $this->getMockBuilder(ServiceProviderInterface::class)->getMock();
-        $provider->expects($this->once())->method('register');
-
-        $app->service_providers = [[$provider, ['key' => 'value']]];
-    }
-
-    public function testSetServiceProvidersInvalidValueThrowsException()
-    {
-        $app = new SilexKernel([], true);
-
-        $this->setExpectedException(InvalidConfigurationException::class);
-        $app->service_providers = ['not_a_provider'];
-    }
-
-    // ---------------------------------------------------------------
-    // __set() magic properties — middlewares
-    // ---------------------------------------------------------------
-
-    public function testSetMiddlewaresValidMiddleware()
-    {
-        $app = new SilexKernel([], true);
         $middleware = new TestMiddleware();
 
         // Should not throw
-        $app->middlewares = [$middleware];
-        $this->assertTrue(true, 'Setting valid middleware should not throw');
+        $app = new MicroKernel(['middlewares' => [$middleware]], true);
+        $this->assertInstanceOf(MicroKernel::class, $app);
     }
 
-    public function testSetMiddlewaresInvalidValueThrowsException()
+    public function testConfigMiddlewaresInvalidValueThrowsException()
     {
-        $app = new SilexKernel([], true);
-
-        $this->setExpectedException(InvalidConfigurationException::class);
-        $app->middlewares = ['not_a_middleware'];
+        $this->expectException(InvalidConfigurationException::class);
+        new MicroKernel(['middlewares' => ['not_a_middleware']], true);
     }
 
     // ---------------------------------------------------------------
-    // __set() magic properties — view_handlers
+    // Bootstrap_Config — view_handlers validation
     // ---------------------------------------------------------------
 
-    public function testSetViewHandlersValidCallable()
+    public function testConfigViewHandlersValidCallable()
     {
-        $app = new SilexKernel([], true);
-
         // Should not throw — JsonViewHandler is callable
-        $app->view_handlers = [new JsonViewHandler()];
-        $this->assertTrue(true, 'Setting valid view handler should not throw');
+        $app = new MicroKernel(['view_handlers' => [new JsonViewHandler()]], true);
+        $this->assertInstanceOf(MicroKernel::class, $app);
     }
 
-    public function testSetViewHandlersInvalidValueThrowsException()
+    public function testConfigViewHandlersInvalidValueThrowsException()
     {
-        $app = new SilexKernel([], true);
-
-        $this->setExpectedException(InvalidConfigurationException::class);
-        $app->view_handlers = ['not_callable_string_that_does_not_exist_as_function'];
+        $this->expectException(InvalidConfigurationException::class);
+        new MicroKernel(['view_handlers' => ['not_callable_string_that_does_not_exist_as_function']], true);
     }
 
     // ---------------------------------------------------------------
-    // __set() magic properties — error_handlers
+    // Bootstrap_Config — error_handlers validation
     // ---------------------------------------------------------------
 
-    public function testSetErrorHandlersValidCallable()
+    public function testConfigErrorHandlersValidCallable()
     {
-        $app = new SilexKernel([], true);
-
         $handler = function () { return null; };
-        $app->error_handlers = [$handler];
-        $this->assertTrue(true, 'Setting valid error handler should not throw');
+        $app = new MicroKernel(['error_handlers' => [$handler]], true);
+        $this->assertInstanceOf(MicroKernel::class, $app);
     }
 
-    public function testSetErrorHandlersInvalidValueThrowsException()
+    public function testConfigErrorHandlersInvalidValueThrowsException()
     {
-        $app = new SilexKernel([], true);
-
-        $this->setExpectedException(InvalidConfigurationException::class);
-        $app->error_handlers = ['not_callable_string_that_does_not_exist_as_function'];
+        $this->expectException(InvalidConfigurationException::class);
+        new MicroKernel(['error_handlers' => ['not_callable_string_that_does_not_exist_as_function']], true);
     }
 
     // ---------------------------------------------------------------
-    // __set() magic properties — injected_args
+    // Bootstrap_Config — injected_args
     // ---------------------------------------------------------------
 
-    public function testSetInjectedArgsAddsToControllerInjectedArgs()
+    public function testConfigInjectedArgsAddsToControllerInjectedArgs()
     {
-        $app = new SilexKernel([], true);
         $handler = new JsonViewHandler();
+        $app = new MicroKernel(['injected_args' => [$handler]], true);
 
-        $app->injected_args = [$handler];
-
-        // Verify via the resolver_auto_injections service
-        $injections = $app['resolver_auto_injections'];
+        $injections = $app->getControllerInjectedArgs();
         $this->assertContains($handler, $injections);
-    }
-
-    // ---------------------------------------------------------------
-    // __set() magic properties — unknown property
-    // ---------------------------------------------------------------
-
-    public function testSetUnknownPropertyThrowsLogicException()
-    {
-        $app = new SilexKernel([], true);
-
-        $this->setExpectedException(\LogicException::class);
-        $app->unknown_property = 'value';
     }
 
     // ---------------------------------------------------------------
     // boot() — conditional registration
     // ---------------------------------------------------------------
 
-    public function testBootWithRoutingConfigRegistersCacheableRouterProvider()
+    public function testBootWithRoutingConfigRegistersRouting()
     {
-        $app = new SilexKernel(
+        $app = new MicroKernel(
             [
-                'cache_dir' => __DIR__ . '/cache',
+                'cache_dir' => static::createTempCacheDir(),
                 'routing'   => [
                     'path'       => __DIR__ . '/routes.yml',
                     'namespaces' => ['Oasis\\Mlib\\Http\\Test\\Helpers\\Controllers\\'],
@@ -300,13 +203,13 @@ class SilexKernelTest extends TestCase
 
         $app->boot();
 
-        // After boot with routing config, request_matcher should be available
-        $this->assertTrue(isset($app['request_matcher']));
+        // After boot with routing config, request matcher should be available
+        $this->assertNotNull($app->getRequestMatcher());
     }
 
     public function testBootWithTwigConfigRegistersSimpleTwigServiceProvider()
     {
-        $app = new SilexKernel(
+        $app = new MicroKernel(
             [
                 'twig' => [
                     'template_dir' => __DIR__ . '/Integration/templates',
@@ -317,23 +220,21 @@ class SilexKernelTest extends TestCase
 
         $app->boot();
 
-        $this->assertTrue(isset($app['twig']));
-        $this->assertInstanceOf(\Twig_Environment::class, $app['twig']);
+        $this->assertInstanceOf(\Twig\Environment::class, $app->getTwig());
     }
 
     public function testBootWithoutOptionalConfigsDoesNotRegisterOptionalProviders()
     {
-        $app = new SilexKernel([], true);
+        $app = new MicroKernel([], true);
         $app->boot();
 
-        // Without routing config, request_matcher should not be GroupUrlMatcher
         // Without twig config, twig should not be set
-        $this->assertFalse(isset($app['twig']));
+        $this->assertNull($app->getTwig());
     }
 
     public function testBootDoubleBootProtection()
     {
-        $app = new SilexKernel([], true);
+        $app = new MicroKernel([], true);
         $app->boot();
         // Second boot should be a no-op (early return)
         $app->boot();
@@ -346,53 +247,45 @@ class SilexKernelTest extends TestCase
 
     public function testIsGrantedReturnsFalseWhenNoAuthorizationChecker()
     {
-        $app = new SilexKernel([], true);
+        $app = new MicroKernel([], true);
 
-        // No security.authorization_checker registered
-        $this->assertFalse($app->isGranted('ROLE_ADMIN'));
-    }
-
-    public function testIsGrantedReturnsFalseWhenCheckerIsNotAuthorizationCheckerInterface()
-    {
-        $app = new SilexKernel([], true);
-        $app['security.authorization_checker'] = 'not_a_checker';
-
+        // No authorization checker set
         $this->assertFalse($app->isGranted('ROLE_ADMIN'));
     }
 
     public function testIsGrantedReturnsFalseOnAuthenticationCredentialsNotFoundException()
     {
-        $app = new SilexKernel([], true);
+        $app = new MicroKernel([], true);
 
-        $checker = $this->getMockBuilder(AuthorizationCheckerInterface::class)->getMock();
+        $checker = $this->createStub(AuthorizationCheckerInterface::class);
         $checker->method('isGranted')
             ->willThrowException(new AuthenticationCredentialsNotFoundException('No credentials'));
 
-        $app['security.authorization_checker'] = $checker;
+        $app->setAuthorizationChecker($checker);
 
         $this->assertFalse($app->isGranted('ROLE_ADMIN'));
     }
 
     public function testIsGrantedReturnsTrueWhenCheckerGrantsAccess()
     {
-        $app = new SilexKernel([], true);
+        $app = new MicroKernel([], true);
 
-        $checker = $this->getMockBuilder(AuthorizationCheckerInterface::class)->getMock();
+        $checker = $this->createStub(AuthorizationCheckerInterface::class);
         $checker->method('isGranted')->willReturn(true);
 
-        $app['security.authorization_checker'] = $checker;
+        $app->setAuthorizationChecker($checker);
 
         $this->assertTrue($app->isGranted('ROLE_USER'));
     }
 
     public function testIsGrantedReturnsFalseWhenCheckerDeniesAccess()
     {
-        $app = new SilexKernel([], true);
+        $app = new MicroKernel([], true);
 
-        $checker = $this->getMockBuilder(AuthorizationCheckerInterface::class)->getMock();
+        $checker = $this->createStub(AuthorizationCheckerInterface::class);
         $checker->method('isGranted')->willReturn(false);
 
-        $app['security.authorization_checker'] = $checker;
+        $app->setAuthorizationChecker($checker);
 
         $this->assertFalse($app->isGranted('ROLE_ADMIN'));
     }
@@ -403,14 +296,14 @@ class SilexKernelTest extends TestCase
 
     public function testGetCacheDirectoriesNoCacheDir()
     {
-        $app = new SilexKernel([], true);
+        $app = new MicroKernel([], true);
 
         $this->assertEquals([], $app->getCacheDirectories());
     }
 
     public function testGetCacheDirectoriesWithCacheDir()
     {
-        $app = new SilexKernel(['cache_dir' => '/tmp/test-cache'], true);
+        $app = new MicroKernel(['cache_dir' => '/tmp/test-cache'], true);
 
         $dirs = $app->getCacheDirectories();
         $this->assertContains('/tmp/test-cache', $dirs);
@@ -418,7 +311,7 @@ class SilexKernelTest extends TestCase
 
     public function testGetCacheDirectoriesWithRoutingCacheDir()
     {
-        $app = new SilexKernel(
+        $app = new MicroKernel(
             [
                 'cache_dir' => '/tmp/test-cache',
                 'routing'   => [
@@ -436,7 +329,7 @@ class SilexKernelTest extends TestCase
 
     public function testGetCacheDirectoriesWithTwigCacheDir()
     {
-        $app = new SilexKernel(
+        $app = new MicroKernel(
             [
                 'cache_dir' => '/tmp/test-cache',
                 'twig'      => [
@@ -455,17 +348,9 @@ class SilexKernelTest extends TestCase
     // getParameter()
     // ---------------------------------------------------------------
 
-    public function testGetParameterFromContainer()
-    {
-        $app = new SilexKernel([], true);
-        $app['my.param'] = 'container_value';
-
-        $this->assertEquals('container_value', $app->getParameter('my.param'));
-    }
-
     public function testGetParameterFromExtraParameters()
     {
-        $app = new SilexKernel([], true);
+        $app = new MicroKernel([], true);
         $app->addExtraParameters(['extra.key' => 'extra_value']);
 
         $this->assertEquals('extra_value', $app->getParameter('extra.key'));
@@ -473,14 +358,14 @@ class SilexKernelTest extends TestCase
 
     public function testGetParameterReturnsDefaultWhenNotFound()
     {
-        $app = new SilexKernel([], true);
+        $app = new MicroKernel([], true);
 
         $this->assertEquals('default_val', $app->getParameter('nonexistent', 'default_val'));
     }
 
     public function testGetParameterReturnsNullByDefault()
     {
-        $app = new SilexKernel([], true);
+        $app = new MicroKernel([], true);
 
         $this->assertNull($app->getParameter('nonexistent'));
     }
@@ -491,28 +376,20 @@ class SilexKernelTest extends TestCase
 
     public function testGetTokenReturnsNullWhenNoTokenStorage()
     {
-        $app = new SilexKernel([], true);
-
-        $this->assertNull($app->getToken());
-    }
-
-    public function testGetTokenReturnsNullWhenTokenStorageIsNotInterface()
-    {
-        $app = new SilexKernel([], true);
-        $app['security.token_storage'] = 'not_a_token_storage';
+        $app = new MicroKernel([], true);
 
         $this->assertNull($app->getToken());
     }
 
     public function testGetTokenReturnsTokenFromValidStorage()
     {
-        $app = new SilexKernel([], true);
+        $app = new MicroKernel([], true);
 
-        $token = $this->getMockBuilder(TokenInterface::class)->getMock();
-        $tokenStorage = $this->getMockBuilder(TokenStorageInterface::class)->getMock();
+        $token = $this->createStub(TokenInterface::class);
+        $tokenStorage = $this->createStub(TokenStorageInterface::class);
         $tokenStorage->method('getToken')->willReturn($token);
 
-        $app['security.token_storage'] = $tokenStorage;
+        $app->setTokenStorage($tokenStorage);
 
         $this->assertSame($token, $app->getToken());
     }
@@ -523,23 +400,23 @@ class SilexKernelTest extends TestCase
 
     public function testGetUserReturnsNullWhenNoToken()
     {
-        $app = new SilexKernel([], true);
+        $app = new MicroKernel([], true);
 
         $this->assertNull($app->getUser());
     }
 
     public function testGetUserReturnsUserFromToken()
     {
-        $app = new SilexKernel([], true);
+        $app = new MicroKernel([], true);
 
-        $user = $this->getMockBuilder(UserInterface::class)->getMock();
-        $token = $this->getMockBuilder(TokenInterface::class)->getMock();
+        $user = $this->createStub(UserInterface::class);
+        $token = $this->createStub(TokenInterface::class);
         $token->method('getUser')->willReturn($user);
 
-        $tokenStorage = $this->getMockBuilder(TokenStorageInterface::class)->getMock();
+        $tokenStorage = $this->createStub(TokenStorageInterface::class);
         $tokenStorage->method('getToken')->willReturn($token);
 
-        $app['security.token_storage'] = $tokenStorage;
+        $app->setTokenStorage($tokenStorage);
 
         $this->assertSame($user, $app->getUser());
     }
@@ -550,14 +427,14 @@ class SilexKernelTest extends TestCase
 
     public function testGetTwigReturnsNullWhenNoTwigRegistered()
     {
-        $app = new SilexKernel([], true);
+        $app = new MicroKernel([], true);
 
         $this->assertNull($app->getTwig());
     }
 
     public function testGetTwigReturnsTwigEnvironmentWhenRegistered()
     {
-        $app = new SilexKernel(
+        $app = new MicroKernel(
             [
                 'twig' => [
                     'template_dir' => __DIR__ . '/Integration/templates',
@@ -568,6 +445,6 @@ class SilexKernelTest extends TestCase
         $app->boot();
 
         $twig = $app->getTwig();
-        $this->assertInstanceOf(\Twig_Environment::class, $twig);
+        $this->assertInstanceOf(\Twig\Environment::class, $twig);
     }
 }

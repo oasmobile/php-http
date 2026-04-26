@@ -20,7 +20,7 @@ class ConfigurationValidationTraitTest extends TestCase
     /** @var ConfigurationValidationTraitConsumer */
     private $consumer;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->consumer = new ConfigurationValidationTraitConsumer();
     }
@@ -64,7 +64,7 @@ class ConfigurationValidationTraitTest extends TestCase
 
     public function testInvalidConfigurationThrowsException()
     {
-        $this->setExpectedException(\Exception::class);
+        $this->expectException(\Exception::class);
 
         $config = [
             'unknown_key' => 'should_fail',

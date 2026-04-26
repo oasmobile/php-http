@@ -8,60 +8,60 @@
 
 ## Tasks
 
-- [ ] 1. Migration Guide — Document Validation Tests 骨架（RED）
-  - [ ] 1.1 创建 `ut/MigrationGuideValidationTest.php` 测试文件
+- [x] 1. Migration Guide — Document Validation Tests 骨架（RED）
+  - [x] 1.1 创建 `ut/MigrationGuideValidationTest.php` 测试文件
     - 编写 Property 1 测试：TOC 锚点完整性 — 解析 `migration-v3.md` TOC 中的 `[text](#anchor)` 链接，验证每个 anchor 对应文档中的一个 heading
     - 编写 Property 2 测试：Breaking Change 覆盖完整性 — 解析 `docs/changes/unreleased/php85-upgrade.md` 提取条目，验证每个条目在 `migration-v3.md` 中有对应内容
     - 编写 Property 3 测试：条目格式完整性 — 解析每个 breaking change entry，验证包含 severity marker（🔴/🟡/🟢）+ before/after code blocks + action 描述
     - 编写 Property 4 测试：Bootstrap_Config Key 覆盖完整性 — 解析 `docs/state/architecture.md` 提取 Bootstrap_Config keys，验证每个 key 在参考表中出现
     - 此阶段测试预期全部 FAIL（RED），因为 `migration-v3.md` 尚不存在
     - _Ref: Requirement 1, AC 2/3; Requirement 2, AC 1/2/3; Requirement 9, AC 2; Design Correctness Properties 1–4_
-  - [ ] 1.2 在 `phpunit.xml` 中注册 `migration-guide-validation` test suite
+  - [x] 1.2 在 `phpunit.xml` 中注册 `migration-guide-validation` test suite
     - 添加 `<testsuite name="migration-guide-validation"><file>ut/MigrationGuideValidationTest.php</file></testsuite>`
     - _Ref: Design Testing Strategy_
-  - [ ] 1.3 Checkpoint: 运行 `phpunit --testsuite migration-guide-validation`，确认测试文件可编译、测试用例存在且全部 FAIL（RED 状态）。Commit。
+  - [x] 1.3 Checkpoint: 运行 `phpunit --testsuite migration-guide-validation`，确认测试文件可编译、测试用例存在且全部 FAIL（RED 状态）。Commit。
 
-- [ ] 2. Migration Guide — 编写迁移文档（GREEN）
-  - [ ] 2.1 创建 `docs/manual/migration-v3.md`，编写 TOC 和概述章节
+- [-] 2. Migration Guide — 编写迁移文档（GREEN）
+  - [x] 2.1 创建 `docs/manual/migration-v3.md`，编写 TOC 和概述章节
     - 文件头部包含版本变更摘要、适用范围说明
     - TOC 使用 markdown 锚点链接导航到各模块章节（按 R1 AC4 定义的顺序：PHP Version → Dependencies → Kernel API → DI Container → Bootstrap Config → Routing → Security → Middleware → Views → Twig → CORS → Cookie → PHP 语言适配 → 附录）
     - 包含快速评估清单（按严重程度汇总所有 breaking change）
     - _Ref: Requirement 1, AC 1/2/4_
-  - [ ] 2.2 编写 PHP Version 和 Dependencies 章节
+  - [x] 2.2 编写 PHP Version 和 Dependencies 章节
     - PHP Version：PHP `>=7.0.0` → `>=8.5`，Severity 🔴，before/after 示例（`composer.json` 中的 `"php"` 约束）
     - Dependencies：移除 `silex/silex`、`silex/providers`、`twig/extensions`（🔴）；Symfony `^4.0` → `^7.2`（🔴）；`twig/twig` `^1.24` → `^3.0`（🔴）；`guzzlehttp/guzzle` `^6.3` → `^7.0`（🔴）；`oasis/logging` `^1.1` → `^3.0`、`oasis/utils` `^1.6` → `^3.0`（🔴）
     - 每项均包含 severity marker + before/after 代码示例 + action 描述
     - _Ref: Requirement 7, AC 1–6; Requirement 2, AC 1–6; Design Data Models 映射表 #1–9_
-  - [ ] 2.3 编写 Kernel API 和 DI Container 章节
+  - [x] 2.3 编写 Kernel API 和 DI Container 章节
     - Kernel API：`SilexKernel` → `MicroKernel` 类名变更（🔴）、命名空间变更、构造函数签名变更（🔴）、公共 API 方法列表、`__set()` 移除（🔴）
     - DI Container：Pimple 移除（🔴）、`$app['xxx']` 访问模式移除（🔴）、`Pimple\ServiceProviderInterface` → `CompilerPassInterface`/`ExtensionInterface`（🔴）、新 service 注册模式
     - _Ref: Requirement 3, AC 1–5; Requirement 4, AC 1–3; Design Data Models 映射表 #10–14_
-  - [ ] 2.4 编写 Bootstrap Config 和 Routing 章节
+  - [x] 2.4 编写 Bootstrap Config 和 Routing 章节
     - Bootstrap Config：`providers` key 语义变更（🔴）、完整 Bootstrap_Config key 参考表（列出每个 key 的类型、默认值、是否变更）
     - Routing：迁移到 Symfony Routing 7.x（🟢），明确说明 `routing` key 行为保持不变，无需下游操作
     - _Ref: Requirement 9, AC 1–3; Requirement 10, AC 1/5; Design Data Models Bootstrap_Config Key 参考表, 映射表 #15–16_
-  - [ ] 2.5 编写 Security 章节
+  - [x] 2.5 编写 Security 章节
     - `AuthenticationPolicyInterface` 重写（🔴）、`FirewallInterface` 重写（🔴）、`AccessRuleInterface` 重写（🔴）
     - `AbstractSimplePreAuthenticator` → `AbstractPreAuthenticator`（🔴），新 template method pattern
     - `AbstractSimplePreAuthenticateUserProvider` 适配（🔴）
     - 完整的 before/after 自定义 pre-authentication policy 示例
     - `NullEntryPoint` 适配（🟢），明确说明无需下游操作
     - _Ref: Requirement 5, AC 1–6; Requirement 10, AC 5; Design Data Models 映射表 #17–21, 33_
-  - [ ] 2.6 编写 Middleware、Views、Twig 章节
+  - [x] 2.6 编写 Middleware、Views、Twig 章节
     - Middleware：`MiddlewareInterface::before()` 签名变更（🔴）、`AbstractMiddleware` 移除 Silex 依赖（🔴）、事件优先级常量变更（🔴）、旧 Symfony 事件类移除（🔴，交叉引用）
     - Views：View Handler / `ResponseRendererInterface` 类型参数变更（🔴）
     - Twig：`Twig_Environment` 等类名变更（🔴）、`twig/extensions` 移除替代方案（🟡）、`SimpleTwigServiceProvider` 重写（🔴）、`twig.strict_variables` / `twig.auto_reload` 行为说明
     - _Ref: Requirement 6, AC 1–3; Requirement 10, AC 4; Requirement 8, AC 1–4; Design Data Models 映射表 #22–27, 32_
-  - [ ] 2.7 编写 CORS、Cookie、PHP 语言适配、附录章节
+  - [x] 2.7 编写 CORS、Cookie、PHP 语言适配、附录章节
     - CORS：Provider → EventSubscriber（🟢），明确说明 `CrossOriginResourceSharingStrategy` API 保持不变，无需下游操作
     - Cookie：Provider → EventSubscriber（🟢），明确说明 `ResponseCookieContainer` API 保持不变，无需下游操作
     - PHP 语言适配：隐式 nullable 参数修复（🟡）、动态属性废弃（🟡）、建议下游运行自身 PHP 8.5 兼容性检查
     - 附录：完整 API 变更速查表，包含开发依赖参考（`phpunit/phpunit` `^5.2` → `^13.0`（🟢）、`phpstan/phpstan` 新增 `^2.1`（🟢））
     - _Ref: Requirement 10, AC 2/3/5; Requirement 11, AC 1–3; Design Data Models 映射表 #28–31, 34–35_
-  - [ ] 2.8 Checkpoint: 运行 `phpunit --testsuite migration-guide-validation`，确认 Property 1–4 测试全部通过（GREEN）。Commit。
+  - [-] 2.8 Checkpoint: 运行 `phpunit --testsuite migration-guide-validation`，确认 Property 1–4 测试全部通过（GREEN）。Commit。
 
 
-- [ ] 3. Check Script — PBT 测试骨架（RED）
+- [~] 3. Check Script — PBT 测试骨架（RED）
   - [ ] 3.1 创建 `ut/PBT/MigrateCheckPropertyTest.php` 测试文件
     - 编写 Property 5 测试：规则检测完整性 — 生成包含随机 Removed_API/Changed_API 引用的 PHP 文件内容（简单规则用模板拼接，复杂模式如 Pimple 访问、Guzzle 选项用预定义片段，CR Q4→C），验证 scanner 对每个文件产生至少一个 Finding
     - 编写 Property 6 测试：递归扫描完整性 — 生成随机深度（1–5 层）的目录结构，随机放置 `.php` 文件，验证发现的文件数等于放置的文件数
@@ -78,7 +78,7 @@
     - _Ref: Design Testing Strategy_
   - [ ] 3.3 Checkpoint: 运行 `phpunit --testsuite migrate-check-pbt`，确认测试文件可编译、测试用例存在且全部 FAIL（RED 状态）。Commit。
 
-- [ ] 4. Check Script — Unit Tests 骨架（RED）
+- [~] 4. Check Script — Unit Tests 骨架（RED）
   - [ ] 4.1 创建 `ut/MigrateCheckScriptTest.php` 测试文件
     - 编写测试：目录不存在 → stderr 输出错误信息 + exit code 2
     - 编写测试：空目录（无 `.php` 文件）→ 提示信息 + exit code 0
@@ -102,7 +102,7 @@
     - _Ref: Design Testing Strategy_
   - [ ] 4.3 Checkpoint: 运行 `phpunit --testsuite migrate-check-unit`，确认测试文件可编译、测试用例存在且全部 FAIL（RED 状态）。Commit。
 
-- [ ] 5. Check Script — 实现脚本（GREEN）
+- [~] 5. Check Script — 实现脚本（GREEN）
   - [ ] 5.1 创建 `bin/oasis-http-migrate-v3-check` 脚本文件，实现 Rule Registry
     - 创建脚本文件，添加 `#!/usr/bin/env php` shebang
     - 实现 `getRules(): array` 函数，注册所有规则：

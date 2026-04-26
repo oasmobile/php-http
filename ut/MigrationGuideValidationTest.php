@@ -20,7 +20,7 @@ use PHPUnit\Framework\TestCase;
 class MigrationGuideValidationTest extends TestCase
 {
     private const MIGRATION_GUIDE_PATH = __DIR__ . '/../docs/manual/migration-v3.md';
-    private const BREAKING_CHANGE_RECORD_PATH = __DIR__ . '/../docs/changes/unreleased/php85-upgrade.md';
+    private const BREAKING_CHANGE_RECORD_PATH = __DIR__ . '/../docs/changes/3.0/php85-upgrade.md';
     private const ARCHITECTURE_PATH = __DIR__ . '/../docs/state/architecture.md';
 
     // ========================================================================

@@ -4,7 +4,7 @@
 
 ## Status
 
-`implemented`
+`released`
 
 ## Background
 

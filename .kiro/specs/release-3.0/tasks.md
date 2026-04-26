@@ -6,32 +6,32 @@
 
 ## Tasks
 
-- [-] 1. 自动化验证
+- [x] 1. 自动化验证
   - [x] 1.1 在 `release/3.0` 分支上执行全量测试，确认 560 tests / 21182 assertions 全部通过，零 failures、零 errors、零 deprecation notices。测试命令：`php vendor/bin/phpunit`（Ref: Requirement 1, AC 1/3）
   - [x] 1.2 执行静态分析，确认 PHPStan level 8 零错误。命令：`php vendor/bin/phpstan analyse`（Ref: Requirement 1, AC 2）
   - [x] 1.3 执行覆盖率采集，命令：`php vendor/bin/phpunit --coverage-text`，记录覆盖率百分比用于 CHANGELOG 测试覆盖 section。如因缺少 Xdebug/PCOV 扩展无法运行，记录"覆盖率工具不可用"及原因，不阻塞后续流程（Ref: Requirement 4, AC 4）
-  - [-] 1.4 Checkpoint: phpunit 输出 560 tests / 21182 assertions / 0 failures / 0 errors / 0 deprecation notices，phpstan 零错误，覆盖率结果已记录（覆盖率工具不可用：无 Xdebug/PCOV 扩展）。Commit message: `test: release 3.0 自动化验证通过`
+  - [x] 1.4 Checkpoint: phpunit 输出 560 tests / 21182 assertions / 0 failures / 0 errors / 0 deprecation notices，phpstan 零错误，覆盖率结果已记录（覆盖率工具不可用：无 Xdebug/PCOV 扩展）。Commit message: `test: release 3.0 自动化验证通过`
 
-- [~] 2. 端到端手工验证
-  - [ ] 2.1 Increment alpha tag：查询已有 alpha tag（`git tag -l 'v3.0.0-alpha*'`），取最大序号 +1，打新 tag（如 `git tag v3.0.0-alpha1`）
-  - [ ] 2.2 Migration Guide 手工验证 — 验证对象：`docs/manual/migration-v3.md`
-    - [ ] 验证文件存在且包含全部 12 个模块章节（PHP Version → Dependencies → Kernel API → DI Container → Bootstrap Config → Routing → Security → Middleware → Views → Twig → CORS → Cookie）+ PHP 语言适配 + 附录
-    - [ ] 验证 TOC 中所有锚点链接解析到有效 heading
-    - [ ] 验证每个 breaking change 条目包含 severity marker（🔴/🟡/🟢）、before/after 代码块、action 描述
-    - [ ] 验证 Bootstrap Config Key 参考表覆盖 `docs/state/architecture.md` 中定义的所有 key
-    - [ ] `[脚本]` 编排为自动化测试脚本，解析 markdown 结构验证上述各项
+- [-] 2. 端到端手工验证
+  - [x] 2.1 Increment alpha tag：查询已有 alpha tag（`git tag -l 'v3.0.0-alpha*'`），取最大序号 +1，打新 tag（如 `git tag v3.0.0-alpha1`）
+  - [x] 2.2 Migration Guide 手工验证 — 验证对象：`docs/manual/migration-v3.md`
+    - [x] 验证文件存在且包含全部 12 个模块章节（PHP Version → Dependencies → Kernel API → DI Container → Bootstrap Config → Routing → Security → Middleware → Views → Twig → CORS → Cookie）+ PHP 语言适配 + 附录
+    - [x] 验证 TOC 中所有锚点链接解析到有效 heading
+    - [x] 验证每个 breaking change 条目包含 severity marker（🔴/🟡/🟢）、before/after 代码块、action 描述
+    - [x] 验证 Bootstrap Config Key 参考表覆盖 `docs/state/architecture.md` 中定义的所有 key
+    - [x] `[脚本]` 编排为自动化测试脚本，解析 markdown 结构验证上述各项
     - （Ref: Requirement 2, AC 1–4）
-  - [ ] 2.3 Check Script 手工验证 — 验证对象：`bin/oasis-http-migrate-v3-check`
-    - [ ] 验证 `--help` 输出 usage 信息
-    - [ ] 对包含已知 Removed API 引用的测试 PHP 文件，验证正确检测到 finding
-    - [ ] 对包含 Pimple 访问模式（`$app['...']`）的测试 PHP 文件，验证正确检测到 finding
-    - [ ] 验证 `--format=json` 输出有效 JSON
-    - [ ] 验证存在 🔴 finding 时 exit code 为 1，无 🔴 finding 时 exit code 为 0
-    - [ ] `[脚本]` 编排为自动化测试脚本，创建临时测试 PHP 文件并执行 Check Script 验证
+  - [x] 2.3 Check Script 手工验证 — 验证对象：`bin/oasis-http-migrate-v3-check`
+    - [x] 验证 `--help` 输出 usage 信息
+    - [x] 对包含已知 Removed API 引用的测试 PHP 文件，验证正确检测到 finding
+    - [x] 对包含 Pimple 访问模式（`$app['...']`）的测试 PHP 文件，验证正确检测到 finding
+    - [x] 验证 `--format=json` 输出有效 JSON
+    - [x] 验证存在 🔴 finding 时 exit code 为 1，无 🔴 finding 时 exit code 为 0
+    - [x] `[脚本]` 编排为自动化测试脚本，创建临时测试 PHP 文件并执行 Check Script 验证
     - （Ref: Requirement 3, AC 1–5）
-  - [ ] 2.4 Checkpoint: Migration Guide 验证全部通过，Check Script 验证全部通过，alpha tag 已打。Commit message: `test: release 3.0 端到端手工验证通过`
+  - [-] 2.4 Checkpoint: Migration Guide 验证全部通过，Check Script 验证全部通过，alpha tag 已打。Commit message: `test: release 3.0 端到端手工验证通过`
 
-- [ ] 3. 文档收敛
+- [~] 3. 文档收敛
   - [ ] 3.1 活跃 Spec 变更记录完整性确认 — 确认 `docs/changes/unreleased/php85-migration-guide.md` 准确反映 PRP-008 的全部交付物：Migration Guide 文档（`docs/manual/migration-v3.md`）、Check Script（`bin/oasis-http-migrate-v3-check`）、三层测试（Document Validation Tests + PBT Properties 5–11 + Unit Tests）、`composer.json` bin 配置、`phpunit.xml` suite 注册（`migration-guide-validation`、`migrate-check-pbt`、`migrate-check-unit`）。如不完整须补充后再继续（Ref: Requirement 6, AC 1–2）
   - [ ] 3.2 版本 CHANGELOG 生成 — 创建 `docs/changes/3.0/CHANGELOG.md`，将两份 unreleased 变更记录（`php85-upgrade.md` 和 `php85-migration-guide.md`）合并重组为统一格式。按变更类型（Added / Changed / Removed）组织，不按 feature 拆分。包含：标题、release date、Summary、Added / Changed / Removed sections、Resolved Notes section、测试覆盖 section（最终统计 + 各 Phase 测试类型与数量 + 覆盖率百分比）（Ref: Requirement 4, AC 1–5）
   - [ ] 3.3 全局 CHANGELOG 更新 — 在 `docs/changes/CHANGELOG.md` 顶部追加 v3.0 摘要条目，遵循现有格式：版本 heading + 一句话摘要 + 链接到 `3.0/CHANGELOG.md`（Ref: Requirement 5, AC 1–2）
@@ -41,7 +41,7 @@
   - [ ] 3.7 项目文档一致性确认 — 确认以下文档与 v3.0 版本一致：`PROJECT.md` 反映 v3.0 技术栈（PHP >=8.5, Symfony 7.x, Twig 3.x, Guzzle 7.x, PHPStan level 8）；`README.md` 反映 v3.0 版本要求；`docs/state/` 反映当前架构（Symfony MicroKernel, Symfony DI, Symfony Security 7.x authenticator system）；`docs/manual/` 与 v3.0 代码库一致（Ref: Requirement 10, AC 1–4）
   - [ ] 3.8 Checkpoint: 活跃 spec 变更记录已确认完整，`docs/changes/3.0/CHANGELOG.md` 已生成且内容完整，全局 CHANGELOG 已更新，7 个 spec 已归档到 `docs/changes/3.0/specs/`，2 份变更记录已归档，7 个 proposal 已更新状态并归档到 `docs/proposals/archive/`，项目文档一致性已确认。Commit message: `docs: release 3.0 文档收敛完成`
 
-- [ ] 4. Final checkpoint — 归档结果验证
+- [~] 4. Final checkpoint — 归档结果验证
   - [ ] 4.1 确认归档后目录结构符合预期：
     - [ ] `docs/changes/3.0/CHANGELOG.md` 存在且内容完整
     - [ ] `docs/changes/3.0/php85-upgrade.md` 存在
@@ -55,7 +55,7 @@
   - [ ] 4.2 执行全量测试确认归档操作未影响测试结果：`php vendor/bin/phpunit`，预期 560 tests / 21182 assertions / 0 failures / 0 errors
   - [ ] 4.3 Checkpoint: 目录结构符合预期，全量测试通过。Commit message: `docs: release 3.0 归档结果验证通过`
 
-- [ ] 5. Code Review
+- [~] 5. Code Review
   - 委托给 code-reviewer sub-agent 执行。Review 范围为 `release/3.0` 分支上 Task 1–4 的所有变更。
 
 ## Issues

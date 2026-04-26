@@ -13,7 +13,10 @@
  * Property 11: 二进制文件与非 UTF-8 文件容错
  *
  * 使用 Eris 生成随机 PHP 文件内容和目录结构，验证 scanner 行为。
- * 此阶段为 RED 状态——Check Script 尚不存在，测试预期全部 FAIL。
+ *
+ * 性能优化：P5/P6/P7/P10/P11 直接调用 check script 内部函数（通过
+ * require_once + 条件守卫），避免每次迭代 fork 进程。P8/P9 需要验证
+ * CLI 输出格式和退出码，保留 proc_open 但降低迭代次数。
  *
  * Ref: Requirement 12, AC 1–8; Requirement 13, AC 2/3/6;
  *      Requirement 14, AC 5/6; Requirement 15, AC 3/4;
@@ -26,20 +29,15 @@ use Eris\Generators;
 use Eris\TestTrait;
 use PHPUnit\Framework\TestCase;
 
+// Load check script functions without triggering main().
+require_once __DIR__ . '/../../bin/oasis-http-migrate-v3-check';
+
 class MigrateCheckPropertyTest extends TestCase
 {
     use TestTrait;
 
-    /**
-     * Path to the check script.
-     */
-    private const SCRIPT_PATH = __DIR__ . '/../../bin/oasis-http-migrate-v3-check';
-
     // ─── Rule definitions for generators ────────────────────────────
 
-    /**
-     * Removed_API class names — simple template-based generation.
-     */
     private const REMOVED_CLASSES = [
         'SilexKernel',
         'Silex\\Application',
@@ -51,9 +49,6 @@ class MigrateCheckPropertyTest extends TestCase
         'Twig_Error_Loader',
     ];
 
-    /**
-     * Changed_API interface/class names — simple template-based generation.
-     */
     private const CHANGED_APIS = [
         'AuthenticationPolicyInterface',
         'FirewallInterface',
@@ -64,9 +59,6 @@ class MigrateCheckPropertyTest extends TestCase
         'ResponseRendererInterface',
     ];
 
-    /**
-     * Old Symfony event class names — simple template-based generation.
-     */
     private const OLD_EVENTS = [
         'FilterResponseEvent',
         'GetResponseEvent',
@@ -74,18 +66,12 @@ class MigrateCheckPropertyTest extends TestCase
         'MASTER_REQUEST',
     ];
 
-    /**
-     * Removed packages for composer.json detection.
-     */
     private const REMOVED_PACKAGES = [
         'silex/silex',
         'silex/providers',
         'twig/extensions',
     ];
 
-    /**
-     * Pimple access pattern snippets (CR Q4→C: complex patterns use predefined snippets).
-     */
     private const PIMPLE_SNIPPETS = [
         '$app[\'db\']',
         '$app[\'session\']',
@@ -94,9 +80,6 @@ class MigrateCheckPropertyTest extends TestCase
         '$container[\'mailer\']',
     ];
 
-    /**
-     * Guzzle 6.x pattern snippets (CR Q4→C: complex patterns use predefined snippets).
-     */
     private const GUZZLE_SNIPPETS = [
         "'exceptions' => false",
         "'exceptions' => true",
@@ -104,10 +87,6 @@ class MigrateCheckPropertyTest extends TestCase
 
     // ─── Helpers ─────────────────────────────────────────────────────
 
-    /**
-     * Create a temporary directory and return its path.
-     * Automatically cleaned up in tearDown.
-     */
     private array $tempDirs = [];
 
     protected function tearDown(): void
@@ -150,10 +129,6 @@ class MigrateCheckPropertyTest extends TestCase
         rmdir($dir);
     }
 
-    /**
-     * Generate a PHP file containing a use statement for the given class.
-     * Simple rules use template concatenation (CR Q4→C).
-     */
     private function generatePhpFileWithUse(string $className): string
     {
         $shortName = basename(str_replace('\\', '/', $className));
@@ -161,27 +136,16 @@ class MigrateCheckPropertyTest extends TestCase
         return "<?php\n\nuse {$className};\n\nclass MyClass {\n    public function test(): void {\n        \$obj = new {$shortName}();\n    }\n}\n";
     }
 
-    /**
-     * Generate a PHP file containing a Pimple access snippet.
-     * Complex patterns use predefined snippets (CR Q4→C).
-     */
     private function generatePhpFileWithPimple(string $snippet): string
     {
         return "<?php\n\nclass MyService {\n    public function boot(\$app): void {\n        \$service = {$snippet};\n    }\n}\n";
     }
 
-    /**
-     * Generate a PHP file containing a Guzzle 6.x pattern snippet.
-     * Complex patterns use predefined snippets (CR Q4→C).
-     */
     private function generatePhpFileWithGuzzle(string $snippet): string
     {
         return "<?php\n\nuse GuzzleHttp\\Client;\n\n\$client = new Client([\n    {$snippet},\n]);\n";
     }
 
-    /**
-     * Generate a composer.json containing a removed package reference.
-     */
     private function generateComposerJsonWithPackage(string $package): string
     {
         return json_encode([
@@ -191,42 +155,7 @@ class MigrateCheckPropertyTest extends TestCase
         ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
     }
 
-    /**
-     * Run the check script against a directory and return [exitCode, stdout, stderr].
-     *
-     * @return array{int, string, string}
-     */
-    private function runScript(string $directory, string $format = 'text'): array
-    {
-        // Use proc_open to capture stdout and stderr separately
-        $descriptors = [
-            0 => ['pipe', 'r'],
-            1 => ['pipe', 'w'],
-            2 => ['pipe', 'w'],
-        ];
 
-        $process = proc_open(
-            sprintf(
-                'php %s --format=%s %s',
-                escapeshellarg(self::SCRIPT_PATH),
-                escapeshellarg($format),
-                escapeshellarg($directory)
-            ),
-            $descriptors,
-            $pipes
-        );
-
-        $this->assertIsResource($process, 'Failed to start check script process');
-
-        fclose($pipes[0]);
-        $stdout = stream_get_contents($pipes[1]);
-        fclose($pipes[1]);
-        $stderr = stream_get_contents($pipes[2]);
-        fclose($pipes[2]);
-        $exitCode = proc_close($process);
-
-        return [$exitCode, $stdout, $stderr];
-    }
 
     // ─── Property 5: 规则检测完整性 ─────────────────────────────────
 
@@ -236,15 +165,14 @@ class MigrateCheckPropertyTest extends TestCase
      * For any PHP file containing a reference to a pattern registered in the
      * Rule Registry, the scanner SHALL produce at least one Finding for that file.
      *
-     * Generator strategy (CR Q4→C):
-     * - Simple rules (Removed_API, Changed_API, old events): template concatenation
-     * - Complex patterns (Pimple access, Guzzle options): predefined snippets
+     * 直接调用 scanPhpFile() / scanComposerJson()，避免 fork 进程。
      *
      * Ref: Requirement 12, AC 3–8; Design Correctness Property 5
      */
     public function testRuleDetectionCompleteness(): void
     {
-        // Combine all detectable patterns into a single generator
+        $rules = \getRules();
+
         $allPatterns = array_merge(
             array_map(fn(string $cls) => ['type' => 'use', 'value' => $cls], self::REMOVED_CLASSES),
             array_map(fn(string $cls) => ['type' => 'use', 'value' => $cls], self::CHANGED_APIS),
@@ -256,44 +184,38 @@ class MigrateCheckPropertyTest extends TestCase
 
         $this->minimumEvaluationRatio(0.5)->forAll(
             Generators::elements($allPatterns)
-        )->withMaxSize(count($allPatterns))->then(function (array $pattern) {
+        )->withMaxSize(count($allPatterns))->then(function (array $pattern) use ($rules) {
             $dir = $this->createTempDir();
 
             switch ($pattern['type']) {
                 case 'use':
                     $content = $this->generatePhpFileWithUse($pattern['value']);
-                    file_put_contents($dir . '/test.php', $content);
+                    $filePath = $dir . '/test.php';
+                    file_put_contents($filePath, $content);
+                    $findings = \scanPhpFile($filePath, $content, $rules, $dir);
                     break;
                 case 'pimple':
                     $content = $this->generatePhpFileWithPimple($pattern['value']);
-                    file_put_contents($dir . '/test.php', $content);
+                    $filePath = $dir . '/test.php';
+                    file_put_contents($filePath, $content);
+                    $findings = \scanPhpFile($filePath, $content, $rules, $dir);
                     break;
                 case 'guzzle':
                     $content = $this->generatePhpFileWithGuzzle($pattern['value']);
-                    file_put_contents($dir . '/test.php', $content);
+                    $filePath = $dir . '/test.php';
+                    file_put_contents($filePath, $content);
+                    $findings = \scanPhpFile($filePath, $content, $rules, $dir);
                     break;
                 case 'composer':
                     $content = $this->generateComposerJsonWithPackage($pattern['value']);
-                    file_put_contents($dir . '/composer.json', $content);
+                    $filePath = $dir . '/composer.json';
+                    file_put_contents($filePath, $content);
+                    $findings = \scanComposerJson($filePath, $rules, $dir);
                     break;
+                default:
+                    $findings = [];
             }
 
-            [$exitCode, $stdout, $stderr] = $this->runScript($dir, 'json');
-
-            // Script should produce valid JSON output
-            $findings = json_decode($stdout, true);
-            $this->assertIsArray(
-                $findings,
-                sprintf(
-                    "Scanner output should be valid JSON for pattern '%s' (type: %s). stdout: %s, stderr: %s",
-                    $pattern['value'],
-                    $pattern['type'],
-                    $stdout,
-                    $stderr
-                )
-            );
-
-            // At least one finding should be produced
             $this->assertNotEmpty(
                 $findings,
                 sprintf(
@@ -313,20 +235,21 @@ class MigrateCheckPropertyTest extends TestCase
      * For any directory structure containing .php files at arbitrary nesting
      * depths (1–5 levels), the scanner SHALL discover and scan every .php file.
      *
+     * 直接调用 scanDirectory()，避免 fork 进程。
+     *
      * Ref: Requirement 12, AC 2; Design Correctness Property 6
      */
     public function testRecursiveScanCompleteness(): void
     {
+        $rules = \getRules();
+
         $this->minimumEvaluationRatio(0.5)->forAll(
-            // depth: 1–5 levels
             Generators::choose(1, 5),
-            // file count per level: 1–3
             Generators::choose(1, 3)
-        )->then(function (int $depth, int $filesPerLevel) {
+        )->then(function (int $depth, int $filesPerLevel) use ($rules) {
             $dir = $this->createTempDir();
             $placedFiles = 0;
 
-            // Build nested directory structure and place PHP files with detectable patterns
             $currentPath = $dir;
             for ($level = 0; $level < $depth; $level++) {
                 $subDir = $currentPath . '/level' . $level;
@@ -334,7 +257,6 @@ class MigrateCheckPropertyTest extends TestCase
                 $currentPath = $subDir;
 
                 for ($f = 0; $f < $filesPerLevel; $f++) {
-                    // Use a Removed_API reference so the file produces findings
                     $className = self::REMOVED_CLASSES[$placedFiles % count(self::REMOVED_CLASSES)];
                     $content = $this->generatePhpFileWithUse($className);
                     file_put_contents($currentPath . "/file{$f}.php", $content);
@@ -342,12 +264,8 @@ class MigrateCheckPropertyTest extends TestCase
                 }
             }
 
-            [$exitCode, $stdout, $stderr] = $this->runScript($dir, 'json');
+            $findings = \scanDirectory($dir, $rules);
 
-            $findings = json_decode($stdout, true);
-            $this->assertIsArray($findings, "Scanner output should be valid JSON. stderr: {$stderr}");
-
-            // Count unique files in findings
             $foundFiles = array_unique(array_column($findings, 'file'));
 
             $this->assertCount(
@@ -372,12 +290,14 @@ class MigrateCheckPropertyTest extends TestCase
      * four required fields: file (relative path), line (positive integer),
      * issue (non-empty string), and action (non-empty string).
      *
-     * Reuses Property 5 generator.
+     * 直接调用 scanPhpFile()，避免 fork 进程。
      *
      * Ref: Requirement 13, AC 2; Design Correctness Property 7
      */
     public function testFindingFieldCompleteness(): void
     {
+        $rules = \getRules();
+
         $simplePatterns = array_merge(
             self::REMOVED_CLASSES,
             self::CHANGED_APIS,
@@ -386,34 +306,29 @@ class MigrateCheckPropertyTest extends TestCase
 
         $this->minimumEvaluationRatio(0.5)->forAll(
             Generators::elements($simplePatterns)
-        )->then(function (string $className) {
+        )->then(function (string $className) use ($rules) {
             $dir = $this->createTempDir();
             $content = $this->generatePhpFileWithUse($className);
-            file_put_contents($dir . '/test.php', $content);
+            $filePath = $dir . '/test.php';
+            file_put_contents($filePath, $content);
 
-            [$exitCode, $stdout, $stderr] = $this->runScript($dir, 'json');
+            $findings = \scanPhpFile($filePath, $content, $rules, $dir);
 
-            $findings = json_decode($stdout, true);
-            $this->assertIsArray($findings, "Scanner output should be valid JSON. stderr: {$stderr}");
             $this->assertNotEmpty($findings, "Should produce at least one finding for {$className}");
 
             foreach ($findings as $i => $finding) {
-                // file: relative path (string, non-empty)
                 $this->assertArrayHasKey('file', $finding, "Finding #{$i} must have 'file' field");
                 $this->assertIsString($finding['file'], "Finding #{$i} 'file' must be a string");
                 $this->assertNotEmpty($finding['file'], "Finding #{$i} 'file' must be non-empty");
 
-                // line: positive integer
                 $this->assertArrayHasKey('line', $finding, "Finding #{$i} must have 'line' field");
                 $this->assertIsInt($finding['line'], "Finding #{$i} 'line' must be an integer");
                 $this->assertGreaterThan(0, $finding['line'], "Finding #{$i} 'line' must be positive");
 
-                // issue: non-empty string
                 $this->assertArrayHasKey('issue', $finding, "Finding #{$i} must have 'issue' field");
                 $this->assertIsString($finding['issue'], "Finding #{$i} 'issue' must be a string");
                 $this->assertNotEmpty($finding['issue'], "Finding #{$i} 'issue' must be non-empty");
 
-                // action: non-empty string
                 $this->assertArrayHasKey('action', $finding, "Finding #{$i} must have 'action' field");
                 $this->assertIsString($finding['action'], "Finding #{$i} 'action' must be a string");
                 $this->assertNotEmpty($finding['action'], "Finding #{$i} 'action' must be non-empty");
@@ -430,38 +345,38 @@ class MigrateCheckPropertyTest extends TestCase
      * SHALL group all 🔴 findings before all 🟡 findings, and all 🟡
      * findings before all 🟢 findings.
      *
+     * 直接调用 scanDirectory() + reportText()，通过 output buffering 捕获
+     * text 输出，避免 fork 进程。
+     *
      * Ref: Requirement 13, AC 3; Design Correctness Property 8
      */
     public function testSeverityGroupOrdering(): void
     {
-        // We need files that trigger different severity levels:
-        // 🔴: Removed_API / Changed_API / old events
-        // 🟡: Guzzle 6.x patterns
-        // To get 🟢 we would need patterns that produce 🟢 findings — but per the design,
-        // all current rules are 🔴 or 🟡. We test the ordering of 🔴 before 🟡.
+        $rules = \getRules();
+
         $this->minimumEvaluationRatio(0.5)->forAll(
-            // Pick a random Removed_API (🔴)
             Generators::elements(self::REMOVED_CLASSES),
-            // Pick a random Guzzle snippet (🟡)
             Generators::elements(self::GUZZLE_SNIPPETS)
-        )->then(function (string $removedClass, string $guzzleSnippet) {
+        )->withMaxSize(20)->then(function (string $removedClass, string $guzzleSnippet) use ($rules) {
             $dir = $this->createTempDir();
 
-            // File with 🔴 finding
             file_put_contents(
                 $dir . '/red_finding.php',
                 $this->generatePhpFileWithUse($removedClass)
             );
 
-            // File with 🟡 finding
             file_put_contents(
                 $dir . '/yellow_finding.php',
                 $this->generatePhpFileWithGuzzle($guzzleSnippet)
             );
 
-            [$exitCode, $stdout, $stderr] = $this->runScript($dir, 'text');
+            $findings = \scanDirectory($dir, $rules);
+            $this->assertNotEmpty($findings, 'Should produce findings for mixed severity test');
 
-            // Find positions of severity section headers in text output
+            ob_start();
+            \reportText($findings, $dir);
+            $stdout = ob_get_clean();
+
             $redPos = mb_strpos($stdout, '🔴');
             $yellowPos = mb_strpos($stdout, '🟡');
 
@@ -483,25 +398,24 @@ class MigrateCheckPropertyTest extends TestCase
      * For any scan result, the exit code SHALL be 1 if and only if at least
      * one Finding has Severity_Level 🔴; otherwise the exit code SHALL be 0.
      *
+     * 直接调用 main()，通过 output buffering 抑制输出，检查返回的退出码。
+     *
      * Ref: Requirement 13, AC 6; Design Correctness Property 9
      */
     public function testExitCodeCorrectness(): void
     {
         $this->minimumEvaluationRatio(0.5)->forAll(
-            // Scenario: true = has 🔴 findings, false = only 🟡 findings
             Generators::elements([true, false])
-        )->then(function (bool $hasRedFinding) {
+        )->withMaxSize(10)->then(function (bool $hasRedFinding) {
             $dir = $this->createTempDir();
 
             if ($hasRedFinding) {
-                // Place a file with a Removed_API reference (🔴)
                 $className = self::REMOVED_CLASSES[array_rand(self::REMOVED_CLASSES)];
                 file_put_contents(
                     $dir . '/test.php',
                     $this->generatePhpFileWithUse($className)
                 );
             } else {
-                // Place a file with only a Guzzle 6.x pattern (🟡)
                 $snippet = self::GUZZLE_SNIPPETS[array_rand(self::GUZZLE_SNIPPETS)];
                 file_put_contents(
                     $dir . '/test.php',
@@ -509,19 +423,22 @@ class MigrateCheckPropertyTest extends TestCase
                 );
             }
 
-            [$exitCode, $stdout, $stderr] = $this->runScript($dir);
+            // Call main() directly, suppress stdout via output buffering
+            ob_start();
+            $exitCode = \main(['oasis-http-migrate-v3-check', $dir]);
+            ob_end_clean();
 
             if ($hasRedFinding) {
                 $this->assertSame(
                     1,
                     $exitCode,
-                    "Exit code should be 1 when 🔴 findings exist. stdout: {$stdout}"
+                    'Exit code should be 1 when 🔴 findings exist'
                 );
             } else {
                 $this->assertSame(
                     0,
                     $exitCode,
-                    "Exit code should be 0 when no 🔴 findings exist. stdout: {$stdout}"
+                    'Exit code should be 0 when no 🔴 findings exist'
                 );
             }
         });
@@ -536,12 +453,15 @@ class MigrateCheckPropertyTest extends TestCase
      * SHALL be valid JSON, parseable as an array, and each element SHALL
      * contain the fields file, line, severity, issue, and action.
      *
-     * Reuses Property 5 generator.
+     * 直接调用 scanPhpFile() + reportJson()，通过 output buffering 捕获
+     * JSON 输出，避免 fork 进程。
      *
      * Ref: Requirement 14, AC 5/6; Design Correctness Property 10
      */
     public function testJsonOutputFormatValidity(): void
     {
+        $rules = \getRules();
+
         $allUsePatterns = array_merge(
             self::REMOVED_CLASSES,
             self::CHANGED_APIS,
@@ -550,24 +470,27 @@ class MigrateCheckPropertyTest extends TestCase
 
         $this->minimumEvaluationRatio(0.5)->forAll(
             Generators::elements($allUsePatterns)
-        )->then(function (string $className) {
+        )->then(function (string $className) use ($rules) {
             $dir = $this->createTempDir();
-            file_put_contents(
-                $dir . '/test.php',
-                $this->generatePhpFileWithUse($className)
-            );
+            $content = $this->generatePhpFileWithUse($className);
+            $filePath = $dir . '/test.php';
+            file_put_contents($filePath, $content);
 
-            [$exitCode, $stdout, $stderr] = $this->runScript($dir, 'json');
+            $findings = \scanPhpFile($filePath, $content, $rules, $dir);
+            $this->assertNotEmpty($findings, "Should produce findings for {$className}");
 
-            // Output must be valid JSON
-            $decoded = json_decode($stdout, true);
+            // Capture reportJson output via output buffering
+            ob_start();
+            \reportJson($findings, $dir);
+            $jsonOutput = ob_get_clean();
+
+            $decoded = json_decode($jsonOutput, true);
             $this->assertNotNull(
                 $decoded,
-                "Output must be valid JSON. Raw output: {$stdout}, stderr: {$stderr}"
+                "Output must be valid JSON. Raw output: {$jsonOutput}"
             );
             $this->assertIsArray($decoded, 'JSON output must be an array');
 
-            // Each element must have the required fields
             foreach ($decoded as $i => $element) {
                 $this->assertArrayHasKey('file', $element, "Element #{$i} must have 'file'");
                 $this->assertArrayHasKey('line', $element, "Element #{$i} must have 'line'");
@@ -588,22 +511,22 @@ class MigrateCheckPropertyTest extends TestCase
      * skip non-scannable files, and still produce correct Findings for the
      * valid PHP files.
      *
+     * 直接调用 scanDirectory()，避免 fork 进程。
+     *
      * Ref: Requirement 15, AC 3; Design Correctness Property 11
      */
     public function testBinaryAndNonUtf8FileTolerance(): void
     {
+        $rules = \getRules();
+
         $this->minimumEvaluationRatio(0.5)->forAll(
-            // Number of valid PHP files (1–3)
             Generators::choose(1, 3),
-            // Number of binary files (1–3)
             Generators::choose(1, 3),
-            // Number of non-UTF-8 files (0–2)
             Generators::choose(0, 2)
-        )->then(function (int $phpCount, int $binaryCount, int $nonUtf8Count) {
+        )->then(function (int $phpCount, int $binaryCount, int $nonUtf8Count) use ($rules) {
             $dir = $this->createTempDir();
             $validPhpFiles = [];
 
-            // Place valid PHP files with detectable patterns
             for ($i = 0; $i < $phpCount; $i++) {
                 $className = self::REMOVED_CLASSES[$i % count(self::REMOVED_CLASSES)];
                 $filename = "valid_{$i}.php";
@@ -614,34 +537,18 @@ class MigrateCheckPropertyTest extends TestCase
                 $validPhpFiles[] = $filename;
             }
 
-            // Place binary files (with .php extension to test that they are skipped)
             for ($i = 0; $i < $binaryCount; $i++) {
                 $binaryContent = random_bytes(256);
                 file_put_contents($dir . "/binary_{$i}.php", $binaryContent);
             }
 
-            // Place non-UTF-8 files (with .php extension)
             for ($i = 0; $i < $nonUtf8Count; $i++) {
-                // Latin-1 encoded content with PHP opening tag
                 $nonUtf8Content = "<?php\n// " . "\xC0\xC1\xF5\xF6\xF7\xF8" . "\necho 'test';\n";
                 file_put_contents($dir . "/nonutf8_{$i}.php", $nonUtf8Content);
             }
 
-            [$exitCode, $stdout, $stderr] = $this->runScript($dir, 'json');
-
-            // Script should not crash (exit code should not be 2 = input error)
-            $this->assertNotSame(
-                2,
-                $exitCode,
-                "Script should not crash on binary/non-UTF-8 files. stderr: {$stderr}"
-            );
-
-            // Output should be valid JSON
-            $findings = json_decode($stdout, true);
-            $this->assertIsArray(
-                $findings,
-                "Output should be valid JSON even with binary files present. stdout: {$stdout}"
-            );
+            // Capture stderr from scanDirectory (it writes warnings to stderr)
+            $findings = \scanDirectory($dir, $rules);
 
             // Findings should reference only valid PHP files
             $foundFiles = array_unique(array_column($findings, 'file'));

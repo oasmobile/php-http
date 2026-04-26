@@ -148,7 +148,7 @@
     - _Ref: Requirement 14, AC 1/2/3_
   - [x] 5.7 Checkpoint: 运行 `phpunit --testsuite migrate-check-pbt --testsuite migrate-check-unit`，确认 PBT（Properties 5–11）和 Unit Tests 全部通过（GREEN）。运行 `phpunit` 全量测试确认无回归。Commit。
 
-- [-] 6. 手工测试
+- [x] 6. 手工测试
   - [x] 6.1 Migration Guide 结构验证
     - [脚本] 验证 `docs/manual/migration-v3.md` 文件存在且非空
     - [脚本] 验证 TOC 中所有锚点链接可解析到文档内 heading
@@ -167,10 +167,10 @@
     - [脚本] 创建包含旧包引用的测试 `composer.json`，运行 Check Script，验证检测到预期 finding
     - [脚本] 验证 text 输出中 🔴 findings 排在 🟡 之前
     - [脚本] 验证存在 🔴 finding 时 exit code 为 1
-  - [-] 6.4 Checkpoint: 确认所有手工测试场景通过，记录测试结果。Commit。
+  - [x] 6.4 Checkpoint: 确认所有手工测试场景通过，记录测试结果。Commit。
 
-- [~] 7. Code Review
-  - [ ] 7.1 委托给 code-reviewer sub-agent 执行
+- [x] 7. Code Review
+  - [x] 7.1 委托给 code-reviewer sub-agent 执行
 
 ## Notes
 

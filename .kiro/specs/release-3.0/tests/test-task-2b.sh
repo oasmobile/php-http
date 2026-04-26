@@ -10,8 +10,8 @@ PASS=0
 FAIL=0
 TOTAL=0
 
-pass() { ((PASS++)); ((TOTAL++)); echo "  ✅ PASS: $1"; }
-fail() { ((FAIL++)); ((TOTAL++)); echo "  ❌ FAIL: $1"; }
+pass() { PASS=$((PASS + 1)); TOTAL=$((TOTAL + 1)); echo "  ✅ PASS: $1"; }
+fail() { FAIL=$((FAIL + 1)); TOTAL=$((TOTAL + 1)); echo "  ❌ FAIL: $1"; }
 
 SCRIPT="bin/oasis-http-migrate-v3-check"
 TMPDIR=""

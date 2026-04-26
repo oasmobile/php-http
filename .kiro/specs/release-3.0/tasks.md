@@ -10,7 +10,7 @@
   - [x] 1.1 在 `release/3.0` 分支上执行全量测试，确认 560 tests / 21182 assertions 全部通过，零 failures、零 errors、零 deprecation notices。测试命令：`php vendor/bin/phpunit`（Ref: Requirement 1, AC 1/3）
   - [x] 1.2 执行静态分析，确认 PHPStan level 8 零错误。命令：`php vendor/bin/phpstan analyse`（Ref: Requirement 1, AC 2）
   - [x] 1.3 执行覆盖率采集，命令：`php vendor/bin/phpunit --coverage-text`，记录覆盖率百分比用于 CHANGELOG 测试覆盖 section。如因缺少 Xdebug/PCOV 扩展无法运行，记录"覆盖率工具不可用"及原因，不阻塞后续流程（Ref: Requirement 4, AC 4）
-  - [x] 1.4 Checkpoint: phpunit 输出 560 tests / 21182 assertions / 0 failures / 0 errors / 0 deprecation notices，phpstan 零错误，覆盖率结果已记录（覆盖率工具不可用：无 Xdebug/PCOV 扩展）。Commit message: `test: release 3.0 自动化验证通过`
+  - [x] 1.4 Checkpoint: phpunit 输出 560 tests / 21182 assertions / 0 failures / 0 errors / 0 deprecation notices，phpstan 零错误，覆盖率已采集（Lines: 89.21%, Methods: 81.77%, Classes: 75.56%）。Commit message: `test: release 3.0 自动化验证通过`
 
 - [x] 2. 端到端手工验证
   - [x] 2.1 Increment alpha tag：查询已有 alpha tag（`git tag -l 'v3.0.0-alpha*'`），取最大序号 +1，打新 tag（如 `git tag v3.0.0-alpha1`）
@@ -41,8 +41,8 @@
   - [x] 3.7 项目文档一致性确认 — 确认以下文档与 v3.0 版本一致：`PROJECT.md` 反映 v3.0 技术栈（PHP >=8.5, Symfony 7.x, Twig 3.x, Guzzle 7.x, PHPStan level 8）；`README.md` 反映 v3.0 版本要求；`docs/state/` 反映当前架构（Symfony MicroKernel, Symfony DI, Symfony Security 7.x authenticator system）；`docs/manual/` 与 v3.0 代码库一致（Ref: Requirement 10, AC 1–4）
   - [x] 3.8 Checkpoint: 活跃 spec 变更记录已确认完整，`docs/changes/3.0/CHANGELOG.md` 已生成且内容完整，全局 CHANGELOG 已更新，7 个 spec 已归档到 `docs/changes/3.0/specs/`，2 份变更记录已归档，7 个 proposal 已更新状态并归档到 `docs/proposals/archive/`，项目文档一致性已确认。Commit message: `docs: release 3.0 文档收敛完成`
 
-- [-] 4. Final checkpoint — 归档结果验证
-  - [ ] 4.1 确认归档后目录结构符合预期：
+- [x] 4. Final checkpoint — 归档结果验证
+  - [x] 4.1 确认归档后目录结构符合预期：
     - [ ] `docs/changes/3.0/CHANGELOG.md` 存在且内容完整
     - [ ] `docs/changes/3.0/php85-upgrade.md` 存在
     - [ ] `docs/changes/3.0/php85-migration-guide.md` 存在
@@ -52,10 +52,10 @@
     - [ ] `docs/changes/unreleased/specs/` 下无剩余 spec 目录
     - [ ] `docs/changes/unreleased/` 下无本次 release 的变更记录
     - [ ] `docs/proposals/` 下无 PRP-002 ~ PRP-008 文件
-  - [ ] 4.2 执行全量测试确认归档操作未影响测试结果：`php vendor/bin/phpunit`，预期 560 tests / 21182 assertions / 0 failures / 0 errors
-  - [ ] 4.3 Checkpoint: 目录结构符合预期，全量测试通过。Commit message: `docs: release 3.0 归档结果验证通过`
+  - [x] 4.2 执行全量测试确认归档操作未影响测试结果：`php vendor/bin/phpunit`，预期 560 tests / 21182 assertions / 0 failures / 0 errors
+  - [x] 4.3 Checkpoint: 目录结构符合预期，全量测试通过。Commit message: `docs: release 3.0 归档结果验证通过`
 
-- [~] 5. Code Review
+- [x] 5. Code Review
   - 委托给 code-reviewer sub-agent 执行。Review 范围为 `release/3.0` 分支上 Task 1–4 的所有变更。
 
 ## Issues

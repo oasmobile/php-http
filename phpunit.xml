@@ -85,6 +85,9 @@
         <testsuite name="FallbackViewHandlerTest">
             <file>ut/FallbackViewHandlerTest.php</file>
         </testsuite>
+        <testsuite name="migration-guide-validation">
+            <file>ut/MigrationGuideValidationTest.php</file>
+        </testsuite>
         <testsuite name="pbt">
             <directory>ut/PBT</directory>
         </testsuite>

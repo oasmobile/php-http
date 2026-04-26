@@ -102,7 +102,7 @@
     - _Ref: Design Testing Strategy_
   - [x] 4.3 Checkpoint: 运行 `phpunit --testsuite migrate-check-unit`，确认测试文件可编译、测试用例存在且全部 FAIL（RED 状态）。Commit。
 
-- [-] 5. Check Script — 实现脚本（GREEN）
+- [x] 5. Check Script — 实现脚本（GREEN）
   - [x] 5.1 创建 `bin/oasis-http-migrate-v3-check` 脚本文件，实现 Rule Registry
     - 创建脚本文件，添加 `#!/usr/bin/env php` shebang
     - 实现 `getRules(): array` 函数，注册所有规则：
@@ -146,30 +146,30 @@
     - 添加 `"bin": ["bin/oasis-http-migrate-v3-check"]`
     - 确保脚本文件有可执行权限
     - _Ref: Requirement 14, AC 1/2/3_
-  - [-] 5.7 Checkpoint: 运行 `phpunit --testsuite migrate-check-pbt --testsuite migrate-check-unit`，确认 PBT（Properties 5–11）和 Unit Tests 全部通过（GREEN）。运行 `phpunit` 全量测试确认无回归。Commit。
+  - [x] 5.7 Checkpoint: 运行 `phpunit --testsuite migrate-check-pbt --testsuite migrate-check-unit`，确认 PBT（Properties 5–11）和 Unit Tests 全部通过（GREEN）。运行 `phpunit` 全量测试确认无回归。Commit。
 
-- [ ] 6. 手工测试
-  - [ ] 6.1 Migration Guide 结构验证
+- [-] 6. 手工测试
+  - [x] 6.1 Migration Guide 结构验证
     - [脚本] 验证 `docs/manual/migration-v3.md` 文件存在且非空
     - [脚本] 验证 TOC 中所有锚点链接可解析到文档内 heading
     - [脚本] 验证所有 breaking change 条目包含 severity marker（🔴/🟡/🟢）
     - [脚本] 验证所有 breaking change 条目包含 before/after 代码块
     - [脚本] 统计各 severity 级别的条目数量，输出汇总
-  - [ ] 6.2 Check Script CLI 交互验证
+  - [x] 6.2 Check Script CLI 交互验证
     - [脚本] 验证 `bin/oasis-http-migrate-v3-check --help` 输出 usage 信息
     - [脚本] 验证对不存在的目录输出错误信息且 exit code 为 2
     - [脚本] 验证对空目录输出提示信息且 exit code 为 0
     - [脚本] 验证 `--format=json` 输出有效 JSON
     - [脚本] 验证 `--format=invalid` 输出错误信息且 exit code 为 2
-  - [ ] 6.3 Check Script 端到端扫描验证
+  - [x] 6.3 Check Script 端到端扫描验证
     - [脚本] 创建包含已知 Removed_API 引用的测试 PHP 文件，运行 Check Script，验证检测到预期 finding
     - [脚本] 创建包含 Pimple 访问模式的测试 PHP 文件，运行 Check Script，验证检测到预期 finding
     - [脚本] 创建包含旧包引用的测试 `composer.json`，运行 Check Script，验证检测到预期 finding
     - [脚本] 验证 text 输出中 🔴 findings 排在 🟡 之前
     - [脚本] 验证存在 🔴 finding 时 exit code 为 1
-  - [ ] 6.4 Checkpoint: 确认所有手工测试场景通过，记录测试结果。Commit。
+  - [-] 6.4 Checkpoint: 确认所有手工测试场景通过，记录测试结果。Commit。
 
-- [ ] 7. Code Review
+- [~] 7. Code Review
   - [ ] 7.1 委托给 code-reviewer sub-agent 执行
 
 ## Notes

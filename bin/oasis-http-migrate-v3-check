@@ -1,0 +1,1009 @@
+#!/usr/bin/env php
+<?php
+/**
+ * oasis/http v3 Migration Pre-Check Script
+ *
+ * Scans a target directory for references to removed/changed APIs from the
+ * oasis/http v2 → v3 upgrade (PHP 8.5 migration, Silex → Symfony MicroKernel).
+ *
+ * Usage: oasis-http-migrate-v3-check [options] <directory>
+ *
+ * Options:
+ *   --help          Show usage information
+ *   --format=FORMAT Output format: text (default), json
+ *
+ * Exit codes:
+ *   0  No 🔴 findings (or no findings at all)
+ *   1  At least one 🔴 finding exists
+ *   2  Input error (directory not found, invalid arguments, etc.)
+ */
+
+// Conditional guard: only execute main() when run as CLI script.
+// This allows test files to require this file and call individual functions
+// without triggering main() execution.
+if (PHP_SAPI === 'cli' && isset($argv) && realpath($argv[0]) === realpath(__FILE__)) {
+    exit(main($argv));
+}
+
+// ============================================================
+// 1. Rule Registry
+// ============================================================
+
+/**
+ * Return all detection rules.
+ *
+ * Each rule is an associative array with keys:
+ *   id, type, patterns, severity, issue, action
+ *
+ * @return list<array{id: string, type: string, patterns: list<string>, severity: string, issue: string, action: string}>
+ */
+function getRules(): array
+{
+    return [
+        // ── Removed_API rules (8) ──────────────────────────────
+        [
+            'id'       => 'removed-silex-kernel',
+            'type'     => 'removed_class',
+            'patterns' => ['SilexKernel'],
+            'severity' => '🔴',
+            'issue'    => 'Reference to removed class SilexKernel',
+            'action'   => 'Replace with MicroKernel and update constructor signature',
+        ],
+        [
+            'id'       => 'removed-silex-app',
+            'type'     => 'removed_class',
+            'patterns' => ['Silex\\Application', 'Silex\Application'],
+            'severity' => '🔴',
+            'issue'    => 'Reference to removed class Silex\\Application',
+            'action'   => 'Remove Silex\\Application dependency; use Symfony DI instead',
+        ],
+        [
+            'id'       => 'removed-pimple-container',
+            'type'     => 'removed_class',
+            'patterns' => ['Pimple\\Container', 'Pimple\Container'],
+            'severity' => '🔴',
+            'issue'    => 'Reference to removed class Pimple\\Container',
+            'action'   => 'Replace with Symfony DependencyInjection ContainerInterface',
+        ],
+        [
+            'id'       => 'removed-pimple-provider',
+            'type'     => 'removed_class',
+            'patterns' => ['Pimple\\ServiceProviderInterface', 'Pimple\ServiceProviderInterface'],
+            'severity' => '🔴',
+            'issue'    => 'Reference to removed interface Pimple\\ServiceProviderInterface',
+            'action'   => 'Replace with Symfony CompilerPassInterface / ExtensionInterface',
+        ],
+        [
+            'id'       => 'removed-bootable-provider',
+            'type'     => 'removed_class',
+            'patterns' => ['Silex\\Api\\BootableProviderInterface', 'Silex\Api\BootableProviderInterface'],
+            'severity' => '🔴',
+            'issue'    => 'Reference to removed interface Silex\\Api\\BootableProviderInterface',
+            'action'   => 'Remove BootableProviderInterface; use Symfony compiler passes instead',
+        ],
+        [
+            'id'       => 'removed-twig-env',
+            'type'     => 'removed_class',
+            'patterns' => ['Twig_Environment'],
+            'severity' => '🔴',
+            'issue'    => 'Reference to removed class Twig_Environment',
+            'action'   => 'Replace with \\Twig\\Environment',
+        ],
+        [
+            'id'       => 'removed-twig-func',
+            'type'     => 'removed_class',
+            'patterns' => ['Twig_SimpleFunction'],
+            'severity' => '🔴',
+            'issue'    => 'Reference to removed class Twig_SimpleFunction',
+            'action'   => 'Replace with \\Twig\\TwigFunction',
+        ],
+        [
+            'id'       => 'removed-twig-error',
+            'type'     => 'removed_class',
+            'patterns' => ['Twig_Error_Loader'],
+            'severity' => '🔴',
+            'issue'    => 'Reference to removed class Twig_Error_Loader',
+            'action'   => 'Replace with \\Twig\\Error\\LoaderError',
+        ],
+
+        // ── Changed_API rules (7) ──────────────────────────────
+        [
+            'id'       => 'changed-auth-policy',
+            'type'     => 'changed_api',
+            'patterns' => ['AuthenticationPolicyInterface'],
+            'severity' => '🔴',
+            'issue'    => 'Reference to changed interface AuthenticationPolicyInterface',
+            'action'   => 'Review and update implementation to match new method signatures',
+        ],
+        [
+            'id'       => 'changed-firewall',
+            'type'     => 'changed_api',
+            'patterns' => ['FirewallInterface'],
+            'severity' => '🔴',
+            'issue'    => 'Reference to changed interface FirewallInterface',
+            'action'   => 'Review and update implementation to match new method signatures',
+        ],
+        [
+            'id'       => 'changed-access-rule',
+            'type'     => 'changed_api',
+            'patterns' => ['AccessRuleInterface'],
+            'severity' => '🔴',
+            'issue'    => 'Reference to changed interface AccessRuleInterface',
+            'action'   => 'Review and update implementation to match new method signatures',
+        ],
+        [
+            'id'       => 'changed-pre-auth',
+            'type'     => 'changed_api',
+            'patterns' => ['AbstractSimplePreAuthenticator'],
+            'severity' => '🔴',
+            'issue'    => 'Reference to changed class AbstractSimplePreAuthenticator',
+            'action'   => 'Replace with AbstractPreAuthenticator; implement getCredentialsFromRequest() + authenticateAndGetUser()',
+        ],
+        [
+            'id'       => 'changed-pre-auth-user',
+            'type'     => 'changed_api',
+            'patterns' => ['AbstractSimplePreAuthenticateUserProvider'],
+            'severity' => '🔴',
+            'issue'    => 'Reference to changed class AbstractSimplePreAuthenticateUserProvider',
+            'action'   => 'Update to conform to Symfony 7.x UserProviderInterface',
+        ],
+        [
+            'id'       => 'changed-middleware',
+            'type'     => 'changed_api',
+            'patterns' => ['MiddlewareInterface'],
+            'severity' => '🔴',
+            'issue'    => 'Reference to changed interface MiddlewareInterface',
+            'action'   => 'Update before() method signature: remove Silex\\Application parameter',
+        ],
+        [
+            'id'       => 'changed-renderer',
+            'type'     => 'changed_api',
+            'patterns' => ['ResponseRendererInterface'],
+            'severity' => '🔴',
+            'issue'    => 'Reference to changed interface ResponseRendererInterface',
+            'action'   => 'Update type parameter from SilexKernel to MicroKernel',
+        ],
+
+        // ── Pimple access pattern rule (1) ─────────────────────
+        [
+            'id'       => 'pimple-access',
+            'type'     => 'pimple_access',
+            'patterns' => ['$app', '$container'],
+            'severity' => '🔴',
+            'issue'    => 'Pimple-style container access pattern detected',
+            'action'   => 'Replace $app[\'...\'] / $container[\'...\'] with Symfony DI service injection',
+        ],
+
+        // ── Old Symfony event class rules (4) ──────────────────
+        [
+            'id'       => 'old-event-filter-response',
+            'type'     => 'old_event',
+            'patterns' => ['FilterResponseEvent'],
+            'severity' => '🔴',
+            'issue'    => 'Reference to removed Symfony event class FilterResponseEvent',
+            'action'   => 'Replace with Symfony\\Component\\HttpKernel\\Event\\ResponseEvent',
+        ],
+        [
+            'id'       => 'old-event-get-response',
+            'type'     => 'old_event',
+            'patterns' => ['GetResponseEvent'],
+            'severity' => '🔴',
+            'issue'    => 'Reference to removed Symfony event class GetResponseEvent',
+            'action'   => 'Replace with Symfony\\Component\\HttpKernel\\Event\\RequestEvent',
+        ],
+        [
+            'id'       => 'old-event-exception',
+            'type'     => 'old_event',
+            'patterns' => ['GetResponseForExceptionEvent'],
+            'severity' => '🔴',
+            'issue'    => 'Reference to removed Symfony event class GetResponseForExceptionEvent',
+            'action'   => 'Replace with Symfony\\Component\\HttpKernel\\Event\\ExceptionEvent',
+        ],
+        [
+            'id'       => 'old-event-master-request',
+            'type'     => 'old_event',
+            'patterns' => ['MASTER_REQUEST'],
+            'severity' => '🔴',
+            'issue'    => 'Reference to removed constant MASTER_REQUEST',
+            'action'   => 'Replace with HttpKernelInterface::MAIN_REQUEST',
+        ],
+
+        // ── Old package reference rules (3) ────────────────────
+        [
+            'id'       => 'old-pkg-silex',
+            'type'     => 'old_package',
+            'patterns' => ['silex/silex'],
+            'severity' => '🔴',
+            'issue'    => 'composer.json references removed package silex/silex',
+            'action'   => 'Remove silex/silex from composer.json; use oasis/http ^3.0 instead',
+        ],
+        [
+            'id'       => 'old-pkg-silex-providers',
+            'type'     => 'old_package',
+            'patterns' => ['silex/providers'],
+            'severity' => '🔴',
+            'issue'    => 'composer.json references removed package silex/providers',
+            'action'   => 'Remove silex/providers from composer.json',
+        ],
+        [
+            'id'       => 'old-pkg-twig-ext',
+            'type'     => 'old_package',
+            'patterns' => ['twig/extensions'],
+            'severity' => '🔴',
+            'issue'    => 'composer.json references removed package twig/extensions',
+            'action'   => 'Remove twig/extensions; use Twig 3.x built-in equivalents',
+        ],
+
+        // ── Guzzle 6.x pattern rules (2) ──────────────────────
+        [
+            'id'       => 'guzzle-exceptions-option',
+            'type'     => 'guzzle_pattern',
+            'patterns' => ["'exceptions'"],
+            'severity' => '🟡',
+            'issue'    => "Guzzle 6.x 'exceptions' option detected",
+            'action'   => "Remove 'exceptions' option; use try/catch with GuzzleHttp\\Exception\\RequestException in Guzzle 7.x",
+        ],
+        [
+            'id'       => 'guzzle-new-client',
+            'type'     => 'guzzle_pattern',
+            'patterns' => ['GuzzleHttp\\Client', 'GuzzleHttp\Client'],
+            'severity' => '🟡',
+            'issue'    => 'GuzzleHttp\\Client usage detected; review for Guzzle 6.x patterns',
+            'action'   => 'Review Client constructor options for Guzzle 6.x deprecated options',
+        ],
+    ];
+}
+
+
+// ============================================================
+// 2. CLI — Argument parsing and entry point
+// ============================================================
+
+/**
+ * Main entry point.
+ *
+ * @param list<string> $argv
+ */
+function main(array $argv): int
+{
+    $format    = 'text';
+    $directory = null;
+
+    // Parse arguments (skip $argv[0] which is the script name)
+    $args = array_slice($argv, 1);
+
+    if (empty($args)) {
+        fwrite(STDERR, getUsage());
+        return 2;
+    }
+
+    foreach ($args as $arg) {
+        if ($arg === '--help') {
+            echo getUsage();
+            return 0;
+        }
+
+        if (str_starts_with($arg, '--format=')) {
+            $format = substr($arg, strlen('--format='));
+            if (!in_array($format, ['text', 'json'], true)) {
+                fwrite(STDERR, "Error: Unsupported format '{$format}'. Use 'text' or 'json'.\n");
+                return 2;
+            }
+            continue;
+        }
+
+        if (str_starts_with($arg, '--')) {
+            fwrite(STDERR, "Error: Unknown option '{$arg}'.\n");
+            fwrite(STDERR, getUsage());
+            return 2;
+        }
+
+        // Positional argument = directory
+        $directory = $arg;
+    }
+
+    if ($directory === null) {
+        fwrite(STDERR, getUsage());
+        return 2;
+    }
+
+    if (!is_dir($directory)) {
+        fwrite(STDERR, "Error: Directory '{$directory}' does not exist.\n");
+        return 2;
+    }
+
+    $rules    = getRules();
+    $findings = scanDirectory($directory, $rules);
+
+    // Check if any PHP files or composer.json were found
+    if (!hasScannableFiles($directory)) {
+        $msg = "No PHP files found in '{$directory}'.\n";
+        if ($format === 'json') {
+            echo "[]\n";
+            fwrite(STDERR, $msg);
+        } else {
+            echo $msg;
+        }
+        return 0;
+    }
+
+    if (empty($findings)) {
+        if ($format === 'json') {
+            echo "[]\n";
+        }
+        echo "✅ No compatibility issues found. The project appears compatible with oasis/http v3.\n";
+        return 0;
+    }
+
+    if ($format === 'json') {
+        reportJson($findings, $directory);
+    } else {
+        reportText($findings, $directory);
+    }
+
+    // Exit code: 1 if any 🔴 finding, 0 otherwise
+    foreach ($findings as $finding) {
+        if ($finding['severity'] === '🔴') {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+/**
+ * Return usage/help text.
+ */
+function getUsage(): string
+{
+    return <<<'USAGE'
+Usage: oasis-http-migrate-v3-check [options] <directory>
+
+Scan a project directory for oasis/http v2 API references that need updating for v3.
+
+Options:
+  --help          Show this help message
+  --format=FORMAT Output format: text (default), json
+
+Arguments:
+  directory       Target directory to scan
+
+Exit codes:
+  0  No 🔴 (must-fix) findings
+  1  At least one 🔴 finding exists
+  2  Input error (missing directory, invalid arguments)
+
+USAGE;
+}
+
+/**
+ * Check if the directory contains any scannable files (.php or composer.json).
+ */
+function hasScannableFiles(string $dir): bool
+{
+    $realDir = realpath($dir);
+    if ($realDir === false) {
+        return false;
+    }
+
+    try {
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($realDir, \RecursiveDirectoryIterator::SKIP_DOTS | \RecursiveDirectoryIterator::FOLLOW_SYMLINKS),
+            \RecursiveIteratorIterator::SELF_FIRST
+        );
+
+        foreach ($iterator as $file) {
+            if (!$file->isFile()) {
+                continue;
+            }
+            $name = $file->getFilename();
+            if (isPhpFile($file->getPathname()) || $name === 'composer.json') {
+                return true;
+            }
+        }
+    } catch (\UnexpectedValueException $e) {
+        // Permission or symlink issues
+    }
+
+    return false;
+}
+
+// ============================================================
+// 3. Scanner — File traversal and token scanning
+// ============================================================
+
+/**
+ * Recursively scan a directory for findings.
+ *
+ * Uses realpath() to deduplicate and avoid symlink loops.
+ *
+ * @param list<array> $rules
+ * @return list<array{file: string, line: int, severity: string, issue: string, action: string, rule_id: string}>
+ */
+function scanDirectory(string $dir, array $rules): array
+{
+    $realDir = realpath($dir);
+    if ($realDir === false) {
+        return [];
+    }
+
+    $findings    = [];
+    $visitedDirs = [];
+
+    scanDirectoryRecursive($realDir, $realDir, $rules, $findings, $visitedDirs);
+
+    return $findings;
+}
+
+/**
+ * Internal recursive scanner.
+ *
+ * @param string $currentDir  Current directory being scanned
+ * @param string $baseDir     Root directory (for relative path computation)
+ * @param list<array> $rules
+ * @param list<array> &$findings  Accumulated findings (by reference)
+ * @param array<string, true> &$visitedDirs  Visited real paths (by reference)
+ */
+function scanDirectoryRecursive(
+    string $currentDir,
+    string $baseDir,
+    array $rules,
+    array &$findings,
+    array &$visitedDirs
+): void {
+    $realCurrent = realpath($currentDir);
+    if ($realCurrent === false) {
+        return;
+    }
+
+    // Symlink loop detection
+    if (isset($visitedDirs[$realCurrent])) {
+        return;
+    }
+    $visitedDirs[$realCurrent] = true;
+
+    $entries = @scandir($currentDir);
+    if ($entries === false) {
+        fwrite(STDERR, "Warning: Cannot read directory '{$currentDir}', skipping.\n");
+        return;
+    }
+
+    foreach ($entries as $entry) {
+        if ($entry === '.' || $entry === '..') {
+            continue;
+        }
+
+        $fullPath = $currentDir . DIRECTORY_SEPARATOR . $entry;
+
+        if (is_dir($fullPath)) {
+            scanDirectoryRecursive($fullPath, $baseDir, $rules, $findings, $visitedDirs);
+            continue;
+        }
+
+        if (!is_file($fullPath)) {
+            continue;
+        }
+
+        // Check readability
+        if (!is_readable($fullPath)) {
+            fwrite(STDERR, "Warning: Cannot read file '{$fullPath}', skipping.\n");
+            continue;
+        }
+
+        if ($entry === 'composer.json') {
+            $composerFindings = scanComposerJson($fullPath, $rules, $baseDir);
+            array_push($findings, ...$composerFindings);
+            continue;
+        }
+
+        if (isPhpFile($fullPath)) {
+            // Skip binary and non-UTF-8 files
+            if (isBinaryFile($fullPath)) {
+                continue;
+            }
+
+            $content = @file_get_contents($fullPath);
+            if ($content === false) {
+                fwrite(STDERR, "Warning: Cannot read file '{$fullPath}', skipping.\n");
+                continue;
+            }
+
+            if (!isUtf8($content)) {
+                continue;
+            }
+
+            $fileFindings = scanPhpFile($fullPath, $content, $rules, $baseDir);
+            array_push($findings, ...$fileFindings);
+        }
+    }
+}
+
+/**
+ * Scan a single PHP file using token_get_all().
+ *
+ * @param string $filePath  Absolute path to the PHP file
+ * @param string $content   File content (already read)
+ * @param list<array> $rules
+ * @param string $baseDir   Root directory for relative path computation
+ * @return list<array{file: string, line: int, severity: string, issue: string, action: string, rule_id: string}>
+ */
+function scanPhpFile(string $filePath, string $content, array $rules, string $baseDir): array
+{
+    $findings    = [];
+    $relativePath = getRelativePath($filePath, $baseDir);
+
+    // Suppress warnings from token_get_all on malformed PHP
+    $tokens = @token_get_all($content);
+    if (!is_array($tokens)) {
+        fwrite(STDERR, "Warning: Failed to tokenize '{$filePath}', skipping.\n");
+        return [];
+    }
+
+    // Build rule lookup structures for efficient matching
+    $classRules   = []; // type: removed_class, changed_api, old_event
+    $pimpleRules  = []; // type: pimple_access
+    $guzzleRules  = []; // type: guzzle_pattern
+
+    foreach ($rules as $rule) {
+        switch ($rule['type']) {
+            case 'removed_class':
+            case 'changed_api':
+            case 'old_event':
+                foreach ($rule['patterns'] as $pattern) {
+                    $classRules[$pattern] = $rule;
+                }
+                break;
+            case 'pimple_access':
+                $pimpleRules[] = $rule;
+                break;
+            case 'guzzle_pattern':
+                $guzzleRules[] = $rule;
+                break;
+        }
+    }
+
+    // Track already-reported rule IDs per line to avoid duplicates
+    $reported = [];
+
+    $tokenCount = count($tokens);
+    for ($i = 0; $i < $tokenCount; $i++) {
+        $token = $tokens[$i];
+
+        // Skip non-array tokens (single-char tokens like '{', '}', etc.)
+        if (!is_array($token)) {
+            continue;
+        }
+
+        [$tokenId, $tokenValue, $tokenLine] = $token;
+
+        // Skip comments
+        if ($tokenId === T_COMMENT || $tokenId === T_DOC_COMMENT) {
+            continue;
+        }
+
+        // ── Check class/interface name references ──────────────
+
+        // Handle 'use' statements: collect the full namespace
+        if ($tokenId === T_USE) {
+            $namespace = collectUseNamespace($tokens, $i, $tokenCount);
+            if ($namespace !== null) {
+                checkClassReference($namespace, $tokenLine, $classRules, $relativePath, $findings, $reported);
+                // Also check the short name (last segment)
+                $shortName = getShortClassName($namespace);
+                if ($shortName !== $namespace) {
+                    checkClassReference($shortName, $tokenLine, $classRules, $relativePath, $findings, $reported);
+                }
+            }
+            continue;
+        }
+
+        // Handle fully qualified names (T_NAME_FULLY_QUALIFIED, T_NAME_QUALIFIED)
+        if ($tokenId === T_NAME_FULLY_QUALIFIED || $tokenId === T_NAME_QUALIFIED) {
+            $name = ltrim($tokenValue, '\\');
+            checkClassReference($name, $tokenLine, $classRules, $relativePath, $findings, $reported);
+            $shortName = getShortClassName($name);
+            if ($shortName !== $name) {
+                checkClassReference($shortName, $tokenLine, $classRules, $relativePath, $findings, $reported);
+            }
+            continue;
+        }
+
+        // Handle simple T_STRING tokens (unqualified class names, constants)
+        if ($tokenId === T_STRING) {
+            checkClassReference($tokenValue, $tokenLine, $classRules, $relativePath, $findings, $reported);
+        }
+
+        // ── Check Pimple access patterns ──────────────────────
+        // Pattern: $app['...'] or $container['...']
+        if ($tokenId === T_VARIABLE && in_array($tokenValue, ['$app', '$container'], true)) {
+            if (isPimpleAccess($tokens, $i, $tokenCount)) {
+                foreach ($pimpleRules as $rule) {
+                    $key = $rule['id'] . ':' . $tokenLine;
+                    if (!isset($reported[$key])) {
+                        $findings[] = [
+                            'file'     => $relativePath,
+                            'line'     => $tokenLine,
+                            'severity' => $rule['severity'],
+                            'issue'    => $rule['issue'],
+                            'action'   => $rule['action'],
+                            'rule_id'  => $rule['id'],
+                        ];
+                        $reported[$key] = true;
+                    }
+                }
+            }
+        }
+
+        // ── Check Guzzle 6.x patterns ─────────────────────────
+        // Detect 'exceptions' string key in array contexts
+        if ($tokenId === T_CONSTANT_ENCAPSED_STRING) {
+            $strValue = trim($tokenValue, "'\"");
+            foreach ($guzzleRules as $rule) {
+                foreach ($rule['patterns'] as $pattern) {
+                    $patternValue = trim($pattern, "'\"");
+                    if ($strValue === $patternValue) {
+                        $key = $rule['id'] . ':' . $tokenLine;
+                        if (!isset($reported[$key])) {
+                            $findings[] = [
+                                'file'     => $relativePath,
+                                'line'     => $tokenLine,
+                                'severity' => $rule['severity'],
+                                'issue'    => $rule['issue'],
+                                'action'   => $rule['action'],
+                                'rule_id'  => $rule['id'],
+                            ];
+                            $reported[$key] = true;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return $findings;
+}
+
+/**
+ * Collect the full namespace from a 'use' statement.
+ *
+ * Advances $i past the use statement.
+ *
+ * @return string|null  The full namespace, or null if parsing fails
+ */
+function collectUseNamespace(array $tokens, int &$i, int $tokenCount): ?string
+{
+    $namespace = '';
+    $i++; // skip 'use' token
+
+    while ($i < $tokenCount) {
+        $token = $tokens[$i];
+
+        if (is_array($token)) {
+            [$id, $value] = $token;
+
+            if ($id === T_WHITESPACE) {
+                $i++;
+                continue;
+            }
+
+            if ($id === T_STRING || $id === T_NAME_QUALIFIED || $id === T_NAME_FULLY_QUALIFIED || $id === T_NS_SEPARATOR) {
+                $namespace .= $value;
+                $i++;
+                continue;
+            }
+
+            // 'function' or 'const' use — skip
+            if ($id === T_FUNCTION || $id === T_CONST) {
+                return null;
+            }
+
+            // 'as' alias — stop collecting namespace
+            if ($id === T_AS) {
+                break;
+            }
+        } else {
+            // Single char token
+            if ($token === ';' || $token === ',') {
+                break;
+            }
+            if ($token === '{') {
+                // Group use — not fully supported, break
+                break;
+            }
+        }
+
+        $i++;
+    }
+
+    $namespace = ltrim($namespace, '\\');
+
+    return $namespace !== '' ? $namespace : null;
+}
+
+/**
+ * Check if a class/interface name matches any class rule and record a finding.
+ *
+ * @param array<string, array> $classRules  Pattern → rule mapping
+ * @param list<array> &$findings
+ * @param array<string, true> &$reported
+ */
+function checkClassReference(
+    string $name,
+    int $line,
+    array $classRules,
+    string $relativePath,
+    array &$findings,
+    array &$reported
+): void {
+    if (isset($classRules[$name])) {
+        $rule = $classRules[$name];
+        $key  = $rule['id'] . ':' . $line;
+        if (!isset($reported[$key])) {
+            $findings[] = [
+                'file'     => $relativePath,
+                'line'     => $line,
+                'severity' => $rule['severity'],
+                'issue'    => $rule['issue'],
+                'action'   => $rule['action'],
+                'rule_id'  => $rule['id'],
+            ];
+            $reported[$key] = true;
+        }
+    }
+}
+
+/**
+ * Check if the token at position $i is followed by '[' (Pimple array access).
+ */
+function isPimpleAccess(array $tokens, int $i, int $tokenCount): bool
+{
+    $j = $i + 1;
+
+    // Skip whitespace
+    while ($j < $tokenCount && is_array($tokens[$j]) && $tokens[$j][0] === T_WHITESPACE) {
+        $j++;
+    }
+
+    if ($j >= $tokenCount) {
+        return false;
+    }
+
+    // Check for '['
+    $next = $tokens[$j];
+    if (is_string($next) && $next === '[') {
+        return true;
+    }
+
+    return false;
+}
+
+/**
+ * Scan a composer.json file for removed package references.
+ *
+ * @param list<array> $rules
+ * @return list<array{file: string, line: int, severity: string, issue: string, action: string, rule_id: string}>
+ */
+function scanComposerJson(string $filePath, array $rules, string $baseDir): array
+{
+    $findings     = [];
+    $relativePath = getRelativePath($filePath, $baseDir);
+
+    $content = @file_get_contents($filePath);
+    if ($content === false) {
+        fwrite(STDERR, "Warning: Cannot read file '{$filePath}', skipping.\n");
+        return [];
+    }
+
+    $data = json_decode($content, true);
+    if (!is_array($data)) {
+        fwrite(STDERR, "Warning: Invalid JSON in '{$filePath}', skipping.\n");
+        return [];
+    }
+
+    // Collect package rules
+    $packageRules = [];
+    foreach ($rules as $rule) {
+        if ($rule['type'] === 'old_package') {
+            foreach ($rule['patterns'] as $pattern) {
+                $packageRules[$pattern] = $rule;
+            }
+        }
+    }
+
+    // Check require and require-dev sections
+    $sections = ['require', 'require-dev'];
+    foreach ($sections as $section) {
+        if (!isset($data[$section]) || !is_array($data[$section])) {
+            continue;
+        }
+
+        foreach ($data[$section] as $package => $version) {
+            if (isset($packageRules[$package])) {
+                $rule = $packageRules[$package];
+
+                // Find the line number of the package in the file
+                $line = findLineInFile($content, $package);
+
+                $findings[] = [
+                    'file'     => $relativePath,
+                    'line'     => $line,
+                    'severity' => $rule['severity'],
+                    'issue'    => $rule['issue'],
+                    'action'   => $rule['action'],
+                    'rule_id'  => $rule['id'],
+                ];
+            }
+        }
+    }
+
+    return $findings;
+}
+
+/**
+ * Find the line number of a string in file content.
+ */
+function findLineInFile(string $content, string $needle): int
+{
+    $pos = strpos($content, $needle);
+    if ($pos === false) {
+        return 1;
+    }
+
+    return substr_count($content, "\n", 0, $pos) + 1;
+}
+
+// ============================================================
+// 4. Reporter — Output formatting
+// ============================================================
+
+/**
+ * Output findings in text format, grouped by severity.
+ *
+ * @param list<array{file: string, line: int, severity: string, issue: string, action: string, rule_id: string}> $findings
+ */
+function reportText(array $findings, string $targetDir): void
+{
+    // Group by severity
+    $groups = [
+        '🔴' => [],
+        '🟡' => [],
+        '🟢' => [],
+    ];
+
+    foreach ($findings as $finding) {
+        $sev = $finding['severity'];
+        if (!isset($groups[$sev])) {
+            $groups[$sev] = [];
+        }
+        $groups[$sev][] = $finding;
+    }
+
+    $severityLabels = [
+        '🔴' => '必须改',
+        '🟡' => '建议改',
+        '🟢' => '可选',
+    ];
+
+    foreach ($groups as $severity => $groupFindings) {
+        if (empty($groupFindings)) {
+            continue;
+        }
+
+        $label = $severityLabels[$severity] ?? $severity;
+        $count = count($groupFindings);
+        echo "\n=== {$severity} {$label} ({$count} findings) ===\n\n";
+
+        foreach ($groupFindings as $finding) {
+            echo "{$finding['file']}:{$finding['line']}\n";
+            echo "  [{$finding['rule_id']}] {$finding['issue']}\n";
+            echo "  → {$finding['action']}\n\n";
+        }
+    }
+
+    // Summary
+    $total = count($findings);
+    $redCount    = count($groups['🔴']);
+    $yellowCount = count($groups['🟡']);
+    $greenCount  = count($groups['🟢']);
+
+    echo "=== Summary ===\n";
+    echo "Total: {$total} findings\n";
+    echo "  🔴 必须改: {$redCount}\n";
+    echo "  🟡 建议改: {$yellowCount}\n";
+    echo "  🟢 可选: {$greenCount}\n";
+}
+
+/**
+ * Output findings in JSON format.
+ *
+ * @param list<array{file: string, line: int, severity: string, issue: string, action: string, rule_id: string}> $findings
+ */
+function reportJson(array $findings, string $targetDir): void
+{
+    $output = [];
+    foreach ($findings as $finding) {
+        $output[] = [
+            'file'     => $finding['file'],
+            'line'     => $finding['line'],
+            'severity' => $finding['severity'],
+            'issue'    => $finding['issue'],
+            'action'   => $finding['action'],
+        ];
+    }
+
+    echo json_encode($output, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) . "\n";
+}
+
+// ============================================================
+// 5. Helpers
+// ============================================================
+
+/**
+ * Check if a file path has a .php extension.
+ */
+function isPhpFile(string $path): bool
+{
+    return strtolower(pathinfo($path, PATHINFO_EXTENSION)) === 'php';
+}
+
+/**
+ * Check if a file appears to be binary.
+ *
+ * Reads the first 8KB and checks for null bytes.
+ */
+function isBinaryFile(string $path): bool
+{
+    $handle = @fopen($path, 'rb');
+    if ($handle === false) {
+        return false;
+    }
+
+    $chunk = fread($handle, 8192);
+    fclose($handle);
+
+    if ($chunk === false || $chunk === '') {
+        return false;
+    }
+
+    // Check for null bytes — a strong indicator of binary content
+    return str_contains($chunk, "\0");
+}
+
+/**
+ * Check if a string is valid UTF-8.
+ */
+function isUtf8(string $content): bool
+{
+    return mb_check_encoding($content, 'UTF-8');
+}
+
+/**
+ * Get the short (unqualified) class name from a fully qualified name.
+ */
+function getShortClassName(string $fqcn): string
+{
+    $parts = explode('\\', $fqcn);
+    return end($parts);
+}
+
+/**
+ * Compute a relative path from a base directory.
+ */
+function getRelativePath(string $filePath, string $baseDir): string
+{
+    $realFile = realpath($filePath);
+    $realBase = realpath($baseDir);
+
+    if ($realFile === false || $realBase === false) {
+        return $filePath;
+    }
+
+    // Ensure base dir ends with separator
+    $realBase = rtrim($realBase, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+
+    if (str_starts_with($realFile, $realBase)) {
+        return substr($realFile, strlen($realBase));
+    }
+
+    return $filePath;
+}

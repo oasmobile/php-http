@@ -78,7 +78,7 @@
     - _Ref: Design Testing Strategy_
   - [x] 3.3 Checkpoint: 运行 `phpunit --testsuite migrate-check-pbt`，确认测试文件可编译、测试用例存在且全部 FAIL（RED 状态）。Commit。
 
-- [-] 4. Check Script — Unit Tests 骨架（RED）
+- [x] 4. Check Script — Unit Tests 骨架（RED）
   - [x] 4.1 创建 `ut/MigrateCheckScriptTest.php` 测试文件
     - 编写测试：目录不存在 → stderr 输出错误信息 + exit code 2
     - 编写测试：空目录（无 `.php` 文件）→ 提示信息 + exit code 0
@@ -100,10 +100,10 @@
   - [x] 4.2 在 `phpunit.xml` 中注册 `migrate-check-unit` test suite
     - 添加 `<testsuite name="migrate-check-unit"><file>ut/MigrateCheckScriptTest.php</file></testsuite>`
     - _Ref: Design Testing Strategy_
-  - [-] 4.3 Checkpoint: 运行 `phpunit --testsuite migrate-check-unit`，确认测试文件可编译、测试用例存在且全部 FAIL（RED 状态）。Commit。
+  - [x] 4.3 Checkpoint: 运行 `phpunit --testsuite migrate-check-unit`，确认测试文件可编译、测试用例存在且全部 FAIL（RED 状态）。Commit。
 
-- [~] 5. Check Script — 实现脚本（GREEN）
-  - [ ] 5.1 创建 `bin/oasis-http-migrate-v3-check` 脚本文件，实现 Rule Registry
+- [-] 5. Check Script — 实现脚本（GREEN）
+  - [x] 5.1 创建 `bin/oasis-http-migrate-v3-check` 脚本文件，实现 Rule Registry
     - 创建脚本文件，添加 `#!/usr/bin/env php` shebang
     - 实现 `getRules(): array` 函数，注册所有规则：
       - Removed_API 规则（8 条）：`removed-silex-kernel`、`removed-silex-app`、`removed-pimple-container`、`removed-pimple-provider`、`removed-bootable-provider`、`removed-twig-env`、`removed-twig-func`、`removed-twig-error`
@@ -114,7 +114,7 @@
       - Guzzle 6.x 模式规则（2 条）：`guzzle-exceptions-option`、`guzzle-new-client`
     - 实现可测试性方案（提取函数文件或条件守卫，CR Q1→A/B 自行选择）
     - _Ref: Requirement 12, AC 3–8; Design Architecture Rule Registry_
-  - [ ] 5.2 实现 CLI 入口和参数解析
+  - [x] 5.2 实现 CLI 入口和参数解析
     - 实现 `main(array $argv): int` 函数
     - 解析 `--help`、`--format=FORMAT`、`<directory>` 参数
     - 无参数时输出 usage 到 stderr，exit code 2
@@ -122,7 +122,7 @@
     - 无效 `--format` 值输出错误到 stderr，exit code 2
     - 目标目录不存在输出错误到 stderr，exit code 2
     - _Ref: Requirement 14, AC 1/4/5; Requirement 15, AC 1; Design Components CLI 接口_
-  - [ ] 5.3 实现 Token Scanner 和 Composer Scanner
+  - [x] 5.3 实现 Token Scanner 和 Composer Scanner
     - 实现 `scanDirectory(string $dir, array $rules): array` — 递归遍历目录，使用 `realpath()` 去重避免符号链接循环
     - 实现 `scanPhpFile(string $file, array $rules): array` — 基于 `token_get_all()` 的 token 级扫描，跳过注释 token，识别 `use` 语句中的完整命名空间、`T_STRING` 中的类名引用、`$app['...']`/`$container['...']` Pimple 访问模式、Guzzle 6.x 选项模式
     - 实现 `scanComposerJson(string $file, array $rules): array` — `json_decode()` 解析，检查 `require` 和 `require-dev` 中的旧包引用
@@ -132,21 +132,21 @@
     - `composer.json` JSON 解析失败时输出 warning 到 stderr 并继续
     - 文件无读取权限时输出 warning 到 stderr 并继续
     - _Ref: Requirement 12, AC 1–8; Requirement 15, AC 2–5; Design Architecture Token Scanner, Composer Scanner_
-  - [ ] 5.4 实现 Reporter（text 和 JSON 格式）
+  - [x] 5.4 实现 Reporter（text 和 JSON 格式）
     - 实现 `reportText(array $findings, string $targetDir): void` — 按 Severity 分组排序（🔴 → 🟡 → 🟢），输出每个 finding 的文件路径（相对）、行号、issue、action，末尾输出 summary（total + 各 severity 计数）
     - 实现 `reportJson(array $findings, string $targetDir): void` — 输出 JSON 数组，每个元素包含 `file`、`line`、`severity`、`issue`、`action` 字段
     - 无 finding 时输出 success message
     - _Ref: Requirement 13, AC 1–5; Requirement 14, AC 5/6; Design Architecture Reporter_
-  - [ ] 5.5 串联 main 函数，实现退出码逻辑
+  - [x] 5.5 串联 main 函数，实现退出码逻辑
     - `main()` 调用 `scanDirectory()` → `reportText()`/`reportJson()` → 返回退出码
     - 存在 🔴 finding → exit code 1；否则 → exit code 0
     - 目标目录无 `.php` 文件 → 输出提示信息，exit code 0
     - _Ref: Requirement 13, AC 5/6; Design Data Models 退出码模型_
-  - [ ] 5.6 更新 `composer.json` 添加 `"bin"` 配置
+  - [x] 5.6 更新 `composer.json` 添加 `"bin"` 配置
     - 添加 `"bin": ["bin/oasis-http-migrate-v3-check"]`
     - 确保脚本文件有可执行权限
     - _Ref: Requirement 14, AC 1/2/3_
-  - [ ] 5.7 Checkpoint: 运行 `phpunit --testsuite migrate-check-pbt --testsuite migrate-check-unit`，确认 PBT（Properties 5–11）和 Unit Tests 全部通过（GREEN）。运行 `phpunit` 全量测试确认无回归。Commit。
+  - [-] 5.7 Checkpoint: 运行 `phpunit --testsuite migrate-check-pbt --testsuite migrate-check-unit`，确认 PBT（Properties 5–11）和 Unit Tests 全部通过（GREEN）。运行 `phpunit` 全量测试确认无回归。Commit。
 
 - [ ] 6. 手工测试
   - [ ] 6.1 Migration Guide 结构验证

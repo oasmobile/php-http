@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace Oasis\Mlib\Http\Test\Cors;
 
 use Oasis\Mlib\Http\ServiceProviders\Cors\CrossOriginResourceSharingProvider;

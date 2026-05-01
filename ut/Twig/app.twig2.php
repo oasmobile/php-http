@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * Twig test bootstrap — MicroKernel with twig config via Bootstrap_Config.
  * This file tests the configuration-driven initialization path.

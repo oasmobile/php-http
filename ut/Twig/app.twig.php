@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * Twig test bootstrap — MicroKernel with twig config (with cache_dir).
  */

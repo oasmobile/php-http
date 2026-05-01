@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * Integration test for Bootstrap_Configuration chain.
  *

@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * AWS configuration with trust_cloudfront_ips=true but behind_elb=false.
  * Used by ElbTrustedProxyTest supplementary tests (R12 AC 5).

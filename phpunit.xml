@@ -12,6 +12,7 @@
         <testsuite name="cors">
             <file>ut/Cors/CrossOriginResourceSharingTest.php</file>
             <file>ut/Cors/CrossOriginResourceSharingAdvancedTest.php</file>
+            <file>ut/Cors/CrossOriginResourceSharingStrategyTest.php</file>
         </testsuite>
         <testsuite name="security">
             <file>ut/Security/SecurityServiceProviderTest.php</file>
@@ -19,6 +20,9 @@
             <file>ut/Security/NullEntryPointTest.php</file>
             <file>ut/Security/AccessRuleListenerTest.php</file>
             <file>ut/Security/AbstractSimplePreAuthenticationPolicyTest.php</file>
+            <file>ut/Security/AbstractPreAuthenticatorTest.php</file>
+            <file>ut/Security/AbstractSimplePreAuthenticateUserProviderTest.php</file>
+            <file>ut/Security/SimpleAccessRuleSettersTest.php</file>
         </testsuite>
         <testsuite name="twig">
             <file>ut/Twig/TwigServiceProviderTest.php</file>
@@ -78,6 +82,7 @@
         </testsuite>
         <testsuite name="SilexKernelTest">
             <file>ut/SilexKernelTest.php</file>
+            <file>ut/MicroKernelSupplementaryTest.php</file>
         </testsuite>
         <testsuite name="SilexKernelWebTest">
             <file>ut/SilexKernelWebTest.php</file>

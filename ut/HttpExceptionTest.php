@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 use Oasis\Mlib\Http\ErrorHandlers\ExceptionWrapper;
 use Oasis\Mlib\Http\MicroKernel;
 use Oasis\Mlib\Http\Test\Helpers\RouteCacheCleaner;

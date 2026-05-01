@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * MicroKernel configuration for Security_Authentication_Flow integration tests.
  *

@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 use Oasis\Mlib\Http\MicroKernel;
 use Oasis\Mlib\Http\Test\Helpers\Middlewares\TestMiddleware;

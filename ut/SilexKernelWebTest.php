@@ -344,6 +344,34 @@ class SilexKernelWebTest extends WebTestCase
             $json['called']
         );
     }
+
+    /**
+     * Sending a request with a disallowed HTTP method should return 405.
+     * Covers the MethodNotAllowedException catch branch in registerRouting().
+     */
+    public function testMethodNotAllowedReturns405()
+    {
+        $client = $this->createClient();
+        $client->request('GET', '/cors/put'); // route only allows PUT
+        $response = $client->getResponse();
+
+        $this->assertEquals(Response::HTTP_METHOD_NOT_ALLOWED, $response->getStatusCode());
+    }
+
+    /**
+     * Scheme redirect with query string should preserve the query string.
+     * Covers the query-string branch in the scheme redirect logic.
+     */
+    public function testHttpOnlyRouteWithQueryStringPreservesQuery()
+    {
+        $client = $this->createClient();
+        $client->request('GET', '/httponly?foo=bar', [], [], ['HTTPS' => 'on']);
+        /** @var RedirectResponse $response */
+        $response = $client->getResponse();
+        $this->assertInstanceOf(RedirectResponse::class, $response);
+        $this->assertStringContainsString('foo=bar', $response->getTargetUrl());
+        $this->assertStringStartsWith('http://', $response->getTargetUrl());
+    }
 }
 
 /**

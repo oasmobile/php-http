@@ -1,5 +1,9 @@
 # Changelog
 
+## v3.1 - 2026-05-03
+
+Symfony 全系依赖 `^7.2` → `^8.0`。详见 [3.1/CHANGELOG.md](3.1/CHANGELOG.md)。
+
 ## v3.0 - 2026-04-26
 
 PHP 8.5 全面升级（PRP-002 ~ PRP-008）：框架替换、依赖升级、Security 重构、语言适配、Migration Guide & Check Script。详见 [3.0/CHANGELOG.md](3.0/CHANGELOG.md)。

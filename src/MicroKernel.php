@@ -38,6 +38,7 @@ use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+use Symfony\Component\Security\Core\Authorization\AccessDecision;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationCredentialsNotFoundException;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -300,14 +301,14 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
     /**
      * Checks if the attributes are granted against the current authentication token and optionally supplied object.
      */
-    public function isGranted(mixed $attributes, mixed $object = null): bool
+    public function isGranted(mixed $attributes, mixed $object = null, ?AccessDecision $accessDecision = null): bool
     {
         if ($this->authorizationChecker === null) {
             return false;
         }
 
         try {
-            return $this->authorizationChecker->isGranted($attributes, $object);
+            return $this->authorizationChecker->isGranted($attributes, $object, $accessDecision);
         } catch (AuthenticationCredentialsNotFoundException $e) {
             mdebug("Authentication credential not found, isGranted will return false. msg = %s", $e->getMessage());
 

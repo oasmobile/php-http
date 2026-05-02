@@ -88,10 +88,6 @@ class StubUser implements UserInterface
     {
         return $this->identifier;
     }
-
-    public function eraseCredentials(): void
-    {
-    }
 }
 
 class AuthenticatorPropertyTest extends TestCase

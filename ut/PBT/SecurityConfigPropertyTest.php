@@ -66,10 +66,6 @@ class StubRefreshUser implements UserInterface
     {
         return $this->identifier;
     }
-
-    public function eraseCredentials(): void
-    {
-    }
 }
 
 class SecurityConfigPropertyTest extends TestCase

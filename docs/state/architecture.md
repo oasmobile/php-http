@@ -86,7 +86,7 @@ src/
 ### 核心组件
 
 - **`AuthenticationPolicyInterface`**：认证策略接口，通过 `getAuthenticator()` 返回 `AuthenticatorInterface` 实例，内置支持 pre_auth / http / form / anonymous 等类型
-- **`AbstractPreAuthenticator`**：模板方法基类，实现 Symfony 7.x `AuthenticatorInterface`，子类只需实现 `getCredentialsFromRequest()` + `authenticateAndGetUser()` 两步
+- **`AbstractPreAuthenticator`**：模板方法基类，实现 Symfony `AuthenticatorInterface`，子类只需实现 `getCredentialsFromRequest()` + `authenticateAndGetUser()` 两步
 - **`FirewallInterface` / `SimpleFirewall`**：按 URL pattern 匹配请求，关联一组 policy
 - **`AccessRuleInterface` / `SimpleAccessRule`**：按 URL pattern + roles 做授权检查，未授权抛 403
 - **`NullEntryPoint`**：默认认证入口点，未认证时抛出 `AccessDeniedHttpException`

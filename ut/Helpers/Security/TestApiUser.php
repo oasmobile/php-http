@@ -52,13 +52,6 @@ class TestApiUser implements UserInterface, \JsonSerializable
     }
     
     /**
-     * Removes sensitive data from the user.
-     */
-    public function eraseCredentials(): void
-    {
-    }
-    
-    /**
      * Specify data which should be serialized to JSON
      *
      * @return mixed data which can be serialized by json_encode

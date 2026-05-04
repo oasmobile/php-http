@@ -95,6 +95,21 @@ $kernel->isGranted('ROLE_ADMIN');
 
 ---
 
+## 认证属性检查
+
+除角色外，`isGranted()` 还支持 Symfony 认证属性：
+
+| 属性 | 含义 |
+|------|------|
+| `IS_AUTHENTICATED_FULLY` | 用户通过完整认证（非 remember-me） |
+| `IS_AUTHENTICATED_REMEMBERED` | 用户通过 remember-me 或完整认证 |
+
+```php
+$kernel->isGranted('IS_AUTHENTICATED_FULLY'); // 完整认证检查
+```
+
+---
+
 ## 自定义 Security Policy
 
 实现自定义认证策略的完整流程。
@@ -208,5 +223,6 @@ $config = [
 $kernel->getToken();              // TokenInterface | null
 $kernel->getToken()->getRoles();  // 所有角色
 $kernel->isGranted("ROLE_ADMIN"); // 角色检查
+$kernel->isGranted("IS_AUTHENTICATED_FULLY"); // 认证状态检查
 $kernel->getUser();               // UserInterface | null
 ```

@@ -1,6 +1,10 @@
 # Changelog
 
-## v3.1 - 2026-05-03
+## v3.1.1 - Hotfix
+
+修复路由子系统编程式注入 API 缺失（ISS-3.0-L01）和 boot 后路由修改静默失效（ISS-3.0-L02）。详见 [3.1/CHANGELOG.md](3.1/CHANGELOG.md)。
+
+## v3.1.0 - 2026-05-03
 
 Symfony 全系依赖 `^7.2` → `^8.0`。详见 [3.1/CHANGELOG.md](3.1/CHANGELOG.md)。
 

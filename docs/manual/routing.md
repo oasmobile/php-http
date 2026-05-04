@@ -102,6 +102,62 @@ component.user.cart:
 
 ---
 
+## Programmatic Route Injection
+
+除 YAML 文件声明外，`MicroKernel` 提供编程式路由注入 API，在 boot 前通过代码注册路由。
+
+### addRoute
+
+注入单条路由：
+
+```php
+use Symfony\Component\Routing\Route;
+
+$kernel->addRoute('health_check', new Route('/health', [
+    '_controller' => 'HealthController::check',
+]));
+```
+
+### addRoutes
+
+批量注入一组路由：
+
+```php
+use Symfony\Component\Routing\RouteCollection;
+use Symfony\Component\Routing\Route;
+
+$routes = new RouteCollection();
+$routes->add('api.users', new Route('/api/users', [
+    '_controller' => 'UserController::list',
+]));
+$routes->add('api.orders', new Route('/api/orders', [
+    '_controller' => 'OrderController::list',
+]));
+
+$kernel->addRoutes($routes);
+```
+
+### 合并顺序
+
+编程式路由在 YAML 路由之后合并到 `RouteCollection`。同名路由按 Symfony 默认语义处理（后入覆盖先入），因此编程式路由会覆盖 YAML 中的同名路由。
+
+### 无 YAML 配置场景
+
+Bootstrap config 中未配置 `routing` 时，仍可通过 `addRoute()` / `addRoutes()` 注入路由。`MicroKernel` 会自动初始化空的路由基础设施并合并编程式路由。
+
+---
+
+## Post-Boot Freeze
+
+boot 完成后，路由表被冻结，所有写操作将抛出 `LogicException`：
+
+- `addRoute()` / `addRoutes()`：MicroKernel 层拦截，抛出 `LogicException('Cannot add routes after the kernel has been booted.')`
+- `getRouter()->getRouteCollection()->add()` / `addCollection()` / `remove()`：`FrozenRouteCollection` 层拦截，抛出 `LogicException('Route collection is frozen after boot. Routes cannot be modified at this point.')`
+
+boot 后的只读操作（`get()`、`all()`、`count()`、`getIterator()`）不受影响，正常返回。
+
+---
+
 ## Caching and Debugging
 
 `oasis/http` 支持路由缓存。缓存的 URL Matcher 文件位于 `cache_dir` 根目录，命名类似 `ProjectUrlMatcher_<hash>.php`。

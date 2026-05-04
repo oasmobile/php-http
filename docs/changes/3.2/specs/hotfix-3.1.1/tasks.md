@@ -208,7 +208,7 @@
     - Ref: Requirement 4, AC 1–4
   - [x] 10.7 Checkpoint: 确认 failing tests 翻转为 pass、缓存基线测试仍 pass、全量测试和静态分析通过；commit
 
-- [-] 11. Manual testing
+- [x] 11. Manual testing
   - [x] 11.1 编程式路由注入端到端验证
     - 使用 `addRoute()` 注入路由，boot 后发送 HTTP 请求，确认路由可达且返回正确 controller 响应
   - [x] 11.2 Boot 后冻结行为验证
@@ -221,9 +221,9 @@
     - 配置 YAML 路由（启用缓存）+ `addRoute()` 注入 Closure controller → boot → 发送请求确认 Closure 路由可达且 YAML 路由也可达
   - [x] 11.6 缓存目录清理后重新 boot 验证
     - 删除缓存目录 → 重新 boot → 确认路由缓存重新生成且路由正常匹配
-  - [-] 11.7 Checkpoint: 确认所有手工测试场景通过；记录测试结果
+  - [x] 11.7 Checkpoint: 确认所有手工测试场景通过；记录测试结果
 
-- [ ] 12. Code review
+- [x] 12. Code review
   - 委托给 `code-reviewer` sub-agent 执行
   - 基于当前分支的 diff 进行 code review
 

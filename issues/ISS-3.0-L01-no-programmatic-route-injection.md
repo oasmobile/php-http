@@ -3,10 +3,10 @@
 | 字段 | 值 |
 |------|-----|
 | Severity | `[P1] major` |
-| Status | `open` |
+| Status | `closed` |
 | Found In | `v3.0` |
-| Fixed In | |
-| Related Test | |
+| Fixed In | `v3.2.0` |
+| Related Test | `ut/Routing/MicroKernelRouteInjectionTest.php`, `ut/Routing/MicroKernelRouteInjectionIntegrationTest.php` |
 
 ---
 
@@ -53,3 +53,4 @@ bootstrap config 应提供与 `middlewares` 等一致的路由注入机制，允
 ## History
 
 - `2026-05-04T08:00Z` `v3.0` [发现] 路由缺少 bootstrap config 级别的编程式注入机制
+- `2026-05-05T00:00Z` `v3.2.0` [修复] 新增 `addRoute()` / `addRoutes()` 编程式路由注入 API

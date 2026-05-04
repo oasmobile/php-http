@@ -126,11 +126,15 @@ class MigrationGuideValidationTest extends TestCase
             }
 
             // (2) Before/After code blocks — expect at least two fenced code blocks,
-            //     or explicit **Before** / **After** labels
+            //     or explicit **Before** / **After** labels.
+            //     For 🟢 (new addition) entries, only **After** is required since
+            //     there is no prior state to show.
+            $isNewAddition = (bool)preg_match('/🟢/u', $title);
             $hasBeforeAfter = (
                 preg_match('/\*\*Before\*\*/i', $body) && preg_match('/\*\*After\*\*/i', $body)
             );
-            if (!$hasBeforeAfter) {
+            $hasAfterOnly = (bool)preg_match('/\*\*After\*\*/i', $body);
+            if (!$hasBeforeAfter && !($isNewAddition && $hasAfterOnly)) {
                 $violations[] = "Entry \"{$title}\": missing Before/After code example pair";
             }
 
@@ -286,8 +290,12 @@ class MigrationGuideValidationTest extends TestCase
         // Extract items from ## Changed and ## Removed sections.
         // Each top-level bullet (- ...) under these sections is a breaking change item.
         // We extract the key identifier from each bullet for coverage checking.
+        //
+        // Sub-sections whose heading contains "验证" or "稳定化" are excluded —
+        // they record validation results, not breaking changes.
         $lines       = explode("\n", $content);
         $inSection   = false;
+        $skipSubSection = false;
         $sectionName = '';
 
         foreach ($lines as $line) {
@@ -295,15 +303,27 @@ class MigrationGuideValidationTest extends TestCase
             if (preg_match('/^##\s+(Changed|Removed|Added)/', $line, $m)) {
                 $sectionName = $m[1];
                 $inSection   = in_array($sectionName, ['Changed', 'Removed'], true);
+                $skipSubSection = false;
                 continue;
             }
             // Stop at next ## heading that is not Changed/Removed
             if (preg_match('/^##\s+/', $line) && $inSection) {
                 $inSection = false;
+                $skipSubSection = false;
                 continue;
             }
 
             if (!$inSection) {
+                continue;
+            }
+
+            // Detect ### sub-section headings; skip validation/stabilization sub-sections
+            if (preg_match('/^###\s+(.+)$/', $line, $m)) {
+                $skipSubSection = (bool)preg_match('/验证|稳定化/u', $m[1]);
+                continue;
+            }
+
+            if ($skipSubSection) {
                 continue;
             }
 
@@ -378,6 +398,14 @@ class MigrationGuideValidationTest extends TestCase
         if (preg_match_all('/\b([A-Z][a-zA-Z]*(?:[A-Z][a-zA-Z]*)+)\b/', $item, $matches)) {
             foreach ($matches[1] as $className) {
                 $keywords[] = $className;
+            }
+        }
+
+        // Multi-word English phrases (e.g. "Symfony Routing", "Service Provider")
+        // — two or more consecutive capitalized words
+        if (preg_match_all('/\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+)+)\b/', $item, $matches)) {
+            foreach ($matches[1] as $phrase) {
+                $keywords[] = $phrase;
             }
         }
 

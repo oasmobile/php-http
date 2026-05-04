@@ -47,6 +47,7 @@ $config = [
         ],
         'access_rules'   => [
             ['pattern' => '^/integration/secured/admin', 'roles' => 'ROLE_ADMIN'],
+            ['pattern' => '^/integration/secured/authenticated', 'roles' => 'IS_AUTHENTICATED_FULLY'],
             ['pattern' => '^/integration/secured/parent', 'roles' => 'ROLE_PARENT'],
             ['pattern' => '^/integration/secured/child', 'roles' => 'ROLE_CHILD'],
             ['pattern' => '^/integration/secured', 'roles' => 'ROLE_USER'],

@@ -94,7 +94,7 @@ src/
 - **`FirewallInterface` / `SimpleFirewall`**：按 URL pattern 匹配请求，关联一组 policy
 - **`AccessRuleInterface` / `SimpleAccessRule`**：按 URL pattern + roles 做授权检查，未授权抛 403
 - **`NullEntryPoint`**：默认认证入口点，未认证时抛出 `AccessDeniedHttpException`
-- **Role Hierarchy**：角色继承关系，通过 Symfony `RoleHierarchy` + `RoleHierarchyVoter` + `AccessDecisionManager` 实现
+- **Role Hierarchy**：角色继承关系，通过 Symfony `RoleHierarchy` + `RoleHierarchyVoter` + `AuthenticatedVoter` + `AccessDecisionManager` 实现；`AuthenticatedVoter` 负责处理 `IS_AUTHENTICATED_FULLY` 等认证属性判断
 
 ### 认证流程
 

@@ -23,6 +23,11 @@ integration.secured.child:
     defaults:
         _controller: IntegrationController::securedChild
 
+integration.secured.authenticated:
+    path: /integration/secured/authenticated
+    defaults:
+        _controller: IntegrationController::securedAuthenticated
+
 integration.public:
     path: /integration/public
     defaults:

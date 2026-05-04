@@ -83,6 +83,41 @@ class SecurityAuthenticationFlowIntegrationTest extends WebTestCase
     // ---------------------------------------------------------------
 
     /**
+     * ISS-3.2-L01: Authenticated user accessing IS_AUTHENTICATED_FULLY route → 200.
+     *
+     * Verifies that AccessDecisionManager includes AuthenticatedVoter so that
+     * IS_AUTHENTICATED_FULLY is correctly evaluated for authenticated users.
+     */
+    public function testIsAuthenticatedFullyGrantedForAuthenticatedUser()
+    {
+        $client = $this->createClient();
+        $client->request('GET', '/integration/secured/authenticated', ['sig' => 'abcd']);
+        $response = $client->getResponse();
+
+        $this->assertEquals(Response::HTTP_OK, $response->getStatusCode(), $response->getContent());
+
+        $json = json_decode($response->getContent(), true);
+        $this->assertTrue(is_array($json));
+        $this->assertStringContainsString('securedAuthenticated', $json['called']);
+        $this->assertEquals('admin', $json['user']);
+        $this->assertTrue($json['authenticated']);
+    }
+
+    /**
+     * ISS-3.2-L01: Unauthenticated request to IS_AUTHENTICATED_FULLY route → 403.
+     */
+    public function testIsAuthenticatedFullyDeniedForUnauthenticatedUser()
+    {
+        $client = $this->createClient();
+        $client->request('GET', '/integration/secured/authenticated');
+        $response = $client->getResponse();
+
+        $this->assertEquals(Response::HTTP_FORBIDDEN, $response->getStatusCode());
+    }
+
+    // ---------------------------------------------------------------
+
+    /**
      * Request without sig → BadCredentialsException → NullEntryPoint → 403.
      */
     public function testNoSigResultsIn403()

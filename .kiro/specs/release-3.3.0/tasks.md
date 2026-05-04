@@ -147,7 +147,7 @@
     - _Requirements: R9-AC3, R9-AC4, R9-AC5_
   - [x] 5.4 Checkpoint: 运行全量测试，确认 Error Handling 场景测试全部通过、回归测试全部通过（如有）、现有测试无回归。Commit message: `test(error-handling): behavior audit + scenario tests for release 3.3.0`
 
-- [-] 6. Twig 模块：行为审计 + 场景测试 + 修复
+- [x] 6. Twig 模块：行为审计 + 场景测试 + 修复
   - [x] 6.1 编写 Twig 场景测试（`tests/Twig/TwigScenarioTest.php`）
     - 继承 `ScenarioTestCase`
     - `testTwigTemplateRendering`：twig config + template path → boot → controller 渲染模板 → response body 包含渲染内容
@@ -169,33 +169,33 @@
     - 如审计发现 missing-breaking / intentionally-removed → 文档化或确认已标注
     - 如审计未发现需修复的能力 → 跳过本 sub-task
     - _Requirements: R11-AC3, R11-AC4, R11-AC5_
-  - [-] 6.4 Checkpoint: 运行全量测试，确认 Twig 场景测试全部通过、回归测试全部通过（如有）、现有测试无回归。Commit message: `test(twig): behavior audit + scenario tests for release 3.3.0`
+  - [x] 6.4 Checkpoint: 运行全量测试，确认 Twig 场景测试全部通过、回归测试全部通过（如有）、现有测试无回归。Commit message: `test(twig): behavior audit + scenario tests for release 3.3.0`
 
-- [ ] 7. Cookie 模块：行为审计 + 场景测试 + 修复
-  - [ ] 7.1 编写 Cookie 场景测试（`tests/Cookie/CookieScenarioTest.php`）
+- [x] 7. Cookie 模块：行为审计 + 场景测试 + 修复
+  - [x] 7.1 编写 Cookie 场景测试（`tests/Cookie/CookieScenarioTest.php`）
     - 继承 `ScenarioTestCase`
     - `testCookieWriting`：controller 添加 cookie → response `Set-Cookie` header 包含 cookie
     - `testResponseCookieContainerInjection`：`SimpleCookieProvider` 配置 → `ResponseCookieContainer` 可作为 controller 参数
     - `testMultipleCookies`：controller 添加多个 cookie → 所有 cookie 出现在 response headers
     - 低风险模块：优先引用现有测试（`@see` 注释），仅补充现有测试未覆盖的场景视角
     - _Requirements: R14-AC1, R14-AC2, R14-AC3_
-  - [ ] 7.2 执行 Cookie 模块行为审计
+  - [x] 7.2 执行 Cookie 模块行为审计
     - 基于 `oasis/http` v2.5.0（tag `v2.5.0`）+ Silex 2.3.0 的整体实现作为审计基准
     - 枚举 v2.5.0 Cookie 相关代码暴露的 API_Surface（`SimpleCookieProvider` 注册、`ResponseCookieContainer` injection、cookie writing on `KernelEvents::RESPONSE`、cookie container lifecycle）
     - **接口存在性审计**：逐项对比 v3.x `SimpleCookieProvider` 实现，分类为 covered / missing-non-breaking / missing-breaking
     - **行为等价性审计**：对比 v2.5.0 和 v3.x 的运行时行为差异（event listener 注册方式、cookie 写入时机、container 生命周期管理等）
     - 产出 Audit_Matrix 到 `.kiro/specs/release-3.3.0/cookie-audit-matrix.md`
     - _Requirements: R13-AC1, R13-AC2, R13-AC6_
-  - [ ] 7.3 修复 Cookie 模块缺失能力（如有）+ 回归测试
+  - [x] 7.3 修复 Cookie 模块缺失能力（如有）+ 回归测试
     - 如审计发现 missing-non-breaking 能力 → 修复代码恢复到 Silex 等价行为
     - 如有修复 → 编写 `tests/Cookie/CookieFixRegressionTest.php` 专项回归测试
     - 如审计发现 missing-breaking / intentionally-removed → 文档化或确认已标注
     - 如审计未发现需修复的能力 → 跳过本 sub-task
     - _Requirements: R13-AC3, R13-AC4, R13-AC5_
-  - [ ] 7.4 Checkpoint: 运行全量测试，确认 Cookie 场景测试全部通过、回归测试全部通过（如有）、现有测试无回归。Commit message: `test(cookie): behavior audit + scenario tests for release 3.3.0`
+  - [x] 7.4 Checkpoint: 运行全量测试，确认 Cookie 场景测试全部通过、回归测试全部通过（如有）、现有测试无回归。Commit message: `test(cookie): behavior audit + scenario tests for release 3.3.0`
 
-- [ ] 8. MicroKernel 聚合层：汇总审计 + 场景测试
-  - [ ] 8.1 编写 MicroKernel 聚合层场景测试（`tests/Integration/MicroKernelAggregationScenarioTest.php`）
+- [-] 8. MicroKernel 聚合层：汇总审计 + 场景测试
+  - [x] 8.1 编写 MicroKernel 聚合层场景测试（`tests/Integration/MicroKernelAggregationScenarioTest.php`）
     - 继承 `ScenarioTestCase`
     - `testFullPipelineTraversal`：routing + security + CORS + middleware + view handler + error handler → 完整 pipeline 产出预期 response
     - `testMinimalConfiguration`：仅 `routing` config → 基本 request-response 正常
@@ -204,7 +204,7 @@
     - `testAddExtraParameters`：添加 extra parameters → `getParameter()` 返回添加的值
     - `testSlowRequestDetection`：controller 超过慢请求阈值 → 慢请求日志行为
     - _Requirements: R16-AC1, R16-AC2, R16-AC3, R16-AC4, R16-AC5, R16-AC6_
-  - [ ] 8.2 执行 MicroKernel 聚合层汇总审计
+  - [x] 8.2 执行 MicroKernel 聚合层汇总审计
     - 基于 `oasis/http` v2.5.0（tag `v2.5.0`）的 `SilexKernel` 作为审计基准
     - 枚举 v2.5.0 `SilexKernel` public API methods，逐项对比 v3.x `MicroKernel` 对应方法的行为等价性
     - 验证请求处理 pipeline 顺序：ELB/CloudFront trusted proxy → Routing (32) → CORS preflight (20) → Firewall (8) → Access rule (7) → user before middleware → controller → View Handler chain → after middleware → Response
@@ -214,13 +214,13 @@
     - 如发现模块审计遗漏的 gap → 按处置策略分类处置
     - 产出 Audit_Matrix 到 `.kiro/specs/release-3.3.0/microkernel-aggregation-audit-matrix.md`
     - _Requirements: R15-AC1, R15-AC2, R15-AC3, R15-AC4, R15-AC5, R15-AC6_
-  - [ ] 8.3 修复聚合层缺失能力（如有）+ 回归测试
+  - [x] 8.3 修复聚合层缺失能力（如有）+ 回归测试
     - 如汇总审计发现 missing-non-breaking 能力 → 修复代码
     - 如有修复 → 编写 `tests/Integration/MicroKernelAggregationFixRegressionTest.php` 专项回归测试
     - 如审计发现 missing-breaking / intentionally-removed → 文档化或确认已标注
     - 如审计未发现需修复的能力 → 跳过本 sub-task
     - _Requirements: R15-AC5_
-  - [ ] 8.4 Checkpoint: 运行全量测试，确认聚合层场景测试全部通过、回归测试全部通过（如有）、现有测试无回归。Commit message: `test(microkernel): aggregation audit + scenario tests for release 3.3.0`
+  - [-] 8.4 Checkpoint: 运行全量测试，确认聚合层场景测试全部通过、回归测试全部通过（如有）、现有测试无回归。Commit message: `test(microkernel): aggregation audit + scenario tests for release 3.3.0`
 
 
 - [ ] 9. 文档更新 + Audit_Matrix 归档

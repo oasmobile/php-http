@@ -6,6 +6,7 @@ namespace Oasis\Mlib\Http\Test\Twig;
 use Oasis\Mlib\Http\MicroKernel;
 use Oasis\Mlib\Http\Test\Helpers\RouteCacheCleaner;
 use Oasis\Mlib\Http\Test\Helpers\WebTestCase;
+use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 
 /**
@@ -32,9 +33,7 @@ class TwigServiceProviderTest extends WebTestCase
         return require __DIR__ . "/app.twig.php";
     }
 
-    /**
-     * @runInSeparateProcess
-     */
+    #[RunInSeparateProcess]
     public function testBasicTemplate()
     {
         $client = $this->createClient();
@@ -63,9 +62,8 @@ class TwigServiceProviderTest extends WebTestCase
     /**
      * Globals: the 'http' global is always registered (pointing to the kernel).
      * Verify it is a MicroKernel instance.
-     *
-     * @runInSeparateProcess
      */
+    #[RunInSeparateProcess]
     public function testGlobalHttpIsRegistered()
     {
         /** @var MicroKernel $app */
@@ -80,9 +78,8 @@ class TwigServiceProviderTest extends WebTestCase
     /**
      * Globals: custom global variables from configuration are accessible in Twig.
      * The 'helper' global is a TwigHelper instance.
-     *
-     * @runInSeparateProcess
      */
+    #[RunInSeparateProcess]
     public function testGlobalCustomVariableRegistered()
     {
         /** @var MicroKernel $app */
@@ -96,9 +93,8 @@ class TwigServiceProviderTest extends WebTestCase
 
     /**
      * Globals: when globals config is empty array, only the default 'http' global is present.
-     *
-     * @runInSeparateProcess
      */
+    #[RunInSeparateProcess]
     public function testGlobalEmptyConfig()
     {
         // Create a kernel with empty globals
@@ -126,9 +122,8 @@ class TwigServiceProviderTest extends WebTestCase
 
     /**
      * Globals: scalar global variables are correctly registered.
-     *
-     * @runInSeparateProcess
      */
+    #[RunInSeparateProcess]
     public function testGlobalScalarVariables()
     {
         $config = [
@@ -159,9 +154,8 @@ class TwigServiceProviderTest extends WebTestCase
     /**
      * asset_base: the asset() Twig function prepends asset_base to the file path.
      * Template a.twig calls {{ asset('/pics/cool.jpg', "3.0") }}.
-     *
-     * @runInSeparateProcess
      */
+    #[RunInSeparateProcess]
     public function testAssetBaseInTemplate()
     {
         $client = $this->createClient();
@@ -174,9 +168,8 @@ class TwigServiceProviderTest extends WebTestCase
 
     /**
      * asset_base: the asset() function with empty version omits the query string.
-     *
-     * @runInSeparateProcess
      */
+    #[RunInSeparateProcess]
     public function testAssetFunctionWithoutVersion()
     {
         /** @var MicroKernel $app */
@@ -190,9 +183,8 @@ class TwigServiceProviderTest extends WebTestCase
 
     /**
      * asset_base: the asset() function with a version appends ?v=<version>.
-     *
-     * @runInSeparateProcess
      */
+    #[RunInSeparateProcess]
     public function testAssetFunctionWithVersion()
     {
         /** @var MicroKernel $app */
@@ -205,9 +197,8 @@ class TwigServiceProviderTest extends WebTestCase
 
     /**
      * asset_base: when asset_base is empty string (default), asset paths are relative.
-     *
-     * @runInSeparateProcess
      */
+    #[RunInSeparateProcess]
     public function testAssetBaseEmptyDefault()
     {
         $config = [
@@ -231,9 +222,8 @@ class TwigServiceProviderTest extends WebTestCase
     /**
      * cache_dir absent: when cache_dir is not configured (defaults to null),
      * Twig should still work without caching.
-     *
-     * @runInSeparateProcess
      */
+    #[RunInSeparateProcess]
     public function testNoCacheDirTemplateRendering()
     {
         $cacheDir = static::createTempCacheDir();
@@ -249,9 +239,8 @@ class TwigServiceProviderTest extends WebTestCase
 
     /**
      * cache_dir absent: Twig environment should not have cache enabled.
-     *
-     * @runInSeparateProcess
      */
+    #[RunInSeparateProcess]
     public function testNoCacheDirTwigHasNoCache()
     {
         $cacheDir = static::createTempCacheDir();
@@ -265,9 +254,8 @@ class TwigServiceProviderTest extends WebTestCase
 
     /**
      * cache_dir present: Twig environment should have cache enabled.
-     *
-     * @runInSeparateProcess
      */
+    #[RunInSeparateProcess]
     public function testCacheDirSetInTwig()
     {
         /** @var MicroKernel $app */
@@ -279,9 +267,8 @@ class TwigServiceProviderTest extends WebTestCase
 
     /**
      * getTwig() returns null when twig config is absent.
-     *
-     * @runInSeparateProcess
      */
+    #[RunInSeparateProcess]
     public function testGetTwigReturnsNullWhenNotConfigured()
     {
         $config = [
@@ -299,9 +286,8 @@ class TwigServiceProviderTest extends WebTestCase
 
     /**
      * getTwig() returns a Twig\Environment when twig config is present.
-     *
-     * @runInSeparateProcess
      */
+    #[RunInSeparateProcess]
     public function testGetTwigReturnsTwigEnvironment()
     {
         /** @var MicroKernel $app */
@@ -314,9 +300,8 @@ class TwigServiceProviderTest extends WebTestCase
 
     /**
      * strict_variables: enabled by default when not explicitly configured.
-     *
-     * @runInSeparateProcess
      */
+    #[RunInSeparateProcess]
     public function testStrictVariablesEnabledByDefault()
     {
         $config = [
@@ -338,9 +323,8 @@ class TwigServiceProviderTest extends WebTestCase
 
     /**
      * strict_variables: disabled when explicitly configured to false.
-     *
-     * @runInSeparateProcess
      */
+    #[RunInSeparateProcess]
     public function testStrictVariablesDisabledWhenConfigured()
     {
         $config = [
@@ -362,9 +346,8 @@ class TwigServiceProviderTest extends WebTestCase
 
     /**
      * auto_reload: enabled in debug mode when auto_reload is not configured (null → auto-detect).
-     *
-     * @runInSeparateProcess
      */
+    #[RunInSeparateProcess]
     public function testAutoReloadEnabledInDebugMode()
     {
         $config = [
@@ -387,9 +370,8 @@ class TwigServiceProviderTest extends WebTestCase
 
     /**
      * auto_reload: disabled in non-debug mode when auto_reload is not configured (null → auto-detect).
-     *
-     * @runInSeparateProcess
      */
+    #[RunInSeparateProcess]
     public function testAutoReloadDisabledInNonDebugMode()
     {
         $config = [
@@ -412,9 +394,8 @@ class TwigServiceProviderTest extends WebTestCase
 
     /**
      * auto_reload: explicit configuration overrides auto-detect logic.
-     *
-     * @runInSeparateProcess
      */
+    #[RunInSeparateProcess]
     public function testAutoReloadExplicitOverride()
     {
         // Case 1: debug=true but auto_reload explicitly set to false

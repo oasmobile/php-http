@@ -6,6 +6,7 @@ namespace Oasis\Mlib\Http\Test\Cors;
 use Oasis\Mlib\Http\ServiceProviders\Cors\CrossOriginResourceSharingProvider;
 use Oasis\Mlib\Http\Test\Helpers\RouteCacheCleaner;
 use Oasis\Mlib\Http\Test\Helpers\WebTestCase;
+use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 
@@ -36,9 +37,7 @@ class CrossOriginResourceSharingAdvancedTest extends WebTestCase
         return require __DIR__ . '/app.cors-advanced.php';
     }
     
-    /**
-     * @runInSeparateProcess
-     */
+    #[RunInSeparateProcess]
     public function testPreflightWhenAccessIsDeniedRoute()
     {
         $origin   = 'http://baidu.com';
@@ -79,9 +78,8 @@ class CrossOriginResourceSharingAdvancedTest extends WebTestCase
      * The advanced app has only one strategy: pattern /secured/madmin/.*, specific origins,
      * credentials_allowed=false (default), no headers_exposed.
      * Covers: onResponse() normal-request path with non-wildcard origin, no credentials.
-     *
-     * @runInSeparateProcess
      */
+    #[RunInSeparateProcess]
     public function testNormalRequestToSecuredCorsRoute()
     {
         $origin = 'http://baidu.com';
@@ -119,9 +117,8 @@ class CrossOriginResourceSharingAdvancedTest extends WebTestCase
      * Normal request to a secured CORS route WITHOUT Origin header.
      * Covers: onPreRouting() early return when no Origin → activeStrategy stays null,
      *         onResponse() skips all CORS processing.
-     *
-     * @runInSeparateProcess
      */
+    #[RunInSeparateProcess]
     public function testNormalRequestWithoutOriginToSecuredRoute()
     {
         $client = $this->createClient();
@@ -144,9 +141,8 @@ class CrossOriginResourceSharingAdvancedTest extends WebTestCase
     /**
      * Preflight request with disallowed origin on the advanced (secured) app.
      * Covers: onResponse() preflight path — isOriginAllowed() returns false.
-     *
-     * @runInSeparateProcess
      */
+    #[RunInSeparateProcess]
     public function testPreflightWithDisallowedOriginOnSecuredRoute()
     {
         $client = $this->createClient();
@@ -168,9 +164,8 @@ class CrossOriginResourceSharingAdvancedTest extends WebTestCase
     /**
      * Normal request with disallowed origin on the advanced (secured) app.
      * Covers: onResponse() normal-request path — isOriginAllowed() returns false for disallowed origin.
-     *
-     * @runInSeparateProcess
      */
+    #[RunInSeparateProcess]
     public function testNormalRequestWithDisallowedOriginOnSecuredRoute()
     {
         $client = $this->createClient();

@@ -17,13 +17,13 @@ class GroupUrlGeneratorTest extends TestCase
 
     public function testGenerateReturnsImmediatelyWhenFirstGeneratorSucceeds()
     {
-        $gen1 = $this->getMockBuilder(UrlGeneratorInterface::class)->getMock();
+        $gen1 = $this->createMock(UrlGeneratorInterface::class);
         $gen1->expects($this->once())
              ->method('generate')
              ->with('home', [], UrlGeneratorInterface::ABSOLUTE_PATH)
              ->willReturn('/home');
 
-        $gen2 = $this->getMockBuilder(UrlGeneratorInterface::class)->getMock();
+        $gen2 = $this->createMock(UrlGeneratorInterface::class);
         $gen2->expects($this->never())
              ->method('generate');
 
@@ -39,12 +39,12 @@ class GroupUrlGeneratorTest extends TestCase
 
     public function testGenerateFallsBackToNextGeneratorOnRouteNotFound()
     {
-        $gen1 = $this->getMockBuilder(UrlGeneratorInterface::class)->getMock();
+        $gen1 = $this->createMock(UrlGeneratorInterface::class);
         $gen1->expects($this->once())
              ->method('generate')
              ->willThrowException(new RouteNotFoundException());
 
-        $gen2 = $this->getMockBuilder(UrlGeneratorInterface::class)->getMock();
+        $gen2 = $this->createMock(UrlGeneratorInterface::class);
         $gen2->expects($this->once())
              ->method('generate')
              ->with('about', ['id' => 1], UrlGeneratorInterface::ABSOLUTE_PATH)
@@ -62,12 +62,12 @@ class GroupUrlGeneratorTest extends TestCase
 
     public function testGenerateThrowsExceptionWhenAllGeneratorsFail()
     {
-        $gen1 = $this->getMockBuilder(UrlGeneratorInterface::class)->getMock();
+        $gen1 = $this->createMock(UrlGeneratorInterface::class);
         $gen1->expects($this->once())
              ->method('generate')
              ->willThrowException(new RouteNotFoundException('not found 1'));
 
-        $gen2 = $this->getMockBuilder(UrlGeneratorInterface::class)->getMock();
+        $gen2 = $this->createMock(UrlGeneratorInterface::class);
         $gen2->expects($this->once())
              ->method('generate')
              ->willThrowException(new RouteNotFoundException('not found 2'));
@@ -96,7 +96,7 @@ class GroupUrlGeneratorTest extends TestCase
 
     public function testGenerateRethrowsLastGeneratorException()
     {
-        $gen = $this->getMockBuilder(UrlGeneratorInterface::class)->getMock();
+        $gen = $this->createMock(UrlGeneratorInterface::class);
         $gen->expects($this->once())
             ->method('generate')
             ->willThrowException(new RouteNotFoundException('specific route error'));
@@ -119,7 +119,7 @@ class GroupUrlGeneratorTest extends TestCase
     {
         $context = new RequestContext('/app');
 
-        $gen1 = $this->getMockBuilder(UrlGeneratorInterface::class)->getMock();
+        $gen1 = $this->createMock(UrlGeneratorInterface::class);
         $gen1->expects($this->once())
              ->method('setContext')
              ->with($this->identicalTo($context));
@@ -136,7 +136,7 @@ class GroupUrlGeneratorTest extends TestCase
 
     public function testGenerateDoesNotSetContextOnSubGeneratorsWhenContextNotExplicitlySet()
     {
-        $gen1 = $this->getMockBuilder(UrlGeneratorInterface::class)->getMock();
+        $gen1 = $this->createMock(UrlGeneratorInterface::class);
         $gen1->expects($this->never())
              ->method('setContext');
         $gen1->expects($this->once())

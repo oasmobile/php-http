@@ -20,13 +20,13 @@ class GroupUrlMatcherTest extends TestCase
     {
         $context = new RequestContext();
 
-        $matcher1 = $this->getMockBuilder(UrlMatcherInterface::class)->getMock();
+        $matcher1 = $this->createMock(UrlMatcherInterface::class);
         $matcher1->expects($this->once())
                  ->method('match')
                  ->with('/foo')
                  ->willReturn(['_controller' => 'FooController::index']);
 
-        $matcher2 = $this->getMockBuilder(UrlMatcherInterface::class)->getMock();
+        $matcher2 = $this->createMock(UrlMatcherInterface::class);
         $matcher2->expects($this->never())
                  ->method('match');
 
@@ -44,13 +44,13 @@ class GroupUrlMatcherTest extends TestCase
     {
         $context = new RequestContext();
 
-        $matcher1 = $this->getMockBuilder(UrlMatcherInterface::class)->getMock();
+        $matcher1 = $this->createMock(UrlMatcherInterface::class);
         $matcher1->expects($this->once())
                  ->method('match')
                  ->with('/bar')
                  ->willThrowException(new ResourceNotFoundException());
 
-        $matcher2 = $this->getMockBuilder(UrlMatcherInterface::class)->getMock();
+        $matcher2 = $this->createMock(UrlMatcherInterface::class);
         $matcher2->expects($this->once())
                  ->method('match')
                  ->with('/bar')
@@ -70,12 +70,12 @@ class GroupUrlMatcherTest extends TestCase
     {
         $context = new RequestContext();
 
-        $matcher1 = $this->getMockBuilder(UrlMatcherInterface::class)->getMock();
+        $matcher1 = $this->createMock(UrlMatcherInterface::class);
         $matcher1->expects($this->once())
                  ->method('match')
                  ->willThrowException(new ResourceNotFoundException('not found 1'));
 
-        $matcher2 = $this->getMockBuilder(UrlMatcherInterface::class)->getMock();
+        $matcher2 = $this->createMock(UrlMatcherInterface::class);
         $matcher2->expects($this->once())
                  ->method('match')
                  ->willThrowException(new ResourceNotFoundException('not found 2'));
@@ -107,7 +107,7 @@ class GroupUrlMatcherTest extends TestCase
     {
         $context = new RequestContext();
 
-        $matcher = $this->getMockBuilder(UrlMatcherInterface::class)->getMock();
+        $matcher = $this->createMock(UrlMatcherInterface::class);
         $matcher->expects($this->once())
                 ->method('match')
                 ->willThrowException(new ResourceNotFoundException('specific message'));
@@ -130,7 +130,7 @@ class GroupUrlMatcherTest extends TestCase
     {
         $context = new RequestContext();
 
-        $matcher = $this->getMockBuilder(UrlMatcherInterface::class)->getMock();
+        $matcher = $this->createMock(UrlMatcherInterface::class);
         $matcher->expects($this->once())
                 ->method('match')
                 ->with('/hello')

@@ -16,7 +16,7 @@ class CacheableRouterUrlMatcherWrapperTest extends TestCase
 
     public function testMatchDelegatesToInnerMatcher()
     {
-        $inner = $this->getMockBuilder(UrlMatcherInterface::class)->getMock();
+        $inner = $this->createMock(UrlMatcherInterface::class);
         $inner->expects($this->once())
               ->method('match')
               ->with('/foo')
@@ -38,7 +38,7 @@ class CacheableRouterUrlMatcherWrapperTest extends TestCase
 
     public function testMatchDoesNotModifyControllerWithoutDoubleColon()
     {
-        $inner = $this->getMockBuilder(UrlMatcherInterface::class)->getMock();
+        $inner = $this->createMock(UrlMatcherInterface::class);
         $inner->expects($this->once())
               ->method('match')
               ->willReturn(['_controller' => 'simple_controller']);
@@ -59,7 +59,7 @@ class CacheableRouterUrlMatcherWrapperTest extends TestCase
         $existingClass = 'PHPUnit\\Framework\\TestCase';
         $controller    = $existingClass . '::someMethod';
 
-        $inner = $this->getMockBuilder(UrlMatcherInterface::class)->getMock();
+        $inner = $this->createMock(UrlMatcherInterface::class);
         $inner->expects($this->once())
               ->method('match')
               ->willReturn(['_controller' => $controller]);
@@ -79,7 +79,7 @@ class CacheableRouterUrlMatcherWrapperTest extends TestCase
         // NonExistentController does not exist, but with namespace prefix it should
         // We need a class that exists under a known namespace
         // Use TestCase as the "resolved" class: namespace = 'PHPUnit\Framework', class = 'TestCase'
-        $inner = $this->getMockBuilder(UrlMatcherInterface::class)->getMock();
+        $inner = $this->createMock(UrlMatcherInterface::class);
         $inner->expects($this->once())
               ->method('match')
               ->willReturn(['_controller' => 'TestCase::someMethod']);
@@ -96,7 +96,7 @@ class CacheableRouterUrlMatcherWrapperTest extends TestCase
 
     public function testMatchUsesFirstMatchingNamespace()
     {
-        $inner = $this->getMockBuilder(UrlMatcherInterface::class)->getMock();
+        $inner = $this->createMock(UrlMatcherInterface::class);
         $inner->expects($this->once())
               ->method('match')
               ->willReturn(['_controller' => 'TestCase::run']);
@@ -117,7 +117,7 @@ class CacheableRouterUrlMatcherWrapperTest extends TestCase
 
     public function testMatchLeavesControllerUnchangedWhenNoNamespaceResolves()
     {
-        $inner = $this->getMockBuilder(UrlMatcherInterface::class)->getMock();
+        $inner = $this->createMock(UrlMatcherInterface::class);
         $inner->expects($this->once())
               ->method('match')
               ->willReturn(['_controller' => 'TotallyFakeController::action']);
@@ -137,7 +137,7 @@ class CacheableRouterUrlMatcherWrapperTest extends TestCase
 
     public function testMatchLeavesControllerUnchangedWhenNamespacesEmpty()
     {
-        $inner = $this->getMockBuilder(UrlMatcherInterface::class)->getMock();
+        $inner = $this->createMock(UrlMatcherInterface::class);
         $inner->expects($this->once())
               ->method('match')
               ->willReturn(['_controller' => 'FakeController::action']);
@@ -154,7 +154,7 @@ class CacheableRouterUrlMatcherWrapperTest extends TestCase
 
     public function testMatchHandlesNamespaceWithTrailingBackslash()
     {
-        $inner = $this->getMockBuilder(UrlMatcherInterface::class)->getMock();
+        $inner = $this->createMock(UrlMatcherInterface::class);
         $inner->expects($this->once())
               ->method('match')
               ->willReturn(['_controller' => 'TestCase::someMethod']);
@@ -174,7 +174,7 @@ class CacheableRouterUrlMatcherWrapperTest extends TestCase
     {
         $callable = function () { return 'hello'; };
 
-        $inner = $this->getMockBuilder(UrlMatcherInterface::class)->getMock();
+        $inner = $this->createMock(UrlMatcherInterface::class);
         $inner->expects($this->once())
               ->method('match')
               ->willReturn(['_controller' => $callable]);
@@ -193,7 +193,7 @@ class CacheableRouterUrlMatcherWrapperTest extends TestCase
     {
         $context = new RequestContext('/app');
 
-        $inner = $this->getMockBuilder(UrlMatcherInterface::class)->getMock();
+        $inner = $this->createMock(UrlMatcherInterface::class);
         $inner->expects($this->once())
               ->method('setContext')
               ->with($this->identicalTo($context));
@@ -206,7 +206,7 @@ class CacheableRouterUrlMatcherWrapperTest extends TestCase
     {
         $context = new RequestContext('/app');
 
-        $inner = $this->getMockBuilder(UrlMatcherInterface::class)->getMock();
+        $inner = $this->createMock(UrlMatcherInterface::class);
         $inner->expects($this->once())
               ->method('getContext')
               ->willReturn($context);

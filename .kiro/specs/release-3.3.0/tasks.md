@@ -44,8 +44,8 @@
   - [x] 1.5 Checkpoint: 运行 `php vendor/bin/phpunit --testsuite security`（或全量测试），确认 Security 场景测试全部通过、回归测试全部通过（如有）、现有测试无回归。Commit message: `test(security): behavior audit + scenario tests for release 3.3.0`
 
 
-- [ ] 2. Routing 模块：行为审计 + 场景测试 + 修复
-  - [ ] 2.1 编写 Routing 场景测试（`tests/Routing/RoutingScenarioTest.php`）
+- [x] 2. Routing 模块：行为审计 + 场景测试 + 修复
+  - [x] 2.1 编写 Routing 场景测试（`tests/Routing/RoutingScenarioTest.php`）
     - 继承 `ScenarioTestCase`
     - `testYamlRouteLoadingAndMatching`：`routing.path` → boot → 发请求 → 正确 controller 被调用
     - `testProgrammaticRouteInjection`：`addRoute()` before boot → 注入路由可匹配
@@ -56,21 +56,21 @@
     - `testRouteCacheBehavior`：`cache_dir` → cached matcher 创建 → 复用
     - `testUndefinedRoute`：请求未定义路径 → 404
     - _Requirements: R4-AC1, R4-AC2, R4-AC3, R4-AC4, R4-AC5, R4-AC6, R4-AC7, R4-AC8_
-  - [ ] 2.2 执行 Routing 模块行为审计
+  - [x] 2.2 执行 Routing 模块行为审计
     - 基于 `oasis/http` v2.5.0（tag `v2.5.0`）+ Silex 2.3.0 的整体实现作为审计基准
     - 枚举 v2.5.0 Routing 相关代码暴露的 API_Surface（`SilexKernel` 中的路由注册、YAML route loading、route parameter replacement、route caching、URL matching、URL generation）
     - **接口存在性审计**：逐项对比 v3.x `CacheableRouterProvider` 实现，分类为 covered / missing-non-breaking / missing-breaking
     - **行为等价性审计**：对比 v2.5.0 和 v3.x 的运行时行为差异（route matching 逻辑、cache 机制、parameter replacement 时机、route collection 操作语义等）
     - 产出 Audit_Matrix 到 `.kiro/specs/release-3.3.0/routing-audit-matrix.md`
     - _Requirements: R3-AC1, R3-AC2, R3-AC6_
-  - [ ] 2.3 修复 Routing 模块缺失能力（如有）+ 回归测试
+  - [x] 2.3 修复 Routing 模块缺失能力（如有）+ 回归测试
     - 如审计发现 missing-non-breaking 能力 → 修复代码恢复到 Silex 等价行为
     - 如有修复 → 编写 `tests/Routing/RoutingFixRegressionTest.php` 专项回归测试
     - 如审计发现 missing-breaking 能力 → 文档化到 `docs/manual/migration-v3.md`
     - 如审计发现 intentionally-removed 能力 → 确认 Migration_Guide 已标注
     - 如审计未发现需修复的能力 → 跳过本 sub-task
     - _Requirements: R3-AC3, R3-AC4, R3-AC5_
-  - [ ] 2.4 Checkpoint: 运行全量测试，确认 Routing 场景测试全部通过、回归测试全部通过（如有）、现有测试无回归。Commit message: `test(routing): behavior audit + scenario tests for release 3.3.0`
+  - [x] 2.4 Checkpoint: 运行全量测试，确认 Routing 场景测试全部通过、回归测试全部通过（如有）、现有测试无回归。Commit message: `test(routing): behavior audit + scenario tests for release 3.3.0`
 
 - [ ] 3. Middleware 模块：行为审计 + 场景测试 + 修复
   - [ ] 3.1 编写 Middleware 场景测试（`tests/Middlewares/MiddlewareScenarioTest.php`）

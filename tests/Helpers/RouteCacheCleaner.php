@@ -41,6 +41,7 @@ trait RouteCacheCleaner
     /**
      * @afterClass
      */
+    #[\PHPUnit\Framework\Attributes\AfterClass]
     public static function cleanUpTempCacheDir(): void
     {
         if (self::$tempCacheDir !== null && is_dir(self::$tempCacheDir)) {

@@ -36,6 +36,8 @@
             <file>tests/ErrorHandlers/WrappedExceptionInfoTest.php</file>
             <file>tests/ErrorHandlers/ExceptionWrapperTest.php</file>
             <file>tests/ErrorHandlers/JsonErrorHandlerTest.php</file>
+            <file>tests/ErrorHandlers/ErrorHandlerScenarioTest.php</file>
+            <file>tests/ErrorHandlers/ErrorHandlerFixRegressionTest.php</file>
         </testsuite>
         <testsuite name="configuration">
             <file>tests/Configuration/HttpConfigurationTest.php</file>

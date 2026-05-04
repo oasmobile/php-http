@@ -29,7 +29,9 @@
 | `DefaultHtmlRenderer::renderOnException()` | fallback | covered | `src/Views/DefaultHtmlRenderer.php` | no-action | 功能等价：无 Twig 时 JSON 序列化 `WrappedExceptionInfo`；有 Twig 时渲染 `{code}.twig` 模板 |
 | `JsonApiRenderer::renderOnException()` | fallback | covered | `src/Views/JsonApiRenderer.php` | no-action | 功能等价 |
 | Previous handler response check | chain | covered | `if ($event->getResponse() !== null) { return; }` | no-action | v3.x 在每个 handler listener 开头检查，等价于 v2.5.0 中 Silex event propagation 机制 |
+| Exception type filtering (`shouldRun()`) | chain | ~~missing-non-breaking~~ → covered | `MicroKernel::shouldRunErrorHandler()` | fix-code | **已修复**。Silex `ExceptionListenerWrapper::shouldRun()` 通过反射检查 handler 第一个参数的类型声明，仅在异常匹配该类型时调用 handler。v3.x 原实现缺失此机制，已通过 `shouldRunErrorHandler()` 静态方法恢复。见回归测试 `ErrorHandlerFixRegressionTest` |
 | Custom priority per handler | registration | intentionally-removed | N/A | confirm-documented | v2.5.0 `$this->error($callback, $priority)` 允许每个 handler 指定不同 priority；v3.x 所有 handler 统一使用 priority -8。实际使用中 v2.5.0 的 `__set('error_handlers', ...)` 也不支持 per-handler priority（数组中无法携带 priority 信息），仅 `$this->error()` 直接调用时支持。v3.x 移除了 `error()` 公开方法，因此此能力不再可用。**影响极低**：下游代码通过 Bootstrap_Config 注册 error handler，从未使用过 per-handler priority |
+| Handler 第 4 参数 `$event` | chain | intentionally-removed | N/A | confirm-documented | Silex `ExceptionListenerWrapper` 以 4 参数调用 handler：`($exception, $request, $code, $event)`。v3.x 仅传递 3 参数 `($exception, $request, $code)`。第 4 参数 `$event` 在 oasis/http 自带 handler 中从未使用，且 Bootstrap_Config 文档中 handler 签名为 3 参数。**影响极低** |
 
 ---
 
@@ -69,10 +71,20 @@
 
 | 维度 | v2.5.0 | v3.x | 等价性 |
 |------|--------|------|--------|
-| 非 Response, 非 null 返回值 | Silex `ExceptionListenerWrapper::ensureResponse()` 将返回值转为 Response（通过 `$app->json()` 或字符串转换） | listener 闭包遍历 `$kernel->getViewHandlers()` 将返回值传递给 view handler chain | **等价** — v2.5.0 的 `ensureResponse()` 最终也是通过 view handler 机制处理；v3.x 直接调用 view handler chain |
+| 非 Response, 非 null 返回值 | Silex `ExceptionListenerWrapper::ensureResponse()` 分发 `KernelEvents::VIEW` 事件（创建新的 `GetResponseForControllerResultEvent`） | listener 闭包直接遍历 `$kernel->getViewHandlers()` 数组 | **功能等价** — 两者最终遍历的是同一组 view handlers。差异：Silex 通过事件分发触发所有 `KernelEvents::VIEW` listener；v3.x 直接遍历 Bootstrap_Config 注册的 view handlers。在 oasis/http 架构中，所有 view handler 都通过 Bootstrap_Config 注册（`ViewHandlerSubscriber` 内部遍历的也是同一组 handlers），因此行为等价 |
 | View handler 产出 Response 后的 status code | 由 view handler 自行决定 | `$viewResponse->setStatusCode($code)` 强制设置为 HTTP exception code | **等价** — 确保 HTTP exception 的 status code 不被 view handler 覆盖 |
 
-### 6. FallbackViewHandler 行为
+### 6. 异常类型过滤（shouldRun）
+
+| 维度 | v2.5.0 | v3.x（修复后） | 等价性 |
+|------|--------|---------------|--------|
+| 类型过滤机制 | `ExceptionListenerWrapper::shouldRun()` 通过反射检查 handler 第一个参数的类型声明 | `MicroKernel::shouldRunErrorHandler()` 通过反射检查 handler 第一个参数的类型声明 | **等价**（已修复） |
+| 匹配语义 | `$expectedException->getClass()->isInstance($exception)` — instanceof 语义 | `$exception instanceof $expectedClass` — instanceof 语义 | **等价** |
+| 无类型声明时 | 不过滤，handler 总是被调用 | 不过滤，handler 总是被调用 | **等价** |
+| `\Exception` 类型声明时 | 匹配所有异常 | 匹配所有异常 | **等价** |
+| 反射失败时 | 不过滤（fallback to true） | 不过滤（fallback to true） | **等价** |
+
+### 7. FallbackViewHandler 行为
 
 | 维度 | v2.5.0 | v3.x | 等价性 |
 |------|--------|------|--------|
@@ -87,11 +99,22 @@
 
 | Coverage Status | 数量 | 说明 |
 |-----------------|------|------|
-| covered | 19 | 所有核心 API_Surface 项均已覆盖 |
-| missing-non-breaking | 0 | 无缺失的非 breaking 能力 |
+| covered | 20 | 所有核心 API_Surface 项均已覆盖（含修复后的 1 项） |
+| missing-non-breaking → fixed | 1 | 异常类型过滤（`shouldRun()`）— 已通过 `shouldRunErrorHandler()` 修复 |
 | missing-breaking | 0 | 无缺失的 breaking 能力 |
-| intentionally-removed | 1 | per-handler priority（通过 `$this->error($cb, $priority)` 指定不同 priority）— 影响极低，下游代码从未使用 |
+| intentionally-removed | 2 | per-handler priority + handler 第 4 参数 `$event` — 影响极低 |
 
-**总体评估**：Error Handling 模块的 v3.x 实现与 v2.5.0 行为完全等价。唯一的差异是 per-handler priority 能力被移除，但该能力在实际使用中从未通过 Bootstrap_Config 暴露（数组无法携带 priority 信息），仅在直接调用 `$this->error()` 时可用。v3.x 移除了 `error()` 公开方法，因此此能力自然消失。
+**总体评估**：Error Handling 模块的 v3.x 实现在修复前缺失一项实现层面的能力（异常类型过滤），已通过 `shouldRunErrorHandler()` 恢复。修复后与 v2.5.0 行为完全等价。两项 intentionally-removed 能力（per-handler priority、handler 第 4 参数）在实际使用中从未被下游代码依赖。
 
-**Migration_Guide 确认**：per-handler priority 的移除属于 `error()` 方法移除的附带效果。`error()` 方法的移除已在 v3.0 迁移中隐含处理（Silex API 整体移除），无需单独文档化。
+**修复记录**：
+- `MicroKernel::shouldRunErrorHandler()` — 恢复 Silex `ExceptionListenerWrapper::shouldRun()` 的异常类型过滤行为
+- 回归测试：`tests/ErrorHandlers/ErrorHandlerFixRegressionTest.php`（7 个测试方法）
+
+**Migration_Guide 确认**：
+- per-handler priority 的移除属于 `error()` 方法移除的附带效果，已在 Migration Guide 中文档化
+- handler 第 4 参数 `$event` 的移除属于 Silex API 整体移除的附带效果，无需单独文档化（Bootstrap_Config 文档中 handler 签名始终为 3 参数）
+
+**实现层面深入审计发现**：
+1. Silex `ExceptionListenerWrapper::ensureResponse()` 通过分发 `KernelEvents::VIEW` 事件处理非 Response 返回值；v3.x 直接遍历 view handlers 数组。两者在 oasis/http 架构中行为等价（所有 view handler 都通过 Bootstrap_Config 注册）
+2. Silex 传递 4 个参数给 handler（含 `$event`）；v3.x 传递 3 个参数。第 4 参数从未被使用
+3. **关键修复**：Silex 的 `shouldRun()` 通过反射实现异常类型过滤，允许下游用户注册类型特化的 error handler（如 `function(NotFoundHttpException $e, ...)`）。v3.x 原实现缺失此机制，在 PHP 8.5 严格类型环境下会导致 `TypeError`。已修复

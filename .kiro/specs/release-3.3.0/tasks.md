@@ -123,7 +123,7 @@
   - [x] 4.4 Checkpoint: 运行全量测试，确认 CORS 场景测试全部通过、回归测试全部通过（如有）、现有测试无回归。Commit message: `test(cors): behavior audit + scenario tests for release 3.3.0`
 
 
-- [-] 5. Error Handling 模块：行为审计 + 场景测试 + 修复
+- [x] 5. Error Handling 模块：行为审计 + 场景测试 + 修复
   - [x] 5.1 编写 Error Handling 场景测试（`tests/ErrorHandlers/ErrorHandlerScenarioTest.php`）
     - 继承 `ScenarioTestCase`
     - `testCustomErrorHandler`：`error_handlers` 配置 → handler 接收异常 → 返回自定义 Response
@@ -145,7 +145,7 @@
     - 如审计发现 missing-breaking / intentionally-removed → 文档化或确认已标注
     - 如审计未发现需修复的能力 → 跳过本 sub-task
     - _Requirements: R9-AC3, R9-AC4, R9-AC5_
-  - [-] 5.4 Checkpoint: 运行全量测试，确认 Error Handling 场景测试全部通过、回归测试全部通过（如有）、现有测试无回归。Commit message: `test(error-handling): behavior audit + scenario tests for release 3.3.0`
+  - [x] 5.4 Checkpoint: 运行全量测试，确认 Error Handling 场景测试全部通过、回归测试全部通过（如有）、现有测试无回归。Commit message: `test(error-handling): behavior audit + scenario tests for release 3.3.0`
 
 - [ ] 6. Twig 模块：行为审计 + 场景测试 + 修复
   - [ ] 6.1 编写 Twig 场景测试（`tests/Twig/TwigScenarioTest.php`）

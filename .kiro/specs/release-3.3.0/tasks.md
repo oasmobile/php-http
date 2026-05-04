@@ -226,6 +226,9 @@
 - [ ] 9. 文档更新 + Audit_Matrix 归档
   - [ ] 9.1 更新 Migration_Guide（`docs/manual/migration-v3.md`）
     - 如审计发现未文档化的 breaking change → 补充 severity marker + before/after 代码示例 + 迁移说明
+    - 已确认需补充的条目：
+      - 🔴 `FirewallInterface::isStateless()` 移除 + `SimpleFirewall` 不再接受 `stateless` 配置项（v3.x 为 stateless-only 架构）
+      - 🔴 `AccessRuleInterface::getRequiredChannel()` 的 channel enforcement 行为变更（v3.x 实现为 301 redirect，v2.5.0 由 Silex `ChannelListener` 实现）
     - 对照全部 Audit_Matrix 结果做完整性 review
     - 遵循 writing conventions：中文行文 + 英文术语 + backtick 包裹代码引用 + 表格格式
     - _Requirements: R17-AC1, R17-AC3, R17-AC4_

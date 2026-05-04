@@ -14,12 +14,20 @@ use Oasis\Mlib\Http\ServiceProviders\Cookie\SimpleCookieProvider;
 use Oasis\Mlib\Http\ServiceProviders\Cors\CrossOriginResourceSharingProvider;
 use Oasis\Mlib\Http\ServiceProviders\Security\SimpleSecurityProvider;
 use Oasis\Mlib\Http\ServiceProviders\Twig\SimpleTwigServiceProvider;
+use Oasis\Mlib\Http\ServiceProviders\Routing\CacheableRouter;
 use Oasis\Mlib\Http\ServiceProviders\Routing\CacheableRouterProvider;
+use Oasis\Mlib\Http\ServiceProviders\Routing\GroupUrlGenerator;
+use Oasis\Mlib\Http\ServiceProviders\Routing\GroupUrlMatcher;
 use Oasis\Mlib\Utils\ArrayDataProvider;
 use Oasis\Mlib\Utils\DataType;
+use Symfony\Component\Routing\Generator\UrlGenerator;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Routing\Loader\ClosureLoader;
 use Symfony\Component\Routing\Matcher\RequestMatcherInterface;
+use Symfony\Component\Routing\Matcher\UrlMatcher;
 use Symfony\Component\Routing\RequestContext;
+use Symfony\Component\Routing\Route;
+use Symfony\Component\Routing\RouteCollection;
 use Symfony\Component\Routing\Router;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
@@ -86,6 +94,10 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
     protected $corsSubscriber = null;
     /** @var CacheableRouterProvider|null */
     protected $routerProvider = null;
+    /** @var array<array{name: string, route: Route}|array{collection: RouteCollection}> */
+    protected array $pendingRoutes = [];
+    /** @var CacheableRouter|null Router for programmatic-only routes (no YAML config) */
+    protected ?CacheableRouter $directRouter = null;
     /** @var ArrayDataProvider|null */
     protected $routingConfigDataProvider = null;
     /** @var RequestMatcherInterface|null */
@@ -368,6 +380,36 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
     }
 
     /**
+     * Add a single route to be merged into the RouteCollection during boot.
+     * Must be called before boot(); calling after boot throws LogicException.
+     *
+     * @throws \LogicException if the kernel has already been booted
+     */
+    public function addRoute(string $name, Route $route): void
+    {
+        if ($this->booted) {
+            throw new \LogicException('Cannot add routes after the kernel has been booted.');
+        }
+
+        $this->pendingRoutes[] = ['name' => $name, 'route' => $route];
+    }
+
+    /**
+     * Add a collection of routes to be merged into the RouteCollection during boot.
+     * Must be called before boot(); calling after boot throws LogicException.
+     *
+     * @throws \LogicException if the kernel has already been booted
+     */
+    public function addRoutes(RouteCollection $routes): void
+    {
+        if ($this->booted) {
+            throw new \LogicException('Cannot add routes after the kernel has been booted.');
+        }
+
+        $this->pendingRoutes[] = ['collection' => $routes];
+    }
+
+    /**
      * @return string[]
      */
     public function getCacheDirectories(): array
@@ -596,25 +638,71 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
             DataType::Mixed
         );
 
-        if (!$routingConfig || !is_array($routingConfig)) {
+        $hasPendingRoutes = !empty($this->pendingRoutes);
+
+        if ((!$routingConfig || !is_array($routingConfig)) && !$hasPendingRoutes) {
             return;
         }
 
-        // Process routing configuration
-        $this->routingConfigDataProvider = $this->processConfiguration(
-            $routingConfig,
-            new CacheableRouterConfiguration()
-        );
+        $requestContext = new RequestContext();
 
-        // Create and register the router provider
-        $this->routerProvider = new CacheableRouterProvider();
-        $this->routerProvider->register($this);
+        if ($routingConfig && is_array($routingConfig)) {
+            // Process routing configuration (existing YAML path)
+            $this->routingConfigDataProvider = $this->processConfiguration(
+                $routingConfig,
+                new CacheableRouterConfiguration()
+            );
 
-        // Build routing services with a fresh RequestContext
-        $requestContext       = new RequestContext();
-        assert($this->routerProvider !== null);
-        $this->requestMatcher = $this->routerProvider->buildRequestMatcher($requestContext);
-        $this->urlGenerator   = $this->routerProvider->buildUrlGenerator($requestContext);
+            // Create and register the router provider
+            $routerProvider = new CacheableRouterProvider();
+            $routerProvider->register($this);
+            $this->routerProvider = $routerProvider;
+
+            // Merge pending routes before building matcher (before getMatcher() compiles)
+            if ($hasPendingRoutes) {
+                $router     = $routerProvider->getRouter($requestContext);
+                $collection = $router->getRouteCollection();
+                $this->mergePendingRoutes($collection);
+            }
+
+            // Build routing services
+            $this->requestMatcher = $routerProvider->buildRequestMatcher($requestContext);
+            $this->urlGenerator   = $routerProvider->buildUrlGenerator($requestContext);
+
+            // Freeze the CacheableRouter's RouteCollection
+            $cacheableRouter = $routerProvider->getRouter($requestContext);
+            assert($cacheableRouter instanceof CacheableRouter);
+            $cacheableRouter->freeze();
+        } else {
+            // No YAML config but has pending routes: bypass CacheableRouterProvider,
+            // create a CacheableRouter with an empty RouteCollection via ClosureLoader.
+            $loader = new ClosureLoader();
+            $directRouter = new CacheableRouter(
+                $this,
+                $loader,
+                function () { return new RouteCollection(); },
+                ['cache_dir' => null, 'debug' => $this->isDebug],
+                $requestContext
+            );
+            $this->directRouter = $directRouter;
+
+            // Merge pending routes into the empty collection
+            $collection = $directRouter->getRouteCollection();
+            $this->mergePendingRoutes($collection);
+
+            // Build matcher and generator from the collection
+            $matcher = new UrlMatcher($collection, $requestContext);
+            $this->requestMatcher = new GroupUrlMatcher(
+                $requestContext,
+                [$matcher]
+            );
+            $this->urlGenerator = new GroupUrlGenerator(
+                [new UrlGenerator($collection, $requestContext)]
+            );
+
+            // Freeze the direct router's RouteCollection
+            $directRouter->freeze();
+        }
 
         // Register a custom routing listener that runs before Symfony's RouterListener (priority 32).
         // Our listener uses the custom GroupUrlMatcher to resolve routes.
@@ -667,6 +755,20 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
             },
             self::BEFORE_PRIORITY_ROUTING + 1 // priority 33, one above Symfony's RouterListener (32)
         );
+    }
+
+    /**
+     * Merge pending programmatic routes into the given RouteCollection.
+     */
+    private function mergePendingRoutes(RouteCollection $collection): void
+    {
+        foreach ($this->pendingRoutes as $entry) {
+            if (isset($entry['collection'])) {
+                $collection->addCollection($entry['collection']);
+            } else {
+                $collection->add($entry['name'], $entry['route']);
+            }
+        }
     }
 
     // ─── Symfony Kernel overrides ────────────────────────────────────
@@ -889,15 +991,19 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
     }
 
     /**
-     * @return Router|null The router, or null if routing is not configured.
+     * @return Router|null The router, or null if routing is not configured and no programmatic routes exist.
      */
     public function getRouter(): ?Router
     {
-        if ($this->routerProvider === null) {
-            return null;
+        if ($this->routerProvider !== null) {
+            return $this->routerProvider->getRouter(new RequestContext());
         }
 
-        return $this->routerProvider->getRouter(new RequestContext());
+        if ($this->directRouter !== null) {
+            return $this->directRouter;
+        }
+
+        return null;
     }
 
     /**

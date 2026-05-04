@@ -97,7 +97,7 @@
     - _Requirements: R5-AC3, R5-AC4, R5-AC5_
   - [x] 3.4 Checkpoint: 运行全量测试，确认 Middleware 场景测试全部通过、回归测试全部通过（如有）、现有测试无回归。Commit message: `test(middleware): behavior audit + scenario tests for release 3.3.0`
 
-- [-] 4. CORS 模块：行为审计 + 场景测试 + 修复
+- [x] 4. CORS 模块：行为审计 + 场景测试 + 修复
   - [x] 4.1 编写 CORS 场景测试（`tests/Cors/CorsScenarioTest.php`）
     - 继承 `ScenarioTestCase`
     - `testPreflightRequestHandling`：OPTIONS + `Access-Control-Request-Method` → preflight response with `Access-Control-Allow-*` headers
@@ -120,11 +120,11 @@
     - 如审计发现 missing-breaking / intentionally-removed → 文档化或确认已标注
     - 如审计未发现需修复的能力 → 跳过本 sub-task
     - _Requirements: R7-AC3, R7-AC4, R7-AC5_
-  - [-] 4.4 Checkpoint: 运行全量测试，确认 CORS 场景测试全部通过、回归测试全部通过（如有）、现有测试无回归。Commit message: `test(cors): behavior audit + scenario tests for release 3.3.0`
+  - [x] 4.4 Checkpoint: 运行全量测试，确认 CORS 场景测试全部通过、回归测试全部通过（如有）、现有测试无回归。Commit message: `test(cors): behavior audit + scenario tests for release 3.3.0`
 
 
-- [ ] 5. Error Handling 模块：行为审计 + 场景测试 + 修复
-  - [ ] 5.1 编写 Error Handling 场景测试（`tests/ErrorHandlers/ErrorHandlerScenarioTest.php`）
+- [-] 5. Error Handling 模块：行为审计 + 场景测试 + 修复
+  - [x] 5.1 编写 Error Handling 场景测试（`tests/ErrorHandlers/ErrorHandlerScenarioTest.php`）
     - 继承 `ScenarioTestCase`
     - `testCustomErrorHandler`：`error_handlers` 配置 → handler 接收异常 → 返回自定义 Response
     - `testErrorHandlerChainOrdering`：多个 error handler → 按注册顺序调用，第一个返回 Response 的短路
@@ -132,20 +132,20 @@
     - `testHttpExceptionStatusCodePreservation`：抛 `HttpException(403)` → response status = 403
     - `testFallbackViewHandlerErrorRendering`：无自定义 error handler → `FallbackViewHandler` 产出 response
     - _Requirements: R10-AC1, R10-AC2, R10-AC3, R10-AC4, R10-AC5_
-  - [ ] 5.2 执行 Error Handling 模块行为审计
+  - [x] 5.2 执行 Error Handling 模块行为审计
     - 基于 `oasis/http` v2.5.0（tag `v2.5.0`）+ Silex 2.3.0 的整体实现作为审计基准
     - 枚举 v2.5.0 Error Handling 相关代码暴露的 API_Surface（`SilexKernel::error()` 覆写、error handler chain、exception-to-response conversion、`ExceptionListenerWrapper`、chain short-circuit/passthrough、HTTP exception status code preservation、`FallbackViewHandler`）
     - **接口存在性审计**：逐项对比 v3.x Error_Handler_Chain 实现，分类为 covered / missing-non-breaking / missing-breaking
     - **行为等价性审计**：对比 v2.5.0 和 v3.x 的运行时行为差异（exception listener 注册方式、handler 调用顺序、null 返回值处理、HttpException status code 传递路径等）
     - 产出 Audit_Matrix 到 `.kiro/specs/release-3.3.0/error-handling-audit-matrix.md`
     - _Requirements: R9-AC1, R9-AC2, R9-AC6_
-  - [ ] 5.3 修复 Error Handling 模块缺失能力（如有）+ 回归测试
+  - [x] 5.3 修复 Error Handling 模块缺失能力（如有）+ 回归测试
     - 如审计发现 missing-non-breaking 能力 → 修复代码恢复到 Silex 等价行为
     - 如有修复 → 编写 `tests/ErrorHandlers/ErrorHandlerFixRegressionTest.php` 专项回归测试
     - 如审计发现 missing-breaking / intentionally-removed → 文档化或确认已标注
     - 如审计未发现需修复的能力 → 跳过本 sub-task
     - _Requirements: R9-AC3, R9-AC4, R9-AC5_
-  - [ ] 5.4 Checkpoint: 运行全量测试，确认 Error Handling 场景测试全部通过、回归测试全部通过（如有）、现有测试无回归。Commit message: `test(error-handling): behavior audit + scenario tests for release 3.3.0`
+  - [-] 5.4 Checkpoint: 运行全量测试，确认 Error Handling 场景测试全部通过、回归测试全部通过（如有）、现有测试无回归。Commit message: `test(error-handling): behavior audit + scenario tests for release 3.3.0`
 
 - [ ] 6. Twig 模块：行为审计 + 场景测试 + 修复
   - [ ] 6.1 编写 Twig 场景测试（`tests/Twig/TwigScenarioTest.php`）

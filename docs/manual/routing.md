@@ -137,9 +137,9 @@ $routes->add('api.orders', new Route('/api/orders', [
 $kernel->addRoutes($routes);
 ```
 
-### 合并顺序
+### 匹配优先级
 
-编程式路由在 YAML 路由之后合并到 `RouteCollection`。同名路由按 Symfony 默认语义处理（后入覆盖先入），因此编程式路由会覆盖 YAML 中的同名路由。
+编程式路由优先于 YAML 路由匹配。当编程式路由与 YAML 路由定义了相同路径或相同名称时，编程式路由胜出。内部实现上，编程式路由使用独立的内存 matcher，排在 YAML 缓存 matcher 之前。
 
 ### 无 YAML 配置场景
 

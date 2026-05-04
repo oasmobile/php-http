@@ -683,23 +683,22 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
             $matchers[]   = $yamlMatcher;
             $generators[] = $routerProvider->buildUrlGenerator($requestContext);
 
-            // After cache compilation, merge programmatic routes into the
-            // CacheableRouter's RouteCollection for read-only access via
-            // getRouter()->getRouteCollection(). This does NOT affect the
-            // already-compiled cached matcher.
-            if ($hasPendingRoutes) {
-                $cacheableRouter = $routerProvider->getRouter($requestContext);
-                $yamlCollection  = $cacheableRouter->getRouteCollection();
-                $this->mergePendingRoutes($yamlCollection);
-            }
-
             // Combine matchers and generators
             $this->requestMatcher = new GroupUrlMatcher($requestContext, $matchers);
             $this->urlGenerator   = new GroupUrlGenerator($generators);
 
-            // Freeze the CacheableRouter's RouteCollection
+            // After cache compilation, merge programmatic routes into the
+            // CacheableRouter's RouteCollection for read-only access via
+            // getRouter()->getRouteCollection(). This does NOT affect the
+            // already-compiled cached matcher.
             $cacheableRouter = $routerProvider->getRouter($requestContext);
             assert($cacheableRouter instanceof CacheableRouter);
+            if ($hasPendingRoutes) {
+                $yamlCollection = $cacheableRouter->getRouteCollection();
+                $this->mergePendingRoutes($yamlCollection);
+            }
+
+            // Freeze the CacheableRouter's RouteCollection
             $cacheableRouter->freeze();
         } else {
             // No YAML config but has pending routes: bypass CacheableRouterProvider,
@@ -735,7 +734,8 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
         // Register a custom routing listener that runs before Symfony's RouterListener (priority 32).
         // Our listener uses the custom GroupUrlMatcher to resolve routes.
         // Once _controller is set, Symfony's RouterListener will skip routing.
-        $matcher    = $this->requestMatcher;
+        assert($this->requestMatcher !== null);
+        $matcher = $this->requestMatcher;
         /** @var \Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher */
         $dispatcher = $this->getContainer()->get('event_dispatcher');
         $dispatcher->addListener(

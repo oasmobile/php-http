@@ -385,12 +385,11 @@ class SecurityScenarioTest extends ScenarioTestCase
     }
 
     // -----------------------------------------------------------------
-    // R2-AC7: Stateless firewall behavior
+    // R2-AC7: Stateless behavior (v3.x is stateless-only)
     // -----------------------------------------------------------------
 
     /**
-     * Stateless firewall → no session interaction during authentication.
-     *
+     * v3.x is stateless-only — no session interaction during authentication.
      * Verifies that the firewall processes authentication without requiring
      * or creating a session. The response should not contain a session cookie.
      */
@@ -401,11 +400,10 @@ class SecurityScenarioTest extends ScenarioTestCase
                 'mauth' => new TestAuthenticationPolicy(),
             ],
             'firewalls' => [
-                'scenario.stateless' => new SimpleFirewall([
+                'scenario.main' => new SimpleFirewall([
                     'pattern'   => '^/scenario',
                     'policies'  => ['mauth' => true],
                     'users'     => new TestApiUserProvider(),
-                    'stateless' => true,
                 ]),
             ],
             'access_rules' => [

@@ -102,7 +102,6 @@ class SecurityConfigPropertyTest extends TestCase
                 'pattern'       => '^/secured',
                 'policies'      => ['test_pre_auth' => true],
                 'users'         => new TestApiUserProvider(),
-                'stateless'     => true,
             ]);
 
             // Add random access rules

@@ -125,11 +125,9 @@ class ConstructorPromotionPropertyTest extends TestCase
                 fn(string $s) => $s !== '' && strlen($s) <= 100,
                 Generators::string()
             ),
-            // stateless: boolean
-            Generators::bool(),
             // number of policies (1–4)
             Generators::choose(1, 4)
-        )->then(function (string $pattern, bool $stateless, int $policyCount) {
+        )->then(function (string $pattern, int $policyCount) {
             $policies = [];
             for ($i = 0; $i < $policyCount; $i++) {
                 $policyName = 'policy_' . bin2hex(random_bytes(3));
@@ -143,7 +141,6 @@ class ConstructorPromotionPropertyTest extends TestCase
                 'pattern'   => $pattern,
                 'policies'  => $policies,
                 'users'     => $users,
-                'stateless' => $stateless,
                 'misc'      => $misc,
             ]);
 
@@ -156,11 +153,6 @@ class ConstructorPromotionPropertyTest extends TestCase
                 $policies,
                 $firewall->getPolicies(),
                 'getPolicies() should return the original policies'
-            );
-            $this->assertSame(
-                $stateless,
-                $firewall->isStateless(),
-                'isStateless() should return the original stateless flag'
             );
             $this->assertSame(
                 $users,
@@ -193,14 +185,8 @@ class ConstructorPromotionPropertyTest extends TestCase
                 'pattern'  => $pattern,
                 'policies' => ['test_policy' => true],
                 'users'    => ['memory' => ['admin' => ['password' => '1234', 'roles' => ['ROLE_ADMIN']]]],
-                // 'stateless' and 'misc' omitted — should use defaults
+                // 'misc' omitted — should use defaults
             ]);
-
-            // stateless defaults to false (per SimpleFirewallConfiguration)
-            $this->assertFalse(
-                $firewall->isStateless(),
-                'isStateless() should default to false when not specified'
-            );
 
             // misc defaults to empty array
             $this->assertSame(

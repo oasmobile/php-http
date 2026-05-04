@@ -15,8 +15,10 @@ use Oasis\Mlib\Http\Configuration\SecurityConfiguration;
 use Oasis\Mlib\Http\MicroKernel;
 use Oasis\Mlib\Utils\DataProviderInterface;
 use Oasis\Mlib\Utils\DataType;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestMatcherInterface;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\KernelEvents;
@@ -261,7 +263,6 @@ class SimpleSecurityProvider
         $setting              = $firewall->getPolicies();
         $setting['pattern']   = $firewall->getPattern();
         $setting['users']     = $firewall->getUserProvider();
-        $setting['stateless'] = $firewall->isStateless();
         $setting              = array_merge($setting, $firewall->getOtherSettings());
         
         return $setting;
@@ -359,6 +360,26 @@ class SimpleSecurityProvider
                     }
                     
                     // First matching rule takes effect
+                    
+                    // Channel enforcement: redirect HTTP → HTTPS (or vice versa)
+                    if ($channel !== null) {
+                        $scheme = $request->getScheme();
+                        if ($channel === 'https' && $scheme !== 'https') {
+                            $event->setResponse(new RedirectResponse(
+                                str_replace('http://', 'https://', $request->getUri()),
+                                Response::HTTP_MOVED_PERMANENTLY,
+                            ));
+                            return;
+                        }
+                        if ($channel === 'http' && $scheme !== 'http') {
+                            $event->setResponse(new RedirectResponse(
+                                str_replace('https://', 'http://', $request->getUri()),
+                                Response::HTTP_MOVED_PERMANENTLY,
+                            ));
+                            return;
+                        }
+                    }
+                    
                     if (empty($roles)) {
                         return; // No role requirement — allow access
                     }

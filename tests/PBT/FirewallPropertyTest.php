@@ -10,7 +10,7 @@ declare(strict_types=1);
  * Property 8: Firewall 解析输出 invariant
  * Property 9: Firewall 缺失必填字段 error condition
  *
- * 使用 Eris 生成随机 pattern、policies、stateless 组合验证配置正确性。
+ * 使用 Eris 生成随机 pattern、policies 组合验证配置正确性。
  *
  * Ref: Requirements 12.1, 12.2, 12.3, 12.4, 12.5
  */
@@ -34,7 +34,7 @@ class FirewallPropertyTest extends TestCase
     /**
      * Feature: php85-phase3-security-refactor, Property 7: Firewall 配置 round-trip
      * For any valid firewall configuration, SimpleFirewall round-trip preserves
-     * pattern, policies, and stateless flag.
+     * pattern and policies.
      *
      * Ref: Requirements 12.1, 12.2, 12.3
      */
@@ -46,11 +46,9 @@ class FirewallPropertyTest extends TestCase
                 fn(string $s) => $s !== '' && strlen($s) <= 100,
                 Generators::string()
             ),
-            // stateless: boolean
-            Generators::bool(),
             // number of policies (1–4)
             Generators::choose(1, 4)
-        )->then(function (string $pattern, bool $stateless, int $policyCount) {
+        )->then(function (string $pattern, int $policyCount) {
             $policies = [];
             for ($i = 0; $i < $policyCount; $i++) {
                 $policyName = 'policy_' . bin2hex(random_bytes(3));
@@ -63,7 +61,6 @@ class FirewallPropertyTest extends TestCase
                 'pattern'   => $pattern,
                 'policies'  => $policies,
                 'users'     => $users,
-                'stateless' => $stateless,
             ]);
 
             // round-trip: getPattern() returns original pattern
@@ -79,13 +76,6 @@ class FirewallPropertyTest extends TestCase
                 $firewall->getPolicies(),
                 'getPolicies() should return the original policies'
             );
-
-            // round-trip: isStateless() returns original stateless flag
-            $this->assertSame(
-                $stateless,
-                $firewall->isStateless(),
-                'isStateless() should return the original stateless flag'
-            );
         });
     }
 
@@ -94,7 +84,7 @@ class FirewallPropertyTest extends TestCase
     /**
      * Feature: php85-phase3-security-refactor, Property 8: Firewall 解析输出 invariant
      * For any SimpleFirewall instance, parseFirewall() output contains
-     * 'pattern', 'users', and 'stateless' keys.
+     * 'pattern' and 'users' keys.
      *
      * Ref: Requirements 12.4
      */
@@ -105,9 +95,8 @@ class FirewallPropertyTest extends TestCase
             Generators::suchThat(
                 fn(string $s) => $s !== '' && strlen($s) <= 100,
                 Generators::string()
-            ),
-            Generators::bool()
-        )->then(function (string $pattern, bool $stateless) {
+            )
+        )->then(function (string $pattern) {
             $policies = ['test_policy' => true];
             $users = ['memory' => ['admin' => ['password' => '1234', 'roles' => ['ROLE_ADMIN']]]];
 
@@ -115,7 +104,6 @@ class FirewallPropertyTest extends TestCase
                 'pattern'   => $pattern,
                 'policies'  => $policies,
                 'users'     => $users,
-                'stateless' => $stateless,
             ]);
 
             // Use reflection to call protected parseFirewall()
@@ -126,12 +114,10 @@ class FirewallPropertyTest extends TestCase
             // invariant: output contains required keys
             $this->assertArrayHasKey('pattern', $result, 'parseFirewall() output must contain "pattern" key');
             $this->assertArrayHasKey('users', $result, 'parseFirewall() output must contain "users" key');
-            $this->assertArrayHasKey('stateless', $result, 'parseFirewall() output must contain "stateless" key');
 
             // verify values match
             $this->assertSame($pattern, $result['pattern']);
             $this->assertSame($users, $result['users']);
-            $this->assertSame($stateless, $result['stateless']);
         });
     }
 

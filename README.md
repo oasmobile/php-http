@@ -112,6 +112,39 @@ the advanced routing features as well. Please refer to
 [advanced routing configuration](docs/manual/routing.md)
 for more.
 
+##### Programmatic Route Injection
+
+In addition to YAML-based routing, `MicroKernel` supports programmatic
+route injection before boot:
+
+```php
+<?php
+
+use Oasis\Mlib\Http\MicroKernel;
+use Symfony\Component\Routing\Route;
+
+$kernel = new MicroKernel($config, $isDebug);
+
+// inject a single route
+$kernel->addRoute('health_check', new Route('/health', [
+    '_controller' => 'HealthController::check',
+]));
+
+// inject a collection of routes
+$routes = new \Symfony\Component\Routing\RouteCollection();
+$routes->add('api.users', new Route('/api/users', [
+    '_controller' => 'UserController::list',
+]));
+$kernel->addRoutes($routes);
+
+$kernel->run();
+```
+
+Programmatic routes take priority over YAML routes. After boot, the
+route table is frozen — any write operation throws `LogicException`.
+
+See [routing documentation](docs/manual/routing.md) for details.
+
 ##### Security
 
 When a web application is deployed, it is often the case that we would

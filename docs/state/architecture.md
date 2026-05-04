@@ -10,6 +10,8 @@
 
 通过 bootstrap config 数组驱动初始化，config 经 Symfony Config 组件校验后分发给各 Service Provider。
 
+boot 前支持编程式注入：`addMiddleware()`、`addControllerInjectedArg()`、`addRoute()` / `addRoutes()` 等方法在 boot 前暂存，boot 时消费。boot 后路由表冻结，写操作抛出 `LogicException`。
+
 ---
 
 ## 模块结构
@@ -72,6 +74,8 @@ src/
    - Access rule 授权（priority 7）：匹配 access rule pattern → 检查 token 角色 → 通过或 403
    - 用户 before middleware
 4. 路由匹配 → 控制器执行（参数通过 `ExtendedArgumentValueResolver` 注入）
+   - 双层 matcher 架构：编程式路由（内存 `UrlMatcher`，优先匹配）→ YAML 路由（`CacheableRouter` 编译缓存）
+   - 通过 `GroupUrlMatcher` 串联，编程式 matcher 排在前面
 5. 返回值非 Response 时进入 View Handler 链
 6. 异常时进入 Error Handler 链
 7. `KernelEvents::RESPONSE` 触发 after middleware

@@ -9,11 +9,11 @@
 | 层 | 技术 |
 |----|------|
 | 语言 | PHP ≥ 8.5 |
-| 框架 | Symfony MicroKernel（Symfony 7.x 组件） |
+| 框架 | Symfony MicroKernel（Symfony 8.x 组件） |
 | 模板 | Twig 3.x |
-| HTTP | Symfony HttpFoundation 7.x |
-| 路由 | Symfony Routing 7.x（YAML 配置 + 缓存） |
-| 安全 | Symfony Security 7.x |
+| HTTP | Symfony HttpFoundation 8.x |
+| 路由 | Symfony Routing 8.x（YAML 配置 + 缓存 + 编程式注入） |
+| 安全 | Symfony Security 8.x |
 | HTTP 客户端 | Guzzle 7.x |
 | 测试 | PHPUnit 13.x |
 | 静态分析 | PHPStan（level 8） |
@@ -76,7 +76,7 @@ composer install
 | error-handlers | `WrappedExceptionInfoTest`, `ExceptionWrapperTest`, `JsonErrorHandlerTest` |
 | configuration | `HttpConfigurationTest`, `SecurityConfigurationTest`, `CrossOriginResourceSharingConfigurationTest`, `TwigConfigurationTest`, `CacheableRouterConfigurationTest`, `SimpleAccessRuleConfigurationTest`, `SimpleFirewallConfigurationTest`, `ConfigurationValidationTraitTest` |
 | views | `AbstractSmartViewHandlerTest`, `JsonViewHandlerTest`, `DefaultHtmlRendererTest`, `JsonApiRendererTest`, `PrefilightResponseTest`, `RouteBasedResponseRendererResolverTest` |
-| routing | `GroupUrlMatcherTest`, `GroupUrlGeneratorTest`, `CacheableRouterUrlMatcherWrapperTest`, `InheritableRouteCollectionTest`, `InheritableYamlFileLoaderTest`, `CacheableRouterTest`, `CacheableRouterProviderTest` |
+| routing | `GroupUrlMatcherTest`, `GroupUrlGeneratorTest`, `CacheableRouterUrlMatcherWrapperTest`, `InheritableRouteCollectionTest`, `InheritableYamlFileLoaderTest`, `CacheableRouterTest`, `CacheableRouterProviderTest`, `FrozenRouteCollectionTest`, `MicroKernelRouteInjectionTest`, `MicroKernelRoutePreservationTest`, `MicroKernelRouteInjectionIntegrationTest`, `RouteCacheIsolationTest` |
 | cookie | `ResponseCookieContainerTest`, `SimpleCookieProviderTest` |
 | middlewares | `AbstractMiddlewareTest` |
 | misc | `ExtendedArgumentValueResolverTest`, `ExtendedExceptionListnerWrapperTest`, `ChainedParameterBagDataProviderTest` |

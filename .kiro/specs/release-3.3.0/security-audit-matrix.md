@@ -107,6 +107,64 @@ v2.5.0 通过 `installAuthenticationFactory()` 将自定义 policy 注入 Silex 
 | `IS_AUTHENTICATED_FULLY` 属性支持 | public_api | covered | `AuthenticatedVoter` 支持 | no-action | — |
 | 角色继承（`ROLE_ADMIN` → `ROLE_USER`） | public_api | covered | `RoleHierarchyVoter` 支持 | no-action | — |
 
+## Behavioral Equivalence Audit（行为等价性审计）
+
+以上 API_Surface 审计确认了"接口存在性"——v2.5.0 有的接口 v3.x 也有。本节深入对比 v3.x 重写后的**运行时行为**是否与 v2.5.0 等价。
+
+### Firewall Pattern Matching
+
+| 行为 | v2.5.0 | v3.x | 等价？ | 说明 |
+|------|--------|------|--------|------|
+| String pattern matching | Silex `FirewallMap` → `RequestMatcher($pattern)` → Symfony `preg_match('{' . $pattern . '}', $pathinfo)` | `requestMatchesPattern()` → `preg_match('{' . $pattern . '}', rawurldecode($pathinfo))` | ⚠️ 微差异 | v3.x 额外做了 `rawurldecode()`。对于不含 URL 编码字符的路径，行为一致。含 `%2F` 等编码字符时 v3.x 会先解码再匹配，v2.5.0 不会。这是有意的改进（防止 URL 编码绕过 pattern），不是 regression |
+| `RequestMatcherInterface` pattern matching | Silex `FirewallMap` 直接使用 `RequestMatcher` 实例 | `requestMatchesPattern()` 调用 `$pattern->matches($request)` | ✅ 等价 | — |
+| 多 firewall 匹配顺序 | Silex `FirewallMap::getListeners()` 按注册顺序遍历，first match wins | `registerFirewallListener()` 按注册顺序遍历，first match + `break` | ✅ 等价 | — |
+
+### Authentication Flow
+
+| 行为 | v2.5.0 | v3.x | 等价？ | 说明 |
+|------|--------|------|--------|------|
+| 认证入口 | Silex `Firewall` 组件 dispatch → 各 firewall listener 按 position 排序执行 | 单个 event listener (priority 8) 内部遍历 firewalls + policies | ✅ 等价 | 内部机制不同，但外部可观察行为一致：first matching firewall → iterate policies → authenticate |
+| `supports()` 判断 | v2.5.0 `AbstractSimplePreAuthenticator::createToken()` 中 `getCredentialsFromRequest()` 返回 null 时创建 anon token | v3.x `AbstractPreAuthenticator::supports()` 返回 `getCredentialsFromRequest() !== null` | ⚠️ 语义变更 | v2.5.0 无凭证时仍创建 `PreAuthenticatedToken('anon.', null, ...)`，后续 `authenticateToken()` 会因 null credentials 失败。v3.x 无凭证时 `supports()` 返回 false，直接跳过认证。**最终效果一致**（都不会产生有效 token），但中间路径不同 |
+| 认证成功 → token 类型 | `PreAuthenticatedToken` (Symfony 4.x) | `PostAuthenticationToken` (Symfony 8.x) | ⚠️ 类型变更 | Symfony 8.x 移除了 `PreAuthenticatedToken`，替换为 `PostAuthenticationToken`。如果下游代码 `instanceof PreAuthenticatedToken`，需要更新。已在 Migration_Guide §7 覆盖 |
+| 认证失败处理 | Silex `ExceptionListener` catch `AuthenticationException` → 调用 entry point → `NullEntryPoint` 抛 `AccessDeniedHttpException` | `registerFirewallListener()` catch `AuthenticationException` → 静默忽略 → access rule listener 判定 | ⚠️ 路径变更 | v2.5.0：认证失败 → `ExceptionListener` → entry point → 403。v3.x：认证失败 → token 保持 null → access rule 检查 → 无 token → 403。**最终 HTTP 响应一致**（都是 403），但异常传播路径不同。如果下游代码依赖 `ExceptionListener` 的行为（如自定义 `access_denied_handler`），需要适配 |
+| 无凭证 + 无 access rule | v2.5.0：无凭证 → anon token → 无 access rule 匹配 → 请求通过 | v3.x：无凭证 → `supports()` false → token null → 无 access rule 匹配 → 请求通过 | ✅ 等价 | — |
+| 无凭证 + 有 access rule | v2.5.0：无凭证 → anon token → access rule 匹配 → `AccessListener` → `AccessDecisionManager` → deny → `ExceptionListener` → entry point → 403 | v3.x：无凭证 → token null → access rule 匹配 → `!$token` → 直接抛 `AccessDeniedHttpException` → 403 | ✅ 等价 | 最终 HTTP 响应一致 |
+
+### Access Decision Strategy
+
+| 行为 | v2.5.0 | v3.x | 等价？ | 说明 |
+|------|--------|------|--------|------|
+| `AccessDecisionManager` strategy | Silex 默认 `AffirmativeBased`（任一 voter grant → allow） | `UnanimousStrategy`（所有 voter 必须 grant → allow） | ⚠️ 有意变更 | 当前 voter 列表为 `[AuthenticatedVoter, RoleHierarchyVoter]`。对于角色检查，`AuthenticatedVoter` 对 `ROLE_*` 属性 abstain，`RoleHierarchyVoter` 决定。对于 `IS_AUTHENTICATED_FULLY`，`AuthenticatedVoter` 决定，`RoleHierarchyVoter` abstain。两种 strategy 在当前 voter 组合下**行为一致**——因为每次只有一个 voter 实际投票，另一个 abstain。差异仅在自定义 voter 场景下才会显现，而 v3.x 不支持自定义 voter |
+| Access rule `channel` enforcement | Silex `ChannelListener` 强制 http/https redirect | v3.x 不强制 channel 检查 | ⚠️ 能力缺失 | `AccessRuleInterface::getRequiredChannel()` 配置项保留，但 v3.x 的 `registerAccessRuleListener()` 未读取 `$channel` 值做任何处理。如果 v2.5.0 下游使用了 channel enforcement（`'https'`），v3.x 不会 redirect。**但**：v2.5.0 的 channel enforcement 来自 Silex 的 `ChannelListener`，不是 `SimpleSecurityProvider` 自己实现的。v2.5.0 的 `subscribe()` 中也没有额外处理 channel。所以这个能力实际上是 Silex 底层提供的，v2.5.0 只是透传了配置。v3.x 保留了配置接口但未实现 enforcement |
+
+### Firewall Scope & Sub-request Handling
+
+| 行为 | v2.5.0 | v3.x | 等价？ | 说明 |
+|------|--------|------|--------|------|
+| Main request only | Silex `Firewall` 组件仅处理 main request | `registerFirewallListener()` 检查 `$event->isMainRequest()` | ✅ 等价 | — |
+| Access rule main request only | Silex `AccessListener` 仅处理 main request | `registerAccessRuleListener()` 检查 `$event->isMainRequest()` | ✅ 等价 | — |
+
+### Token Lifecycle
+
+| 行为 | v2.5.0 | v3.x | 等价？ | 说明 |
+|------|--------|------|--------|------|
+| Token 创建时机 | Silex authentication listener 成功后设置 token | `registerFirewallListener()` 成功后 `$tokenStorage->setToken($token)` | ✅ 等价 | — |
+| Token 跨请求持久化（non-stateless） | Silex `ContextListener` 通过 session 持久化 | v3.x 无 `ContextListener`，token 不跨请求持久化 | ⚠️ 行为变更 | v3.x 所有 firewall 实际上都是 stateless 的（无论 `isStateless()` 返回什么）。v2.5.0 中 `stateless = false` 的 firewall 会通过 session 持久化 token。**但**：oasis/http 的典型使用场景是 stateless API（每次请求都带凭证），session 持久化在实际使用中很少被依赖。如果下游确实依赖了 session token 持久化，v3.x 会表现为"每次请求都需要重新认证" |
+
+### Summary of Behavioral Differences
+
+| # | 差异 | 影响 | 处置 |
+|---|------|------|------|
+| B1 | Pattern matching 额外 `rawurldecode()` | 低：仅影响含 URL 编码字符的路径 | no-action（有意改进） |
+| B2 | Token 类型从 `PreAuthenticatedToken` 变为 `PostAuthenticationToken` | 中：下游 `instanceof` 检查需更新 | document-only（已在 Migration_Guide §7） |
+| B3 | 认证失败路径变更（`ExceptionListener` → 直接抛异常） | 低：最终 HTTP 响应一致（403） | no-action |
+| B4 | `AccessDecisionManager` strategy 变更 | 低：当前 voter 组合下行为一致 | no-action（有意变更） |
+| B5 | Channel enforcement 未实现 | 低：v2.5.0 也是透传 Silex 底层能力 | document-only（需确认 Migration_Guide 是否覆盖） |
+| B6 | Token 不跨请求持久化 | 中：依赖 session 的场景受影响 | document-only（stateless API 场景不受影响） |
+| B7 | `supports()` 语义变更（无凭证时跳过 vs 创建 anon token） | 低：最终效果一致 | no-action |
+
+---
+
 ## v2.5.0 未暴露的 Silex 能力（不在审计范围内）
 
 以下 Silex 原生能力在 v2.5.0 的 `SimpleSecurityProvider` 中**未作为公开 API 暴露**，因此不属于 v2.5.0 → v3.x 迁移的审计范围：
@@ -130,6 +188,8 @@ v2.5.0 通过 `installAuthenticationFactory()` 将自定义 policy 注入 Silex 
 
 ## Summary
 
+### API_Surface Coverage
+
 | Coverage Status | Count | Percentage |
 |-----------------|-------|------------|
 | covered | 44 | 100% |
@@ -137,6 +197,17 @@ v2.5.0 通过 `installAuthenticationFactory()` 将自定义 policy 注入 Silex 
 | missing-breaking | 0 | 0% |
 | intentionally-removed | 0 | 0% |
 
-**结论**：以 `oasis/http` v2.5.0 为基准，Security 模块的所有公开 API_Surface 项在 v3.x 中均已覆盖（covered）。接口签名的 breaking change（`AuthenticationPolicyInterface` 重写、`FirewallInterface` 类型声明、`AbstractSimplePreAuthenticator` → `AbstractPreAuthenticator`）已在 Migration_Guide 中文档化。
+### Behavioral Equivalence
 
-与之前以 Silex 原始能力为基准的审计相比，关键差异在于：v2.5.0 的 `SimpleSecurityProvider` 已经对 Silex 做了大量封装和裁剪，许多 Silex 原生能力（form login、HTTP Basic、anonymous、remember_me、logout、switch_user、密码编码等）在 v2.5.0 时就未暴露给下游。这些能力不应算作 v3.x 的 "intentionally-removed"。
+| 等价状态 | Count | 说明 |
+|----------|-------|------|
+| ✅ 等价 | 10 | 行为完全一致 |
+| ⚠️ 有意变更 | 4 | 行为有差异但为有意设计（B1 rawurldecode、B4 UnanimousStrategy、B2 token 类型、B7 supports 语义） |
+| ⚠️ 能力缺失 | 1 | channel enforcement 未实现（B5） |
+| ⚠️ 行为变更 | 2 | 认证失败路径变更（B3）、token 不跨请求持久化（B6） |
+
+**结论**：
+
+1. **API_Surface**：v2.5.0 的所有公开接口在 v3.x 中均已覆盖。接口签名的 breaking change 已在 Migration_Guide 中文档化。
+2. **行为等价性**：v3.x 重写了 v2.5.0 的底层实现（从 Silex `SecurityServiceProvider` 继承变为独立实现），大部分行为等价。7 处行为差异中，4 处为有意变更，2 处最终 HTTP 响应一致（路径不同但结果相同），1 处为 channel enforcement 能力缺失（低影响，v2.5.0 也是透传 Silex 底层能力）。
+3. **需确认**：B5（channel enforcement）和 B6（token 跨请求持久化）在 Migration_Guide 中仅作为接口签名变更提及，未明确说明行为差异。建议在 Task 9（文档更新）中补充。

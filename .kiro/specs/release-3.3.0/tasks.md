@@ -72,8 +72,8 @@
     - _Requirements: R3-AC3, R3-AC4, R3-AC5_
   - [x] 2.4 Checkpoint: 运行全量测试，确认 Routing 场景测试全部通过、回归测试全部通过（如有）、现有测试无回归。Commit message: `test(routing): behavior audit + scenario tests for release 3.3.0`
 
-- [ ] 3. Middleware 模块：行为审计 + 场景测试 + 修复
-  - [ ] 3.1 编写 Middleware 场景测试（`tests/Middlewares/MiddlewareScenarioTest.php`）
+- [-] 3. Middleware 模块：行为审计 + 场景测试 + 修复
+  - [x] 3.1 编写 Middleware 场景测试（`tests/Middlewares/MiddlewareScenarioTest.php`）
     - 继承 `ScenarioTestCase`
     - `testBeforeMiddlewareExecution`：before middleware 在 controller 前执行
     - `testAfterMiddlewareExecution`：after middleware 在 controller 后执行，可修改 response
@@ -82,20 +82,20 @@
     - `testMasterRequestOnlyFiltering`：`onlyForMasterRequest() = true` → main request 执行，sub-request 不执行
     - `testMiddlewareExceptionBehavior`：before middleware 抛异常 → Error_Handler_Chain 被调用
     - _Requirements: R6-AC1, R6-AC2, R6-AC3, R6-AC4, R6-AC5, R6-AC6_
-  - [ ] 3.2 执行 Middleware 模块行为审计
+  - [x] 3.2 执行 Middleware 模块行为审计
     - 基于 `oasis/http` v2.5.0（tag `v2.5.0`）+ Silex 2.3.0 的整体实现作为审计基准
     - 枚举 v2.5.0 Middleware 相关代码暴露的 API_Surface（`SilexKernel::before/after` 覆写、`MiddlewareInterface`、`AbstractMiddleware`、priority ordering、master-request-only filtering、short-circuit behavior）
     - **接口存在性审计**：逐项对比 v3.x Middleware_Chain 实现，分类为 covered / missing-non-breaking / missing-breaking
     - **行为等价性审计**：对比 v2.5.0 和 v3.x 的运行时行为差异（event listener 注册方式、priority 映射、short-circuit 机制、after middleware 的 response 修改时机等）
     - 产出 Audit_Matrix 到 `.kiro/specs/release-3.3.0/middleware-audit-matrix.md`
     - _Requirements: R5-AC1, R5-AC2, R5-AC6_
-  - [ ] 3.3 修复 Middleware 模块缺失能力（如有）+ 回归测试
+  - [x] 3.3 修复 Middleware 模块缺失能力（如有）+ 回归测试
     - 如审计发现 missing-non-breaking 能力 → 修复代码恢复到 Silex 等价行为
     - 如有修复 → 编写 `tests/Middlewares/MiddlewareFixRegressionTest.php` 专项回归测试
     - 如审计发现 missing-breaking / intentionally-removed → 文档化或确认已标注
     - 如审计未发现需修复的能力 → 跳过本 sub-task
     - _Requirements: R5-AC3, R5-AC4, R5-AC5_
-  - [ ] 3.4 Checkpoint: 运行全量测试，确认 Middleware 场景测试全部通过、回归测试全部通过（如有）、现有测试无回归。Commit message: `test(middleware): behavior audit + scenario tests for release 3.3.0`
+  - [-] 3.4 Checkpoint: 运行全量测试，确认 Middleware 场景测试全部通过、回归测试全部通过（如有）、现有测试无回归。Commit message: `test(middleware): behavior audit + scenario tests for release 3.3.0`
 
 - [ ] 4. CORS 模块：行为审计 + 场景测试 + 修复
   - [ ] 4.1 编写 CORS 场景测试（`tests/Cors/CorsScenarioTest.php`）

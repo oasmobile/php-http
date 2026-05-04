@@ -76,6 +76,7 @@
         </testsuite>
         <testsuite name="middlewares">
             <file>tests/Middlewares/AbstractMiddlewareTest.php</file>
+            <file>tests/Middlewares/MiddlewareScenarioTest.php</file>
         </testsuite>
         <testsuite name="misc">
             <file>tests/Misc/ExtendedArgumentValueResolverTest.php</file>

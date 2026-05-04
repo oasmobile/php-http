@@ -2,112 +2,112 @@
 <phpunit
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
-        bootstrap="ut/bootstrap.php"
+        bootstrap="tests/bootstrap.php"
 >
     <testsuites>
         <testsuite name="exceptions">
-            <file>ut/Misc/UniquenessViolationHttpExceptionTest.php</file>
-            <file>ut/HttpExceptionTest.php</file>
+            <file>tests/Misc/UniquenessViolationHttpExceptionTest.php</file>
+            <file>tests/HttpExceptionTest.php</file>
         </testsuite>
         <testsuite name="cors">
-            <file>ut/Cors/CrossOriginResourceSharingTest.php</file>
-            <file>ut/Cors/CrossOriginResourceSharingAdvancedTest.php</file>
-            <file>ut/Cors/CrossOriginResourceSharingStrategyTest.php</file>
+            <file>tests/Cors/CrossOriginResourceSharingTest.php</file>
+            <file>tests/Cors/CrossOriginResourceSharingAdvancedTest.php</file>
+            <file>tests/Cors/CrossOriginResourceSharingStrategyTest.php</file>
         </testsuite>
         <testsuite name="security">
-            <file>ut/Security/SecurityServiceProviderTest.php</file>
-            <file>ut/Security/SecurityServiceProviderConfigurationTest.php</file>
-            <file>ut/Security/NullEntryPointTest.php</file>
-            <file>ut/Security/AccessRuleListenerTest.php</file>
-            <file>ut/Security/AbstractSimplePreAuthenticationPolicyTest.php</file>
-            <file>ut/Security/AbstractPreAuthenticatorTest.php</file>
-            <file>ut/Security/AbstractSimplePreAuthenticateUserProviderTest.php</file>
-            <file>ut/Security/SimpleAccessRuleSettersTest.php</file>
-            <file>ut/Security/SecurityScenarioTest.php</file>
+            <file>tests/Security/SecurityServiceProviderTest.php</file>
+            <file>tests/Security/SecurityServiceProviderConfigurationTest.php</file>
+            <file>tests/Security/NullEntryPointTest.php</file>
+            <file>tests/Security/AccessRuleListenerTest.php</file>
+            <file>tests/Security/AbstractSimplePreAuthenticationPolicyTest.php</file>
+            <file>tests/Security/AbstractPreAuthenticatorTest.php</file>
+            <file>tests/Security/AbstractSimplePreAuthenticateUserProviderTest.php</file>
+            <file>tests/Security/SimpleAccessRuleSettersTest.php</file>
+            <file>tests/Security/SecurityScenarioTest.php</file>
         </testsuite>
         <testsuite name="twig">
-            <file>ut/Twig/TwigServiceProviderTest.php</file>
-            <file>ut/Twig/TwigServiceProviderConfigurationTest.php</file>
+            <file>tests/Twig/TwigServiceProviderTest.php</file>
+            <file>tests/Twig/TwigServiceProviderConfigurationTest.php</file>
         </testsuite>
         <testsuite name="aws">
-            <file>ut/AwsTests/ElbTrustedProxyTest.php</file>
+            <file>tests/AwsTests/ElbTrustedProxyTest.php</file>
         </testsuite>
         <testsuite name="error-handlers">
-            <file>ut/ErrorHandlers/WrappedExceptionInfoTest.php</file>
-            <file>ut/ErrorHandlers/ExceptionWrapperTest.php</file>
-            <file>ut/ErrorHandlers/JsonErrorHandlerTest.php</file>
+            <file>tests/ErrorHandlers/WrappedExceptionInfoTest.php</file>
+            <file>tests/ErrorHandlers/ExceptionWrapperTest.php</file>
+            <file>tests/ErrorHandlers/JsonErrorHandlerTest.php</file>
         </testsuite>
         <testsuite name="configuration">
-            <file>ut/Configuration/HttpConfigurationTest.php</file>
-            <file>ut/Configuration/SecurityConfigurationTest.php</file>
-            <file>ut/Configuration/CrossOriginResourceSharingConfigurationTest.php</file>
-            <file>ut/Configuration/TwigConfigurationTest.php</file>
-            <file>ut/Configuration/CacheableRouterConfigurationTest.php</file>
-            <file>ut/Configuration/SimpleAccessRuleConfigurationTest.php</file>
-            <file>ut/Configuration/SimpleFirewallConfigurationTest.php</file>
-            <file>ut/Configuration/ConfigurationValidationTraitTest.php</file>
+            <file>tests/Configuration/HttpConfigurationTest.php</file>
+            <file>tests/Configuration/SecurityConfigurationTest.php</file>
+            <file>tests/Configuration/CrossOriginResourceSharingConfigurationTest.php</file>
+            <file>tests/Configuration/TwigConfigurationTest.php</file>
+            <file>tests/Configuration/CacheableRouterConfigurationTest.php</file>
+            <file>tests/Configuration/SimpleAccessRuleConfigurationTest.php</file>
+            <file>tests/Configuration/SimpleFirewallConfigurationTest.php</file>
+            <file>tests/Configuration/ConfigurationValidationTraitTest.php</file>
         </testsuite>
         <testsuite name="views">
-            <file>ut/Views/AbstractSmartViewHandlerTest.php</file>
-            <file>ut/Views/JsonViewHandlerTest.php</file>
-            <file>ut/Views/DefaultHtmlRendererTest.php</file>
-            <file>ut/Views/JsonApiRendererTest.php</file>
-            <file>ut/Views/PrefilightResponseTest.php</file>
-            <file>ut/Views/RouteBasedResponseRendererResolverTest.php</file>
+            <file>tests/Views/AbstractSmartViewHandlerTest.php</file>
+            <file>tests/Views/JsonViewHandlerTest.php</file>
+            <file>tests/Views/DefaultHtmlRendererTest.php</file>
+            <file>tests/Views/JsonApiRendererTest.php</file>
+            <file>tests/Views/PrefilightResponseTest.php</file>
+            <file>tests/Views/RouteBasedResponseRendererResolverTest.php</file>
         </testsuite>
         <testsuite name="routing">
-            <file>ut/Routing/GroupUrlMatcherTest.php</file>
-            <file>ut/Routing/GroupUrlGeneratorTest.php</file>
-            <file>ut/Routing/CacheableRouterUrlMatcherWrapperTest.php</file>
-            <file>ut/Routing/InheritableRouteCollectionTest.php</file>
-            <file>ut/Routing/InheritableYamlFileLoaderTest.php</file>
-            <file>ut/Routing/CacheableRouterTest.php</file>
-            <file>ut/Routing/CacheableRouterProviderTest.php</file>
-            <file>ut/Routing/MicroKernelRouteInjectionTest.php</file>
-            <file>ut/Routing/MicroKernelRoutePreservationTest.php</file>
-            <file>ut/Routing/FrozenRouteCollectionTest.php</file>
-            <file>ut/Routing/MicroKernelRouteInjectionIntegrationTest.php</file>
-            <file>ut/Routing/RouteCacheIsolationTest.php</file>
+            <file>tests/Routing/GroupUrlMatcherTest.php</file>
+            <file>tests/Routing/GroupUrlGeneratorTest.php</file>
+            <file>tests/Routing/CacheableRouterUrlMatcherWrapperTest.php</file>
+            <file>tests/Routing/InheritableRouteCollectionTest.php</file>
+            <file>tests/Routing/InheritableYamlFileLoaderTest.php</file>
+            <file>tests/Routing/CacheableRouterTest.php</file>
+            <file>tests/Routing/CacheableRouterProviderTest.php</file>
+            <file>tests/Routing/MicroKernelRouteInjectionTest.php</file>
+            <file>tests/Routing/MicroKernelRoutePreservationTest.php</file>
+            <file>tests/Routing/FrozenRouteCollectionTest.php</file>
+            <file>tests/Routing/MicroKernelRouteInjectionIntegrationTest.php</file>
+            <file>tests/Routing/RouteCacheIsolationTest.php</file>
         </testsuite>
         <testsuite name="cookie">
-            <file>ut/Cookie/ResponseCookieContainerTest.php</file>
-            <file>ut/Cookie/SimpleCookieProviderTest.php</file>
+            <file>tests/Cookie/ResponseCookieContainerTest.php</file>
+            <file>tests/Cookie/SimpleCookieProviderTest.php</file>
         </testsuite>
         <testsuite name="middlewares">
-            <file>ut/Middlewares/AbstractMiddlewareTest.php</file>
+            <file>tests/Middlewares/AbstractMiddlewareTest.php</file>
         </testsuite>
         <testsuite name="misc">
-            <file>ut/Misc/ExtendedArgumentValueResolverTest.php</file>
-            <file>ut/Misc/ExtendedExceptionListnerWrapperTest.php</file>
-            <file>ut/Misc/ChainedParameterBagDataProviderTest.php</file>
+            <file>tests/Misc/ExtendedArgumentValueResolverTest.php</file>
+            <file>tests/Misc/ExtendedExceptionListnerWrapperTest.php</file>
+            <file>tests/Misc/ChainedParameterBagDataProviderTest.php</file>
         </testsuite>
         <testsuite name="integration">
-            <file>ut/Integration/BootstrapConfigurationIntegrationTest.php</file>
-            <file>ut/Integration/SecurityAuthenticationFlowIntegrationTest.php</file>
-            <file>ut/Integration/SilexKernelCrossCommunityIntegrationTest.php</file>
+            <file>tests/Integration/BootstrapConfigurationIntegrationTest.php</file>
+            <file>tests/Integration/SecurityAuthenticationFlowIntegrationTest.php</file>
+            <file>tests/Integration/SilexKernelCrossCommunityIntegrationTest.php</file>
         </testsuite>
         <testsuite name="SilexKernelTest">
-            <file>ut/SilexKernelTest.php</file>
-            <file>ut/MicroKernelSupplementaryTest.php</file>
+            <file>tests/SilexKernelTest.php</file>
+            <file>tests/MicroKernelSupplementaryTest.php</file>
         </testsuite>
         <testsuite name="SilexKernelWebTest">
-            <file>ut/SilexKernelWebTest.php</file>
+            <file>tests/SilexKernelWebTest.php</file>
         </testsuite>
         <testsuite name="FallbackViewHandlerTest">
-            <file>ut/FallbackViewHandlerTest.php</file>
+            <file>tests/FallbackViewHandlerTest.php</file>
         </testsuite>
         <testsuite name="migration-guide-validation">
-            <file>ut/MigrationGuideValidationTest.php</file>
+            <file>tests/MigrationGuideValidationTest.php</file>
         </testsuite>
         <testsuite name="migrate-check-unit">
-            <file>ut/MigrateCheckScriptTest.php</file>
+            <file>tests/MigrateCheckScriptTest.php</file>
         </testsuite>
         <testsuite name="migrate-check-pbt">
-            <file>ut/PBT/MigrateCheckPropertyTest.php</file>
+            <file>tests/PBT/MigrateCheckPropertyTest.php</file>
         </testsuite>
         <testsuite name="pbt">
-            <directory>ut/PBT</directory>
-            <exclude>ut/PBT/MigrateCheckPropertyTest.php</exclude>
+            <directory>tests/PBT</directory>
+            <exclude>tests/PBT/MigrateCheckPropertyTest.php</exclude>
         </testsuite>
     </testsuites>
     <source>

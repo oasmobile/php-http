@@ -42,7 +42,7 @@
     },
     "autoload-dev"     : {
         "psr-4": {
-            "Oasis\\Mlib\\Http\\Test\\": "ut/"
+            "Oasis\\Mlib\\Http\\Test\\": "tests/"
         }
     },
     "bin": [

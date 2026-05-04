@@ -10,7 +10,7 @@
  * Usage: php test-task-13.php
  */
 
-require_once __DIR__ . '/../../../../ut/bootstrap.php';
+require_once __DIR__ . '/../../../../tests/bootstrap.php';
 
 use Oasis\Mlib\Http\ErrorHandlers\ExceptionWrapper;
 use Oasis\Mlib\Http\ErrorHandlers\JsonErrorHandler;
@@ -105,7 +105,7 @@ try {
         [
             'cache_dir'      => $cacheDir1,
             'routing'        => [
-                'path'       => __DIR__ . '/../../../../ut/routes.yml',
+                'path'       => __DIR__ . '/../../../../tests/routes.yml',
                 'namespaces' => ['Oasis\\Mlib\\Http\\Test\\Helpers\\Controllers\\'],
             ],
             'view_handlers'  => [new JsonViewHandler()],
@@ -210,7 +210,7 @@ try {
         [
             'cache_dir'      => $cacheDir2,
             'routing'        => [
-                'path'       => __DIR__ . '/../../../../ut/routes.yml',
+                'path'       => __DIR__ . '/../../../../tests/routes.yml',
                 'namespaces' => ['Oasis\\Mlib\\Http\\Test\\Helpers\\Controllers\\'],
             ],
             'view_handlers'  => [new JsonViewHandler()],
@@ -259,7 +259,7 @@ try {
         [
             'cache_dir'      => $cacheDir2b,
             'routing'        => [
-                'path'       => __DIR__ . '/../../../../ut/routes.yml',
+                'path'       => __DIR__ . '/../../../../tests/routes.yml',
                 'namespaces' => ['Oasis\\Mlib\\Http\\Test\\Helpers\\Controllers\\'],
             ],
             'view_handlers'  => [new JsonViewHandler()],
@@ -312,7 +312,7 @@ try {
         [
             'cache_dir'      => $cacheDir3,
             'routing'        => [
-                'path'       => __DIR__ . '/../../../../ut/routes.yml',
+                'path'       => __DIR__ . '/../../../../tests/routes.yml',
                 'namespaces' => ['Oasis\\Mlib\\Http\\Test\\Helpers\\Controllers\\'],
             ],
             'view_handlers'  => [new JsonViewHandler()],
@@ -400,7 +400,7 @@ try {
         [
             'cache_dir'      => $cacheDir4,
             'routing'        => [
-                'path'       => __DIR__ . '/../../../../ut/fallback-test.routes.yml',
+                'path'       => __DIR__ . '/../../../../tests/fallback-test.routes.yml',
                 'namespaces' => ['Oasis\\Mlib\\Http\\Test\\Helpers\\Controllers\\'],
             ],
             'view_handlers'  => [$viewHandlerCallable4],
@@ -466,7 +466,7 @@ try {
         [
             'cache_dir'      => $cacheDir5,
             'routing'        => [
-                'path'       => __DIR__ . '/../../../../ut/fallback-test.routes.yml',
+                'path'       => __DIR__ . '/../../../../tests/fallback-test.routes.yml',
                 'namespaces' => ['Oasis\\Mlib\\Http\\Test\\Helpers\\Controllers\\'],
             ],
             'view_handlers'  => [$viewHandlerCallable5],
@@ -528,7 +528,7 @@ try {
         [
             'cache_dir'      => $cacheDir5c,
             'routing'        => [
-                'path'       => __DIR__ . '/../../../../ut/fallback-test.routes.yml',
+                'path'       => __DIR__ . '/../../../../tests/fallback-test.routes.yml',
                 'namespaces' => ['Oasis\\Mlib\\Http\\Test\\Helpers\\Controllers\\'],
             ],
             'view_handlers'  => [new JsonViewHandler()],
@@ -572,7 +572,7 @@ try {
         [
             'cache_dir'      => $cacheDir6,
             'routing'        => [
-                'path'       => __DIR__ . '/../../../../ut/routes.yml',
+                'path'       => __DIR__ . '/../../../../tests/routes.yml',
                 'namespaces' => ['Oasis\\Mlib\\Http\\Test\\Helpers\\Controllers\\'],
             ],
             'view_handlers'  => [new JsonViewHandler()],
@@ -626,7 +626,7 @@ try {
         [
             'cache_dir' => $cacheDir7,
             'twig'      => [
-                'template_dir' => __DIR__ . '/../../../../ut/Integration/templates',
+                'template_dir' => __DIR__ . '/../../../../tests/Integration/templates',
             ],
         ],
         true
@@ -656,11 +656,11 @@ try {
         [
             'cache_dir'      => $cacheDir7c,
             'routing'        => [
-                'path'       => __DIR__ . '/../../../../ut/routes.yml',
+                'path'       => __DIR__ . '/../../../../tests/routes.yml',
                 'namespaces' => ['Oasis\\Mlib\\Http\\Test\\Helpers\\Controllers\\'],
             ],
             'twig'           => [
-                'template_dir' => __DIR__ . '/../../../../ut/Twig/templates',
+                'template_dir' => __DIR__ . '/../../../../tests/Twig/templates',
                 'asset_base'   => 'http://example.com/assets',
             ],
             'view_handlers'  => [new JsonViewHandler()],
@@ -711,11 +711,11 @@ try {
         [
             'cache_dir'          => $cacheDir8,
             'routing'            => [
-                'path'       => __DIR__ . '/../../../../ut/routes.yml',
+                'path'       => __DIR__ . '/../../../../tests/routes.yml',
                 'namespaces' => ['Oasis\\Mlib\\Http\\Test\\Helpers\\Controllers\\'],
             ],
             'twig'               => [
-                'template_dir' => __DIR__ . '/../../../../ut/Twig/templates',
+                'template_dir' => __DIR__ . '/../../../../tests/Twig/templates',
                 'asset_base'   => 'http://example.com/assets',
             ],
             'cors'               => [

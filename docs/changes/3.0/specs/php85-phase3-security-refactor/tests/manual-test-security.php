@@ -25,8 +25,8 @@ use Symfony\Component\HttpKernel\HttpKernelInterface;
  */
 function createApp(string $projectRoot): \Oasis\Mlib\Http\MicroKernel
 {
-    $cacheDir = $projectRoot . '/ut/cache/manual-test-' . uniqid();
-    $app = require $projectRoot . '/ut/Integration/app.integration-security.php';
+    $cacheDir = $projectRoot . '/tests/cache/manual-test-' . uniqid();
+    $app = require $projectRoot . '/tests/Integration/app.integration-security.php';
     return $app;
 }
 

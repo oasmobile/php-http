@@ -101,7 +101,7 @@ require 'vendor/autoload.php';
 \$config = [
     'cache_dir' => sys_get_temp_dir() . '/oasis-mt7-strict-' . getmypid(),
     'twig' => [
-        'template_dir' => __DIR__ . '/ut/Twig/templates',
+        'template_dir' => __DIR__ . '/tests/Twig/templates',
     ],
 ];
 
@@ -147,7 +147,7 @@ require 'vendor/autoload.php';
 \$config = [
     'cache_dir' => sys_get_temp_dir() . '/oasis-mt7-auto-d-' . getmypid(),
     'twig' => [
-        'template_dir' => __DIR__ . '/ut/Twig/templates',
+        'template_dir' => __DIR__ . '/tests/Twig/templates',
     ],
 ];
 
@@ -172,7 +172,7 @@ require 'vendor/autoload.php';
 \$config = [
     'cache_dir' => sys_get_temp_dir() . '/oasis-mt7-auto-nd-' . getmypid(),
     'twig' => [
-        'template_dir' => __DIR__ . '/ut/Twig/templates',
+        'template_dir' => __DIR__ . '/tests/Twig/templates',
     ],
 ];
 

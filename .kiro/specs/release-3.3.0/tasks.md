@@ -6,8 +6,8 @@
 
 ## Tasks
 
-- [-] 1. Security 模块：行为审计 + 场景测试 + 修复
-  - [x] 1.1 实现 `ScenarioTestCase` 基类（`ut/Helpers/ScenarioTestCase.php`）
+- [x] 1. Security 模块：行为审计 + 场景测试 + 修复
+  - [x] 1.1 实现 `ScenarioTestCase` 基类（`tests/Helpers/ScenarioTestCase.php`）
     - 继承 `PHPUnit\Framework\TestCase`
     - 封装 `buildKernel(array $config, bool $isDebug = false): MicroKernel`
     - 封装 `handleRequest(MicroKernel $kernel, string $method, string $uri, array $parameters = [], array $server = []): Response`
@@ -17,7 +17,7 @@
     - 提供 `createTempCacheDir(): string`
     - `tearDown()` 中自动 shutdown kernel 并清理缓存
     - _Requirements: R2（基础设施）_
-  - [x] 1.2 编写 Security 场景测试（`ut/Security/SecurityScenarioTest.php`）
+  - [x] 1.2 编写 Security 场景测试（`tests/Security/SecurityScenarioTest.php`）
     - 继承 `ScenarioTestCase`
     - `testCompleteAuthenticationFlow`：firewall with pre_auth policy → boot → 发请求 → 验证 `getToken()` 返回 `PostAuthenticationToken`，`getUser()` 返回认证用户
     - `testAuthenticationFailure`：invalid credentials → token 为 null，access rule 决定结果
@@ -35,16 +35,16 @@
     - _Requirements: R1-AC1, R1-AC2, R1-AC6_
   - [x] 1.4 修复 Security 模块缺失能力（如有）+ 回归测试
     - 如审计发现 missing-non-breaking 能力 → 修复代码恢复到 Silex 等价行为
-    - 如有修复 → 编写 `ut/Security/SecurityFixRegressionTest.php` 专项回归测试
+    - 如有修复 → 编写 `tests/Security/SecurityFixRegressionTest.php` 专项回归测试
     - 如审计发现 missing-breaking 能力 → 文档化到 `docs/manual/migration-v3.md`
     - 如审计发现 intentionally-removed 能力 → 确认 Migration_Guide 已标注
     - 如审计未发现需修复的能力 → 跳过本 sub-task
     - _Requirements: R1-AC3, R1-AC4, R1-AC5_
-  - [-] 1.5 Checkpoint: 运行 `php vendor/bin/phpunit --testsuite security`（或全量测试），确认 Security 场景测试全部通过、回归测试全部通过（如有）、现有测试无回归。Commit message: `test(security): behavior audit + scenario tests for release 3.3.0`
+  - [x] 1.5 Checkpoint: 运行 `php vendor/bin/phpunit --testsuite security`（或全量测试），确认 Security 场景测试全部通过、回归测试全部通过（如有）、现有测试无回归。Commit message: `test(security): behavior audit + scenario tests for release 3.3.0`
 
 
-- [~] 2. Routing 模块：行为审计 + 场景测试 + 修复
-  - [ ] 2.1 编写 Routing 场景测试（`ut/Routing/RoutingScenarioTest.php`）
+- [ ] 2. Routing 模块：行为审计 + 场景测试 + 修复
+  - [ ] 2.1 编写 Routing 场景测试（`tests/Routing/RoutingScenarioTest.php`）
     - 继承 `ScenarioTestCase`
     - `testYamlRouteLoadingAndMatching`：`routing.path` → boot → 发请求 → 正确 controller 被调用
     - `testProgrammaticRouteInjection`：`addRoute()` before boot → 注入路由可匹配
@@ -63,7 +63,7 @@
     - _Requirements: R3-AC1, R3-AC2, R3-AC6_
   - [ ] 2.3 修复 Routing 模块缺失能力（如有）+ 回归测试
     - 如审计发现 missing-non-breaking 能力 → 修复代码恢复到 Silex 等价行为
-    - 如有修复 → 编写 `ut/Routing/RoutingFixRegressionTest.php` 专项回归测试
+    - 如有修复 → 编写 `tests/Routing/RoutingFixRegressionTest.php` 专项回归测试
     - 如审计发现 missing-breaking 能力 → 文档化到 `docs/manual/migration-v3.md`
     - 如审计发现 intentionally-removed 能力 → 确认 Migration_Guide 已标注
     - 如审计未发现需修复的能力 → 跳过本 sub-task
@@ -71,7 +71,7 @@
   - [ ] 2.4 Checkpoint: 运行全量测试，确认 Routing 场景测试全部通过、回归测试全部通过（如有）、现有测试无回归。Commit message: `test(routing): behavior audit + scenario tests for release 3.3.0`
 
 - [ ] 3. Middleware 模块：行为审计 + 场景测试 + 修复
-  - [ ] 3.1 编写 Middleware 场景测试（`ut/Middlewares/MiddlewareScenarioTest.php`）
+  - [ ] 3.1 编写 Middleware 场景测试（`tests/Middlewares/MiddlewareScenarioTest.php`）
     - 继承 `ScenarioTestCase`
     - `testBeforeMiddlewareExecution`：before middleware 在 controller 前执行
     - `testAfterMiddlewareExecution`：after middleware 在 controller 后执行，可修改 response
@@ -88,14 +88,14 @@
     - _Requirements: R5-AC1, R5-AC2, R5-AC6_
   - [ ] 3.3 修复 Middleware 模块缺失能力（如有）+ 回归测试
     - 如审计发现 missing-non-breaking 能力 → 修复代码恢复到 Silex 等价行为
-    - 如有修复 → 编写 `ut/Middlewares/MiddlewareFixRegressionTest.php` 专项回归测试
+    - 如有修复 → 编写 `tests/Middlewares/MiddlewareFixRegressionTest.php` 专项回归测试
     - 如审计发现 missing-breaking / intentionally-removed → 文档化或确认已标注
     - 如审计未发现需修复的能力 → 跳过本 sub-task
     - _Requirements: R5-AC3, R5-AC4, R5-AC5_
   - [ ] 3.4 Checkpoint: 运行全量测试，确认 Middleware 场景测试全部通过、回归测试全部通过（如有）、现有测试无回归。Commit message: `test(middleware): behavior audit + scenario tests for release 3.3.0`
 
 - [ ] 4. CORS 模块：行为审计 + 场景测试 + 修复
-  - [ ] 4.1 编写 CORS 场景测试（`ut/Cors/CorsScenarioTest.php`）
+  - [ ] 4.1 编写 CORS 场景测试（`tests/Cors/CorsScenarioTest.php`）
     - 继承 `ScenarioTestCase`
     - `testPreflightRequestHandling`：OPTIONS + `Access-Control-Request-Method` → preflight response with `Access-Control-Allow-*` headers
     - `testNormalCorsRequest`：cross-origin GET → `Access-Control-Allow-Origin` header
@@ -112,7 +112,7 @@
     - _Requirements: R7-AC1, R7-AC2, R7-AC6_
   - [ ] 4.3 修复 CORS 模块缺失能力（如有）+ 回归测试
     - 如审计发现 missing-non-breaking 能力 → 修复代码恢复到 Silex 等价行为
-    - 如有修复 → 编写 `ut/Cors/CorsFixRegressionTest.php` 专项回归测试
+    - 如有修复 → 编写 `tests/Cors/CorsFixRegressionTest.php` 专项回归测试
     - 如审计发现 missing-breaking / intentionally-removed → 文档化或确认已标注
     - 如审计未发现需修复的能力 → 跳过本 sub-task
     - _Requirements: R7-AC3, R7-AC4, R7-AC5_
@@ -120,7 +120,7 @@
 
 
 - [ ] 5. Error Handling 模块：行为审计 + 场景测试 + 修复
-  - [ ] 5.1 编写 Error Handling 场景测试（`ut/ErrorHandlers/ErrorHandlerScenarioTest.php`）
+  - [ ] 5.1 编写 Error Handling 场景测试（`tests/ErrorHandlers/ErrorHandlerScenarioTest.php`）
     - 继承 `ScenarioTestCase`
     - `testCustomErrorHandler`：`error_handlers` 配置 → handler 接收异常 → 返回自定义 Response
     - `testErrorHandlerChainOrdering`：多个 error handler → 按注册顺序调用，第一个返回 Response 的短路
@@ -136,14 +136,14 @@
     - _Requirements: R9-AC1, R9-AC2, R9-AC6_
   - [ ] 5.3 修复 Error Handling 模块缺失能力（如有）+ 回归测试
     - 如审计发现 missing-non-breaking 能力 → 修复代码恢复到 Silex 等价行为
-    - 如有修复 → 编写 `ut/ErrorHandlers/ErrorHandlerFixRegressionTest.php` 专项回归测试
+    - 如有修复 → 编写 `tests/ErrorHandlers/ErrorHandlerFixRegressionTest.php` 专项回归测试
     - 如审计发现 missing-breaking / intentionally-removed → 文档化或确认已标注
     - 如审计未发现需修复的能力 → 跳过本 sub-task
     - _Requirements: R9-AC3, R9-AC4, R9-AC5_
   - [ ] 5.4 Checkpoint: 运行全量测试，确认 Error Handling 场景测试全部通过、回归测试全部通过（如有）、现有测试无回归。Commit message: `test(error-handling): behavior audit + scenario tests for release 3.3.0`
 
 - [ ] 6. Twig 模块：行为审计 + 场景测试 + 修复
-  - [ ] 6.1 编写 Twig 场景测试（`ut/Twig/TwigScenarioTest.php`）
+  - [ ] 6.1 编写 Twig 场景测试（`tests/Twig/TwigScenarioTest.php`）
     - 继承 `ScenarioTestCase`
     - `testTwigTemplateRendering`：twig config + template path → boot → controller 渲染模板 → response body 包含渲染内容
     - `testTwigAbsence`：无 `twig` key → `getTwig()` 返回 null
@@ -159,14 +159,14 @@
     - _Requirements: R11-AC1, R11-AC2, R11-AC6_
   - [ ] 6.3 修复 Twig 模块缺失能力（如有）+ 回归测试
     - 如审计发现 missing-non-breaking 能力 → 修复代码恢复到 Silex 等价行为
-    - 如有修复 → 编写 `ut/Twig/TwigFixRegressionTest.php` 专项回归测试
+    - 如有修复 → 编写 `tests/Twig/TwigFixRegressionTest.php` 专项回归测试
     - 如审计发现 missing-breaking / intentionally-removed → 文档化或确认已标注
     - 如审计未发现需修复的能力 → 跳过本 sub-task
     - _Requirements: R11-AC3, R11-AC4, R11-AC5_
   - [ ] 6.4 Checkpoint: 运行全量测试，确认 Twig 场景测试全部通过、回归测试全部通过（如有）、现有测试无回归。Commit message: `test(twig): behavior audit + scenario tests for release 3.3.0`
 
 - [ ] 7. Cookie 模块：行为审计 + 场景测试 + 修复
-  - [ ] 7.1 编写 Cookie 场景测试（`ut/Cookie/CookieScenarioTest.php`）
+  - [ ] 7.1 编写 Cookie 场景测试（`tests/Cookie/CookieScenarioTest.php`）
     - 继承 `ScenarioTestCase`
     - `testCookieWriting`：controller 添加 cookie → response `Set-Cookie` header 包含 cookie
     - `testResponseCookieContainerInjection`：`SimpleCookieProvider` 配置 → `ResponseCookieContainer` 可作为 controller 参数
@@ -181,14 +181,14 @@
     - _Requirements: R13-AC1, R13-AC2, R13-AC6_
   - [ ] 7.3 修复 Cookie 模块缺失能力（如有）+ 回归测试
     - 如审计发现 missing-non-breaking 能力 → 修复代码恢复到 Silex 等价行为
-    - 如有修复 → 编写 `ut/Cookie/CookieFixRegressionTest.php` 专项回归测试
+    - 如有修复 → 编写 `tests/Cookie/CookieFixRegressionTest.php` 专项回归测试
     - 如审计发现 missing-breaking / intentionally-removed → 文档化或确认已标注
     - 如审计未发现需修复的能力 → 跳过本 sub-task
     - _Requirements: R13-AC3, R13-AC4, R13-AC5_
   - [ ] 7.4 Checkpoint: 运行全量测试，确认 Cookie 场景测试全部通过、回归测试全部通过（如有）、现有测试无回归。Commit message: `test(cookie): behavior audit + scenario tests for release 3.3.0`
 
 - [ ] 8. MicroKernel 聚合层：汇总审计 + 场景测试
-  - [ ] 8.1 编写 MicroKernel 聚合层场景测试（`ut/Integration/MicroKernelAggregationScenarioTest.php`）
+  - [ ] 8.1 编写 MicroKernel 聚合层场景测试（`tests/Integration/MicroKernelAggregationScenarioTest.php`）
     - 继承 `ScenarioTestCase`
     - `testFullPipelineTraversal`：routing + security + CORS + middleware + view handler + error handler → 完整 pipeline 产出预期 response
     - `testMinimalConfiguration`：仅 `routing` config → 基本 request-response 正常
@@ -207,7 +207,7 @@
     - _Requirements: R15-AC1, R15-AC2, R15-AC3, R15-AC4, R15-AC5, R15-AC6_
   - [ ] 8.3 修复聚合层缺失能力（如有）+ 回归测试
     - 如汇总审计发现 missing-non-breaking 能力 → 修复代码
-    - 如有修复 → 编写 `ut/Integration/MicroKernelAggregationFixRegressionTest.php` 专项回归测试
+    - 如有修复 → 编写 `tests/Integration/MicroKernelAggregationFixRegressionTest.php` 专项回归测试
     - 如审计发现 missing-breaking / intentionally-removed → 文档化或确认已标注
     - 如审计未发现需修复的能力 → 跳过本 sub-task
     - _Requirements: R15-AC5_

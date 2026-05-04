@@ -5,6 +5,7 @@ namespace Oasis\Mlib\Http\Test\Routing;
 
 use Oasis\Mlib\Http\MicroKernel;
 use Oasis\Mlib\Http\ServiceProviders\Routing\CacheableRouter;
+use Oasis\Mlib\Http\ServiceProviders\Routing\FrozenRouteCollection;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\Routing\Route;
@@ -209,5 +210,115 @@ class CacheableRouterTest extends TestCase
         $route  = $result->get('test');
 
         $this->assertSame('no_placeholders_here', $route->getDefault('plain'));
+    }
+
+    //----------------------------------------------------------------------
+    // freeze() — getRouteCollection() returns FrozenRouteCollection
+    //----------------------------------------------------------------------
+
+    public function testFreezeReturnsInstanceOfFrozenRouteCollection()
+    {
+        $collection = new RouteCollection();
+        $collection->add('test', new Route('/test', [
+            '_controller' => 'TestController::action',
+        ]));
+
+        $router = $this->createRouter($collection, []);
+        $router->freeze();
+        $result = $router->getRouteCollection();
+
+        $this->assertInstanceOf(FrozenRouteCollection::class, $result);
+    }
+
+    //----------------------------------------------------------------------
+    // freeze() — add() throws LogicException
+    //----------------------------------------------------------------------
+
+    public function testFreezeThrowsLogicExceptionOnAdd()
+    {
+        $collection = new RouteCollection();
+        $collection->add('test', new Route('/test', [
+            '_controller' => 'TestController::action',
+        ]));
+
+        $router = $this->createRouter($collection, []);
+        $router->freeze();
+        $frozen = $router->getRouteCollection();
+
+        $this->expectException(\LogicException::class);
+        $frozen->add('new_route', new Route('/new'));
+    }
+
+    //----------------------------------------------------------------------
+    // no freeze — getRouteCollection() returns plain RouteCollection
+    //----------------------------------------------------------------------
+
+    public function testWithoutFreezeReturnsPlainRouteCollection()
+    {
+        $collection = new RouteCollection();
+        $collection->add('test', new Route('/test', [
+            '_controller' => 'TestController::action',
+        ]));
+
+        $router = $this->createRouter($collection, []);
+        $result = $router->getRouteCollection();
+
+        $this->assertNotInstanceOf(FrozenRouteCollection::class, $result);
+        $this->assertInstanceOf(RouteCollection::class, $result);
+    }
+
+    //----------------------------------------------------------------------
+    // freeze() — read-only operations work normally
+    //----------------------------------------------------------------------
+
+    public function testFreezeAllowsReadOnlyOperations()
+    {
+        $collection = new RouteCollection();
+        $collection->add('route_a', new Route('/a', ['_controller' => 'A::action']));
+        $collection->add('route_b', new Route('/b', ['_controller' => 'B::action']));
+
+        $router = $this->createRouter($collection, []);
+        $router->freeze();
+        $frozen = $router->getRouteCollection();
+
+        // get() returns known route
+        $this->assertNotNull($frozen->get('route_a'));
+        $this->assertSame('/a', $frozen->get('route_a')->getPath());
+
+        // all() returns all routes
+        $all = $frozen->all();
+        $this->assertCount(2, $all);
+        $this->assertArrayHasKey('route_a', $all);
+        $this->assertArrayHasKey('route_b', $all);
+
+        // count() returns correct number
+        $this->assertSame(2, $frozen->count());
+
+        // getIterator() is iterable
+        $names = [];
+        foreach ($frozen as $name => $route) {
+            $names[] = $name;
+        }
+        $this->assertSame(['route_a', 'route_b'], $names);
+    }
+
+    //----------------------------------------------------------------------
+    // freeze() — multiple calls return same FrozenRouteCollection instance
+    //----------------------------------------------------------------------
+
+    public function testFreezeReturnsSameCachedInstance()
+    {
+        $collection = new RouteCollection();
+        $collection->add('test', new Route('/test', [
+            '_controller' => 'TestController::action',
+        ]));
+
+        $router = $this->createRouter($collection, []);
+        $router->freeze();
+
+        $first  = $router->getRouteCollection();
+        $second = $router->getRouteCollection();
+
+        $this->assertSame($first, $second, 'Multiple getRouteCollection() calls after freeze() should return the same cached FrozenRouteCollection instance');
     }
 }

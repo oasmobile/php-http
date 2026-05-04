@@ -53,6 +53,15 @@ class IntegrationController
         ];
     }
 
+    public function securedAuthenticated(MicroKernel $app)
+    {
+        return [
+            'called'         => __CLASS__ . '::' . __FUNCTION__ . '()',
+            'user'           => $app->getUser()->getUsername(),
+            'authenticated'  => $app->isGranted('IS_AUTHENTICATED_FULLY'),
+        ];
+    }
+
     public function publicAction()
     {
         return [

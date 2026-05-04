@@ -48,6 +48,7 @@
 | `SilexKernel` → `MicroKernel` | [3. Kernel API](#3-kernel-api) |
 | `MicroKernel` 构造函数签名变更 | [3. Kernel API](#3-kernel-api) |
 | `SilexKernel::__set()` 移除 | [3. Kernel API](#3-kernel-api) |
+| `SilexKernel::before()` / `after()` / `error()` 移除 | [3. Kernel API](#3-kernel-api) |
 | Pimple DI 容器移除 | [4. DI Container](#4-di-container) |
 | `$app['xxx']` 访问模式移除 | [4. DI Container](#4-di-container) |
 | `Pimple\ServiceProviderInterface` → `CompilerPassInterface`/`ExtensionInterface` | [4. DI Container](#4-di-container) |
@@ -370,6 +371,44 @@ $kernel->customService = new MyService();
 ```
 
 **操作**：移除所有对 kernel 的动态属性赋值。改用 Bootstrap Config 的 `providers` key 或 Symfony DI 机制注册服务（参见 [4. DI Container](#4-di-container)）。
+
+### 🔴 `SilexKernel::before()` / `after()` / `error()` 便捷方法移除
+
+**影响**：Silex Application 继承的三个便捷方法已移除，不再支持直接在 kernel 上注册回调。
+
+**Before**:
+
+```php
+$kernel->before(function (Request $request, Application $app) {
+    // before filter
+}, $priority, $masterRequestOnly);
+
+$kernel->after(function (Request $request, Response $response, Application $app) {
+    // after filter
+}, $priority, $masterRequestOnly);
+
+$kernel->error(function (\Exception $e, Request $request, $code) {
+    // error handler
+}, $priority);
+```
+
+**After**:
+
+```php
+// before / after → 实现 MiddlewareInterface，通过 addMiddleware() 注册
+$kernel->addMiddleware(new MyMiddleware());
+
+// error → 通过 Bootstrap Config 的 error_handlers key 传入
+$config = [
+    'error_handlers' => [
+        function (\Throwable $e, Request $request, int $code) {
+            // error handler
+        },
+    ],
+];
+```
+
+**操作**：将 `before()` / `after()` 回调迁移为 `MiddlewareInterface` 实现（参见 [8. Middleware](#8-middleware)）。将 `error()` 回调迁移到 Bootstrap Config 的 `error_handlers` 数组。
 
 ### 公共 API 方法列表
 
@@ -1286,6 +1325,9 @@ class MyClass
 |--------|--------|----------|
 | `SilexKernel` | `MicroKernel` | 🔴 |
 | `SilexKernel::__set()` | 移除 | 🔴 |
+| `SilexKernel::before()` | 移除，改用 `addMiddleware()` | 🔴 |
+| `SilexKernel::after()` | 移除，改用 `addMiddleware()` | 🔴 |
+| `SilexKernel::error()` | 移除，改用 Bootstrap Config `error_handlers` | 🔴 |
 | `Pimple\Container` | Symfony DI `ContainerBuilder` | 🔴 |
 | `$app['xxx']` | `$kernel->getXxx()` / Symfony DI | 🔴 |
 | `Pimple\ServiceProviderInterface` | `CompilerPassInterface` / `ExtensionInterface` | 🔴 |

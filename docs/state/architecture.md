@@ -20,7 +20,7 @@ src/
 ├── ChainedParameterBagDataProvider.php # 链式参数包数据提供者
 ├── Configuration/                     # Symfony Config 定义（校验 bootstrap 数组）
 ├── ServiceProviders/
-│   ├── Routing/                       # 可缓存路由（YAML → Symfony Routing）
+│   ├── Routing/                       # 可缓存路由（YAML → Symfony Routing）+ FrozenRouteCollection（boot 后只读包装）
 │   ├── Security/                      # 安全：Firewall + Policy + AccessRule
 │   ├── Cors/                          # CORS 策略与 preflight 处理
 │   ├── Twig/                          # Twig 模板集成

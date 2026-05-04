@@ -16,12 +16,15 @@ use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\Config\Resource\FileResource;
 use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\Route;
+use Symfony\Component\Routing\RouteCollection;
 use Symfony\Component\Routing\Router;
 
 class CacheableRouter extends Router
 {
     private MicroKernel $kernel;
     private bool $isParamReplaced = false;
+    private bool $frozen = false;
+    private ?FrozenRouteCollection $frozenCollection = null;
     
     /**
      * CacheableRouter constructor.
@@ -45,7 +48,17 @@ class CacheableRouter extends Router
         $this->kernel = $kernel;
     }
     
-    public function getRouteCollection(): \Symfony\Component\Routing\RouteCollection
+    /**
+     * Freeze the route collection. After calling this method, getRouteCollection()
+     * will return a FrozenRouteCollection that rejects all write operations.
+     */
+    public function freeze(): void
+    {
+        $this->frozen = true;
+        $this->frozenCollection = null;
+    }
+    
+    public function getRouteCollection(): RouteCollection
     {
         $collection = parent::getRouteCollection();
         if (!$this->isParamReplaced) {
@@ -72,6 +85,13 @@ class CacheableRouter extends Router
             }
             $collection->addResource(new FileResource(__FILE__));
             $this->isParamReplaced = true;
+        }
+        
+        if ($this->frozen) {
+            if ($this->frozenCollection === null) {
+                $this->frozenCollection = new FrozenRouteCollection($collection);
+            }
+            return $this->frozenCollection;
         }
         
         return $collection;

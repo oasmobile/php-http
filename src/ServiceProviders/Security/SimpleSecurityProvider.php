@@ -26,7 +26,7 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 use Symfony\Component\Security\Core\Authorization\AccessDecisionManager;
 use Symfony\Component\Security\Core\Authorization\AccessDecisionManagerInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
-use Symfony\Component\Security\Core\Authorization\Strategy\UnanimousStrategy;
+use Symfony\Component\Security\Core\Authorization\Strategy\AffirmativeStrategy;
 use Symfony\Component\Security\Core\Authorization\Voter\AuthenticatedVoter;
 use Symfony\Component\Security\Core\Authorization\Voter\RoleHierarchyVoter;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
@@ -149,7 +149,7 @@ class SimpleSecurityProvider
         $roleHierarchy = new RoleHierarchy($this->getRoleHierarchy());
         $roleHierarchyVoter = new RoleHierarchyVoter($roleHierarchy);
         $authenticatedVoter = new AuthenticatedVoter(new AuthenticationTrustResolver());
-        $accessDecisionManager = new AccessDecisionManager([$authenticatedVoter, $roleHierarchyVoter], new UnanimousStrategy());
+        $accessDecisionManager = new AccessDecisionManager([$authenticatedVoter, $roleHierarchyVoter], new AffirmativeStrategy());
         $authorizationChecker = new AuthorizationChecker($tokenStorage, $accessDecisionManager);
         $kernel->setAuthorizationChecker($authorizationChecker);
         

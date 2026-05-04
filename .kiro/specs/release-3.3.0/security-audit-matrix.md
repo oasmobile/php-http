@@ -94,7 +94,7 @@ v2.5.0 通过 `installAuthenticationFactory()` 将自定义 policy 注入 Silex 
 | `RoleHierarchy` 配置和创建 | role_hierarchy | covered | `SimpleSecurityProvider::register()` | no-action | — |
 | `RoleHierarchyVoter` 自动注册 | role_hierarchy | covered | `SimpleSecurityProvider::register()` | no-action | — |
 | `AuthenticatedVoter` 自动注册 | authentication | covered | `SimpleSecurityProvider::register()` | no-action | ISS-3.2-L01 修复后恢复 |
-| `AccessDecisionManager` 创建 | access_rule | covered | `SimpleSecurityProvider::register()` | no-action | v2.5.0 使用 Silex 默认的 `AffirmativeBased`，v3.x 使用 `UnanimousStrategy`——行为差异但为有意设计 |
+| `AccessDecisionManager` 创建 | access_rule | covered | `SimpleSecurityProvider::register()` | no-action | 已修复为 `AffirmativeStrategy`，与 v2.5.0 行为一致 |
 | `AuthorizationChecker` 创建 | access_rule | covered | `SimpleSecurityProvider::register()` | no-action | — |
 
 ## SilexKernel Security API
@@ -134,7 +134,7 @@ v2.5.0 通过 `installAuthenticationFactory()` 将自定义 policy 注入 Silex 
 
 | 行为 | v2.5.0 | v3.x | 等价？ | 说明 |
 |------|--------|------|--------|------|
-| `AccessDecisionManager` strategy | Silex 默认 `AffirmativeBased`（任一 voter grant → allow） | `UnanimousStrategy`（所有 voter 必须 grant → allow） | ⚠️ 有意变更 | 当前 voter 列表为 `[AuthenticatedVoter, RoleHierarchyVoter]`。对于角色检查，`AuthenticatedVoter` 对 `ROLE_*` 属性 abstain，`RoleHierarchyVoter` 决定。对于 `IS_AUTHENTICATED_FULLY`，`AuthenticatedVoter` 决定，`RoleHierarchyVoter` abstain。两种 strategy 在当前 voter 组合下**行为一致**——因为每次只有一个 voter 实际投票，另一个 abstain。差异仅在自定义 voter 场景下才会显现，而 v3.x 不支持自定义 voter |
+| `AccessDecisionManager` strategy | Silex 默认 `AffirmativeBased`（任一 voter grant → allow） | `AffirmativeStrategy`（与 v2.5.0 一致） | ✅ 已修复 | 原为 `UnanimousStrategy`（非有意选择），已改回 `AffirmativeStrategy` 以保持行为等价 |
 | Access rule `channel` enforcement | Silex `ChannelListener` 强制 http/https redirect | v3.x 不强制 channel 检查 | ⚠️ 能力缺失 | `AccessRuleInterface::getRequiredChannel()` 配置项保留，但 v3.x 的 `registerAccessRuleListener()` 未读取 `$channel` 值做任何处理。如果 v2.5.0 下游使用了 channel enforcement（`'https'`），v3.x 不会 redirect。**但**：v2.5.0 的 channel enforcement 来自 Silex 的 `ChannelListener`，不是 `SimpleSecurityProvider` 自己实现的。v2.5.0 的 `subscribe()` 中也没有额外处理 channel。所以这个能力实际上是 Silex 底层提供的，v2.5.0 只是透传了配置。v3.x 保留了配置接口但未实现 enforcement |
 
 ### Firewall Scope & Sub-request Handling
@@ -158,7 +158,7 @@ v2.5.0 通过 `installAuthenticationFactory()` 将自定义 policy 注入 Silex 
 | B1 | Pattern matching 额外 `rawurldecode()` | 低：仅影响含 URL 编码字符的路径 | no-action（有意改进） |
 | B2 | Token 类型从 `PreAuthenticatedToken` 变为 `PostAuthenticationToken` | 中：下游 `instanceof` 检查需更新 | document-only（已在 Migration_Guide §7） |
 | B3 | 认证失败路径变更（`ExceptionListener` → 直接抛异常） | 低：最终 HTTP 响应一致（403） | no-action |
-| B4 | `AccessDecisionManager` strategy 变更 | 低：当前 voter 组合下行为一致 | no-action（有意变更） |
+| B4 | `AccessDecisionManager` strategy 变更 | 低：当前 voter 组合下行为一致 | fix-code（改回 `AffirmativeStrategy` 以保持行为等价） |
 | B5 | Channel enforcement 未实现 | 低：v2.5.0 也是透传 Silex 底层能力 | document-only（需确认 Migration_Guide 是否覆盖） |
 | B6 | Token 不跨请求持久化 | 中：依赖 session 的场景受影响 | document-only（stateless API 场景不受影响） |
 | B7 | `supports()` 语义变更（无凭证时跳过 vs 创建 anon token） | 低：最终效果一致 | no-action |
@@ -201,13 +201,13 @@ v2.5.0 通过 `installAuthenticationFactory()` 将自定义 policy 注入 Silex 
 
 | 等价状态 | Count | 说明 |
 |----------|-------|------|
-| ✅ 等价 | 10 | 行为完全一致 |
-| ⚠️ 有意变更 | 4 | 行为有差异但为有意设计（B1 rawurldecode、B4 UnanimousStrategy、B2 token 类型、B7 supports 语义） |
+| ✅ 等价 | 11 | 行为完全一致（含 B4 修复后） |
+| ⚠️ 有意变更 | 3 | 行为有差异但为有意设计（B1 rawurldecode、B2 token 类型、B7 supports 语义） |
 | ⚠️ 能力缺失 | 1 | channel enforcement 未实现（B5） |
 | ⚠️ 行为变更 | 2 | 认证失败路径变更（B3）、token 不跨请求持久化（B6） |
 
 **结论**：
 
 1. **API_Surface**：v2.5.0 的所有公开接口在 v3.x 中均已覆盖。接口签名的 breaking change 已在 Migration_Guide 中文档化。
-2. **行为等价性**：v3.x 重写了 v2.5.0 的底层实现（从 Silex `SecurityServiceProvider` 继承变为独立实现），大部分行为等价。7 处行为差异中，4 处为有意变更，2 处最终 HTTP 响应一致（路径不同但结果相同），1 处为 channel enforcement 能力缺失（低影响，v2.5.0 也是透传 Silex 底层能力）。
+2. **行为等价性**：v3.x 重写了 v2.5.0 的底层实现（从 Silex `SecurityServiceProvider` 继承变为独立实现），大部分行为等价。发现 7 处行为差异：1 处已修复（B4 `AffirmativeStrategy`），3 处为有意变更，2 处最终 HTTP 响应一致（路径不同但结果相同），1 处为 channel enforcement 能力缺失（低影响）。
 3. **需确认**：B5（channel enforcement）和 B6（token 跨请求持久化）在 Migration_Guide 中仅作为接口签名变更提及，未明确说明行为差异。建议在 Task 9（文档更新）中补充。

@@ -3,10 +3,10 @@
 | 字段 | 值 |
 |------|-----|
 | Severity | `[P2] minor` |
-| Status | `open` |
+| Status | `closed` |
 | Found In | `v3.0` |
-| Fixed In | |
-| Related Test | |
+| Fixed In | `v3.2.0` |
+| Related Test | `ut/Routing/MicroKernelRouteInjectionTest.php`, `ut/Routing/FrozenRouteCollectionTest.php` |
 
 ---
 
@@ -49,3 +49,4 @@ boot 后对 RouteCollection 的写操作应抛出异常，明确拒绝修改。
 ## History
 
 - `2026-05-04T08:00Z` `v3.0` [发现] boot 后路由修改静默无效
+- `2026-05-05T00:00Z` `v3.2.0` [修复] boot 后写操作抛出 `LogicException`（双层冻结：MicroKernel 层 + FrozenRouteCollection 层）

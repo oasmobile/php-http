@@ -1,8 +1,16 @@
-# Migration Guide: oasis/http v2.x → v3.0
+# Migration Guide: oasis/http v2.x → v3.x
 
-`oasis/http` v3.0 完成了从 Silex 到 Symfony MicroKernel 的全面迁移，PHP 最低版本从 `>=7.0.0` 提升到 `>=8.5`。本文档面向下游消费者，按模块分章节描述所有 breaking change 及适配方法。
+`oasis/http` v3.x 完成了从 Silex 到 Symfony MicroKernel 的全面迁移，PHP 最低版本从 `>=7.0.0` 提升到 `>=8.5`。本文档面向下游消费者，按模块分章节描述所有 breaking change 及适配方法。
 
-**适用范围**：从 `oasis/http` v2.x（基于 Silex / Symfony 4.x / PHP 7.x）升级到 v3.0（基于 Symfony MicroKernel / Symfony 7.2 / PHP 8.5）。
+**适用范围**：从 `oasis/http` v2.x（基于 Silex / Symfony 4.x / PHP 7.x）升级到 v3.x（基于 Symfony MicroKernel / Symfony 8.x / PHP 8.5）。
+
+**版本演进**：
+
+| 版本 | 关键变更 |
+|------|----------|
+| v3.0 | Silex → Symfony MicroKernel 全面迁移 |
+| v3.1 | Symfony 组件 `^7.2` → `^8.0` |
+| v3.2 | 编程式路由注入 API + boot 后路由冻结 |
 
 **严重程度标注**：
 
@@ -41,7 +49,7 @@
 |------|------|
 | PHP `>=7.0.0` → `>=8.5` | [1. PHP Version](#1-php-version) |
 | 移除 `silex/silex`、`silex/providers`、`twig/extensions` | [2. Dependencies](#2-dependencies) |
-| Symfony `^4.0` → `^7.2` | [2. Dependencies](#2-dependencies) |
+| Symfony `^4.0` → `^8.0` | [2. Dependencies](#2-dependencies) |
 | `twig/twig` `^1.24` → `^3.0` | [2. Dependencies](#2-dependencies) |
 | `guzzlehttp/guzzle` `^6.3` → `^7.0` | [2. Dependencies](#2-dependencies) |
 | `oasis/logging` `^1.1` → `^3.0`、`oasis/utils` `^1.6` → `^3.0` | [2. Dependencies](#2-dependencies) |
@@ -78,7 +86,8 @@
 
 | 变更 | 章节 |
 |------|------|
-| 路由迁移到 Symfony Routing 7.x | [6. Routing](#6-routing) |
+| 路由迁移到 Symfony Routing 8.x | [6. Routing](#6-routing) |
+| 编程式路由注入 API（v3.2 新增） | [6. Routing](#6-routing) |
 | CORS Provider → EventSubscriber | [11. CORS](#11-cors) |
 | Cookie Provider → EventSubscriber | [12. Cookie](#12-cookie) |
 | `NullEntryPoint` 适配 | [7. Security](#7-security) |
@@ -192,7 +201,7 @@
 
 ### 🔴 Symfony 组件升级
 
-**影响**：所有 Symfony 组件从 `^4.0` 升级到 `^7.2`。
+**影响**：所有 Symfony 组件从 `^4.0` 升级到 `^8.0`（v3.0 升级到 `^7.2`，v3.1 进一步升级到 `^8.0`）。
 
 **Before**:
 
@@ -214,17 +223,19 @@
 ```json
 {
     "require": {
-        "symfony/http-foundation": "^7.2",
-        "symfony/http-kernel": "^7.2",
-        "symfony/routing": "^7.2",
-        "symfony/event-dispatcher": "^7.2",
-        "symfony/security-core": "^7.2",
-        "symfony/security-http": "^7.2"
+        "symfony/http-foundation": "^8.0",
+        "symfony/http-kernel": "^8.0",
+        "symfony/routing": "^8.0",
+        "symfony/event-dispatcher": "^8.0",
+        "symfony/security-core": "^8.0",
+        "symfony/security-http": "^8.0"
     }
 }
 ```
 
-**操作**：`oasis/http` v3.0 已声明对 Symfony `^7.2` 的依赖，下游项目无需手动管理 Symfony 版本。如果下游项目直接依赖了 Symfony 组件，需将版本约束更新为 `^7.2`。
+**操作**：`oasis/http` v3.x 已声明对 Symfony `^8.0` 的依赖，下游项目无需手动管理 Symfony 版本。如果下游项目直接依赖了 Symfony 组件，需将版本约束更新为 `^8.0`。
+
+> **注意**：v3.1 将 Symfony 从 `^7.2` 升级到 `^8.0`，适配了 `AuthorizationCheckerInterface::isGranted()` 签名变更（新增 `?AccessDecision` 参数）和 `UserInterface::eraseCredentials()` 移除。如果下游代码直接使用了这些接口，需同步适配。
 
 ### 🔴 `twig/twig` 升级
 
@@ -600,9 +611,9 @@ $config = [
 
 ## 6. Routing
 
-### 🟢 路由迁移到 Symfony Routing 7.x
+### 🟢 路由迁移到 Symfony Routing 8.x
 
-**影响**：内部路由实现已迁移到 Symfony Routing 7.x，但 Bootstrap_Config 的 `routing` key 行为保持不变。
+**影响**：内部路由实现已迁移到 Symfony Routing 8.x，但 Bootstrap_Config 的 `routing` key 行为保持不变。
 
 **Before**:
 
@@ -627,7 +638,45 @@ $config = [
 ];
 ```
 
-**操作**：无需下游操作。路由注册机制迁移到 Symfony Routing 7.x，但路由配置格式和行为保持不变。
+**操作**：无需下游操作。路由注册机制迁移到 Symfony Routing 8.x，但路由配置格式和行为保持不变。
+
+### 🟢 编程式路由注入 API（v3.2 新增）
+
+**影响**：v3.2 新增 `MicroKernel::addRoute()` 和 `MicroKernel::addRoutes()` 方法，允许在 boot 前通过代码注入路由。这是新增 API，不影响现有 YAML 路由行为。
+
+**After**:
+
+```php
+use Oasis\Mlib\Http\MicroKernel;
+use Symfony\Component\Routing\Route;
+use Symfony\Component\Routing\RouteCollection;
+
+$kernel = new MicroKernel($config, $isDebug);
+
+// 单条注入
+$kernel->addRoute('health', new Route('/health', [
+    '_controller' => 'HealthController::check',
+]));
+
+// 批量注入
+$routes = new RouteCollection();
+$routes->add('api.users', new Route('/api/users', [
+    '_controller' => 'UserController::list',
+]));
+$kernel->addRoutes($routes);
+
+$kernel->run();
+```
+
+**行为说明**：
+
+- 编程式路由优先于 YAML 路由匹配（双层 matcher 架构，编程式 matcher 排在前面）
+- 编程式路由支持 Closure controller，不受 YAML 路由缓存的序列化限制
+- 无 YAML `routing` 配置时，仍可通过 `addRoute()` / `addRoutes()` 注入路由
+- boot 后路由表冻结：`addRoute()` / `addRoutes()` 抛出 `LogicException`
+- boot 后 `getRouter()->getRouteCollection()` 返回 `FrozenRouteCollection`，写操作（`add()` / `addCollection()` / `remove()`）抛出 `LogicException`
+
+**操作**：无需下游操作。这是纯新增 API，不影响现有代码。如果下游代码在 boot 后调用了 `getRouteCollection()->add()`（此前静默失效），v3.2 起会抛出 `LogicException`——这是有意的行为修正，应移除此类调用。
 
 ---
 
@@ -636,7 +685,7 @@ $config = [
 
 ### 🔴 `AuthenticationPolicyInterface` 重写
 
-**影响**：`AuthenticationPolicyInterface` 的方法签名已全面重写，适配 Symfony 7.x Security 组件。`SimpleSecurityProvider` 的 firewall / access rule 注册机制已适配新架构。
+**影响**：`AuthenticationPolicyInterface` 的方法签名已全面重写，适配 Symfony 8.x Security 组件。`SimpleSecurityProvider` 的 firewall / access rule 注册机制已适配新架构。
 
 **Before**:
 
@@ -670,11 +719,11 @@ interface AuthenticationPolicyInterface
 }
 ```
 
-**操作**：重写所有 `AuthenticationPolicyInterface` 实现。旧的 `getAuthenticationProvider()` + `getAuthenticationListener()` 合并为 `getAuthenticator()`，返回 Symfony 7.x `AuthenticatorInterface` 实例。新增 `getAuthenticatorConfig()` 方法。
+**操作**：重写所有 `AuthenticationPolicyInterface` 实现。旧的 `getAuthenticationProvider()` + `getAuthenticationListener()` 合并为 `getAuthenticator()`，返回 Symfony 8.x `AuthenticatorInterface` 实例。新增 `getAuthenticatorConfig()` 方法。
 
 ### 🔴 `FirewallInterface` 重写
 
-**影响**：`FirewallInterface` 方法签名更新，使用 PHP 8.x union type 和 Symfony 7.x 类型。
+**影响**：`FirewallInterface` 方法签名更新，使用 PHP 8.x union type 和 Symfony 8.x 类型。
 
 **Before**:
 
@@ -744,7 +793,7 @@ interface AccessRuleInterface
 
 ### 🔴 `AbstractSimplePreAuthenticator` → `AbstractPreAuthenticator`
 
-**影响**：`AbstractSimplePreAuthenticator` 已废弃（调用其方法会抛出 `LogicException`），替换为 `AbstractPreAuthenticator`。新类采用 template method pattern，实现 Symfony 7.x `AuthenticatorInterface`。
+**影响**：`AbstractSimplePreAuthenticator` 已废弃（调用其方法会抛出 `LogicException`），替换为 `AbstractPreAuthenticator`。新类采用 template method pattern，实现 Symfony 8.x `AuthenticatorInterface`。
 
 **Before**:
 
@@ -787,7 +836,7 @@ class MyAuthenticator extends AbstractPreAuthenticator
 
 ### 🔴 `AbstractSimplePreAuthenticateUserProvider` 适配
 
-**影响**：`AbstractSimplePreAuthenticateUserProvider` 已适配 Symfony 7.x `UserProviderInterface`，方法签名更新。
+**影响**：`AbstractSimplePreAuthenticateUserProvider` 已适配 Symfony 8.x `UserProviderInterface`，方法签名更新。
 
 **Before**:
 
@@ -896,7 +945,7 @@ class ApiKeyPolicy extends AbstractSimplePreAuthenticationPolicy
 
 ### 🟢 `NullEntryPoint` 适配
 
-**影响**：`NullEntryPoint` 已适配 Symfony 7.x `AuthenticationEntryPointInterface`，内部实现变更。
+**影响**：`NullEntryPoint` 已适配 Symfony 8.x `AuthenticationEntryPointInterface`，内部实现变更。
 
 **Before**:
 
@@ -1028,7 +1077,7 @@ $priority = MicroKernel::AFTER_PRIORITY_LATEST;      // -512
 
 ### 🔴 旧 Symfony 事件类移除
 
-**影响**：Symfony 4.x 的事件类已在 Symfony 7.x 中移除，替换为新的事件类。
+**影响**：Symfony 4.x 的事件类已在 Symfony 8.x 中移除，替换为新的事件类。
 
 **Before**:
 
@@ -1353,7 +1402,9 @@ class MyClass
 | `twig/extensions` | 移除（Twig 3.x 内置替代） | 🟡 |
 | `Type $param = null` | `?Type $param = null` | 🟡 |
 | 动态属性 | 显式属性声明 | 🟡 |
-| Routing 内部实现 | Symfony Routing 7.x | 🟢 |
+| Routing 内部实现 | Symfony Routing 8.x | 🟢 |
+| — | `MicroKernel::addRoute()` / `addRoutes()`（v3.2 新增） | 🟢 |
+| boot 后 `getRouteCollection()->add()` 静默失效 | 抛出 `LogicException`（v3.2 修正） | 🟢 |
 | CORS Provider | EventSubscriber | 🟢 |
 | Cookie Provider | EventSubscriber | 🟢 |
 | `NullEntryPoint` 内部实现 | 适配新 Security 架构 | 🟢 |
@@ -1414,9 +1465,9 @@ class MyClass
 
 ### 内部验证说明
 
-`oasis/http` v3.0 已完成以下内部验证：
+`oasis/http` v3.x 已完成以下内部验证：
 
 - 引入 PHPStan level 8 静态分析，零错误
-- 全量测试通过：510 tests, 16642 assertions
+- 全量测试通过：648 tests, 21788 assertions（v3.2.0）
 - 零 deprecation notice
 - `PROJECT.md`、`README.md`、`docs/state/`、`docs/manual/` 全面更新

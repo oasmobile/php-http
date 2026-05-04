@@ -72,7 +72,7 @@
     - _Requirements: R3-AC3, R3-AC4, R3-AC5_
   - [x] 2.4 Checkpoint: 运行全量测试，确认 Routing 场景测试全部通过、回归测试全部通过（如有）、现有测试无回归。Commit message: `test(routing): behavior audit + scenario tests for release 3.3.0`
 
-- [-] 3. Middleware 模块：行为审计 + 场景测试 + 修复
+- [x] 3. Middleware 模块：行为审计 + 场景测试 + 修复
   - [x] 3.1 编写 Middleware 场景测试（`tests/Middlewares/MiddlewareScenarioTest.php`）
     - 继承 `ScenarioTestCase`
     - `testBeforeMiddlewareExecution`：before middleware 在 controller 前执行
@@ -95,10 +95,10 @@
     - 如审计发现 missing-breaking / intentionally-removed → 文档化或确认已标注
     - 如审计未发现需修复的能力 → 跳过本 sub-task
     - _Requirements: R5-AC3, R5-AC4, R5-AC5_
-  - [-] 3.4 Checkpoint: 运行全量测试，确认 Middleware 场景测试全部通过、回归测试全部通过（如有）、现有测试无回归。Commit message: `test(middleware): behavior audit + scenario tests for release 3.3.0`
+  - [x] 3.4 Checkpoint: 运行全量测试，确认 Middleware 场景测试全部通过、回归测试全部通过（如有）、现有测试无回归。Commit message: `test(middleware): behavior audit + scenario tests for release 3.3.0`
 
-- [ ] 4. CORS 模块：行为审计 + 场景测试 + 修复
-  - [ ] 4.1 编写 CORS 场景测试（`tests/Cors/CorsScenarioTest.php`）
+- [-] 4. CORS 模块：行为审计 + 场景测试 + 修复
+  - [x] 4.1 编写 CORS 场景测试（`tests/Cors/CorsScenarioTest.php`）
     - 继承 `ScenarioTestCase`
     - `testPreflightRequestHandling`：OPTIONS + `Access-Control-Request-Method` → preflight response with `Access-Control-Allow-*` headers
     - `testNormalCorsRequest`：cross-origin GET → `Access-Control-Allow-Origin` header
@@ -107,20 +107,20 @@
     - `testCorsAndSecurityInteraction`：CORS + Security → preflight 不触发认证
     - `testNonMatchingOrigin`：不在 allowed list 的 origin → 无 `Access-Control-Allow-Origin` header
     - _Requirements: R8-AC1, R8-AC2, R8-AC3, R8-AC4, R8-AC5, R8-AC6_
-  - [ ] 4.2 执行 CORS 模块行为审计
+  - [x] 4.2 执行 CORS 模块行为审计
     - 基于 `oasis/http` v2.5.0（tag `v2.5.0`）+ Silex 2.3.0 的整体实现作为审计基准
     - 枚举 v2.5.0 CORS 相关代码暴露的 API_Surface（preflight detection、`Access-Control-*` header processing、strategy matching、origin validation、credentials support、max-age、Security interaction）
     - **接口存在性审计**：逐项对比 v3.x `CrossOriginResourceSharingProvider` 实现，分类为 covered / missing-non-breaking / missing-breaking
     - **行为等价性审计**：对比 v2.5.0 和 v3.x 的运行时行为差异（event listener priority、preflight response 生成逻辑、origin 匹配算法、与 Security firewall 的交互顺序等）
     - 产出 Audit_Matrix 到 `.kiro/specs/release-3.3.0/cors-audit-matrix.md`
     - _Requirements: R7-AC1, R7-AC2, R7-AC6_
-  - [ ] 4.3 修复 CORS 模块缺失能力（如有）+ 回归测试
+  - [x] 4.3 修复 CORS 模块缺失能力（如有）+ 回归测试
     - 如审计发现 missing-non-breaking 能力 → 修复代码恢复到 Silex 等价行为
     - 如有修复 → 编写 `tests/Cors/CorsFixRegressionTest.php` 专项回归测试
     - 如审计发现 missing-breaking / intentionally-removed → 文档化或确认已标注
     - 如审计未发现需修复的能力 → 跳过本 sub-task
     - _Requirements: R7-AC3, R7-AC4, R7-AC5_
-  - [ ] 4.4 Checkpoint: 运行全量测试，确认 CORS 场景测试全部通过、回归测试全部通过（如有）、现有测试无回归。Commit message: `test(cors): behavior audit + scenario tests for release 3.3.0`
+  - [-] 4.4 Checkpoint: 运行全量测试，确认 CORS 场景测试全部通过、回归测试全部通过（如有）、现有测试无回归。Commit message: `test(cors): behavior audit + scenario tests for release 3.3.0`
 
 
 - [ ] 5. Error Handling 模块：行为审计 + 场景测试 + 修复

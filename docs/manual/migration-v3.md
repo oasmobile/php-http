@@ -11,6 +11,7 @@
 | v3.0 | Silex → Symfony MicroKernel 全面迁移 |
 | v3.1 | Symfony 组件 `^7.2` → `^8.0` |
 | v3.2 | 编程式路由注入 API + boot 后路由冻结 |
+| v3.3 | 行为审计加固 + `isStateless()` 移除 + channel enforcement 行为变更文档化 |
 
 **严重程度标注**：
 
@@ -63,7 +64,9 @@
 | `providers` key 语义变更 | [5. Bootstrap Config](#5-bootstrap-config) |
 | `AuthenticationPolicyInterface` 重写 | [7. Security](#7-security) |
 | `FirewallInterface` 重写 | [7. Security](#7-security) |
+| `FirewallInterface::isStateless()` 移除（stateless-only 架构） | [7. Security](#7-security) |
 | `AccessRuleInterface` 重写 | [7. Security](#7-security) |
+| `AccessRuleInterface::getRequiredChannel()` channel enforcement 不再生效 | [7. Security](#7-security) |
 | `AbstractSimplePreAuthenticator` → `AbstractPreAuthenticator` | [7. Security](#7-security) |
 | `AbstractSimplePreAuthenticateUserProvider` 适配 | [7. Security](#7-security) |
 | `MiddlewareInterface::before()` 签名变更 | [8. Middleware](#8-middleware) |
@@ -723,7 +726,7 @@ interface AuthenticationPolicyInterface
 
 ### 🔴 `FirewallInterface` 重写
 
-**影响**：`FirewallInterface` 方法签名更新，使用 PHP 8.x union type 和 Symfony 8.x 类型。
+**影响**：`FirewallInterface` 方法签名更新，使用 PHP 8.x union type 和 Symfony 8.x 类型。`isStateless()` 方法已移除——v3.x 采用 stateless-only 架构，所有 firewall 均为无状态（不依赖 session 持久化 token）。
 
 **Before**:
 
@@ -749,14 +752,72 @@ use Symfony\Component\Security\Core\User\UserProviderInterface;
 interface FirewallInterface
 {
     public function getPattern(): string|RequestMatcherInterface;
-    public function isStateless(): bool;
     public function getPolicies(): array;
     public function getUserProvider(): array|UserProviderInterface;
     public function getOtherSettings(): array;
 }
 ```
 
-**操作**：更新所有 `FirewallInterface` 实现，添加返回类型声明，新增 `getOtherSettings()` 方法（可返回空数组）。
+**操作**：更新所有 `FirewallInterface` 实现，移除 `isStateless()` 方法，添加返回类型声明，新增 `getOtherSettings()` 方法（可返回空数组）。
+
+### 🔴 `FirewallInterface::isStateless()` 移除 — Stateless-Only 架构
+
+**影响**：v3.x 移除了 `FirewallInterface::isStateless()` 方法，`SimpleFirewall` 不再接受 `stateless` 配置项。v3.x 采用 stateless-only 架构：所有 firewall 均为无状态，不通过 session 持久化认证 token，每次请求都需要重新认证。
+
+**Before**（v2.x）:
+
+```php
+// v2.x 支持 stateless 和 non-stateless firewall
+$firewall = new SimpleFirewall([
+    'pattern' => '^/api',
+    'stateless' => true,  // 可选：true 跳过 ContextListener，false 通过 session 持久化 token
+    'policies' => ['pre_auth' => true],
+    'users' => $userProvider,
+]);
+```
+
+**After**（v3.x）:
+
+```php
+// v3.x 所有 firewall 均为 stateless，无需配置
+$firewall = new SimpleFirewall([
+    'pattern' => '^/api',
+    'policies' => ['pre_auth' => true],
+    'users' => $userProvider,
+]);
+```
+
+**操作**：移除 `FirewallInterface` 实现中的 `isStateless()` 方法和 `stateless` 配置项。如果下游代码依赖 session 持久化认证 token（`stateless = false`），v3.x 会表现为"每次请求都需要重新认证"——对于 stateless API 场景（每次请求都带凭证）无影响。
+
+### 🔴 `AccessRuleInterface::getRequiredChannel()` — Channel Enforcement 行为变更
+
+**影响**：`AccessRuleInterface::getRequiredChannel()` 方法保留，但 v3.x 的 access rule listener 不再执行 channel enforcement（HTTP/HTTPS 强制重定向）。v2.x 中此能力由 Silex 底层的 `ChannelListener` 提供，v3.x 未实现等价的 channel enforcement 逻辑。
+
+**Before**（v2.x）:
+
+```php
+// v2.x 中 getRequiredChannel() 返回 'https' 时，
+// Silex ChannelListener 会将 HTTP 请求 301 redirect 到 HTTPS
+$rule = new SimpleAccessRule([
+    'pattern' => '^/secure',
+    'roles' => 'ROLE_USER',
+    'channel' => 'https',  // 强制 HTTPS
+]);
+```
+
+**After**（v3.x）:
+
+```php
+// v3.x 中 getRequiredChannel() 配置项保留，但不执行 channel enforcement
+// 如果需要 HTTPS 强制，应在 web server / load balancer 层面配置
+$rule = new SimpleAccessRule([
+    'pattern' => '^/secure',
+    'roles' => 'ROLE_USER',
+    'channel' => 'https',  // 配置项保留但不生效
+]);
+```
+
+**操作**：如果下游代码依赖 `getRequiredChannel()` 的 channel enforcement 行为（HTTP → HTTPS 重定向），需要将此逻辑迁移到 web server 或 load balancer 层面（如 Nginx `return 301 https://...` 或 AWS ALB redirect rule）。对于已在基础设施层面强制 HTTPS 的部署环境，无需操作。
 
 ### 🔴 `AccessRuleInterface` 重写
 
@@ -1382,8 +1443,10 @@ class MyClass
 | `Pimple\ServiceProviderInterface` | `CompilerPassInterface` / `ExtensionInterface` | 🔴 |
 | `Silex\Api\BootableProviderInterface` | 移除 | 🔴 |
 | `AuthenticationPolicyInterface` (旧签名) | `AuthenticationPolicyInterface` (新签名) | 🔴 |
-| `FirewallInterface` (旧签名) | `FirewallInterface` (新签名) | 🔴 |
+| `FirewallInterface` (旧签名) | `FirewallInterface` (新签名，移除 `isStateless()`) | 🔴 |
+| `FirewallInterface::isStateless()` | 移除（stateless-only 架构） | 🔴 |
 | `AccessRuleInterface` (旧签名) | `AccessRuleInterface` (新签名) | 🔴 |
+| `AccessRuleInterface::getRequiredChannel()` channel enforcement | 配置项保留但不执行 enforcement | 🔴 |
 | `AbstractSimplePreAuthenticator` | `AbstractPreAuthenticator` | 🔴 |
 | `AbstractSimplePreAuthenticateUserProvider` (旧签名) | `AbstractSimplePreAuthenticateUserProvider` (新签名) | 🔴 |
 | `MiddlewareInterface::before(Request, Application)` | `MiddlewareInterface::before(Request, MicroKernel)` | 🔴 |

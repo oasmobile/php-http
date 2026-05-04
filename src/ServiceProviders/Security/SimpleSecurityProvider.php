@@ -20,12 +20,14 @@ use Symfony\Component\HttpFoundation\RequestMatcherInterface;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\KernelEvents;
+use Symfony\Component\Security\Core\Authentication\AuthenticationTrustResolver;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authorization\AccessDecisionManager;
 use Symfony\Component\Security\Core\Authorization\AccessDecisionManagerInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 use Symfony\Component\Security\Core\Authorization\Strategy\UnanimousStrategy;
+use Symfony\Component\Security\Core\Authorization\Voter\AuthenticatedVoter;
 use Symfony\Component\Security\Core\Authorization\Voter\RoleHierarchyVoter;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\Role\RoleHierarchy;
@@ -146,7 +148,8 @@ class SimpleSecurityProvider
         // Configure RoleHierarchy + AccessDecisionManager
         $roleHierarchy = new RoleHierarchy($this->getRoleHierarchy());
         $roleHierarchyVoter = new RoleHierarchyVoter($roleHierarchy);
-        $accessDecisionManager = new AccessDecisionManager([$roleHierarchyVoter], new UnanimousStrategy());
+        $authenticatedVoter = new AuthenticatedVoter(new AuthenticationTrustResolver());
+        $accessDecisionManager = new AccessDecisionManager([$authenticatedVoter, $roleHierarchyVoter], new UnanimousStrategy());
         $authorizationChecker = new AuthorizationChecker($tokenStorage, $accessDecisionManager);
         $kernel->setAuthorizationChecker($authorizationChecker);
         

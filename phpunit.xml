@@ -66,6 +66,7 @@
             <file>ut/Routing/MicroKernelRoutePreservationTest.php</file>
             <file>ut/Routing/FrozenRouteCollectionTest.php</file>
             <file>ut/Routing/MicroKernelRouteInjectionIntegrationTest.php</file>
+            <file>ut/Routing/RouteCacheIsolationTest.php</file>
         </testsuite>
         <testsuite name="cookie">
             <file>ut/Cookie/ResponseCookieContainerTest.php</file>

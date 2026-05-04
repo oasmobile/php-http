@@ -658,16 +658,44 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
             $routerProvider->register($this);
             $this->routerProvider = $routerProvider;
 
-            // Merge pending routes before building matcher (before getMatcher() compiles)
+            // ── Dual-matcher architecture ──
+            // Programmatic routes use a separate in-memory UrlMatcher (no cache compilation).
+            // YAML routes go through CacheableRouter's compiled cache path (unchanged).
+            // GroupUrlMatcher combines both, with programmatic matcher first (priority).
+            $matchers   = [];
+            $generators = [];
+
             if ($hasPendingRoutes) {
-                $router     = $routerProvider->getRouter($requestContext);
-                $collection = $router->getRouteCollection();
-                $this->mergePendingRoutes($collection);
+                // Build programmatic routes into an independent collection + matcher.
+                // These routes are NOT merged into the YAML RouteCollection before
+                // cache compilation, so Closures won't cause serialization errors
+                // and cache files contain only YAML routes.
+                $programmaticCollection = new RouteCollection();
+                $this->mergePendingRoutes($programmaticCollection);
+
+                $programmaticMatcher = new UrlMatcher($programmaticCollection, $requestContext);
+                $matchers[]   = $programmaticMatcher;  // programmatic first → priority
+                $generators[] = new UrlGenerator($programmaticCollection, $requestContext);
             }
 
-            // Build routing services
-            $this->requestMatcher = $routerProvider->buildRequestMatcher($requestContext);
-            $this->urlGenerator   = $routerProvider->buildUrlGenerator($requestContext);
+            // Build YAML routing services (compiles cache with YAML routes only)
+            $yamlMatcher = $routerProvider->buildRequestMatcher($requestContext);
+            $matchers[]   = $yamlMatcher;
+            $generators[] = $routerProvider->buildUrlGenerator($requestContext);
+
+            // After cache compilation, merge programmatic routes into the
+            // CacheableRouter's RouteCollection for read-only access via
+            // getRouter()->getRouteCollection(). This does NOT affect the
+            // already-compiled cached matcher.
+            if ($hasPendingRoutes) {
+                $cacheableRouter = $routerProvider->getRouter($requestContext);
+                $yamlCollection  = $cacheableRouter->getRouteCollection();
+                $this->mergePendingRoutes($yamlCollection);
+            }
+
+            // Combine matchers and generators
+            $this->requestMatcher = new GroupUrlMatcher($requestContext, $matchers);
+            $this->urlGenerator   = new GroupUrlGenerator($generators);
 
             // Freeze the CacheableRouter's RouteCollection
             $cacheableRouter = $routerProvider->getRouter($requestContext);

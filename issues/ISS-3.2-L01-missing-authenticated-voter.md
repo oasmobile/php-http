@@ -3,9 +3,9 @@
 | 字段 | 值 |
 |------|-----|
 | Severity | `[P1] major` |
-| Status | `open` |
+| Status | `closed` |
 | Found In | `v3.2.0` |
-| Fixed In | |
+| Fixed In | `v3.2.1` |
 | Related Test | |
 
 ---
@@ -64,4 +64,5 @@ $accessDecisionManager = new AccessDecisionManager(
 
 ## History
 
+- `2026-05-05T12:00Z` `v3.2.0` [修复] hotfix/3.2.1 分支修复，添加 `AuthenticatedVoter` 到 `AccessDecisionManager`
 - `2026-05-05T12:00Z` `v3.2.0` [发现] 用户报告 `isGranted('IS_AUTHENTICATED_FULLY')` 在认证成功后仍返回 `false`

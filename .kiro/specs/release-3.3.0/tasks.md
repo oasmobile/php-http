@@ -194,7 +194,7 @@
     - _Requirements: R13-AC3, R13-AC4, R13-AC5_
   - [x] 7.4 Checkpoint: 运行全量测试，确认 Cookie 场景测试全部通过、回归测试全部通过（如有）、现有测试无回归。Commit message: `test(cookie): behavior audit + scenario tests for release 3.3.0`
 
-- [-] 8. MicroKernel 聚合层：汇总审计 + 场景测试
+- [x] 8. MicroKernel 聚合层：汇总审计 + 场景测试
   - [x] 8.1 编写 MicroKernel 聚合层场景测试（`tests/Integration/MicroKernelAggregationScenarioTest.php`）
     - 继承 `ScenarioTestCase`
     - `testFullPipelineTraversal`：routing + security + CORS + middleware + view handler + error handler → 完整 pipeline 产出预期 response
@@ -220,11 +220,11 @@
     - 如审计发现 missing-breaking / intentionally-removed → 文档化或确认已标注
     - 如审计未发现需修复的能力 → 跳过本 sub-task
     - _Requirements: R15-AC5_
-  - [-] 8.4 Checkpoint: 运行全量测试，确认聚合层场景测试全部通过、回归测试全部通过（如有）、现有测试无回归。Commit message: `test(microkernel): aggregation audit + scenario tests for release 3.3.0`
+  - [x] 8.4 Checkpoint: 运行全量测试，确认聚合层场景测试全部通过、回归测试全部通过（如有）、现有测试无回归。Commit message: `test(microkernel): aggregation audit + scenario tests for release 3.3.0`
 
 
-- [ ] 9. 文档更新 + Audit_Matrix 归档
-  - [ ] 9.1 更新 Migration_Guide（`docs/manual/migration-v3.md`）
+- [x] 9. 文档更新 + Audit_Matrix 归档
+  - [x] 9.1 更新 Migration_Guide（`docs/manual/migration-v3.md`）
     - 如审计发现未文档化的 breaking change → 补充 severity marker + before/after 代码示例 + 迁移说明
     - 已确认需补充的条目：
       - 🔴 `FirewallInterface::isStateless()` 移除 + `SimpleFirewall` 不再接受 `stateless` 配置项（v3.x 为 stateless-only 架构）
@@ -232,31 +232,31 @@
     - 对照全部 Audit_Matrix 结果做完整性 review
     - 遵循 writing conventions：中文行文 + 英文术语 + backtick 包裹代码引用 + 表格格式
     - _Requirements: R17-AC1, R17-AC3, R17-AC4_
-  - [ ] 9.2 更新架构文档（`docs/state/architecture.md`）
+  - [x] 9.2 更新架构文档（`docs/state/architecture.md`）
     - 如审计发现架构文档描述不准确之处 → 修正
     - 如无不准确之处 → 跳过本 sub-task
     - _Requirements: R17-AC2_
-  - [ ] 9.3 移动 Audit_Matrix 文件到 `docs/changes/3.3/`
+  - [x] 9.3 移动 Audit_Matrix 文件到 `docs/changes/3.3/`
     - 将 `.kiro/specs/release-3.3.0/*-audit-matrix.md` 移动到 `docs/changes/3.3/audit/`
     - 验证移动后文件完整
     - _Requirements: Design CR Q3=B_
-  - [ ] 9.4 Checkpoint: 运行全量测试确认文档变更未影响测试结果，验证 `docs/changes/3.3/audit/` 下包含所有 Audit_Matrix 文件。Commit message: `docs: documentation update + audit matrix archival for release 3.3.0`
+  - [x] 9.4 Checkpoint: 运行全量测试确认文档变更未影响测试结果，验证 `docs/changes/3.3/audit/` 下包含所有 Audit_Matrix 文件。Commit message: `docs: documentation update + audit matrix archival for release 3.3.0`
 
-- [ ] 10. 手工测试
-  - [ ] 10.1 Increment alpha tag：查询已有 alpha tag（`git tag -l 'v3.3.0-alpha*'`），取最大序号 +1，打新 tag（如 `git tag v3.3.0-alpha1`）
-  - [ ] 10.2 全量测试验证
+- [-] 10. 手工测试
+  - [x] 10.1 Increment alpha tag：查询已有 alpha tag（`git tag -l 'v3.3.0-alpha*'`），取最大序号 +1，打新 tag（如 `git tag v3.3.0-alpha1`）
+  - [x] 10.2 全量测试验证
     - 执行 `php vendor/bin/phpunit`，确认所有测试通过（含新增的场景测试和回归测试）
     - 记录最终测试统计（tests / assertions / failures / errors）
     - _Requirements: 全量回归验证_
-  - [ ] 10.3 静态分析验证
+  - [x] 10.3 静态分析验证
     - 执行 `php vendor/bin/phpstan analyse`，确认 PHPStan level 8 零错误
     - _Requirements: 代码质量验证_
-  - [ ] 10.4 场景测试覆盖完整性确认
+  - [x] 10.4 场景测试覆盖完整性确认
     - 确认 8 个 `*ScenarioTest.php` 文件均存在且包含预期的测试方法
     - 确认 `ScenarioTestCase` 基类存在且被所有场景测试继承
     - 确认 Audit_Matrix 文件已归档到 `docs/changes/3.3/audit/`
     - _Requirements: R1-R16 覆盖验证_
-  - [ ] 10.5 Checkpoint: alpha tag 已打，全量测试通过，静态分析通过，场景测试覆盖完整。Commit message: `release: v3.3.0 manual testing passed`
+  - [-] 10.5 Checkpoint: alpha tag 已打，全量测试通过，静态分析通过，场景测试覆盖完整。Commit message: `release: v3.3.0 manual testing passed`
 
 - [ ] 11. Code Review
   - 委托给 code-reviewer sub-agent 执行。Review 范围为 `release/3.3.0` 分支上 Task 1–10 的所有变更。

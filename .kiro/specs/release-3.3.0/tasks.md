@@ -6,8 +6,8 @@
 
 ## Tasks
 
-- [ ] 1. Security 模块：行为审计 + 场景测试 + 修复
-  - [ ] 1.1 实现 `ScenarioTestCase` 基类（`ut/Helpers/ScenarioTestCase.php`）
+- [-] 1. Security 模块：行为审计 + 场景测试 + 修复
+  - [x] 1.1 实现 `ScenarioTestCase` 基类（`ut/Helpers/ScenarioTestCase.php`）
     - 继承 `PHPUnit\Framework\TestCase`
     - 封装 `buildKernel(array $config, bool $isDebug = false): MicroKernel`
     - 封装 `handleRequest(MicroKernel $kernel, string $method, string $uri, array $parameters = [], array $server = []): Response`
@@ -17,7 +17,7 @@
     - 提供 `createTempCacheDir(): string`
     - `tearDown()` 中自动 shutdown kernel 并清理缓存
     - _Requirements: R2（基础设施）_
-  - [ ] 1.2 编写 Security 场景测试（`ut/Security/SecurityScenarioTest.php`）
+  - [x] 1.2 编写 Security 场景测试（`ut/Security/SecurityScenarioTest.php`）
     - 继承 `ScenarioTestCase`
     - `testCompleteAuthenticationFlow`：firewall with pre_auth policy → boot → 发请求 → 验证 `getToken()` 返回 `PostAuthenticationToken`，`getUser()` 返回认证用户
     - `testAuthenticationFailure`：invalid credentials → token 为 null，access rule 决定结果
@@ -27,23 +27,23 @@
     - `testUnauthenticatedAccessToProtectedResource`：`AccessDeniedHttpException` → 403
     - `testStatelessFirewallBehavior`：无 session 交互
     - _Requirements: R2-AC1, R2-AC2, R2-AC3, R2-AC4, R2-AC5, R2-AC6, R2-AC7_
-  - [ ] 1.3 执行 Security 模块行为审计
+  - [x] 1.3 执行 Security 模块行为审计
     - 研读 Silex Security Provider 官方文档 + GitHub 源码
     - 枚举 Silex Security API_Surface（firewall registration、authentication policy types、access rule matching、role hierarchy、`AuthenticatedVoter`、token storage、entry point behavior、implicit component auto-registration）
     - 逐项对比 `SimpleSecurityProvider` 实现，分类为 covered / missing-non-breaking / missing-breaking / intentionally-removed
     - 产出 Audit_Matrix 到 `.kiro/specs/release-3.3.0/security-audit-matrix.md`
     - _Requirements: R1-AC1, R1-AC2, R1-AC6_
-  - [ ] 1.4 修复 Security 模块缺失能力（如有）+ 回归测试
+  - [x] 1.4 修复 Security 模块缺失能力（如有）+ 回归测试
     - 如审计发现 missing-non-breaking 能力 → 修复代码恢复到 Silex 等价行为
     - 如有修复 → 编写 `ut/Security/SecurityFixRegressionTest.php` 专项回归测试
     - 如审计发现 missing-breaking 能力 → 文档化到 `docs/manual/migration-v3.md`
     - 如审计发现 intentionally-removed 能力 → 确认 Migration_Guide 已标注
     - 如审计未发现需修复的能力 → 跳过本 sub-task
     - _Requirements: R1-AC3, R1-AC4, R1-AC5_
-  - [ ] 1.5 Checkpoint: 运行 `php vendor/bin/phpunit --testsuite security`（或全量测试），确认 Security 场景测试全部通过、回归测试全部通过（如有）、现有测试无回归。Commit message: `test(security): behavior audit + scenario tests for release 3.3.0`
+  - [-] 1.5 Checkpoint: 运行 `php vendor/bin/phpunit --testsuite security`（或全量测试），确认 Security 场景测试全部通过、回归测试全部通过（如有）、现有测试无回归。Commit message: `test(security): behavior audit + scenario tests for release 3.3.0`
 
 
-- [ ] 2. Routing 模块：行为审计 + 场景测试 + 修复
+- [~] 2. Routing 模块：行为审计 + 场景测试 + 修复
   - [ ] 2.1 编写 Routing 场景测试（`ut/Routing/RoutingScenarioTest.php`）
     - 继承 `ScenarioTestCase`
     - `testYamlRouteLoadingAndMatching`：`routing.path` → boot → 发请求 → 正确 controller 被调用

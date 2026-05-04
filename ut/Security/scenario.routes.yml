@@ -1,0 +1,22 @@
+# Security scenario test routes
+# Used by: SecurityScenarioTest
+
+scenario.security.info:
+    path: /scenario/security/info
+    defaults:
+        _controller: ScenarioSecurityController::info
+
+scenario.security.public:
+    path: /scenario/public
+    defaults:
+        _controller: ScenarioSecurityController::publicAction
+
+scenario.security.api.resource:
+    path: /scenario/api/resource
+    defaults:
+        _controller: ScenarioSecurityController::apiResource
+
+scenario.security.admin.resource:
+    path: /scenario/admin/resource
+    defaults:
+        _controller: ScenarioSecurityController::adminResource

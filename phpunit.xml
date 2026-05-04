@@ -23,6 +23,7 @@
             <file>ut/Security/AbstractPreAuthenticatorTest.php</file>
             <file>ut/Security/AbstractSimplePreAuthenticateUserProviderTest.php</file>
             <file>ut/Security/SimpleAccessRuleSettersTest.php</file>
+            <file>ut/Security/SecurityScenarioTest.php</file>
         </testsuite>
         <testsuite name="twig">
             <file>ut/Twig/TwigServiceProviderTest.php</file>

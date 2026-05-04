@@ -28,7 +28,7 @@
     - `testStatelessFirewallBehavior`：无 session 交互
     - _Requirements: R2-AC1, R2-AC2, R2-AC3, R2-AC4, R2-AC5, R2-AC6, R2-AC7_
   - [x] 1.3 执行 Security 模块行为审计
-    - 基于 `oasis/http` v2.5.0（tag `v2.5.0`）的实际实现作为审计基准，而非 Silex 原始能力
+    - 基于 `oasis/http` v2.5.0（tag `v2.5.0`）+ Silex 2.3.0 的整体实现作为审计基准，而非 Silex 原始能力
     - 枚举 v2.5.0 `SimpleSecurityProvider` 暴露的 API_Surface（`addFirewall`、`addAccessRule`、`addAuthenticationPolicy`、`addRoleHierarchy`、`FirewallInterface`、`AccessRuleInterface`、`AuthenticationPolicyInterface`、`AbstractSimplePreAuthenticator`、`SilexKernel::isGranted/getToken/getUser`）
     - **接口存在性审计**：逐项对比 v3.x 实现，分类为 covered / missing-non-breaking / missing-breaking
     - **行为等价性审计**：对比 v2.5.0 和 v3.x 的运行时行为差异（pattern matching 逻辑、认证流程、token 类型、异常传播路径、AccessDecisionManager strategy、session/stateless 行为等）
@@ -57,7 +57,7 @@
     - `testUndefinedRoute`：请求未定义路径 → 404
     - _Requirements: R4-AC1, R4-AC2, R4-AC3, R4-AC4, R4-AC5, R4-AC6, R4-AC7, R4-AC8_
   - [ ] 2.2 执行 Routing 模块行为审计
-    - 基于 `oasis/http` v2.5.0（tag `v2.5.0`）的实际实现作为审计基准
+    - 基于 `oasis/http` v2.5.0（tag `v2.5.0`）+ Silex 2.3.0 的整体实现作为审计基准
     - 枚举 v2.5.0 Routing 相关代码暴露的 API_Surface（`SilexKernel` 中的路由注册、YAML route loading、route parameter replacement、route caching、URL matching、URL generation）
     - **接口存在性审计**：逐项对比 v3.x `CacheableRouterProvider` 实现，分类为 covered / missing-non-breaking / missing-breaking
     - **行为等价性审计**：对比 v2.5.0 和 v3.x 的运行时行为差异（route matching 逻辑、cache 机制、parameter replacement 时机、route collection 操作语义等）
@@ -83,7 +83,7 @@
     - `testMiddlewareExceptionBehavior`：before middleware 抛异常 → Error_Handler_Chain 被调用
     - _Requirements: R6-AC1, R6-AC2, R6-AC3, R6-AC4, R6-AC5, R6-AC6_
   - [ ] 3.2 执行 Middleware 模块行为审计
-    - 基于 `oasis/http` v2.5.0（tag `v2.5.0`）的实际实现作为审计基准
+    - 基于 `oasis/http` v2.5.0（tag `v2.5.0`）+ Silex 2.3.0 的整体实现作为审计基准
     - 枚举 v2.5.0 Middleware 相关代码暴露的 API_Surface（`SilexKernel::before/after` 覆写、`MiddlewareInterface`、`AbstractMiddleware`、priority ordering、master-request-only filtering、short-circuit behavior）
     - **接口存在性审计**：逐项对比 v3.x Middleware_Chain 实现，分类为 covered / missing-non-breaking / missing-breaking
     - **行为等价性审计**：对比 v2.5.0 和 v3.x 的运行时行为差异（event listener 注册方式、priority 映射、short-circuit 机制、after middleware 的 response 修改时机等）
@@ -108,7 +108,7 @@
     - `testNonMatchingOrigin`：不在 allowed list 的 origin → 无 `Access-Control-Allow-Origin` header
     - _Requirements: R8-AC1, R8-AC2, R8-AC3, R8-AC4, R8-AC5, R8-AC6_
   - [ ] 4.2 执行 CORS 模块行为审计
-    - 基于 `oasis/http` v2.5.0（tag `v2.5.0`）的实际实现作为审计基准
+    - 基于 `oasis/http` v2.5.0（tag `v2.5.0`）+ Silex 2.3.0 的整体实现作为审计基准
     - 枚举 v2.5.0 CORS 相关代码暴露的 API_Surface（preflight detection、`Access-Control-*` header processing、strategy matching、origin validation、credentials support、max-age、Security interaction）
     - **接口存在性审计**：逐项对比 v3.x `CrossOriginResourceSharingProvider` 实现，分类为 covered / missing-non-breaking / missing-breaking
     - **行为等价性审计**：对比 v2.5.0 和 v3.x 的运行时行为差异（event listener priority、preflight response 生成逻辑、origin 匹配算法、与 Security firewall 的交互顺序等）
@@ -133,7 +133,7 @@
     - `testFallbackViewHandlerErrorRendering`：无自定义 error handler → `FallbackViewHandler` 产出 response
     - _Requirements: R10-AC1, R10-AC2, R10-AC3, R10-AC4, R10-AC5_
   - [ ] 5.2 执行 Error Handling 模块行为审计
-    - 基于 `oasis/http` v2.5.0（tag `v2.5.0`）的实际实现作为审计基准
+    - 基于 `oasis/http` v2.5.0（tag `v2.5.0`）+ Silex 2.3.0 的整体实现作为审计基准
     - 枚举 v2.5.0 Error Handling 相关代码暴露的 API_Surface（`SilexKernel::error()` 覆写、error handler chain、exception-to-response conversion、`ExceptionListenerWrapper`、chain short-circuit/passthrough、HTTP exception status code preservation、`FallbackViewHandler`）
     - **接口存在性审计**：逐项对比 v3.x Error_Handler_Chain 实现，分类为 covered / missing-non-breaking / missing-breaking
     - **行为等价性审计**：对比 v2.5.0 和 v3.x 的运行时行为差异（exception listener 注册方式、handler 调用顺序、null 返回值处理、HttpException status code 传递路径等）
@@ -157,7 +157,7 @@
     - 低风险模块：优先引用现有测试（`@see` 注释），仅补充现有测试未覆盖的场景视角
     - _Requirements: R12-AC1, R12-AC2, R12-AC3, R12-AC4_
   - [ ] 6.2 执行 Twig 模块行为审计
-    - 基于 `oasis/http` v2.5.0（tag `v2.5.0`）的实际实现作为审计基准
+    - 基于 `oasis/http` v2.5.0（tag `v2.5.0`）+ Silex 2.3.0 的整体实现作为审计基准
     - 枚举 v2.5.0 Twig 相关代码暴露的 API_Surface（`SimpleTwigServiceProvider` 注册、`TwigEnvironment` initialization、template path、strict variables、auto-reload、`getTwig()` access、Twig absence handling）
     - **接口存在性审计**：逐项对比 v3.x `SimpleTwigServiceProvider` 实现，分类为 covered / missing-non-breaking / missing-breaking
     - **行为等价性审计**：对比 v2.5.0 和 v3.x 的运行时行为差异（Twig environment 配置项传递、global 变量注册、template loader 配置等）
@@ -180,7 +180,7 @@
     - 低风险模块：优先引用现有测试（`@see` 注释），仅补充现有测试未覆盖的场景视角
     - _Requirements: R14-AC1, R14-AC2, R14-AC3_
   - [ ] 7.2 执行 Cookie 模块行为审计
-    - 基于 `oasis/http` v2.5.0（tag `v2.5.0`）的实际实现作为审计基准
+    - 基于 `oasis/http` v2.5.0（tag `v2.5.0`）+ Silex 2.3.0 的整体实现作为审计基准
     - 枚举 v2.5.0 Cookie 相关代码暴露的 API_Surface（`SimpleCookieProvider` 注册、`ResponseCookieContainer` injection、cookie writing on `KernelEvents::RESPONSE`、cookie container lifecycle）
     - **接口存在性审计**：逐项对比 v3.x `SimpleCookieProvider` 实现，分类为 covered / missing-non-breaking / missing-breaking
     - **行为等价性审计**：对比 v2.5.0 和 v3.x 的运行时行为差异（event listener 注册方式、cookie 写入时机、container 生命周期管理等）
@@ -269,7 +269,7 @@
 - 执行时须遵循 `spec-execution.md` 规范
 - Commit 随各 top-level task 的 checkpoint 一起执行，以 top-level task 为 commit 粒度
 - 本 plan 不包含 release spec 自身（`.kiro/specs/release-3.3.0/`）的归档，该操作由 gitflow-finisher 在 finish 阶段执行
-- **审计基准与方法**：审计基准为 `oasis/http` v2.5.0（tag `v2.5.0`）的实际实现，而非 Silex 原始能力。审计包含两个维度：(1) 接口存在性——v2.5.0 暴露的 API 在 v3.x 是否存在；(2) 行为等价性——v3.x 重写的实现是否产出与 v2.5.0 一样的运行时行为。v2.5.0 未暴露的 Silex 原生能力不在审计范围内
+- **审计基准与方法**：审计基准为 `oasis/http` v2.5.0（tag `v2.5.0`）+ Silex 2.3.0 的整体实现——v2.5.0 继承了 Silex，下游用户实际享受的是两者叠加的能力。审计包含两个维度：(1) 接口存在性——v2.5.0 + Silex 暴露的 API 在 v3.x 是否存在；(2) 行为等价性——v3.x 重写的实现是否产出与 v2.5.0 + Silex 一样的运行时行为
 - **Test-First 编排**：每个模块 task 中，场景测试编写（RED）排在审计和修复之前。场景测试先写出来作为行为基准，审计发现的修复需要通过场景测试验证（GREEN）
 - **条件性 sub-task**：修复类 sub-task（1.4, 2.3, 3.3, 4.3, 5.3, 6.3, 7.3, 8.3）的执行取决于审计结果。如审计未发现 missing-non-breaking 能力，该 sub-task 标记为"无需修复"并跳过
 - **Audit_Matrix 产出位置**：执行过程中产出到 `.kiro/specs/release-3.3.0/`，Task 9.3 统一移动到 `docs/changes/3.3/audit/`（Design CR Q3=B）

@@ -19,11 +19,50 @@ use Symfony\Component\Routing\Route;
  */
 class Layer2ConvenienceMethodsTest extends TestCase
 {
+    /** @var mixed */
+    private $previousExceptionHandler = null;
+
+    /** @var MicroKernel[] */
+    private array $kernels = [];
+
+    protected function setUp(): void
+    {
+        $this->previousExceptionHandler = set_exception_handler(null);
+        restore_exception_handler();
+    }
+
+    protected function tearDown(): void
+    {
+        foreach ($this->kernels as $kernel) {
+            $kernel->shutdown();
+        }
+        $this->kernels = [];
+
+        while (true) {
+            $current = set_exception_handler(null);
+            restore_exception_handler();
+            if ($current === $this->previousExceptionHandler || $current === null) {
+                break;
+            }
+            restore_exception_handler();
+        }
+        if ($this->previousExceptionHandler !== null) {
+            set_exception_handler($this->previousExceptionHandler);
+        }
+        $this->previousExceptionHandler = null;
+    }
+
+    private function trackKernel(MicroKernel $kernel): MicroKernel
+    {
+        $this->kernels[] = $kernel;
+        return $kernel;
+    }
+
     // ─── view() ──────────────────────────────────────────────────────
 
     public function testViewHandlerConvertsNonResponseToResponse(): void
     {
-        $kernel = new MicroKernel([], true);
+        $kernel = $this->trackKernel(new MicroKernel([], true));
 
         $kernel->addRoute('data', new Route('/data', [
             '_controller' => function () {
@@ -46,7 +85,7 @@ class Layer2ConvenienceMethodsTest extends TestCase
 
     public function testViewHandlerCalledInRegistrationOrder(): void
     {
-        $kernel = new MicroKernel([], true);
+        $kernel = $this->trackKernel(new MicroKernel([], true));
 
         $kernel->addRoute('data', new Route('/data', [
             '_controller' => function () {
@@ -79,7 +118,7 @@ class Layer2ConvenienceMethodsTest extends TestCase
 
     public function testAbortThrowsHttpException(): void
     {
-        $kernel = new MicroKernel([], true);
+        $kernel = $this->trackKernel(new MicroKernel([], true));
 
         $this->expectException(HttpException::class);
         $this->expectExceptionMessage('Not Found');
@@ -89,7 +128,7 @@ class Layer2ConvenienceMethodsTest extends TestCase
 
     public function testAbortWithHeaders(): void
     {
-        $kernel = new MicroKernel([], true);
+        $kernel = $this->trackKernel(new MicroKernel([], true));
 
         try {
             $kernel->abort(503, 'Maintenance', ['Retry-After' => '3600']);
@@ -102,7 +141,7 @@ class Layer2ConvenienceMethodsTest extends TestCase
 
     public function testAbortInControllerProducesErrorResponse(): void
     {
-        $kernel = new MicroKernel([], true);
+        $kernel = $this->trackKernel(new MicroKernel([], true));
 
         $kernel->addRoute('protected', new Route('/protected', [
             '_controller' => function () use ($kernel) {
@@ -124,7 +163,7 @@ class Layer2ConvenienceMethodsTest extends TestCase
 
     public function testRedirectReturnsRedirectResponse(): void
     {
-        $kernel = new MicroKernel([], true);
+        $kernel = $this->trackKernel(new MicroKernel([], true));
 
         $response = $kernel->redirect('/login');
 
@@ -135,7 +174,7 @@ class Layer2ConvenienceMethodsTest extends TestCase
 
     public function testRedirectWithCustomStatus(): void
     {
-        $kernel = new MicroKernel([], true);
+        $kernel = $this->trackKernel(new MicroKernel([], true));
 
         $response = $kernel->redirect('/new-location', 301);
 
@@ -146,7 +185,7 @@ class Layer2ConvenienceMethodsTest extends TestCase
 
     public function testJsonReturnsJsonResponse(): void
     {
-        $kernel = new MicroKernel([], true);
+        $kernel = $this->trackKernel(new MicroKernel([], true));
 
         $response = $kernel->json(['status' => 'ok']);
 
@@ -157,7 +196,7 @@ class Layer2ConvenienceMethodsTest extends TestCase
 
     public function testJsonWithStatusAndHeaders(): void
     {
-        $kernel = new MicroKernel([], true);
+        $kernel = $this->trackKernel(new MicroKernel([], true));
 
         $response = $kernel->json(['error' => 'bad'], 400, ['X-Error' => 'true']);
 
@@ -169,7 +208,7 @@ class Layer2ConvenienceMethodsTest extends TestCase
 
     public function testStreamReturnsStreamedResponse(): void
     {
-        $kernel = new MicroKernel([], true);
+        $kernel = $this->trackKernel(new MicroKernel([], true));
 
         $response = $kernel->stream(function () {
             echo 'streamed';
@@ -187,7 +226,7 @@ class Layer2ConvenienceMethodsTest extends TestCase
 
     public function testStreamWithCustomStatusAndHeaders(): void
     {
-        $kernel = new MicroKernel([], true);
+        $kernel = $this->trackKernel(new MicroKernel([], true));
 
         $response = $kernel->stream(function () {
             echo 'data';
@@ -201,7 +240,7 @@ class Layer2ConvenienceMethodsTest extends TestCase
 
     public function testSendFileReturnsBinaryFileResponse(): void
     {
-        $kernel = new MicroKernel([], true);
+        $kernel = $this->trackKernel(new MicroKernel([], true));
 
         // Use a known file
         $file = __DIR__ . '/../composer.json';
@@ -213,7 +252,7 @@ class Layer2ConvenienceMethodsTest extends TestCase
 
     public function testSendFileWithContentDisposition(): void
     {
-        $kernel = new MicroKernel([], true);
+        $kernel = $this->trackKernel(new MicroKernel([], true));
 
         $file = __DIR__ . '/../composer.json';
         $response = $kernel->sendFile($file, 200, [], 'attachment');
@@ -227,7 +266,7 @@ class Layer2ConvenienceMethodsTest extends TestCase
 
     public function testSendFileWithSplFileInfo(): void
     {
-        $kernel = new MicroKernel([], true);
+        $kernel = $this->trackKernel(new MicroKernel([], true));
 
         $file = new \SplFileInfo(__DIR__ . '/../composer.json');
         $response = $kernel->sendFile($file, 200, [], 'inline');

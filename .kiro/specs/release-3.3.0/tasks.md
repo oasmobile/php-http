@@ -242,7 +242,7 @@
     - _Requirements: Design CR Q3=B_
   - [x] 9.4 Checkpoint: 运行全量测试确认文档变更未影响测试结果，验证 `docs/changes/3.3/audit/` 下包含所有 Audit_Matrix 文件。Commit message: `docs: documentation update + audit matrix archival for release 3.3.0`
 
-- [-] 10. 手工测试
+- [x] 10. 手工测试
   - [x] 10.1 Increment alpha tag：查询已有 alpha tag（`git tag -l 'v3.3.0-alpha*'`），取最大序号 +1，打新 tag（如 `git tag v3.3.0-alpha1`）
   - [x] 10.2 全量测试验证
     - 执行 `php vendor/bin/phpunit`，确认所有测试通过（含新增的场景测试和回归测试）
@@ -256,9 +256,9 @@
     - 确认 `ScenarioTestCase` 基类存在且被所有场景测试继承
     - 确认 Audit_Matrix 文件已归档到 `docs/changes/3.3/audit/`
     - _Requirements: R1-R16 覆盖验证_
-  - [-] 10.5 Checkpoint: alpha tag 已打，全量测试通过，静态分析通过，场景测试覆盖完整。Commit message: `release: v3.3.0 manual testing passed`
+  - [x] 10.5 Checkpoint: alpha tag 已打，全量测试通过，静态分析通过，场景测试覆盖完整。Commit message: `release: v3.3.0 manual testing passed`
 
-- [ ] 11. Code Review
+- [x] 11. Code Review
   - 委托给 code-reviewer sub-agent 执行。Review 范围为 `release/3.3.0` 分支上 Task 1–10 的所有变更。
 
 ## Issues

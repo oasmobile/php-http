@@ -23,6 +23,13 @@ class SimpleCookieProvider implements EventSubscriberInterface
 
     public function onResponse(ResponseEvent $event): void
     {
+        // Only write cookies on main request response, matching Silex after()
+        // default behavior ($masterRequestOnly = true). Sub-request responses
+        // should not carry Set-Cookie headers.
+        if (!$event->isMainRequest()) {
+            return;
+        }
+
         foreach ($this->cookieContainer->getCookies() as $cookie) {
             $event->getResponse()->headers->setCookie($cookie);
         }

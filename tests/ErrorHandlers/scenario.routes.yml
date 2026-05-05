@@ -1,0 +1,17 @@
+# Error Handling scenario test routes
+# Used by: ErrorHandlerScenarioTest
+
+scenario.error.success:
+    path: /scenario/error/success
+    defaults:
+        _controller: ScenarioErrorHandlerController::success
+
+scenario.error.throw_runtime:
+    path: /scenario/error/throw-runtime
+    defaults:
+        _controller: ScenarioErrorHandlerController::throwRuntime
+
+scenario.error.throw_forbidden:
+    path: /scenario/error/throw-forbidden
+    defaults:
+        _controller: ScenarioErrorHandlerController::throwForbidden

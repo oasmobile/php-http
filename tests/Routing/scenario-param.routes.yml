@@ -1,0 +1,7 @@
+# Routing scenario test routes with parameter replacement
+# Used by: RoutingScenarioTest::testRouteParameterReplacement
+
+scenario.routing.param:
+    path: /scenario/routing/param
+    defaults:
+        _controller: "%controller_class%::paramAction"

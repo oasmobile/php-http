@@ -1,0 +1,14 @@
+cookie_scenario.add:
+    path: /cookie-scenario/add
+    defaults:
+        _controller: ScenarioCookieController::addCookie
+
+cookie_scenario.multiple:
+    path: /cookie-scenario/multiple
+    defaults:
+        _controller: ScenarioCookieController::addMultipleCookies
+
+cookie_scenario.verify_injection:
+    path: /cookie-scenario/verify-injection
+    defaults:
+        _controller: ScenarioCookieController::verifyInjection

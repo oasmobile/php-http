@@ -1,0 +1,12 @@
+# Routing scenario test routes
+# Used by: RoutingScenarioTest
+
+scenario.routing.home:
+    path: /scenario/routing/home
+    defaults:
+        _controller: ScenarioRoutingController::home
+
+scenario.routing.about:
+    path: /scenario/routing/about
+    defaults:
+        _controller: ScenarioRoutingController::about

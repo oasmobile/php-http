@@ -1,0 +1,9 @@
+twig_scenario.render:
+    path: /twig-scenario/render
+    defaults:
+        _controller: TwigScenarioController::render
+
+twig_scenario.strict:
+    path: /twig-scenario/strict
+    defaults:
+        _controller: TwigScenarioController::renderUndefined

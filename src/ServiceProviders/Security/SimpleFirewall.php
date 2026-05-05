@@ -25,7 +25,6 @@ class SimpleFirewall implements FirewallInterface
     protected array $policies;
     /** @var array<string, mixed>|UserProviderInterface<\Symfony\Component\Security\Core\User\UserInterface> */
     protected array|UserProviderInterface $userProvider;
-    protected bool $stateless;
     /** @var array<string, mixed> */
     protected array $otherSettings;
 
@@ -38,7 +37,6 @@ class SimpleFirewall implements FirewallInterface
         $this->pattern       = $dp->getMandatory('pattern', DataType::Mixed);
         $this->policies      = $dp->getMandatory('policies', DataType::Array);
         $this->userProvider  = $dp->getMandatory('users', DataType::Mixed);
-        $this->stateless     = $dp->getMandatory('stateless', DataType::Bool);
         $this->otherSettings = $dp->getMandatory('misc', DataType::Array);
 
     }
@@ -49,14 +47,6 @@ class SimpleFirewall implements FirewallInterface
     public function getPattern(): string|RequestMatcherInterface
     {
         return $this->pattern;
-    }
-
-    /**
-     * @return boolean
-     */
-    public function isStateless(): bool
-    {
-        return $this->stateless;
     }
 
     /**

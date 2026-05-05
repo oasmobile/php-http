@@ -15,8 +15,10 @@ use Oasis\Mlib\Http\Configuration\SecurityConfiguration;
 use Oasis\Mlib\Http\MicroKernel;
 use Oasis\Mlib\Utils\DataProviderInterface;
 use Oasis\Mlib\Utils\DataType;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestMatcherInterface;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\KernelEvents;
@@ -26,7 +28,7 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 use Symfony\Component\Security\Core\Authorization\AccessDecisionManager;
 use Symfony\Component\Security\Core\Authorization\AccessDecisionManagerInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
-use Symfony\Component\Security\Core\Authorization\Strategy\UnanimousStrategy;
+use Symfony\Component\Security\Core\Authorization\Strategy\AffirmativeStrategy;
 use Symfony\Component\Security\Core\Authorization\Voter\AuthenticatedVoter;
 use Symfony\Component\Security\Core\Authorization\Voter\RoleHierarchyVoter;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
@@ -149,7 +151,7 @@ class SimpleSecurityProvider
         $roleHierarchy = new RoleHierarchy($this->getRoleHierarchy());
         $roleHierarchyVoter = new RoleHierarchyVoter($roleHierarchy);
         $authenticatedVoter = new AuthenticatedVoter(new AuthenticationTrustResolver());
-        $accessDecisionManager = new AccessDecisionManager([$authenticatedVoter, $roleHierarchyVoter], new UnanimousStrategy());
+        $accessDecisionManager = new AccessDecisionManager([$authenticatedVoter, $roleHierarchyVoter], new AffirmativeStrategy());
         $authorizationChecker = new AuthorizationChecker($tokenStorage, $accessDecisionManager);
         $kernel->setAuthorizationChecker($authorizationChecker);
         
@@ -261,7 +263,6 @@ class SimpleSecurityProvider
         $setting              = $firewall->getPolicies();
         $setting['pattern']   = $firewall->getPattern();
         $setting['users']     = $firewall->getUserProvider();
-        $setting['stateless'] = $firewall->isStateless();
         $setting              = array_merge($setting, $firewall->getOtherSettings());
         
         return $setting;
@@ -359,6 +360,26 @@ class SimpleSecurityProvider
                     }
                     
                     // First matching rule takes effect
+                    
+                    // Channel enforcement: redirect HTTP → HTTPS (or vice versa)
+                    if ($channel !== null) {
+                        $scheme = $request->getScheme();
+                        if ($channel === 'https' && $scheme !== 'https') {
+                            $event->setResponse(new RedirectResponse(
+                                str_replace('http://', 'https://', $request->getUri()),
+                                Response::HTTP_MOVED_PERMANENTLY,
+                            ));
+                            return;
+                        }
+                        if ($channel === 'http' && $scheme !== 'http') {
+                            $event->setResponse(new RedirectResponse(
+                                str_replace('https://', 'http://', $request->getUri()),
+                                Response::HTTP_MOVED_PERMANENTLY,
+                            ));
+                            return;
+                        }
+                    }
+                    
                     if (empty($roles)) {
                         return; // No role requirement — allow access
                     }

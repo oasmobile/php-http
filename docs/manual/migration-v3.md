@@ -15,6 +15,7 @@
 | v3.4 | 恢复 `render()` / `renderView()` / `path()` / `url()` 便捷方法 |
 | v3.5 | 恢复 `before()` / `after()` / `error()` 便捷方法 |
 | v3.6 | 恢复 `view()` / `abort()` / `redirect()` / `json()` / `stream()` / `sendFile()` 便捷方法 |
+| v3.6.3 | MicroKernel 内部 trait 拆分（公共 API 无变更） |
 
 **严重程度标注**：
 

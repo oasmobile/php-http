@@ -789,35 +789,21 @@ $firewall = new SimpleFirewall([
 
 **操作**：移除 `FirewallInterface` 实现中的 `isStateless()` 方法和 `stateless` 配置项。如果下游代码依赖 session 持久化认证 token（`stateless = false`），v3.x 会表现为"每次请求都需要重新认证"——对于 stateless API 场景（每次请求都带凭证）无影响。
 
-### 🔴 `AccessRuleInterface::getRequiredChannel()` — Channel Enforcement 行为变更
+### 🟢 `AccessRuleInterface::getRequiredChannel()` — Channel Enforcement 行为恢复
 
-**影响**：`AccessRuleInterface::getRequiredChannel()` 方法保留，但 v3.x 的 access rule listener 不再执行 channel enforcement（HTTP/HTTPS 强制重定向）。v2.x 中此能力由 Silex 底层的 `ChannelListener` 提供，v3.x 未实现等价的 channel enforcement 逻辑。
-
-**Before**（v2.x）:
+**影响**：`AccessRuleInterface::getRequiredChannel()` 在 v3.3 中已恢复 channel enforcement 能力。当 access rule 配置了 `channel` 值时，`registerAccessRuleListener()` 会检查请求 scheme 并执行 301 重定向（HTTP↔HTTPS），行为与 v2.x 中 Silex `ChannelListener` 等价。
 
 ```php
-// v2.x 中 getRequiredChannel() 返回 'https' 时，
-// Silex ChannelListener 会将 HTTP 请求 301 redirect 到 HTTPS
+// v3.3+ 中 getRequiredChannel() 返回 'https' 时，
+// access rule listener 会将 HTTP 请求 301 redirect 到 HTTPS
 $rule = new SimpleAccessRule([
     'pattern' => '^/secure',
     'roles' => 'ROLE_USER',
-    'channel' => 'https',  // 强制 HTTPS
+    'channel' => 'https',  // 强制 HTTPS，行为与 v2.x 一致
 ]);
 ```
 
-**After**（v3.x）:
-
-```php
-// v3.x 中 getRequiredChannel() 配置项保留，但不执行 channel enforcement
-// 如果需要 HTTPS 强制，应在 web server / load balancer 层面配置
-$rule = new SimpleAccessRule([
-    'pattern' => '^/secure',
-    'roles' => 'ROLE_USER',
-    'channel' => 'https',  // 配置项保留但不生效
-]);
-```
-
-**操作**：如果下游代码依赖 `getRequiredChannel()` 的 channel enforcement 行为（HTTP → HTTPS 重定向），需要将此逻辑迁移到 web server 或 load balancer 层面（如 Nginx `return 301 https://...` 或 AWS ALB redirect rule）。对于已在基础设施层面强制 HTTPS 的部署环境，无需操作。
+**操作**：无需操作。v3.3+ 的 channel enforcement 行为与 v2.x 等价。
 
 ### 🔴 `AccessRuleInterface` 重写
 

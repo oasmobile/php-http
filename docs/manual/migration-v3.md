@@ -14,6 +14,7 @@
 | v3.3 | 行为审计加固 + `isStateless()` 移除 + channel enforcement 行为变更文档化 |
 | v3.4 | 恢复 `render()` / `renderView()` / `path()` / `url()` 便捷方法 |
 | v3.5 | 恢复 `before()` / `after()` / `error()` 便捷方法 |
+| v3.6 | 恢复 `view()` / `abort()` / `redirect()` / `json()` / `stream()` / `sendFile()` 便捷方法 |
 
 **严重程度标注**：
 
@@ -456,6 +457,12 @@ $kernel->error(function (\Throwable $e, Request $request, int $code) {
 | `before(callable $callback, int $priority = 0, bool $masterRequestOnly = true): void` | 注册 before 过滤器（v3.5 恢复） |
 | `after(callable $callback, int $priority = 0, bool $masterRequestOnly = true): void` | 注册 after 过滤器（v3.5 恢复） |
 | `error(callable $callback, int $priority = -8): void` | 注册错误处理器（v3.5 恢复） |
+| `view(callable $callback): void` | 注册 view handler（v3.6 恢复） |
+| `abort(int $statusCode, string $message = '', array $headers = []): never` | 抛出 HttpException 终止请求（v3.6 恢复） |
+| `redirect(string $url, int $status = 302): RedirectResponse` | 创建重定向响应（v3.6 恢复） |
+| `json(mixed $data = [], int $status = 200, array $headers = []): JsonResponse` | 创建 JSON 响应（v3.6 恢复） |
+| `stream(callable $callback, int $status = 200, array $headers = []): StreamedResponse` | 创建流式响应（v3.6 恢复） |
+| `sendFile(string\|\SplFileInfo $file, int $status = 200, array $headers = [], ?string $contentDisposition = null): BinaryFileResponse` | 创建文件下载响应（v3.6 恢复） |
 | `getParameter(string $key, mixed $default = null): mixed` | 获取参数 |
 | `addExtraParameters(array $extras): void` | 添加额外参数 |
 | `addControllerInjectedArg(object $object): void` | 添加控制器注入参数 |
@@ -1516,6 +1523,12 @@ class MyClass
 | CORS Provider | EventSubscriber | 🟢 |
 | Cookie Provider | EventSubscriber | 🟢 |
 | `NullEntryPoint` 内部实现 | 适配新 Security 架构 | 🟢 |
+| `$app->view()` | 恢复为 `MicroKernel::view()`（v3.6） | 🟢 |
+| `$app->abort()` | 恢复为 `MicroKernel::abort()`（v3.6） | 🟢 |
+| `$app->redirect()` | 恢复为 `MicroKernel::redirect()`（v3.6） | 🟢 |
+| `$app->json()` | 恢复为 `MicroKernel::json()`（v3.6） | 🟢 |
+| `$app->stream()` | 恢复为 `MicroKernel::stream()`（v3.6） | 🟢 |
+| `$app->sendFile()` | 恢复为 `MicroKernel::sendFile()`（v3.6） | 🟢 |
 
 ### 开发依赖参考
 

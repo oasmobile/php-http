@@ -37,12 +37,16 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
 use Symfony\Component\DependencyInjection\Reference;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\HttpKernel\KernelEvents;
@@ -535,6 +539,91 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
             // Store for registration during boot
             $this->errorHandlers[] = $callback;
         }
+    }
+
+    /**
+     * Register a view handler callback (Silex-compatible convenience method).
+     *
+     * View handlers are called when a controller returns a non-Response value,
+     * converting it into a Response. Handlers are called in registration order.
+     *
+     * @param callable $callback Receives (mixed $controllerResult, Request $request) and should return a Response or null
+     */
+    public function view(callable $callback): void
+    {
+        $this->viewHandlers[] = $callback;
+    }
+
+    /**
+     * Abort the current request by throwing an HttpException (Silex-compatible convenience method).
+     *
+     * @param int    $statusCode HTTP status code
+     * @param string $message    Exception message
+     * @param array<string, string> $headers Additional response headers
+     *
+     * @throws HttpException always
+     */
+    public function abort(int $statusCode, string $message = '', array $headers = []): never
+    {
+        throw new HttpException($statusCode, $message, null, $headers);
+    }
+
+    /**
+     * Create a redirect response (Silex-compatible convenience method).
+     *
+     * @param string $url    The URL to redirect to
+     * @param int    $status HTTP status code (default 302)
+     */
+    public function redirect(string $url, int $status = 302): RedirectResponse
+    {
+        return new RedirectResponse($url, $status);
+    }
+
+    /**
+     * Create a JSON response (Silex-compatible convenience method).
+     *
+     * @param mixed $data    Data to encode as JSON
+     * @param int   $status  HTTP status code (default 200)
+     * @param array<string, string> $headers Additional response headers
+     */
+    public function json(mixed $data = [], int $status = 200, array $headers = []): JsonResponse
+    {
+        return new JsonResponse($data, $status, $headers);
+    }
+
+    /**
+     * Create a streamed response (Silex-compatible convenience method).
+     *
+     * @param callable $callback Streaming callback (writes output directly)
+     * @param int      $status   HTTP status code (default 200)
+     * @param array<string, string> $headers Additional response headers
+     */
+    public function stream(callable $callback, int $status = 200, array $headers = []): StreamedResponse
+    {
+        return new StreamedResponse($callback, $status, $headers);
+    }
+
+    /**
+     * Create a BinaryFileResponse for file downloads (Silex-compatible convenience method).
+     *
+     * @param string|\SplFileInfo $file               The file path or SplFileInfo instance
+     * @param int                 $status             HTTP status code (default 200)
+     * @param array<string, string> $headers          Additional response headers
+     * @param string|null         $contentDisposition Content-Disposition type ('attachment' or 'inline'), null to skip
+     */
+    public function sendFile(
+        string|\SplFileInfo $file,
+        int $status = 200,
+        array $headers = [],
+        ?string $contentDisposition = null,
+    ): BinaryFileResponse {
+        $response = new BinaryFileResponse($file, $status, $headers);
+        if ($contentDisposition !== null) {
+            $filename = $file instanceof \SplFileInfo ? $file->getFilename() : basename($file);
+            $response->setContentDisposition($contentDisposition, $filename);
+        }
+
+        return $response;
     }
 
     /**

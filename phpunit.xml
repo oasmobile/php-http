@@ -93,6 +93,7 @@
         <testsuite name="SilexKernelTest">
             <file>tests/SilexKernelTest.php</file>
             <file>tests/MicroKernelSupplementaryTest.php</file>
+            <file>tests/ConvenienceMethodsTest.php</file>
         </testsuite>
         <testsuite name="SilexKernelWebTest">
             <file>tests/SilexKernelWebTest.php</file>

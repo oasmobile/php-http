@@ -12,6 +12,7 @@
 | v3.1 | Symfony 组件 `^7.2` → `^8.0` |
 | v3.2 | 编程式路由注入 API + boot 后路由冻结 |
 | v3.3 | 行为审计加固 + `isStateless()` 移除 + channel enforcement 行为变更文档化 |
+| v3.4 | 恢复 `render()` / `renderView()` / `path()` / `url()` 便捷方法 |
 
 **严重程度标注**：
 
@@ -436,10 +437,16 @@ $config = [
 | `getToken(): ?TokenInterface` | 获取当前认证 token |
 | `getUser(): ?UserInterface` | 获取当前认证用户 |
 | `getTwig(): ?TwigEnvironment` | 获取 Twig 环境 |
+| `render(string $view, array $parameters = [], ?Response $response = null): Response` | 渲染 Twig 模板并返回 Response（v3.4 恢复） |
+| `renderView(string $view, array $parameters = []): string` | 渲染 Twig 模板并返回字符串（v3.4 恢复） |
+| `path(string $route, array $parameters = []): string` | 生成相对 URL（v3.4 恢复） |
+| `url(string $route, array $parameters = []): string` | 生成绝对 URL（v3.4 恢复） |
 | `getParameter(string $key, mixed $default = null): mixed` | 获取参数 |
 | `addExtraParameters(array $extras): void` | 添加额外参数 |
 | `addControllerInjectedArg(object $object): void` | 添加控制器注入参数 |
 | `addMiddleware(MiddlewareInterface $middleware): void` | 添加中间件 |
+| `addRoute(string $name, Route $route): void` | 添加单条路由（v3.2 新增） |
+| `addRoutes(RouteCollection $routes): void` | 批量添加路由（v3.2 新增） |
 | `getCacheDirectories(): array` | 获取缓存目录列表 |
 
 ---
@@ -680,6 +687,22 @@ $kernel->run();
 - boot 后 `getRouter()->getRouteCollection()` 返回 `FrozenRouteCollection`，写操作（`add()` / `addCollection()` / `remove()`）抛出 `LogicException`
 
 **操作**：无需下游操作。这是纯新增 API，不影响现有代码。如果下游代码在 boot 后调用了 `getRouteCollection()->add()`（此前静默失效），v3.2 起会抛出 `LogicException`——这是有意的行为修正，应移除此类调用。
+
+### 🟢 `path()` / `url()` 便捷方法恢复（v3.4）
+
+**影响**：v3.0–v3.3 中移除的 Silex `UrlGeneratorTrait::path()` 和 `UrlGeneratorTrait::url()` 便捷方法已在 v3.4 中恢复为 `MicroKernel` 公共方法。
+
+**After**:
+
+```php
+// 生成相对 URL
+$loginPath = $kernel->path('login', ['redirect' => '/dashboard']);
+
+// 生成绝对 URL
+$callbackUrl = $kernel->url('oauth_callback', ['provider' => 'github']);
+```
+
+**操作**：如果已迁移为 `$kernel->getUrlGenerator()->generate(...)`，可保持不变；也可改回使用便捷方法。
 
 ---
 
@@ -1290,6 +1313,25 @@ $twig = $kernel->getTwig();
 ### `twig.strict_variables` 和 `twig.auto_reload` 行为说明
 
 Bootstrap_Config 中的 `twig.strict_variables`（默认 `true`）和 `twig.auto_reload`（默认 `null`，根据 debug 模式自动判定）行为保持不变。无需下游操作。
+
+### 🟢 `render()` / `renderView()` 便捷方法恢复（v3.4）
+
+**影响**：v3.0–v3.3 中移除的 Silex `TwigTrait::render()` 和 `TwigTrait::renderView()` 便捷方法已在 v3.4 中恢复为 `MicroKernel` 公共方法。
+
+**After**:
+
+```php
+// 渲染模板并返回 Response
+$response = $kernel->render('hello.twig', ['name' => 'World']);
+
+// 渲染模板并返回字符串
+$html = $kernel->renderView('hello.twig', ['name' => 'World']);
+
+// 支持 StreamedResponse
+$response = $kernel->render('large.twig', $data, new StreamedResponse());
+```
+
+**操作**：如果已迁移为 `$kernel->getTwig()->render(...)` + 手动包装 Response，可保持不变；也可改回使用便捷方法。
 
 ---
 

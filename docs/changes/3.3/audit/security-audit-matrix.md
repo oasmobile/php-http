@@ -135,7 +135,7 @@ v2.5.0 通过 `installAuthenticationFactory()` 将自定义 policy 注入 Silex 
 | 行为 | v2.5.0 | v3.x | 等价？ | 说明 |
 |------|--------|------|--------|------|
 | `AccessDecisionManager` strategy | Silex 默认 `AffirmativeBased`（任一 voter grant → allow） | `AffirmativeStrategy`（与 v2.5.0 一致） | ✅ 已修复 | 原为 `UnanimousStrategy`（非有意选择），已改回 `AffirmativeStrategy` 以保持行为等价 |
-| Access rule `channel` enforcement | Silex `ChannelListener` 强制 http/https redirect | v3.x 不强制 channel 检查 | ⚠️ 能力缺失 | `AccessRuleInterface::getRequiredChannel()` 配置项保留，但 v3.x 的 `registerAccessRuleListener()` 未读取 `$channel` 值做任何处理。如果 v2.5.0 下游使用了 channel enforcement（`'https'`），v3.x 不会 redirect。**但**：v2.5.0 的 channel enforcement 来自 Silex 的 `ChannelListener`，不是 `SimpleSecurityProvider` 自己实现的。v2.5.0 的 `subscribe()` 中也没有额外处理 channel。所以这个能力实际上是 Silex 底层提供的，v2.5.0 只是透传了配置。v3.x 保留了配置接口但未实现 enforcement |
+| Access rule `channel` enforcement | Silex `ChannelListener` 强制 http/https redirect | `registerAccessRuleListener()` 内部实现 channel 检查，匹配 rule 时若 scheme 不符则 301 redirect | ✅ 已修复 | v3.3 中 `registerAccessRuleListener()` 已读取 `$channel` 值并执行 HTTP↔HTTPS 301 重定向，行为与 v2.5.0 Silex `ChannelListener` 等价 |
 
 ### Firewall Scope & Sub-request Handling
 
@@ -159,7 +159,7 @@ v2.5.0 通过 `installAuthenticationFactory()` 将自定义 policy 注入 Silex 
 | B2 | Token 类型从 `PreAuthenticatedToken` 变为 `PostAuthenticationToken` | 中：下游 `instanceof` 检查需更新 | document-only（已在 Migration_Guide §7） |
 | B3 | 认证失败路径变更（`ExceptionListener` → 直接抛异常） | 低：最终 HTTP 响应一致（403） | no-action |
 | B4 | `AccessDecisionManager` strategy 变更 | 低：当前 voter 组合下行为一致 | fix-code（改回 `AffirmativeStrategy` 以保持行为等价） |
-| B5 | Channel enforcement 未实现 | 低：v2.5.0 也是透传 Silex 底层能力 | document-only（需确认 Migration_Guide 是否覆盖） |
+| B5 | Channel enforcement 已恢复 | 无：v3.3 已实现等价逻辑 | fix-code（v3.3 已修复） |
 | B6 | Token 不跨请求持久化 | 中：依赖 session 的场景受影响 | document-only（stateless API 场景不受影响） |
 | B7 | `supports()` 语义变更（无凭证时跳过 vs 创建 anon token） | 低：最终效果一致 | no-action |
 

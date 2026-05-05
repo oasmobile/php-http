@@ -15,6 +15,39 @@ use Symfony\Component\Routing\Route;
  */
 class ConvenienceMethodsTest extends TestCase
 {
+    /** @var mixed */
+    private $previousExceptionHandler = null;
+
+    /** @var MicroKernel[] */
+    private array $kernels = [];
+
+    protected function setUp(): void
+    {
+        $this->previousExceptionHandler = set_exception_handler(null);
+        restore_exception_handler();
+    }
+
+    protected function tearDown(): void
+    {
+        foreach ($this->kernels as $kernel) {
+            $kernel->shutdown();
+        }
+        $this->kernels = [];
+
+        while (true) {
+            $current = set_exception_handler(null);
+            restore_exception_handler();
+            if ($current === $this->previousExceptionHandler || $current === null) {
+                break;
+            }
+            restore_exception_handler();
+        }
+        if ($this->previousExceptionHandler !== null) {
+            set_exception_handler($this->previousExceptionHandler);
+        }
+        $this->previousExceptionHandler = null;
+    }
+
     private function buildKernel(): MicroKernel
     {
         $kernel = new MicroKernel([], true);
@@ -26,6 +59,14 @@ class ConvenienceMethodsTest extends TestCase
             },
         ]));
 
+        $this->kernels[] = $kernel;
+
+        return $kernel;
+    }
+
+    private function trackKernel(MicroKernel $kernel): MicroKernel
+    {
+        $this->kernels[] = $kernel;
         return $kernel;
     }
 
@@ -118,7 +159,7 @@ class ConvenienceMethodsTest extends TestCase
 
     public function testErrorCallbackHandlesException(): void
     {
-        $kernel = new MicroKernel([], true);
+        $kernel = $this->trackKernel(new MicroKernel([], true));
 
         $kernel->addRoute('throw', new Route('/throw', [
             '_controller' => function () {
@@ -139,7 +180,7 @@ class ConvenienceMethodsTest extends TestCase
 
     public function testErrorCallbackWithTypeHintFiltering(): void
     {
-        $kernel = new MicroKernel([], true);
+        $kernel = $this->trackKernel(new MicroKernel([], true));
 
         $kernel->addRoute('throw-runtime', new Route('/throw-runtime', [
             '_controller' => function () {
@@ -166,7 +207,7 @@ class ConvenienceMethodsTest extends TestCase
 
     public function testErrorCallbackReturningNullPassesThrough(): void
     {
-        $kernel = new MicroKernel([], true);
+        $kernel = $this->trackKernel(new MicroKernel([], true));
         $order  = [];
 
         $kernel->addRoute('throw2', new Route('/throw2', [
@@ -196,7 +237,7 @@ class ConvenienceMethodsTest extends TestCase
 
     public function testBeforeMasterOnlySkipsSubRequest(): void
     {
-        $kernel = new MicroKernel([], true);
+        $kernel = $this->trackKernel(new MicroKernel([], true));
         $log    = [];
 
         // This controller dispatches a sub-request internally
@@ -232,7 +273,7 @@ class ConvenienceMethodsTest extends TestCase
 
     public function testBeforeAllRequestsFiresOnSubRequest(): void
     {
-        $kernel = new MicroKernel([], true);
+        $kernel = $this->trackKernel(new MicroKernel([], true));
         $log    = [];
 
         $kernel->addRoute('main', new Route('/main', [
@@ -266,7 +307,7 @@ class ConvenienceMethodsTest extends TestCase
 
     public function testAfterMasterOnlySkipsSubRequest(): void
     {
-        $kernel = new MicroKernel([], true);
+        $kernel = $this->trackKernel(new MicroKernel([], true));
         $log    = [];
 
         $kernel->addRoute('main', new Route('/main', [
@@ -298,7 +339,7 @@ class ConvenienceMethodsTest extends TestCase
 
     public function testAfterAllRequestsFiresOnSubRequest(): void
     {
-        $kernel = new MicroKernel([], true);
+        $kernel = $this->trackKernel(new MicroKernel([], true));
         $log    = [];
 
         $kernel->addRoute('main', new Route('/main', [

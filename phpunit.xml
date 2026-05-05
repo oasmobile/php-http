@@ -3,6 +3,10 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
         bootstrap="tests/bootstrap.php"
+        failOnRisky="true"
+        failOnWarning="true"
+        failOnDeprecation="true"
+        failOnNotice="true"
 >
     <testsuites>
         <testsuite name="exceptions">
@@ -95,6 +99,7 @@
             <file>tests/MicroKernelSupplementaryTest.php</file>
             <file>tests/ConvenienceMethodsTest.php</file>
             <file>tests/Layer2ConvenienceMethodsTest.php</file>
+            <file>tests/CoverageGapTest.php</file>
         </testsuite>
         <testsuite name="SilexKernelWebTest">
             <file>tests/SilexKernelWebTest.php</file>

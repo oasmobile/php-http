@@ -7,6 +7,7 @@ use Oasis\Mlib\Http\MicroKernel;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\Routing\Route;
 
 /**
@@ -189,5 +190,141 @@ class ConvenienceMethodsTest extends TestCase
 
         $this->assertSame(['first', 'second'], $order);
         $this->assertSame('second-handler', $response->getContent());
+    }
+
+    // ─── masterRequestOnly ───────────────────────────────────────────
+
+    public function testBeforeMasterOnlySkipsSubRequest(): void
+    {
+        $kernel = new MicroKernel([], true);
+        $log    = [];
+
+        // This controller dispatches a sub-request internally
+        $kernel->addRoute('main', new Route('/main', [
+            '_controller' => function () use ($kernel, &$log) {
+                $log[] = 'controller:main';
+                // Trigger a sub-request
+                $subRequest  = Request::create('/sub');
+                $subResponse = $kernel->handle($subRequest, HttpKernelInterface::SUB_REQUEST);
+                return new Response('main+' . $subResponse->getContent());
+            },
+        ]));
+
+        $kernel->addRoute('sub', new Route('/sub', [
+            '_controller' => function () use (&$log) {
+                $log[] = 'controller:sub';
+                return new Response('sub-ok');
+            },
+        ]));
+
+        // masterRequestOnly = true (default) → should NOT fire on sub-request
+        $kernel->before(function () use (&$log) {
+            $log[] = 'before:master-only';
+            return null;
+        }, 0, true);
+
+        $response = $kernel->handle(Request::create('/main'));
+
+        $this->assertSame('main+sub-ok', $response->getContent());
+        // before should fire once (main request), not on sub-request
+        $this->assertSame(['before:master-only', 'controller:main', 'controller:sub'], $log);
+    }
+
+    public function testBeforeAllRequestsFiresOnSubRequest(): void
+    {
+        $kernel = new MicroKernel([], true);
+        $log    = [];
+
+        $kernel->addRoute('main', new Route('/main', [
+            '_controller' => function () use ($kernel, &$log) {
+                $log[] = 'controller:main';
+                $subRequest  = Request::create('/sub');
+                $subResponse = $kernel->handle($subRequest, HttpKernelInterface::SUB_REQUEST);
+                return new Response('main+' . $subResponse->getContent());
+            },
+        ]));
+
+        $kernel->addRoute('sub', new Route('/sub', [
+            '_controller' => function () use (&$log) {
+                $log[] = 'controller:sub';
+                return new Response('sub-ok');
+            },
+        ]));
+
+        // masterRequestOnly = false → should fire on BOTH main and sub-request
+        $kernel->before(function () use (&$log) {
+            $log[] = 'before:all';
+            return null;
+        }, 0, false);
+
+        $response = $kernel->handle(Request::create('/main'));
+
+        $this->assertSame('main+sub-ok', $response->getContent());
+        // before should fire twice: once for main, once for sub
+        $this->assertSame(['before:all', 'controller:main', 'before:all', 'controller:sub'], $log);
+    }
+
+    public function testAfterMasterOnlySkipsSubRequest(): void
+    {
+        $kernel = new MicroKernel([], true);
+        $log    = [];
+
+        $kernel->addRoute('main', new Route('/main', [
+            '_controller' => function () use ($kernel, &$log) {
+                $log[] = 'controller:main';
+                $subRequest  = Request::create('/sub');
+                $subResponse = $kernel->handle($subRequest, HttpKernelInterface::SUB_REQUEST);
+                return new Response('main+' . $subResponse->getContent());
+            },
+        ]));
+
+        $kernel->addRoute('sub', new Route('/sub', [
+            '_controller' => function () use (&$log) {
+                $log[] = 'controller:sub';
+                return new Response('sub-ok');
+            },
+        ]));
+
+        // masterRequestOnly = true → after fires only for main request
+        $kernel->after(function () use (&$log) {
+            $log[] = 'after:master-only';
+        }, 0, true);
+
+        $kernel->handle(Request::create('/main'));
+
+        // after fires once, after the main response is ready
+        $this->assertCount(1, array_filter($log, fn($v) => $v === 'after:master-only'));
+    }
+
+    public function testAfterAllRequestsFiresOnSubRequest(): void
+    {
+        $kernel = new MicroKernel([], true);
+        $log    = [];
+
+        $kernel->addRoute('main', new Route('/main', [
+            '_controller' => function () use ($kernel, &$log) {
+                $log[] = 'controller:main';
+                $subRequest  = Request::create('/sub');
+                $subResponse = $kernel->handle($subRequest, HttpKernelInterface::SUB_REQUEST);
+                return new Response('main+' . $subResponse->getContent());
+            },
+        ]));
+
+        $kernel->addRoute('sub', new Route('/sub', [
+            '_controller' => function () use (&$log) {
+                $log[] = 'controller:sub';
+                return new Response('sub-ok');
+            },
+        ]));
+
+        // masterRequestOnly = false → after fires on both
+        $kernel->after(function () use (&$log) {
+            $log[] = 'after:all';
+        }, 0, false);
+
+        $kernel->handle(Request::create('/main'));
+
+        // after fires twice: once for sub-response, once for main response
+        $this->assertCount(2, array_filter($log, fn($v) => $v === 'after:all'));
     }
 }

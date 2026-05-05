@@ -1,5 +1,9 @@
 # Changelog
 
+## v3.3.0 - 2025-07-17
+
+Silex Migration Behavior Audit & Scenario Test Hardening：对迁移涉及的 7 模块 + MicroKernel 聚合层进行系统性行为审计与场景测试加固（PRP-009）。详见 [3.3/CHANGELOG.md](3.3/CHANGELOG.md)。
+
 ## v3.2.1 - 2026-05-05
 
 Hotfix：修复 `AccessDecisionManager` 缺少 `AuthenticatedVoter` 导致认证属性检查失败（ISS-3.2-L01），修复 `MigrationGuideValidationTest` 测试逻辑。详见 [3.2.1/CHANGELOG.md](3.2.1/CHANGELOG.md)。

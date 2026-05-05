@@ -1,0 +1,23 @@
+# CORS scenario test routes
+# Used by: CorsScenarioTest
+
+scenario.cors.home:
+    path: /scenario/cors/home
+    defaults:
+        _controller: ScenarioCorsController::home
+
+scenario.cors.resource:
+    path: /scenario/cors/resource
+    methods: [GET, PUT, DELETE]
+    defaults:
+        _controller: ScenarioCorsController::resource
+
+scenario.cors.api:
+    path: /scenario/api/data
+    defaults:
+        _controller: ScenarioCorsController::apiData
+
+scenario.cors.secured:
+    path: /scenario/secured/cors
+    defaults:
+        _controller: ScenarioCorsController::secured

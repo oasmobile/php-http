@@ -21,11 +21,6 @@ interface FirewallInterface
     public function getPattern(): string|RequestMatcherInterface;
 
     /**
-     * @return bool
-     */
-    public function isStateless(): bool;
-
-    /**
      * @return array<string, mixed>    Array of policies
      *                  key is policy name,
      *                  and value is an option array or bool-true

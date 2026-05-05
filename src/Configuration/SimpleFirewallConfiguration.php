@@ -29,7 +29,6 @@ class SimpleFirewallConfiguration implements ConfigurationInterface
             $firewall->children()->variableNode('pattern')->isRequired();
             $firewall->children()->variableNode('policies')->isRequired();
             $firewall->children()->variableNode('users')->isRequired();
-            $firewall->children()->booleanNode('stateless')->defaultValue('false');
             $firewall->children()->variableNode('misc')->defaultValue([]);
         }
 

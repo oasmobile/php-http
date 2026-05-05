@@ -492,8 +492,16 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
                     }
 
                     $exception = $event->getThrowable();
-                    $request   = $event->getRequest();
-                    $code      = $exception instanceof \Symfony\Component\HttpKernel\Exception\HttpExceptionInterface
+
+                    // Exception type filtering — equivalent to Silex ExceptionListenerWrapper::shouldRun().
+                    // If the handler's first parameter declares a specific exception type,
+                    // skip this handler when the exception is not an instance of that type.
+                    if (!self::shouldRunErrorHandler($handler, $exception)) {
+                        return;
+                    }
+
+                    $request = $event->getRequest();
+                    $code    = $exception instanceof \Symfony\Component\HttpKernel\Exception\HttpExceptionInterface
                         ? $exception->getStatusCode()
                         : 500;
 
@@ -521,6 +529,48 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
                 -8 // default priority, consistent with SilexKernel::error()
             );
         }
+    }
+
+    /**
+     * Determine whether an error handler should run for the given exception.
+     *
+     * Equivalent to Silex ExceptionListenerWrapper::shouldRun(): inspects the
+     * handler's first parameter type declaration and skips the handler if the
+     * exception is not an instance of the declared type.
+     */
+    private static function shouldRunErrorHandler(callable $handler, \Throwable $exception): bool
+    {
+        try {
+            if (\is_array($handler)) {
+                $reflection = new \ReflectionMethod($handler[0], $handler[1]);
+            } elseif (\is_object($handler) && !$handler instanceof \Closure) {
+                $reflection = new \ReflectionMethod($handler, '__invoke');
+            } elseif ($handler instanceof \Closure) {
+                $reflection = new \ReflectionFunction($handler);
+            } elseif (\is_string($handler)) {
+                $reflection = new \ReflectionFunction($handler);
+            } else {
+                return true;
+            }
+        } catch (\ReflectionException) {
+            return true;
+        }
+
+        $parameters = $reflection->getParameters();
+        if (empty($parameters)) {
+            return true;
+        }
+
+        $firstParam = $parameters[0];
+        $type = $firstParam->getType();
+
+        if (!$type instanceof \ReflectionNamedType || $type->isBuiltin()) {
+            return true;
+        }
+
+        $expectedClass = $type->getName();
+
+        return $exception instanceof $expectedClass;
     }
 
     // ─── Internal: View handler registration ─────────────────────────

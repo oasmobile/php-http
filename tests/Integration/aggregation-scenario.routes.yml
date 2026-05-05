@@ -1,0 +1,22 @@
+# MicroKernel aggregation scenario test routes
+# Used by: MicroKernelAggregationScenarioTest
+
+aggregation.pipeline.full:
+    path: /aggregation/pipeline/full
+    defaults:
+        _controller: AggregationScenarioController::fullPipeline
+
+aggregation.minimal:
+    path: /aggregation/minimal
+    defaults:
+        _controller: AggregationScenarioController::minimal
+
+aggregation.injected:
+    path: /aggregation/injected
+    defaults:
+        _controller: AggregationScenarioController::injectedArg
+
+aggregation.slow:
+    path: /aggregation/slow
+    defaults:
+        _controller: AggregationScenarioController::slow

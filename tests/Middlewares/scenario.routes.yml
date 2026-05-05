@@ -1,0 +1,12 @@
+# Middleware scenario test routes
+# Used by: MiddlewareScenarioTest
+
+scenario.middleware.hello:
+    path: /scenario/middleware/hello
+    defaults:
+        _controller: ScenarioMiddlewareController::hello
+
+scenario.middleware.echo:
+    path: /scenario/middleware/echo
+    defaults:
+        _controller: ScenarioMiddlewareController::echo

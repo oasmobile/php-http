@@ -26,7 +26,7 @@
 ## 命名空间
 
 - 源码：`Oasis\Mlib\Http\` → `src/`
-- 测试：`Oasis\Mlib\Http\Test\` → `ut/`
+- 测试：`Oasis\Mlib\Http\Test\` → `tests/`
 
 ---
 

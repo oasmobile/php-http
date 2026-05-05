@@ -1,5 +1,9 @@
 # Changelog
 
+## v3.3.1 - 2025-07-18
+
+Hotfix：修正 migration guide 中 channel enforcement 描述，反映 v3.3 已恢复该能力。详见 [3.3.1/CHANGELOG.md](3.3.1/CHANGELOG.md)。
+
 ## v3.3.0 - 2025-07-17
 
 Silex Migration Behavior Audit & Scenario Test Hardening：对迁移涉及的 7 模块 + MicroKernel 聚合层进行系统性行为审计与场景测试加固（PRP-009）。详见 [3.3/CHANGELOG.md](3.3/CHANGELOG.md)。

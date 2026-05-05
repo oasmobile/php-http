@@ -66,7 +66,6 @@
 | `FirewallInterface` 重写 | [7. Security](#7-security) |
 | `FirewallInterface::isStateless()` 移除（stateless-only 架构） | [7. Security](#7-security) |
 | `AccessRuleInterface` 重写 | [7. Security](#7-security) |
-| `AccessRuleInterface::getRequiredChannel()` channel enforcement 不再生效 | [7. Security](#7-security) |
 | `AbstractSimplePreAuthenticator` → `AbstractPreAuthenticator` | [7. Security](#7-security) |
 | `AbstractSimplePreAuthenticateUserProvider` 适配 | [7. Security](#7-security) |
 | `MiddlewareInterface::before()` 签名变更 | [8. Middleware](#8-middleware) |
@@ -91,6 +90,7 @@
 |------|------|
 | 路由迁移到 Symfony Routing 8.x | [6. Routing](#6-routing) |
 | 编程式路由注入 API（v3.2 新增） | [6. Routing](#6-routing) |
+| `AccessRuleInterface::getRequiredChannel()` channel enforcement 行为恢复（v3.3） | [7. Security](#7-security) |
 | CORS Provider → EventSubscriber | [11. CORS](#11-cors) |
 | Cookie Provider → EventSubscriber | [12. Cookie](#12-cookie) |
 | `NullEntryPoint` 适配 | [7. Security](#7-security) |
@@ -793,6 +793,8 @@ $firewall = new SimpleFirewall([
 
 **影响**：`AccessRuleInterface::getRequiredChannel()` 在 v3.3 中已恢复 channel enforcement 能力。当 access rule 配置了 `channel` 值时，`registerAccessRuleListener()` 会检查请求 scheme 并执行 301 重定向（HTTP↔HTTPS），行为与 v2.x 中 Silex `ChannelListener` 等价。
 
+**After**:
+
 ```php
 // v3.3+ 中 getRequiredChannel() 返回 'https' 时，
 // access rule listener 会将 HTTP 请求 301 redirect 到 HTTPS
@@ -1432,7 +1434,7 @@ class MyClass
 | `FirewallInterface` (旧签名) | `FirewallInterface` (新签名，移除 `isStateless()`) | 🔴 |
 | `FirewallInterface::isStateless()` | 移除（stateless-only 架构） | 🔴 |
 | `AccessRuleInterface` (旧签名) | `AccessRuleInterface` (新签名) | 🔴 |
-| `AccessRuleInterface::getRequiredChannel()` channel enforcement | 配置项保留但不执行 enforcement | 🔴 |
+| `AccessRuleInterface::getRequiredChannel()` channel enforcement | v3.3 恢复 enforcement，行为与 v2.x 等价 | 🟢 |
 | `AbstractSimplePreAuthenticator` | `AbstractPreAuthenticator` | 🔴 |
 | `AbstractSimplePreAuthenticateUserProvider` (旧签名) | `AbstractSimplePreAuthenticateUserProvider` (新签名) | 🔴 |
 | `MiddlewareInterface::before(Request, Application)` | `MiddlewareInterface::before(Request, MicroKernel)` | 🔴 |

@@ -1284,12 +1284,7 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
             }
 
             if (!\array_key_exists('prefixes', $awsIps)) {
-                $guzzleClient = new Client(
-                    [
-                        'base_uri' => 'https://ip-ranges.amazonaws.com/',
-                        'timeout'  => 5.0,
-                    ]
-                );
+                $guzzleClient = $this->createAwsIpRangesClient();
                 $awsResponse = $guzzleClient->request('GET', 'ip-ranges.json');
                 if ($awsResponse->getStatusCode() !== Response::HTTP_OK) {
                     \merror(
@@ -1328,6 +1323,20 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
         } catch (\Throwable $throwable) {
             \merror("Error while setting aws trusted proxies, exception = %s", $throwable->getMessage());
         }
+    }
+
+    // ─── Internal: AWS IP ranges client factory ────────────────────
+
+    /**
+     * Create the Guzzle client used to fetch AWS IP ranges.
+     * Override in tests to inject a mock handler.
+     */
+    protected function createAwsIpRangesClient(): Client
+    {
+        return new Client([
+            'base_uri' => 'https://ip-ranges.amazonaws.com/',
+            'timeout'  => 5.0,
+        ]);
     }
 
     // ─── Accessors for internal state (used by service providers) ────

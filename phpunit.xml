@@ -35,6 +35,7 @@
         </testsuite>
         <testsuite name="aws">
             <file>tests/AwsTests/ElbTrustedProxyTest.php</file>
+            <file>tests/AwsTests/CloudfrontTrustedProxiesUnitTest.php</file>
         </testsuite>
         <testsuite name="error-handlers">
             <file>tests/ErrorHandlers/WrappedExceptionInfoTest.php</file>

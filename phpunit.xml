@@ -54,14 +54,6 @@
             <file>tests/Configuration/SimpleFirewallConfigurationTest.php</file>
             <file>tests/Configuration/ConfigurationValidationTraitTest.php</file>
         </testsuite>
-        <testsuite name="views">
-            <file>tests/Views/AbstractSmartViewHandlerTest.php</file>
-            <file>tests/Views/JsonViewHandlerTest.php</file>
-            <file>tests/Views/DefaultHtmlRendererTest.php</file>
-            <file>tests/Views/JsonApiRendererTest.php</file>
-            <file>tests/Views/PrefilightResponseTest.php</file>
-            <file>tests/Views/RouteBasedResponseRendererResolverTest.php</file>
-        </testsuite>
         <testsuite name="routing">
             <file>tests/Routing/GroupUrlMatcherTest.php</file>
             <file>tests/Routing/GroupUrlGeneratorTest.php</file>
@@ -95,26 +87,29 @@
             <file>tests/Integration/SecurityAuthenticationFlowIntegrationTest.php</file>
             <file>tests/Integration/SilexKernelCrossCommunityIntegrationTest.php</file>
         </testsuite>
-        <testsuite name="SilexKernelTest">
+        <testsuite name="kernel">
             <file>tests/SilexKernelTest.php</file>
             <file>tests/MicroKernelSupplementaryTest.php</file>
             <file>tests/ConvenienceMethodsTest.php</file>
             <file>tests/Layer2ConvenienceMethodsTest.php</file>
             <file>tests/CoverageGapTest.php</file>
+            <file>tests/CoverageGapSupplementaryTest.php</file>
         </testsuite>
-        <testsuite name="SilexKernelWebTest">
+        <testsuite name="kernel-web">
             <file>tests/SilexKernelWebTest.php</file>
         </testsuite>
-        <testsuite name="FallbackViewHandlerTest">
+        <testsuite name="views">
+            <file>tests/Views/AbstractSmartViewHandlerTest.php</file>
+            <file>tests/Views/JsonViewHandlerTest.php</file>
+            <file>tests/Views/DefaultHtmlRendererTest.php</file>
+            <file>tests/Views/JsonApiRendererTest.php</file>
+            <file>tests/Views/PrefilightResponseTest.php</file>
+            <file>tests/Views/RouteBasedResponseRendererResolverTest.php</file>
             <file>tests/FallbackViewHandlerTest.php</file>
         </testsuite>
-        <testsuite name="migration-guide-validation">
+        <testsuite name="migration">
             <file>tests/MigrationGuideValidationTest.php</file>
-        </testsuite>
-        <testsuite name="migrate-check-unit">
             <file>tests/MigrateCheckScriptTest.php</file>
-        </testsuite>
-        <testsuite name="migrate-check-pbt">
             <file>tests/PBT/MigrateCheckPropertyTest.php</file>
         </testsuite>
         <testsuite name="pbt">

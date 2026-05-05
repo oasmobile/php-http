@@ -33,6 +33,7 @@
 ## 核心入口
 
 - `src/MicroKernel.php` — 核心类，继承 Symfony `HttpKernel`，通过 bootstrap config 数组初始化
+- `src/Kernel/` — MicroKernel 内部 trait 拆分（BootstrapTrait / RoutingTrait / MiddlewareTrait / ErrorHandlerTrait / ConvenienceTrait / ServicesTrait / CloudfrontTrustedProxyResolver）
 
 ---
 

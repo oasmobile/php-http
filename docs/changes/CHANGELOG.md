@@ -1,5 +1,9 @@
 # Changelog
 
+## v3.6.3 - 2026-05-06
+
+MicroKernel 内部重构：拆分为 `Kernel/` 子 namespace traits，提升可维护性。公共 API 无变更。详见 [3.6.3/CHANGELOG.md](3.6.3/CHANGELOG.md)。
+
 ## v3.4.0 - 2026-05-06
 
 Hotfix：恢复 SilexKernel 时代通过 Trait 暴露的 `render` / `renderView` / `path` / `url` 便捷方法，在 MicroKernel 上补充对等实现。详见 [3.4/CHANGELOG.md](3.4/CHANGELOG.md)。

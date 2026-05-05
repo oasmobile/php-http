@@ -10,6 +10,8 @@
 
 通过 bootstrap config 数组驱动初始化，config 经 Symfony Config 组件校验后分发给各 Service Provider。
 
+内部逻辑拆分为 `Kernel/` 子 namespace 下的 traits：`BootstrapTrait`（生命周期）、`RoutingTrait`（路由）、`MiddlewareTrait`（中间件）、`ErrorHandlerTrait`（错误处理）、`ConvenienceTrait`（便捷方法）、`ServicesTrait`（服务访问）。CloudFront IP 解析由独立类 `CloudfrontTrustedProxyResolver` 负责。
+
 boot 前支持编程式注入：`addMiddleware()`、`addControllerInjectedArg()`、`addRoute()` / `addRoutes()` 等方法在 boot 前暂存，boot 时消费。boot 后路由表冻结，写操作抛出 `LogicException`。
 
 提供便捷方法：`render()` / `renderView()`（Twig 模板渲染）、`path()` / `url()`（URL 生成）、`before()` / `after()` / `error()`（Silex 风格回调注册）、`view()`（view handler 注册）、`abort()` / `redirect()` / `json()` / `stream()` / `sendFile()`（Response 工厂），委托内部 Twig 环境、UrlGenerator、EventDispatcher 和 Symfony HttpFoundation 实现。
@@ -20,7 +22,15 @@ boot 前支持编程式注入：`addMiddleware()`、`addControllerInjectedArg()`
 
 ```
 src/
-├── MicroKernel.php                    # 核心入口
+├── MicroKernel.php                    # 核心入口（组合 Kernel/ traits）
+├── Kernel/                            # MicroKernel 内部 trait 拆分
+│   ├── BootstrapTrait.php             # 构造 / boot / run 生命周期
+│   ├── CloudfrontTrustedProxyResolver.php # CloudFront IP 解析（独立类）
+│   ├── ConvenienceTrait.php           # 便捷方法（render/path/url/abort/redirect/json/stream/sendFile）
+│   ├── ErrorHandlerTrait.php          # error handler 注册与异常处理
+│   ├── MiddlewareTrait.php            # before/after middleware 注册
+│   ├── RoutingTrait.php               # 路由注入 / matcher / generator
+│   └── ServicesTrait.php              # Twig / Security / Token 服务访问
 ├── ChainedParameterBagDataProvider.php # 链式参数包数据提供者
 ├── Configuration/                     # Symfony Config 定义（校验 bootstrap 数组）
 ├── ServiceProviders/

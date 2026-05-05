@@ -8,6 +8,7 @@ use Oasis\Mlib\Http\Configuration\CacheableRouterConfiguration;
 use Oasis\Mlib\Http\Configuration\ConfigurationValidationTrait;
 use Oasis\Mlib\Http\Configuration\HttpConfiguration;
 use Oasis\Mlib\Http\EventSubscribers\ViewHandlerSubscriber;
+use Oasis\Mlib\Http\Middlewares\CallbackMiddleware;
 use Oasis\Mlib\Http\Middlewares\MiddlewareInterface;
 use Oasis\Mlib\Http\ServiceProviders\Cookie\ResponseCookieContainer;
 use Oasis\Mlib\Http\ServiceProviders\Cookie\SimpleCookieProvider;
@@ -473,6 +474,70 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
     }
 
     /**
+     * Register a before-filter callback (Silex-compatible convenience method).
+     *
+     * The callback receives (Request $request, MicroKernel $kernel) and may return
+     * a Response to short-circuit the request handling.
+     *
+     * @param callable(Request, MicroKernel): (Response|null) $callback
+     * @param int  $priority          Event listener priority (higher = earlier)
+     * @param bool $masterRequestOnly Whether to skip sub-requests
+     */
+    public function before(callable $callback, int $priority = 0, bool $masterRequestOnly = true): void
+    {
+        $this->addMiddleware(new CallbackMiddleware(
+            beforeCallback: $callback,
+            afterCallback: null,
+            beforePriority: $priority,
+            afterPriority: false,
+            masterRequestOnly: $masterRequestOnly,
+            kernel: $this,
+        ));
+    }
+
+    /**
+     * Register an after-filter callback (Silex-compatible convenience method).
+     *
+     * The callback receives (Request $request, Response $response, MicroKernel $kernel)
+     * and may modify the response in-place.
+     *
+     * @param callable(Request, Response, MicroKernel): void $callback
+     * @param int  $priority          Event listener priority (higher = earlier)
+     * @param bool $masterRequestOnly Whether to skip sub-requests
+     */
+    public function after(callable $callback, int $priority = 0, bool $masterRequestOnly = true): void
+    {
+        $this->addMiddleware(new CallbackMiddleware(
+            beforeCallback: null,
+            afterCallback: $callback,
+            afterPriority: $priority,
+            beforePriority: false,
+            masterRequestOnly: $masterRequestOnly,
+            kernel: $this,
+        ));
+    }
+
+    /**
+     * Register an error handler callback (Silex-compatible convenience method).
+     *
+     * The callback receives (\Throwable $e, Request $request, int $code) and may
+     * return a Response. Equivalent to adding to Bootstrap Config 'error_handlers'.
+     *
+     * @param callable(\Throwable, Request, int): (Response|null) $callback
+     * @param int $priority Event listener priority (lower = later; default -8 matches Silex)
+     */
+    public function error(callable $callback, int $priority = -8): void
+    {
+        if ($this->booted) {
+            // Register directly on the dispatcher if already booted
+            $this->registerSingleErrorHandler($callback, $priority);
+        } else {
+            // Store for registration during boot
+            $this->errorHandlers[] = $callback;
+        }
+    }
+
+    /**
      * Add a single route to be merged into the RouteCollection during boot.
      * Must be called before boot(); calling after boot throws LogicException.
      *
@@ -622,6 +687,52 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
                 -8 // default priority, consistent with SilexKernel::error()
             );
         }
+    }
+
+    /**
+     * Register a single error handler on the EventDispatcher.
+     * Used by error() when called after boot.
+     */
+    protected function registerSingleErrorHandler(callable $handler, int $priority = -8): void
+    {
+        /** @var \Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher */
+        $dispatcher = $this->getContainer()->get('event_dispatcher');
+        $kernel = $this;
+        $dispatcher->addListener(
+            KernelEvents::EXCEPTION,
+            function (ExceptionEvent $event) use ($handler, $kernel) {
+                if ($event->getResponse() !== null) {
+                    return;
+                }
+
+                $exception = $event->getThrowable();
+
+                if (!self::shouldRunErrorHandler($handler, $exception)) {
+                    return;
+                }
+
+                $request = $event->getRequest();
+                $code    = $exception instanceof \Symfony\Component\HttpKernel\Exception\HttpExceptionInterface
+                    ? $exception->getStatusCode()
+                    : 500;
+
+                $response = $handler($exception, $request, $code);
+
+                if ($response instanceof Response) {
+                    $event->setResponse($response);
+                } elseif ($response !== null) {
+                    foreach ($kernel->getViewHandlers() as $viewHandler) {
+                        $viewResponse = $viewHandler($response, $request);
+                        if ($viewResponse instanceof Response) {
+                            $viewResponse->setStatusCode($code);
+                            $event->setResponse($viewResponse);
+                            return;
+                        }
+                    }
+                }
+            },
+            $priority
+        );
     }
 
     /**

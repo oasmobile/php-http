@@ -13,6 +13,7 @@
 | v3.2 | 编程式路由注入 API + boot 后路由冻结 |
 | v3.3 | 行为审计加固 + `isStateless()` 移除 + channel enforcement 行为变更文档化 |
 | v3.4 | 恢复 `render()` / `renderView()` / `path()` / `url()` 便捷方法 |
+| v3.5 | 恢复 `before()` / `after()` / `error()` 便捷方法 |
 
 **严重程度标注**：
 
@@ -58,7 +59,6 @@
 | `SilexKernel` → `MicroKernel` | [3. Kernel API](#3-kernel-api) |
 | `MicroKernel` 构造函数签名变更 | [3. Kernel API](#3-kernel-api) |
 | `SilexKernel::__set()` 移除 | [3. Kernel API](#3-kernel-api) |
-| `SilexKernel::before()` / `after()` / `error()` 移除 | [3. Kernel API](#3-kernel-api) |
 | Pimple DI 容器移除 | [4. DI Container](#4-di-container) |
 | `$app['xxx']` 访问模式移除 | [4. DI Container](#4-di-container) |
 | `Pimple\ServiceProviderInterface` → `CompilerPassInterface`/`ExtensionInterface` | [4. DI Container](#4-di-container) |
@@ -92,6 +92,7 @@
 | 路由迁移到 Symfony Routing 8.x | [6. Routing](#6-routing) |
 | 编程式路由注入 API（v3.2 新增） | [6. Routing](#6-routing) |
 | `AccessRuleInterface::getRequiredChannel()` channel enforcement 行为恢复（v3.3） | [7. Security](#7-security) |
+| `before()` / `after()` / `error()` 便捷方法恢复（v3.5） | [3. Kernel API](#3-kernel-api) |
 | CORS Provider → EventSubscriber | [11. CORS](#11-cors) |
 | Cookie Provider → EventSubscriber | [12. Cookie](#12-cookie) |
 | `NullEntryPoint` 适配 | [7. Security](#7-security) |
@@ -387,11 +388,11 @@ $kernel->customService = new MyService();
 
 **操作**：移除所有对 kernel 的动态属性赋值。改用 Bootstrap Config 的 `providers` key 或 Symfony DI 机制注册服务（参见 [4. DI Container](#4-di-container)）。
 
-### 🔴 `SilexKernel::before()` / `after()` / `error()` 便捷方法移除
+### 🟢 `SilexKernel::before()` / `after()` / `error()` 便捷方法恢复（v3.5）
 
-**影响**：Silex Application 继承的三个便捷方法已移除，不再支持直接在 kernel 上注册回调。
+**影响**：v3.0–v3.4 中移除的三个便捷方法已在 v3.5 中恢复为 `MicroKernel` 公共方法。签名与 Silex 基本一致，降低迁移成本。
 
-**Before**:
+**Before**（Silex 2.x）:
 
 ```php
 $kernel->before(function (Request $request, Application $app) {
@@ -407,23 +408,34 @@ $kernel->error(function (\Exception $e, Request $request, $code) {
 }, $priority);
 ```
 
-**After**:
+**After**（v3.5）:
 
 ```php
-// before / after → 实现 MiddlewareInterface，通过 addMiddleware() 注册
-$kernel->addMiddleware(new MyMiddleware());
+$kernel->before(function (Request $request, MicroKernel $kernel) {
+    // before filter — 返回 Response 可短路请求
+    return null;
+}, $priority, $masterRequestOnly);
 
-// error → 通过 Bootstrap Config 的 error_handlers key 传入
-$config = [
-    'error_handlers' => [
-        function (\Throwable $e, Request $request, int $code) {
-            // error handler
-        },
-    ],
-];
+$kernel->after(function (Request $request, Response $response, MicroKernel $kernel) {
+    // after filter — 可修改 response
+}, $priority, $masterRequestOnly);
+
+$kernel->error(function (\Throwable $e, Request $request, int $code) {
+    // error handler — 返回 Response 处理异常，返回 null 传递给下一个 handler
+    return new Response('error', $code);
+}, $priority);
 ```
 
-**操作**：将 `before()` / `after()` 回调迁移为 `MiddlewareInterface` 实现（参见 [8. Middleware](#8-middleware)）。将 `error()` 回调迁移到 Bootstrap Config 的 `error_handlers` 数组。
+**签名差异**：
+
+| 参数 | Silex 2.x | v3.5 |
+|------|-----------|------|
+| before 回调第二参数 | `Silex\Application` | `MicroKernel` |
+| after 回调第三参数 | `Silex\Application` | `MicroKernel` |
+| error 回调第一参数 | `\Exception` | `\Throwable` |
+| error 回调第三参数 | `$code`（无类型） | `int $code` |
+
+**操作**：如果已迁移为 `MiddlewareInterface` + `error_handlers` 配置，可保持不变；也可改回使用便捷方法。两种方式等价。
 
 ### 公共 API 方法列表
 
@@ -441,6 +453,9 @@ $config = [
 | `renderView(string $view, array $parameters = []): string` | 渲染 Twig 模板并返回字符串（v3.4 恢复） |
 | `path(string $route, array $parameters = []): string` | 生成相对 URL（v3.4 恢复） |
 | `url(string $route, array $parameters = []): string` | 生成绝对 URL（v3.4 恢复） |
+| `before(callable $callback, int $priority = 0, bool $masterRequestOnly = true): void` | 注册 before 过滤器（v3.5 恢复） |
+| `after(callable $callback, int $priority = 0, bool $masterRequestOnly = true): void` | 注册 after 过滤器（v3.5 恢复） |
+| `error(callable $callback, int $priority = -8): void` | 注册错误处理器（v3.5 恢复） |
 | `getParameter(string $key, mixed $default = null): mixed` | 获取参数 |
 | `addExtraParameters(array $extras): void` | 添加额外参数 |
 | `addControllerInjectedArg(object $object): void` | 添加控制器注入参数 |
@@ -1465,9 +1480,9 @@ class MyClass
 |--------|--------|----------|
 | `SilexKernel` | `MicroKernel` | 🔴 |
 | `SilexKernel::__set()` | 移除 | 🔴 |
-| `SilexKernel::before()` | 移除，改用 `addMiddleware()` | 🔴 |
-| `SilexKernel::after()` | 移除，改用 `addMiddleware()` | 🔴 |
-| `SilexKernel::error()` | 移除，改用 Bootstrap Config `error_handlers` | 🔴 |
+| `SilexKernel::before()` | 恢复为 `MicroKernel::before()`（v3.5） | 🟢 |
+| `SilexKernel::after()` | 恢复为 `MicroKernel::after()`（v3.5） | 🟢 |
+| `SilexKernel::error()` | 恢复为 `MicroKernel::error()`（v3.5） | 🟢 |
 | `Pimple\Container` | Symfony DI `ContainerBuilder` | 🔴 |
 | `$app['xxx']` | `$kernel->getXxx()` / Symfony DI | 🔴 |
 | `Pimple\ServiceProviderInterface` | `CompilerPassInterface` / `ExtensionInterface` | 🔴 |

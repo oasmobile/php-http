@@ -38,6 +38,7 @@ use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
@@ -350,6 +351,98 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
     public function getTwig(): ?TwigEnvironment
     {
         return $this->twigEnvironment;
+    }
+
+    /**
+     * Renders a Twig template and returns a Response.
+     *
+     * If a StreamedResponse is passed as the third argument, the template will be streamed.
+     *
+     * @param string        $view       The template name
+     * @param array<string, mixed> $parameters Template variables
+     * @param Response|null $response   An optional Response instance to populate
+     *
+     * @return Response
+     *
+     * @throws \LogicException if Twig is not configured
+     */
+    public function render(string $view, array $parameters = [], ?Response $response = null): Response
+    {
+        if ($this->twigEnvironment === null) {
+            throw new \LogicException('Cannot call render() when Twig is not configured.');
+        }
+
+        $twig = $this->twigEnvironment;
+
+        if ($response instanceof StreamedResponse) {
+            $response->setCallback(function () use ($twig, $view, $parameters): void {
+                $twig->display($view, $parameters);
+            });
+        } else {
+            if ($response === null) {
+                $response = new Response();
+            }
+            $response->setContent($twig->render($view, $parameters));
+        }
+
+        return $response;
+    }
+
+    /**
+     * Renders a Twig template and returns the rendered string.
+     *
+     * @param string        $view       The template name
+     * @param array<string, mixed> $parameters Template variables
+     *
+     * @return string The rendered content
+     *
+     * @throws \LogicException if Twig is not configured
+     */
+    public function renderView(string $view, array $parameters = []): string
+    {
+        if ($this->twigEnvironment === null) {
+            throw new \LogicException('Cannot call renderView() when Twig is not configured.');
+        }
+
+        return $this->twigEnvironment->render($view, $parameters);
+    }
+
+    /**
+     * Generates a path (relative URL) from the given route name and parameters.
+     *
+     * @param string               $route      The route name
+     * @param array<string, mixed> $parameters Route parameters
+     *
+     * @return string The generated path
+     *
+     * @throws \LogicException if routing is not configured
+     */
+    public function path(string $route, array $parameters = []): string
+    {
+        if ($this->urlGenerator === null) {
+            throw new \LogicException('Cannot call path() when routing is not configured.');
+        }
+
+        return $this->urlGenerator->generate($route, $parameters, UrlGeneratorInterface::ABSOLUTE_PATH);
+    }
+
+    /**
+     * Generates an absolute URL from the given route name and parameters.
+     *
+     * @param string               $route      The route name
+     * @param array<string, mixed> $parameters Route parameters
+     *
+     * @return string The generated URL
+     *
+     * @throws \LogicException if routing is not configured
+     */
+    public function url(string $route, array $parameters = []): string
+    {
+        if ($this->urlGenerator === null) {
+            throw new \LogicException('Cannot call url() when routing is not configured.');
+        }
+
+        return $this->urlGenerator->generate($route, $parameters, UrlGeneratorInterface::ABSOLUTE_URL);
     }
 
     public function getParameter(string $key, mixed $default = null): mixed

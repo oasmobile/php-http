@@ -12,6 +12,8 @@
 
 boot 前支持编程式注入：`addMiddleware()`、`addControllerInjectedArg()`、`addRoute()` / `addRoutes()` 等方法在 boot 前暂存，boot 时消费。boot 后路由表冻结，写操作抛出 `LogicException`。
 
+提供便捷方法：`render()` / `renderView()`（Twig 模板渲染）、`path()` / `url()`（URL 生成），委托内部 Twig 环境和 UrlGenerator 实现。
+
 ---
 
 ## 模块结构

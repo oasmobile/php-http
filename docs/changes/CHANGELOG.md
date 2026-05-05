@@ -1,5 +1,9 @@
 # Changelog
 
+## v3.4.0 - 2026-05-06
+
+Hotfix：恢复 SilexKernel 时代通过 Trait 暴露的 `render` / `renderView` / `path` / `url` 便捷方法，在 MicroKernel 上补充对等实现。详见 [3.4/CHANGELOG.md](3.4/CHANGELOG.md)。
+
 ## v3.3.1 - 2025-07-18
 
 Hotfix：修正 migration guide 中 channel enforcement 描述，反映 v3.3 已恢复该能力。详见 [3.3.1/CHANGELOG.md](3.3.1/CHANGELOG.md)。

@@ -7,6 +7,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Response as GuzzleResponse;
+use Oasis\Mlib\Http\Kernel\CloudfrontTrustedProxyResolver;
 use Oasis\Mlib\Http\MicroKernel;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
@@ -15,7 +16,7 @@ use Symfony\Component\Routing\Route;
 
 /**
  * Unit tests for setCloudfrontTrustedProxies HTTP fetch paths.
- * Uses a MicroKernel subclass to inject Guzzle MockHandler.
+ * Uses a MicroKernel subclass to inject a mock CloudfrontTrustedProxyResolver.
  */
 class CloudfrontTrustedProxiesUnitTest extends TestCase
 {
@@ -102,9 +103,24 @@ class CloudfrontTrustedProxiesUnitTest extends TestCase
                 parent::__construct($httpConfig, $isDebug);
             }
 
-            protected function createAwsIpRangesClient(): Client
+            protected function createCloudfrontTrustedProxyResolver(): CloudfrontTrustedProxyResolver
             {
-                return new Client(['handler' => $this->guzzleHandler]);
+                $cacheDir = $this->cacheDir;
+                $handler = $this->guzzleHandler;
+                return new class($cacheDir, $handler) extends CloudfrontTrustedProxyResolver {
+                    private HandlerStack $guzzleHandler;
+
+                    public function __construct(?string $cacheDir, HandlerStack $handler)
+                    {
+                        parent::__construct($cacheDir);
+                        $this->guzzleHandler = $handler;
+                    }
+
+                    protected function createAwsIpRangesClient(): Client
+                    {
+                        return new Client(['handler' => $this->guzzleHandler]);
+                    }
+                };
             }
         };
 
@@ -198,9 +214,24 @@ class CloudfrontTrustedProxiesUnitTest extends TestCase
                 parent::__construct($httpConfig, $isDebug);
             }
 
-            protected function createAwsIpRangesClient(): Client
+            protected function createCloudfrontTrustedProxyResolver(): CloudfrontTrustedProxyResolver
             {
-                return new Client(['handler' => $this->guzzleHandler]);
+                $cacheDir = $this->cacheDir;
+                $handler = $this->guzzleHandler;
+                return new class($cacheDir, $handler) extends CloudfrontTrustedProxyResolver {
+                    private HandlerStack $guzzleHandler;
+
+                    public function __construct(?string $cacheDir, HandlerStack $handler)
+                    {
+                        parent::__construct($cacheDir);
+                        $this->guzzleHandler = $handler;
+                    }
+
+                    protected function createAwsIpRangesClient(): Client
+                    {
+                        return new Client(['handler' => $this->guzzleHandler]);
+                    }
+                };
             }
         };
 

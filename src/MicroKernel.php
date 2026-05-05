@@ -3,53 +3,37 @@ declare(strict_types=1);
 
 namespace Oasis\Mlib\Http;
 
-use GuzzleHttp\Client;
-use Oasis\Mlib\Http\Configuration\CacheableRouterConfiguration;
 use Oasis\Mlib\Http\Configuration\ConfigurationValidationTrait;
 use Oasis\Mlib\Http\Configuration\HttpConfiguration;
-use Oasis\Mlib\Http\EventSubscribers\ViewHandlerSubscriber;
-use Oasis\Mlib\Http\Middlewares\CallbackMiddleware;
+use Oasis\Mlib\Http\Kernel\BootstrapTrait;
+use Oasis\Mlib\Http\Kernel\CloudfrontTrustedProxyResolver;
+use Oasis\Mlib\Http\Kernel\ConvenienceTrait;
+use Oasis\Mlib\Http\Kernel\ErrorHandlerTrait;
+use Oasis\Mlib\Http\Kernel\MiddlewareTrait;
+use Oasis\Mlib\Http\Kernel\RoutingTrait;
+use Oasis\Mlib\Http\Kernel\ServicesTrait;
 use Oasis\Mlib\Http\Middlewares\MiddlewareInterface;
-use Oasis\Mlib\Http\ServiceProviders\Cookie\ResponseCookieContainer;
-use Oasis\Mlib\Http\ServiceProviders\Cookie\SimpleCookieProvider;
 use Oasis\Mlib\Http\ServiceProviders\Cors\CrossOriginResourceSharingProvider;
-use Oasis\Mlib\Http\ServiceProviders\Security\SimpleSecurityProvider;
-use Oasis\Mlib\Http\ServiceProviders\Twig\SimpleTwigServiceProvider;
 use Oasis\Mlib\Http\ServiceProviders\Routing\CacheableRouter;
 use Oasis\Mlib\Http\ServiceProviders\Routing\CacheableRouterProvider;
-use Oasis\Mlib\Http\ServiceProviders\Routing\GroupUrlGenerator;
-use Oasis\Mlib\Http\ServiceProviders\Routing\GroupUrlMatcher;
 use Oasis\Mlib\Utils\ArrayDataProvider;
 use Oasis\Mlib\Utils\DataType;
-use Symfony\Component\Routing\Generator\UrlGenerator;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Symfony\Component\Routing\Loader\ClosureLoader;
 use Symfony\Component\Routing\Matcher\RequestMatcherInterface;
-use Symfony\Component\Routing\Matcher\UrlMatcher;
 use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
 use Symfony\Component\Routing\Router;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
-use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
 use Symfony\Component\DependencyInjection\Reference;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\StreamedResponse;
-use Symfony\Component\HttpKernel\Event\ExceptionEvent;
-use Symfony\Component\HttpKernel\Event\RequestEvent;
-use Symfony\Component\HttpKernel\Event\ResponseEvent;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\Kernel;
-use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\AccessDecision;
@@ -62,6 +46,12 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
 {
     use MicroKernelTrait;
     use ConfigurationValidationTrait;
+    use ConvenienceTrait;
+    use RoutingTrait;
+    use ErrorHandlerTrait;
+    use MiddlewareTrait;
+    use BootstrapTrait;
+    use ServicesTrait;
 
     // Priority constants — 精确数值是行为契约（CR Q3: A）
     const BEFORE_PRIORITY_EARLIEST       = 512;
@@ -136,130 +126,6 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
         parent::__construct($isDebug ? 'dev' : 'prod', $isDebug);
 
         $this->parseBootstrapConfig();
-    }
-
-    /**
-     * Parse Bootstrap_Config keys and store them as instance properties.
-     */
-    protected function parseBootstrapConfig(): void
-    {
-        // trusted_proxies
-        if ($trustedProxiesConfig = $this->httpDataProvider->getOptional(
-            'trusted_proxies',
-            DataType::Mixed
-        )) {
-            if (!is_array($trustedProxiesConfig)) {
-                $trustedProxiesConfig = [$trustedProxiesConfig];
-            }
-            Request::setTrustedProxies(
-                \array_merge(Request::getTrustedProxies(), $trustedProxiesConfig),
-                Request::getTrustedHeaderSet()
-            );
-        }
-
-        // trusted_header_set
-        if ($trustedHeaderSet = $this->httpDataProvider->getOptional(
-            'trusted_header_set',
-            DataType::Mixed
-        )) {
-            if (\is_string($trustedHeaderSet) && \constant(Request::class . "::" . $trustedHeaderSet) !== null) {
-                $trustedHeaderSet = \constant(Request::class . "::" . $trustedHeaderSet);
-            }
-            Request::setTrustedProxies(Request::getTrustedProxies(), $trustedHeaderSet);
-        }
-
-        // middlewares
-        if ($middlewaresConfig = $this->httpDataProvider->getOptional(
-            'middlewares',
-            DataType::Mixed
-        )) {
-            if (!is_array($middlewaresConfig)) {
-                $middlewaresConfig = [$middlewaresConfig];
-            }
-            $filtered = array_filter(
-                $middlewaresConfig,
-                function ($v) {
-                    return $v instanceof MiddlewareInterface;
-                }
-            );
-            if (\count($filtered) !== \count($middlewaresConfig)) {
-                throw new InvalidConfigurationException("middlewares must be an array of Middleware");
-            }
-            foreach ($middlewaresConfig as $middleware) {
-                $this->addMiddleware($middleware);
-            }
-        }
-
-        // view_handlers
-        if ($viewHandlersConfig = $this->httpDataProvider->getOptional(
-            'view_handlers',
-            DataType::Mixed
-        )) {
-            if (!is_array($viewHandlersConfig)) {
-                $viewHandlersConfig = [$viewHandlersConfig];
-            }
-            $filtered = array_filter(
-                $viewHandlersConfig,
-                function ($v) {
-                    return is_callable($v);
-                }
-            );
-            if (\count($filtered) !== \count($viewHandlersConfig)) {
-                throw new InvalidConfigurationException("view_handlers must be an array of Callable");
-            }
-            $this->viewHandlers = $viewHandlersConfig;
-        }
-
-        // error_handlers
-        if ($errorHandlersConfig = $this->httpDataProvider->getOptional(
-            'error_handlers',
-            DataType::Mixed
-        )) {
-            if (!is_array($errorHandlersConfig)) {
-                $errorHandlersConfig = [$errorHandlersConfig];
-            }
-            $filtered = array_filter(
-                $errorHandlersConfig,
-                function ($v) {
-                    return is_callable($v);
-                }
-            );
-            if (\count($filtered) !== \count($errorHandlersConfig)) {
-                throw new InvalidConfigurationException("error_handlers must be an array of Callable");
-            }
-            $this->errorHandlers = $errorHandlersConfig;
-        }
-
-        // injected_args
-        if ($injectedArgs = $this->httpDataProvider->getOptional(
-            'injected_args',
-            DataType::Mixed
-        )) {
-            if (!is_array($injectedArgs)) {
-                $injectedArgs = [$injectedArgs];
-            }
-            foreach ($injectedArgs as $arg) {
-                $this->addControllerInjectedArg($arg);
-            }
-        }
-
-        // providers (CompilerPassInterface / ExtensionInterface)
-        if ($providersConfig = $this->httpDataProvider->getOptional(
-            'providers',
-            DataType::Mixed
-        )) {
-            if (!is_array($providersConfig)) {
-                $providersConfig = [$providersConfig];
-            }
-            foreach ($providersConfig as $provider) {
-                if (!($provider instanceof CompilerPassInterface) && !($provider instanceof ExtensionInterface)) {
-                    throw new InvalidConfigurationException(
-                        'providers must be an array of CompilerPassInterface or ExtensionInterface'
-                    );
-                }
-            }
-            $this->providers = $providersConfig;
-        }
     }
 
     // ─── Public API ──────────────────────────────────────────────────
@@ -358,98 +224,6 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
         return $this->twigEnvironment;
     }
 
-    /**
-     * Renders a Twig template and returns a Response.
-     *
-     * If a StreamedResponse is passed as the third argument, the template will be streamed.
-     *
-     * @param string        $view       The template name
-     * @param array<string, mixed> $parameters Template variables
-     * @param Response|null $response   An optional Response instance to populate
-     *
-     * @return Response
-     *
-     * @throws \LogicException if Twig is not configured
-     */
-    public function render(string $view, array $parameters = [], ?Response $response = null): Response
-    {
-        if ($this->twigEnvironment === null) {
-            throw new \LogicException('Cannot call render() when Twig is not configured.');
-        }
-
-        $twig = $this->twigEnvironment;
-
-        if ($response instanceof StreamedResponse) {
-            $response->setCallback(function () use ($twig, $view, $parameters): void {
-                $twig->display($view, $parameters);
-            });
-        } else {
-            if ($response === null) {
-                $response = new Response();
-            }
-            $response->setContent($twig->render($view, $parameters));
-        }
-
-        return $response;
-    }
-
-    /**
-     * Renders a Twig template and returns the rendered string.
-     *
-     * @param string        $view       The template name
-     * @param array<string, mixed> $parameters Template variables
-     *
-     * @return string The rendered content
-     *
-     * @throws \LogicException if Twig is not configured
-     */
-    public function renderView(string $view, array $parameters = []): string
-    {
-        if ($this->twigEnvironment === null) {
-            throw new \LogicException('Cannot call renderView() when Twig is not configured.');
-        }
-
-        return $this->twigEnvironment->render($view, $parameters);
-    }
-
-    /**
-     * Generates a path (relative URL) from the given route name and parameters.
-     *
-     * @param string               $route      The route name
-     * @param array<string, mixed> $parameters Route parameters
-     *
-     * @return string The generated path
-     *
-     * @throws \LogicException if routing is not configured
-     */
-    public function path(string $route, array $parameters = []): string
-    {
-        if ($this->urlGenerator === null) {
-            throw new \LogicException('Cannot call path() when routing is not configured.');
-        }
-
-        return $this->urlGenerator->generate($route, $parameters, UrlGeneratorInterface::ABSOLUTE_PATH);
-    }
-
-    /**
-     * Generates an absolute URL from the given route name and parameters.
-     *
-     * @param string               $route      The route name
-     * @param array<string, mixed> $parameters Route parameters
-     *
-     * @return string The generated URL
-     *
-     * @throws \LogicException if routing is not configured
-     */
-    public function url(string $route, array $parameters = []): string
-    {
-        if ($this->urlGenerator === null) {
-            throw new \LogicException('Cannot call url() when routing is not configured.');
-        }
-
-        return $this->urlGenerator->generate($route, $parameters, UrlGeneratorInterface::ABSOLUTE_URL);
-    }
-
     public function getParameter(string $key, mixed $default = null): mixed
     {
         if (array_key_exists($key, $this->extraParameters)) {
@@ -472,190 +246,6 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
         $this->controllerInjectedArgs[] = $object;
     }
 
-    public function addMiddleware(MiddlewareInterface $middleware): void
-    {
-        $this->middlewares[] = $middleware;
-    }
-
-    /**
-     * Register a before-filter callback (Silex-compatible convenience method).
-     *
-     * The callback receives (Request $request, MicroKernel $kernel) and may return
-     * a Response to short-circuit the request handling.
-     *
-     * @param callable(Request, MicroKernel): (Response|null) $callback
-     * @param int  $priority          Event listener priority (higher = earlier)
-     * @param bool $masterRequestOnly Whether to skip sub-requests
-     */
-    public function before(callable $callback, int $priority = 0, bool $masterRequestOnly = true): void
-    {
-        $this->addMiddleware(new CallbackMiddleware(
-            beforeCallback: $callback,
-            afterCallback: null,
-            beforePriority: $priority,
-            afterPriority: false,
-            masterRequestOnly: $masterRequestOnly,
-            kernel: $this,
-        ));
-    }
-
-    /**
-     * Register an after-filter callback (Silex-compatible convenience method).
-     *
-     * The callback receives (Request $request, Response $response, MicroKernel $kernel)
-     * and may modify the response in-place.
-     *
-     * @param callable(Request, Response, MicroKernel): void $callback
-     * @param int  $priority          Event listener priority (higher = earlier)
-     * @param bool $masterRequestOnly Whether to skip sub-requests
-     */
-    public function after(callable $callback, int $priority = 0, bool $masterRequestOnly = true): void
-    {
-        $this->addMiddleware(new CallbackMiddleware(
-            beforeCallback: null,
-            afterCallback: $callback,
-            afterPriority: $priority,
-            beforePriority: false,
-            masterRequestOnly: $masterRequestOnly,
-            kernel: $this,
-        ));
-    }
-
-    /**
-     * Register an error handler callback (Silex-compatible convenience method).
-     *
-     * The callback receives (\Throwable $e, Request $request, int $code) and may
-     * return a Response. Equivalent to adding to Bootstrap Config 'error_handlers'.
-     *
-     * @param callable(\Throwable, Request, int): (Response|null) $callback
-     * @param int $priority Event listener priority (lower = later; default -8 matches Silex)
-     */
-    public function error(callable $callback, int $priority = -8): void
-    {
-        if ($this->booted) {
-            // Register directly on the dispatcher if already booted
-            $this->registerSingleErrorHandler($callback, $priority);
-        } else {
-            // Store for registration during boot
-            $this->errorHandlers[] = $callback;
-        }
-    }
-
-    /**
-     * Register a view handler callback (Silex-compatible convenience method).
-     *
-     * View handlers are called when a controller returns a non-Response value,
-     * converting it into a Response. Handlers are called in registration order.
-     *
-     * @param callable $callback Receives (mixed $controllerResult, Request $request) and should return a Response or null
-     */
-    public function view(callable $callback): void
-    {
-        $this->viewHandlers[] = $callback;
-    }
-
-    /**
-     * Abort the current request by throwing an HttpException (Silex-compatible convenience method).
-     *
-     * @param int    $statusCode HTTP status code
-     * @param string $message    Exception message
-     * @param array<string, string> $headers Additional response headers
-     *
-     * @throws HttpException always
-     */
-    public function abort(int $statusCode, string $message = '', array $headers = []): never
-    {
-        throw new HttpException($statusCode, $message, null, $headers);
-    }
-
-    /**
-     * Create a redirect response (Silex-compatible convenience method).
-     *
-     * @param string $url    The URL to redirect to
-     * @param int    $status HTTP status code (default 302)
-     */
-    public function redirect(string $url, int $status = 302): RedirectResponse
-    {
-        return new RedirectResponse($url, $status);
-    }
-
-    /**
-     * Create a JSON response (Silex-compatible convenience method).
-     *
-     * @param mixed $data    Data to encode as JSON
-     * @param int   $status  HTTP status code (default 200)
-     * @param array<string, string> $headers Additional response headers
-     */
-    public function json(mixed $data = [], int $status = 200, array $headers = []): JsonResponse
-    {
-        return new JsonResponse($data, $status, $headers);
-    }
-
-    /**
-     * Create a streamed response (Silex-compatible convenience method).
-     *
-     * @param callable $callback Streaming callback (writes output directly)
-     * @param int      $status   HTTP status code (default 200)
-     * @param array<string, string> $headers Additional response headers
-     */
-    public function stream(callable $callback, int $status = 200, array $headers = []): StreamedResponse
-    {
-        return new StreamedResponse($callback, $status, $headers);
-    }
-
-    /**
-     * Create a BinaryFileResponse for file downloads (Silex-compatible convenience method).
-     *
-     * @param string|\SplFileInfo $file               The file path or SplFileInfo instance
-     * @param int                 $status             HTTP status code (default 200)
-     * @param array<string, string> $headers          Additional response headers
-     * @param string|null         $contentDisposition Content-Disposition type ('attachment' or 'inline'), null to skip
-     */
-    public function sendFile(
-        string|\SplFileInfo $file,
-        int $status = 200,
-        array $headers = [],
-        ?string $contentDisposition = null,
-    ): BinaryFileResponse {
-        $response = new BinaryFileResponse($file, $status, $headers);
-        if ($contentDisposition !== null) {
-            $filename = $file instanceof \SplFileInfo ? $file->getFilename() : basename($file);
-            $response->setContentDisposition($contentDisposition, $filename);
-        }
-
-        return $response;
-    }
-
-    /**
-     * Add a single route to be merged into the RouteCollection during boot.
-     * Must be called before boot(); calling after boot throws LogicException.
-     *
-     * @throws \LogicException if the kernel has already been booted
-     */
-    public function addRoute(string $name, Route $route): void
-    {
-        if ($this->booted) {
-            throw new \LogicException('Cannot add routes after the kernel has been booted.');
-        }
-
-        $this->pendingRoutes[] = ['name' => $name, 'route' => $route];
-    }
-
-    /**
-     * Add a collection of routes to be merged into the RouteCollection during boot.
-     * Must be called before boot(); calling after boot throws LogicException.
-     *
-     * @throws \LogicException if the kernel has already been booted
-     */
-    public function addRoutes(RouteCollection $routes): void
-    {
-        if ($this->booted) {
-            throw new \LogicException('Cannot add routes after the kernel has been booted.');
-        }
-
-        $this->pendingRoutes[] = ['collection' => $routes];
-    }
-
     /**
      * @return string[]
      */
@@ -675,507 +265,6 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
         return $ret;
     }
 
-    // ─── Internal: Middleware registration ────────────────────────────
-
-    /**
-     * Register all middlewares as EventDispatcher listeners.
-     * Called during boot().
-     */
-    protected function registerMiddlewares(): void
-    {
-        /** @var \Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher */
-        $dispatcher = $this->getContainer()->get('event_dispatcher');
-        foreach ($this->middlewares as $middleware) {
-            if (false !== ($priority = $middleware->getBeforePriority())) {
-                $dispatcher->addListener(
-                    KernelEvents::REQUEST,
-                    function (RequestEvent $event) use ($middleware) {
-                        if ($middleware->onlyForMasterRequest()
-                            && $event->getRequestType() !== HttpKernelInterface::MAIN_REQUEST) {
-                            return;
-                        }
-                        $ret = $middleware->before($event->getRequest(), $this);
-                        if ($ret instanceof Response) {
-                            $event->setResponse($ret);
-                        }
-                    },
-                    $priority
-                );
-            }
-            if (false !== ($priority = $middleware->getAfterPriority())) {
-                $dispatcher->addListener(
-                    KernelEvents::RESPONSE,
-                    function (ResponseEvent $event) use ($middleware) {
-                        if ($middleware->onlyForMasterRequest()
-                            && $event->getRequestType() !== HttpKernelInterface::MAIN_REQUEST) {
-                            return;
-                        }
-                        $middleware->after($event->getRequest(), $event->getResponse());
-                    },
-                    $priority
-                );
-            }
-        }
-    }
-
-    // ─── Internal: Error handler registration ────────────────────────
-
-    /**
-     * Register error handlers as EventDispatcher listeners on KernelEvents::EXCEPTION.
-     * Called during boot().
-     */
-    protected function registerErrorHandlers(): void
-    {
-        /** @var \Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher */
-        $dispatcher = $this->getContainer()->get('event_dispatcher');
-        $kernel = $this;
-        foreach ($this->errorHandlers as $handler) {
-            $dispatcher->addListener(
-                KernelEvents::EXCEPTION,
-                function (ExceptionEvent $event) use ($handler, $kernel) {
-                    // If a previous handler (e.g., CORS) already set a response, skip
-                    if ($event->getResponse() !== null) {
-                        return;
-                    }
-
-                    $exception = $event->getThrowable();
-
-                    // Exception type filtering — equivalent to Silex ExceptionListenerWrapper::shouldRun().
-                    // If the handler's first parameter declares a specific exception type,
-                    // skip this handler when the exception is not an instance of that type.
-                    if (!self::shouldRunErrorHandler($handler, $exception)) {
-                        return;
-                    }
-
-                    $request = $event->getRequest();
-                    $code    = $exception instanceof \Symfony\Component\HttpKernel\Exception\HttpExceptionInterface
-                        ? $exception->getStatusCode()
-                        : 500;
-
-                    $response = $handler($exception, $request, $code);
-
-                    if ($response instanceof Response) {
-                        $event->setResponse($response);
-                    } elseif ($response !== null) {
-                        // Non-Response, non-null return (e.g., array from JsonErrorHandler,
-                        // WrappedExceptionInfo from ExceptionWrapper):
-                        // Pass through the view handler chain to convert to a Response,
-                        // matching the old Silex behavior where error handler returns
-                        // were processed by view handlers.
-                        foreach ($kernel->getViewHandlers() as $viewHandler) {
-                            $viewResponse = $viewHandler($response, $request);
-                            if ($viewResponse instanceof Response) {
-                                $viewResponse->setStatusCode($code);
-                                $event->setResponse($viewResponse);
-                                return;
-                            }
-                        }
-                    }
-                    // handler returns null and event has no response → let exception propagate
-                },
-                -8 // default priority, consistent with SilexKernel::error()
-            );
-        }
-    }
-
-    /**
-     * Register a single error handler on the EventDispatcher.
-     * Used by error() when called after boot.
-     */
-    protected function registerSingleErrorHandler(callable $handler, int $priority = -8): void
-    {
-        /** @var \Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher */
-        $dispatcher = $this->getContainer()->get('event_dispatcher');
-        $kernel = $this;
-        $dispatcher->addListener(
-            KernelEvents::EXCEPTION,
-            function (ExceptionEvent $event) use ($handler, $kernel) {
-                if ($event->getResponse() !== null) {
-                    return;
-                }
-
-                $exception = $event->getThrowable();
-
-                if (!self::shouldRunErrorHandler($handler, $exception)) {
-                    return;
-                }
-
-                $request = $event->getRequest();
-                $code    = $exception instanceof \Symfony\Component\HttpKernel\Exception\HttpExceptionInterface
-                    ? $exception->getStatusCode()
-                    : 500;
-
-                $response = $handler($exception, $request, $code);
-
-                if ($response instanceof Response) {
-                    $event->setResponse($response);
-                } elseif ($response !== null) {
-                    foreach ($kernel->getViewHandlers() as $viewHandler) {
-                        $viewResponse = $viewHandler($response, $request);
-                        if ($viewResponse instanceof Response) {
-                            $viewResponse->setStatusCode($code);
-                            $event->setResponse($viewResponse);
-                            return;
-                        }
-                    }
-                }
-            },
-            $priority
-        );
-    }
-
-    /**
-     * Determine whether an error handler should run for the given exception.
-     *
-     * Equivalent to Silex ExceptionListenerWrapper::shouldRun(): inspects the
-     * handler's first parameter type declaration and skips the handler if the
-     * exception is not an instance of the declared type.
-     */
-    private static function shouldRunErrorHandler(callable $handler, \Throwable $exception): bool
-    {
-        try {
-            if (\is_array($handler)) {
-                $reflection = new \ReflectionMethod($handler[0], $handler[1]);
-            } elseif (\is_object($handler) && !$handler instanceof \Closure) {
-                $reflection = new \ReflectionMethod($handler, '__invoke');
-            } elseif ($handler instanceof \Closure) {
-                $reflection = new \ReflectionFunction($handler);
-            } elseif (\is_string($handler)) {
-                $reflection = new \ReflectionFunction($handler);
-            } else {
-                return true;
-            }
-        } catch (\ReflectionException) {
-            return true;
-        }
-
-        $parameters = $reflection->getParameters();
-        if (empty($parameters)) {
-            return true;
-        }
-
-        $firstParam = $parameters[0];
-        $type = $firstParam->getType();
-
-        if (!$type instanceof \ReflectionNamedType || $type->isBuiltin()) {
-            return true;
-        }
-
-        $expectedClass = $type->getName();
-
-        return $exception instanceof $expectedClass;
-    }
-
-    // ─── Internal: View handler registration ─────────────────────────
-
-    /**
-     * Register view handlers as EventSubscriber on KernelEvents::VIEW.
-     * Called during boot().
-     */
-    protected function registerViewHandlers(): void
-    {
-        if (empty($this->viewHandlers)) {
-            return;
-        }
-
-        $subscriber = new ViewHandlerSubscriber($this->viewHandlers);
-        /** @var \Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher */
-        $dispatcher = $this->getContainer()->get('event_dispatcher');
-        $dispatcher->addSubscriber($subscriber);
-    }
-
-    // ─── Internal: Cookie registration ──────────────────────────────
-
-    /**
-     * Register Cookie EventSubscriber.
-     * Creates a ResponseCookieContainer, registers it as a controller injected arg,
-     * and adds the CookieSubscriber to the EventDispatcher.
-     * Called during boot().
-     */
-    protected function registerCookie(): void
-    {
-        $cookieContainer  = new ResponseCookieContainer();
-        $this->addControllerInjectedArg($cookieContainer);
-
-        $cookieSubscriber = new SimpleCookieProvider($cookieContainer);
-        /** @var \Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher */
-        $dispatcher       = $this->getContainer()->get('event_dispatcher');
-        $dispatcher->addSubscriber($cookieSubscriber);
-    }
-
-    // ─── Internal: CORS registration ─────────────────────────────────
-
-    /**
-     * Register CORS EventSubscriber if cors config is provided.
-     * Called during boot().
-     */
-    protected function registerCors(): void
-    {
-        $corsConfig = $this->httpDataProvider->getOptional(
-            'cors',
-            DataType::Mixed
-        );
-
-        if (!$corsConfig || !\is_array($corsConfig)) {
-            return;
-        }
-
-        $this->corsSubscriber = new CrossOriginResourceSharingProvider($corsConfig);
-        /** @var \Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher */
-        $dispatcher = $this->getContainer()->get('event_dispatcher');
-        $dispatcher->addSubscriber($this->corsSubscriber);
-    }
-
-    // ─── Internal: Twig registration ────────────────────────────────
-
-    /**
-     * Register Twig environment if twig config is provided.
-     * Called during boot().
-     */
-    protected function registerTwig(): void
-    {
-        $twigConfig = $this->httpDataProvider->getOptional(
-            'twig',
-            DataType::Mixed
-        );
-
-        if (!$twigConfig || !\is_array($twigConfig)) {
-            return;
-        }
-
-        $twigProvider = new SimpleTwigServiceProvider();
-        $twigProvider->register($this, $twigConfig);
-    }
-
-    // ─── Internal: Security registration ────────────────────────────
-
-    /**
-     * Register Security provider if security config is provided.
-     * Called during boot().
-     */
-    protected function registerSecurity(): void
-    {
-        $securityConfig = $this->httpDataProvider->getOptional(
-            'security',
-            DataType::Mixed
-        );
-
-        if (!$securityConfig || !\is_array($securityConfig)) {
-            return;
-        }
-
-        $securityProvider = new SimpleSecurityProvider();
-        $securityProvider->register($this, $securityConfig);
-    }
-
-    // ─── Internal: Routing registration ─────────────────────────────
-
-    /**
-     * Register routing services if routing config is provided.
-     * Called during boot().
-     */
-    protected function registerRouting(): void
-    {
-        $routingConfig = $this->httpDataProvider->getOptional(
-            'routing',
-            DataType::Mixed
-        );
-
-        $hasPendingRoutes = !empty($this->pendingRoutes);
-
-        if ((!$routingConfig || !is_array($routingConfig)) && !$hasPendingRoutes) {
-            return;
-        }
-
-        $requestContext = new RequestContext();
-
-        if ($routingConfig && is_array($routingConfig)) {
-            // Process routing configuration (existing YAML path)
-            $this->routingConfigDataProvider = $this->processConfiguration(
-                $routingConfig,
-                new CacheableRouterConfiguration()
-            );
-
-            // Create and register the router provider
-            $routerProvider = new CacheableRouterProvider();
-            $routerProvider->register($this);
-            $this->routerProvider = $routerProvider;
-
-            // ── Dual-matcher architecture ──
-            // Programmatic routes use a separate in-memory UrlMatcher (no cache compilation).
-            // YAML routes go through CacheableRouter's compiled cache path (unchanged).
-            // GroupUrlMatcher combines both, with programmatic matcher first (priority).
-            $matchers   = [];
-            $generators = [];
-
-            if ($hasPendingRoutes) {
-                // Build programmatic routes into an independent collection + matcher.
-                // These routes are NOT merged into the YAML RouteCollection before
-                // cache compilation, so Closures won't cause serialization errors
-                // and cache files contain only YAML routes.
-                $programmaticCollection = new RouteCollection();
-                $this->mergePendingRoutes($programmaticCollection);
-
-                $programmaticMatcher = new UrlMatcher($programmaticCollection, $requestContext);
-                $matchers[]   = $programmaticMatcher;  // programmatic first → priority
-                $generators[] = new UrlGenerator($programmaticCollection, $requestContext);
-            }
-
-            // Build YAML routing services (compiles cache with YAML routes only)
-            $yamlMatcher = $routerProvider->buildRequestMatcher($requestContext);
-            $matchers[]   = $yamlMatcher;
-            $generators[] = $routerProvider->buildUrlGenerator($requestContext);
-
-            // Combine matchers and generators
-            $this->requestMatcher = new GroupUrlMatcher($requestContext, $matchers);
-            $this->urlGenerator   = new GroupUrlGenerator($generators);
-
-            // After cache compilation, merge programmatic routes into the
-            // CacheableRouter's RouteCollection for read-only access via
-            // getRouter()->getRouteCollection(). This does NOT affect the
-            // already-compiled cached matcher.
-            $cacheableRouter = $routerProvider->getRouter($requestContext);
-            assert($cacheableRouter instanceof CacheableRouter);
-            if ($hasPendingRoutes) {
-                $yamlCollection = $cacheableRouter->getRouteCollection();
-                $this->mergePendingRoutes($yamlCollection);
-            }
-
-            // Freeze the CacheableRouter's RouteCollection
-            $cacheableRouter->freeze();
-        } else {
-            // No YAML config but has pending routes: bypass CacheableRouterProvider,
-            // create a CacheableRouter with an empty RouteCollection via ClosureLoader.
-            $loader = new ClosureLoader();
-            $directRouter = new CacheableRouter(
-                $this,
-                $loader,
-                function () { return new RouteCollection(); },
-                ['cache_dir' => null, 'debug' => $this->isDebug],
-                $requestContext
-            );
-            $this->directRouter = $directRouter;
-
-            // Merge pending routes into the empty collection
-            $collection = $directRouter->getRouteCollection();
-            $this->mergePendingRoutes($collection);
-
-            // Build matcher and generator from the collection
-            $matcher = new UrlMatcher($collection, $requestContext);
-            $this->requestMatcher = new GroupUrlMatcher(
-                $requestContext,
-                [$matcher]
-            );
-            $this->urlGenerator = new GroupUrlGenerator(
-                [new UrlGenerator($collection, $requestContext)]
-            );
-
-            // Freeze the direct router's RouteCollection
-            $directRouter->freeze();
-        }
-
-        // Register a custom routing listener that runs before Symfony's RouterListener (priority 32).
-        // Our listener uses the custom GroupUrlMatcher to resolve routes.
-        // Once _controller is set, Symfony's RouterListener will skip routing.
-        assert($this->requestMatcher !== null);
-        $matcher = $this->requestMatcher;
-        /** @var \Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher */
-        $dispatcher = $this->getContainer()->get('event_dispatcher');
-        $dispatcher->addListener(
-            KernelEvents::REQUEST,
-            function (RequestEvent $event) use ($matcher, $requestContext) {
-                $request = $event->getRequest();
-
-                if ($request->attributes->has('_controller')) {
-                    return;
-                }
-
-                try {
-                    $requestContext->fromRequest($request);
-                    $parameters = $matcher->matchRequest($request);
-
-                    $request->attributes->add($parameters);
-                    unset($parameters['_route'], $parameters['_controller']);
-                    $request->attributes->set('_route_params', $parameters);
-                } catch (\Symfony\Component\Routing\Exception\ResourceNotFoundException $e) {
-                    // Check if the 404 is due to a scheme mismatch (e.g., HTTPS request
-                    // to an HTTP-only route). If so, generate a redirect response.
-                    $originalScheme = $requestContext->getScheme();
-                    try {
-                        $targetScheme = ($originalScheme === 'https') ? 'http' : 'https';
-                        $requestContext->setScheme($targetScheme);
-                        $parameters = $matcher->matchRequest($request);
-                        // Match succeeded with different scheme → redirect
-                        $url = $targetScheme . '://' . $request->getHost() . $request->getBaseUrl() . $request->getPathInfo();
-                        if ($request->getQueryString()) {
-                            $url .= '?' . $request->getQueryString();
-                        }
-                        $event->setResponse(new \Symfony\Component\HttpFoundation\RedirectResponse($url, 302));
-                        $event->stopPropagation();
-                        return;
-                    } catch (\Throwable $retryException) {
-                        // Not a scheme issue; restore context and let Symfony handle the 404
-                    } finally {
-                        $requestContext->setScheme($originalScheme);
-                    }
-                } catch (\Symfony\Component\Routing\Exception\MethodNotAllowedException $e) {
-                    // Throw MethodNotAllowedHttpException so CORS onException handler can intercept it
-                    $message = \sprintf('No route found for "%s %s": Method Not Allowed (Allow: %s)', $request->getMethod(), $request->getBaseUrl().$request->getPathInfo(), implode(', ', $e->getAllowedMethods()));
-                    throw new \Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException($e->getAllowedMethods(), $message, $e);
-                }
-            },
-            self::BEFORE_PRIORITY_ROUTING + 1 // priority 33, one above Symfony's RouterListener (32)
-        );
-    }
-
-    /**
-     * Merge pending programmatic routes into the given RouteCollection.
-     */
-    private function mergePendingRoutes(RouteCollection $collection): void
-    {
-        foreach ($this->pendingRoutes as $entry) {
-            if (isset($entry['collection'])) {
-                $collection->addCollection($entry['collection']);
-            } else {
-                $collection->add($entry['name'], $entry['route']);
-            }
-        }
-    }
-
-    // ─── Symfony Kernel overrides ────────────────────────────────────
-
-    public function getProjectDir(): string
-    {
-        // Return the working directory; MicroKernel is a library kernel, not a full app
-        $cwd = getcwd();
-        if ($cwd === false) {
-            throw new \RuntimeException('Unable to determine the current working directory');
-        }
-
-        return $cwd;
-    }
-
-    public function getCacheDir(): string
-    {
-        if ($this->cacheDir) {
-            return $this->cacheDir . '/symfony';
-        }
-
-        return sys_get_temp_dir() . '/oasis_http_' . $this->environment;
-    }
-
-    public function getLogDir(): string
-    {
-        return sys_get_temp_dir() . '/oasis_http_logs';
-    }
-
-    public function registerBundles(): iterable
-    {
-        return [
-            new \Symfony\Bundle\FrameworkBundle\FrameworkBundle(),
-        ];
-    }
-
     /**
      * Configure the Symfony DI container.
      * Translates Bootstrap_Config into Symfony DI service definitions.
@@ -1192,10 +281,6 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
         ]);
 
         // Override the default Symfony logger to suppress stderr output.
-        // The framework-bundle registers a Symfony\Component\HttpKernel\Log\Logger
-        // that writes to stderr by default, which pollutes PHPUnit output with
-        // [critical] / [error] messages from ErrorListener. We replace it with
-        // a NullLogger since oasis/logging handles application-level logging.
         $loggerDef = new Definition(\Psr\Log\NullLogger::class);
         $loggerDef->setPublic(true);
         $container->setDefinition('logger', $loggerDef);
@@ -1211,8 +296,6 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
         }
 
         // Register ExtendedArgumentValueResolver for controller injected args.
-        // The resolver is created via a factory method on the kernel service,
-        // which provides the injected args at runtime (after all addControllerInjectedArg() calls).
         $resolverDef = new Definition(ExtendedArgumentValueResolver::class);
         $resolverDef->setFactory([new Reference('kernel'), 'createArgumentValueResolver']);
         $resolverDef->setPublic(true);
@@ -1258,85 +341,17 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
 
     protected function setCloudfrontTrustedProxies(): void
     {
-        try {
-            $awsIps = [];
-            if ($this->cacheDir) {
-                $cacheFilename = $this->cacheDir . "/aws.ips";
-                if (\file_exists($cacheFilename)) {
-                    $content = \file_get_contents($cacheFilename);
-                    if ($content === false) {
-                        $content = '';
-                    }
-                    try {
-                        $awsIps = \json_decode($content, true, 512, JSON_THROW_ON_ERROR);
-                        if (isset($awsIps['expire_at']) && time() > $awsIps['expire_at']) {
-                            $awsIps = [];
-                        }
-                    } catch (\Throwable $throwable) {
-                        \merror(
-                            "Error while processing cached ip file, exception = %s, file content = %s",
-                            $throwable->getMessage(),
-                            $content
-                        );
-                        $awsIps = [];
-                    }
-                }
-            }
-
-            if (!\array_key_exists('prefixes', $awsIps)) {
-                $guzzleClient = $this->createAwsIpRangesClient();
-                $awsResponse = $guzzleClient->request('GET', 'ip-ranges.json');
-                if ($awsResponse->getStatusCode() !== Response::HTTP_OK) {
-                    \merror(
-                        "Cannot get ip-ranges from aws server, response = %s %s, %s",
-                        $awsResponse->getStatusCode(),
-                        $awsResponse->getReasonPhrase(),
-                        $awsResponse->getBody()->getContents()
-                    );
-                } else {
-                    $content = $awsResponse->getBody()->getContents();
-                    $awsIps  = \json_decode($content, true, 512, JSON_THROW_ON_ERROR);
-                    if ($this->cacheDir && \is_writable($this->cacheDir)) {
-                        $cacheFilename       = $this->cacheDir . "/aws.ips";
-                        $awsIps['expire_at'] = time() + 86400;
-                        \file_put_contents(
-                            $cacheFilename,
-                            \json_encode($awsIps, \JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR),
-                            \LOCK_EX
-                        );
-                    }
-                }
-            }
-
-            if (\is_array($awsIps) && \array_key_exists('prefixes', $awsIps)) {
-                $trustedCloudfrontIps = [];
-                foreach ($awsIps['prefixes'] as $info) {
-                    if (\array_key_exists('ip_prefix', $info) && $info['service'] === "CLOUDFRONT") {
-                        $trustedCloudfrontIps[] = $info['ip_prefix'];
-                    }
-                }
-                Request::setTrustedProxies(
-                    \array_merge(Request::getTrustedProxies(), $trustedCloudfrontIps),
-                    Request::HEADER_X_FORWARDED_AWS_ELB
-                );
-            }
-        } catch (\Throwable $throwable) {
-            \merror("Error while setting aws trusted proxies, exception = %s", $throwable->getMessage());
-        }
+        $resolver = $this->createCloudfrontTrustedProxyResolver();
+        $resolver->resolve();
     }
 
-    // ─── Internal: AWS IP ranges client factory ────────────────────
-
     /**
-     * Create the Guzzle client used to fetch AWS IP ranges.
-     * Override in tests to inject a mock handler.
+     * Create the CloudFront trusted proxy resolver.
+     * Override in tests to inject a mock resolver.
      */
-    protected function createAwsIpRangesClient(): Client
+    protected function createCloudfrontTrustedProxyResolver(): CloudfrontTrustedProxyResolver
     {
-        return new Client([
-            'base_uri' => 'https://ip-ranges.amazonaws.com/',
-            'timeout'  => 5.0,
-        ]);
+        return new CloudfrontTrustedProxyResolver($this->cacheDir);
     }
 
     // ─── Accessors for internal state (used by service providers) ────
@@ -1441,5 +456,46 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
     public function createArgumentValueResolver(): ExtendedArgumentValueResolver
     {
         return new ExtendedArgumentValueResolver($this->controllerInjectedArgs);
+    }
+
+    // ─── Symfony Kernel overrides ────────────────────────────────────
+
+    public function getProjectDir(): string
+    {
+        if ($projectDir = $this->httpDataProvider->getOptional('project_dir')) {
+            return $projectDir;
+        }
+
+        $cwd = getcwd();
+        if ($cwd === false) {
+            throw new \RuntimeException('Unable to determine the current working directory');
+        }
+
+        return $cwd;
+    }
+
+    public function getCacheDir(): string
+    {
+        if ($this->cacheDir) {
+            return $this->cacheDir . '/symfony';
+        }
+
+        return sys_get_temp_dir() . '/oasis_http_' . $this->environment;
+    }
+
+    public function getLogDir(): string
+    {
+        if ($logDir = $this->httpDataProvider->getOptional('log_dir')) {
+            return $logDir;
+        }
+
+        return sys_get_temp_dir() . '/oasis_http_logs';
+    }
+
+    public function registerBundles(): iterable
+    {
+        return [
+            new \Symfony\Bundle\FrameworkBundle\FrameworkBundle(),
+        ];
     }
 }

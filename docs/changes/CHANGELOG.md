@@ -4,6 +4,26 @@
 
 MicroKernel 内部重构：拆分为 `Kernel/` 子 namespace traits，提升可维护性。公共 API 无变更。详见 [3.6.3/CHANGELOG.md](3.6.3/CHANGELOG.md)。
 
+## v3.6.2 - 2026-05-06
+
+提取 `createAwsIpRangesClient()` 工厂方法 + CloudFront HTTP 路径测试覆盖，lines 95.05%。详见 [3.6.2/CHANGELOG.md](3.6.2/CHANGELOG.md)。
+
+## v3.6.1 - 2026-05-06
+
+测试加固：启用 PHPUnit 严格模式，覆盖率从 87.85% 提升到 94.91%。详见 [3.6.1/CHANGELOG.md](3.6.1/CHANGELOG.md)。
+
+## v3.6.0 - 2026-05-06
+
+恢复 Silex 第二层便捷方法：`view()` / `abort()` / `redirect()` / `json()` / `stream()` / `sendFile()`。详见 [3.6/CHANGELOG.md](3.6/CHANGELOG.md)。
+
+## v3.5.1 - 2026-05-06
+
+补充 `before()` / `after()` 的 `masterRequestOnly` 参数 sub-request 行为测试。详见 [3.5.1/CHANGELOG.md](3.5.1/CHANGELOG.md)。
+
+## v3.5.0 - 2026-05-06
+
+恢复 Silex 时代的 `before()` / `after()` / `error()` 便捷方法。详见 [3.5/CHANGELOG.md](3.5/CHANGELOG.md)。
+
 ## v3.4.0 - 2026-05-06
 
 Hotfix：恢复 SilexKernel 时代通过 Trait 暴露的 `render` / `renderView` / `path` / `url` 便捷方法，在 MicroKernel 上补充对等实现。详见 [3.4/CHANGELOG.md](3.4/CHANGELOG.md)。
@@ -28,7 +48,11 @@ Hotfix：修复 `AccessDecisionManager` 缺少 `AuthenticatedVoter` 导致认证
 
 Symfony 全系依赖 `^7.2` → `^8.0`。详见 [3.1/CHANGELOG.md](3.1/CHANGELOG.md)。
 
-## v3.0 - 2026-04-26
+## v3.0.1 - 2026-05-01
+
+代码质量加固：全量添加 `declare(strict_types=1)` + 覆盖率提升至 91.57%。详见 [3.0.1/CHANGELOG.md](3.0.1/CHANGELOG.md)。
+
+## v3.0.0 - 2026-04-26
 
 PHP 8.5 全面升级（PRP-002 ~ PRP-008）：框架替换、依赖升级、Security 重构、语言适配、Migration Guide & Check Script。详见 [3.0/CHANGELOG.md](3.0/CHANGELOG.md)。
 

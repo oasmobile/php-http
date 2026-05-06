@@ -29,6 +29,8 @@
 
 ## 目录
 
+- [最小迁移步骤](#最小迁移步骤从-v2x-直升-v36x)
+- [常见报错速查](#常见报错速查)
 - [1. PHP Version](#1-php-version)
 - [2. Dependencies](#2-dependencies)
 - [3. Kernel API](#3-kernel-api)
@@ -94,12 +96,61 @@
 | 路由迁移到 Symfony Routing 8.x | [6. Routing](#6-routing) |
 | 编程式路由注入 API（v3.2 新增） | [6. Routing](#6-routing) |
 | `AccessRuleInterface::getRequiredChannel()` channel enforcement 行为恢复（v3.3） | [7. Security](#7-security) |
-| `before()` / `after()` / `error()` 便捷方法恢复（v3.5） | [3. Kernel API](#3-kernel-api) |
+| `before()` / `after()` / `error()` 便捷方法恢复（v3.5）† | [3. Kernel API](#3-kernel-api) |
 | CORS Provider → EventSubscriber | [11. CORS](#11-cors) |
 | Cookie Provider → EventSubscriber | [12. Cookie](#12-cookie) |
 | `NullEntryPoint` 适配 | [7. Security](#7-security) |
 | `phpunit/phpunit` `^5.2` → `^13.0` | [14. 附录](#14-附录) |
 | `phpstan/phpstan` 新增 `^2.1` | [14. 附录](#14-附录) |
+
+> † 方法本身无需操作（已恢复），但从 v2.x 直升的用户仍需更新回调签名（`Application` → `MicroKernel`，`\Exception` → `\Throwable`），详见 [§3 签名差异表](#3-kernel-api)。
+
+> 完整的旧 API → 新 API 映射表见 [14. 附录 — 完整 API 变更速查表](#完整-api-变更速查表)。
+
+---
+
+## 最小迁移步骤（从 v2.x 直升 v3.6.x）
+
+以下按执行顺序列出让项目"能跑起来"的最少操作。完成后再逐章精调。
+
+1. **环境升级**：确保 PHP >= 8.5
+2. **更新 `composer.json`**：
+   - 移除 `silex/silex`、`silex/providers`、`twig/extensions`
+   - 将 `oasis/http` 约束改为 `^3.6`
+   - 将 `twig/twig` 改为 `^3.0`，`guzzlehttp/guzzle` 改为 `^7.0`
+   - 如直接依赖 Symfony 组件，改为 `^8.0`
+3. **全局替换类名**：`SilexKernel` → `MicroKernel`，更新 `use` 语句
+4. **修改 Kernel 构造**：`new MicroKernel($httpConfig, $isDebug)`（双参数）
+5. **移除 `$app['xxx']`**：内置服务用 `$kernel->getXxx()`，自定义服务用 Symfony DI
+6. **迁移 Service Provider**：`Pimple\ServiceProviderInterface` → `CompilerPassInterface`
+7. **更新 Middleware 签名**：`before(Request, Application)` → `before(Request, MicroKernel)`
+8. **更新 Security 接口**：重写 `AuthenticationPolicyInterface`、`FirewallInterface`、`AccessRuleInterface`、`AbstractPreAuthenticator`（参见 [§7](#7-security)）
+9. **更新 View / Twig**：`ResponseRendererInterface` 参数 `SilexKernel` → `MicroKernel`；Twig 类名改为命名空间风格
+10. **更新便捷方法回调签名**（如使用 `before()`/`after()`/`error()`）：`Application` → `MicroKernel`，`\Exception` → `\Throwable`
+11. **运行 `composer update`**，然后跑测试，逐个修复剩余类型错误
+
+> **提示**：步骤 3–9 可通过 IDE 的全局搜索替换批量完成，大部分是类名/类型声明的机械替换。
+
+---
+
+## 常见报错速查
+
+迁移过程中 `composer update` 或运行时最常遇到的错误及对应章节：
+
+| 报错信息（关键词） | 原因 | 参见 |
+|-------------------|------|------|
+| `Class 'Silex\Application' not found` | Silex 已移除，中间件/回调仍引用旧类 | [§3](#3-kernel-api), [§8](#8-middleware) |
+| `Class 'Oasis\Mlib\Http\SilexKernel' not found` | 入口类已重命名 | [§3](#3-kernel-api) |
+| `Call to undefined method ...::isStateless()` | v3.x stateless-only 架构 | [§7](#7-security) |
+| `must be compatible with ...::before(Request, MicroKernel)` | 中间件签名变更 | [§8](#8-middleware) |
+| `Class 'Pimple\Container' not found` | Pimple 已移除 | [§4](#4-di-container) |
+| `Undefined offset/key` on `$app['xxx']` | 数组式服务访问已移除 | [§4](#4-di-container) |
+| `Class 'Twig_Environment' not found` | Twig 1.x 类名已移除 | [§10](#10-twig) |
+| `Constant MASTER_REQUEST not found` / `Class FilterResponseEvent not found` | Symfony 事件类/常量重命名 | [§8](#8-middleware) |
+| `must implement ...AuthenticatorInterface` | Security 接口重写 | [§7](#7-security) |
+| `LogicException: Cannot add routes after boot` | v3.2 boot 后路由冻结（有意修正） | [§6](#6-routing) |
+| `Declaration of ...::renderOnSuccess(...SilexKernel...)` | View 接口参数类型变更 | [§9](#9-views) |
+| `Implicit nullable parameter` deprecation | PHP 8.4+ 语言变更 | [§13](#13-php-语言适配) |
 
 ---
 
@@ -393,6 +444,8 @@ $kernel->customService = new MyService();
 ### 🟢 `SilexKernel::before()` / `after()` / `error()` 便捷方法恢复（v3.5）
 
 **影响**：v3.0–v3.4 中移除的三个便捷方法已在 v3.5 中恢复为 `MicroKernel` 公共方法。签名与 Silex 基本一致，降低迁移成本。
+
+> ⚠️ **从 v2.x 直升 v3.5+ 的用户注意**：虽然方法名恢复了，但回调签名有 breaking change（`Application` → `MicroKernel`，`\Exception` → `\Throwable`）。如果你的代码使用了这些便捷方法，仍需更新回调参数类型——参见下方签名差异表。
 
 **Before**（Silex 2.x）:
 
@@ -1400,7 +1453,7 @@ $config = [
 **Before**:
 
 ```php
-// Cookie 通过 Silex provider 注册
+// Cookie 通过 Silex provider 注册，通过 Pimple 获取实例
 $cookieContainer = $app['cookie.container'];
 $cookieContainer->addCookie(new Cookie('name', 'value'));
 ```
@@ -1408,11 +1461,21 @@ $cookieContainer->addCookie(new Cookie('name', 'value'));
 **After**:
 
 ```php
-// ResponseCookieContainer API 保持不变
-$cookieContainer->addCookie(new Cookie('name', 'value'));
+// v3.x 中 ResponseCookieContainer 自动注册为 controller injected argument
+// 在控制器方法中通过类型提示直接注入：
+use Oasis\Mlib\Http\ServiceProviders\Cookie\ResponseCookieContainer;
+
+class MyController
+{
+    public function setCookie(ResponseCookieContainer $cookieContainer): Response
+    {
+        $cookieContainer->addCookie(new Cookie('name', 'value'));
+        return new JsonResponse(['ok' => true]);
+    }
+}
 ```
 
-**操作**：无需下游操作。`ResponseCookieContainer` 的 `addCookie()` 和 `getCookies()` 方法保持不变。注意获取 `ResponseCookieContainer` 实例的方式可能需要更新（不再通过 `$app['cookie.container']`）。
+**操作**：移除 `$app['cookie.container']` 访问。改为在控制器方法参数中声明 `ResponseCookieContainer` 类型提示，MicroKernel 的参数解析器会自动注入实例。`addCookie()` 和 `getCookies()` 方法签名保持不变。
 
 ---
 
@@ -1483,6 +1546,8 @@ class MyClass
 ## 14. 附录
 
 ### 完整 API 变更速查表
+
+> 本表列出所有旧 API 到新 API 的映射关系，供迁移时逐项查找。如需按严重程度筛选，参见文档开头的[快速评估清单](#快速评估清单)。
 
 | 旧 API | 新 API | Severity |
 |--------|--------|----------|

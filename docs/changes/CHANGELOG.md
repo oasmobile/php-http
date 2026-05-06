@@ -1,5 +1,9 @@
 # Changelog
 
+## v3.6.4 - 2026-05-07
+
+迁移文档可读性改进：增加最小迁移步骤、常见报错速查表，修正 Cookie 章节，补充便捷方法直升注意事项，消除重复内容。详见 [3.6.4/CHANGELOG.md](3.6.4/CHANGELOG.md)。
+
 ## v3.6.3 - 2026-05-06
 
 MicroKernel 内部重构：拆分为 `Kernel/` 子 namespace traits，提升可维护性。公共 API 无变更。详见 [3.6.3/CHANGELOG.md](3.6.3/CHANGELOG.md)。

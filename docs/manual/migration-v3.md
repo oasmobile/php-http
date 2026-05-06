@@ -16,6 +16,7 @@
 | v3.5 | 恢复 `before()` / `after()` / `error()` 便捷方法 |
 | v3.6 | 恢复 `view()` / `abort()` / `redirect()` / `json()` / `stream()` / `sendFile()` 便捷方法 |
 | v3.6.3 | MicroKernel 内部 trait 拆分（公共 API 无变更） |
+| v3.6.4 | 迁移文档可读性改进（最小迁移步骤、常见报错速查等） |
 
 **严重程度标注**：
 

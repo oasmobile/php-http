@@ -18,6 +18,31 @@
  *   2  Input error (directory not found, invalid arguments, etc.)
  */
 
+// ── Polyfills for PHP < 8.0 ─────────────────────────────────────
+
+if (!function_exists('str_starts_with')) {
+    function str_starts_with(string $haystack, string $needle): bool
+    {
+        return $needle === '' || strncmp($haystack, $needle, strlen($needle)) === 0;
+    }
+}
+
+if (!function_exists('str_contains')) {
+    function str_contains(string $haystack, string $needle): bool
+    {
+        return $needle === '' || strpos($haystack, $needle) !== false;
+    }
+}
+
+// Token constants introduced in PHP 8.0; define as -1 on older versions
+// so comparisons simply never match (graceful degradation).
+if (!defined('T_NAME_FULLY_QUALIFIED')) {
+    define('T_NAME_FULLY_QUALIFIED', -1);
+}
+if (!defined('T_NAME_QUALIFIED')) {
+    define('T_NAME_QUALIFIED', -1);
+}
+
 // Conditional guard: only execute main() when run as CLI script.
 // This allows test files to require this file and call individual functions
 // without triggering main() execution.
@@ -263,9 +288,16 @@ function getRules(): array
  * Main entry point.
  *
  * @param list<string> $argv
+ * @param resource|null $stdout  Output stream (defaults to php://output for OB compatibility)
+ * @param resource|null $stderr  Error stream (defaults to STDERR)
  */
-function main(array $argv): int
+function main(array $argv, $stdout = null, $stderr = null): int
 {
+    if ($stdout === null) {
+        $stdout = fopen('php://output', 'w');
+    }
+    $stderr = $stderr ?? STDERR;
+
     $format    = 'text';
     $directory = null;
 
@@ -273,28 +305,28 @@ function main(array $argv): int
     $args = array_slice($argv, 1);
 
     if (empty($args)) {
-        fwrite(STDERR, getUsage());
+        fwrite($stderr, getUsage());
         return 2;
     }
 
     foreach ($args as $arg) {
         if ($arg === '--help') {
-            echo getUsage();
+            fwrite($stdout, getUsage());
             return 0;
         }
 
         if (str_starts_with($arg, '--format=')) {
             $format = substr($arg, strlen('--format='));
             if (!in_array($format, ['text', 'json'], true)) {
-                fwrite(STDERR, "Error: Unsupported format '{$format}'. Use 'text' or 'json'.\n");
+                fwrite($stderr, "Error: Unsupported format '{$format}'. Use 'text' or 'json'.\n");
                 return 2;
             }
             continue;
         }
 
         if (str_starts_with($arg, '--')) {
-            fwrite(STDERR, "Error: Unknown option '{$arg}'.\n");
-            fwrite(STDERR, getUsage());
+            fwrite($stderr, "Error: Unknown option '{$arg}'.\n");
+            fwrite($stderr, getUsage());
             return 2;
         }
 
@@ -303,43 +335,43 @@ function main(array $argv): int
     }
 
     if ($directory === null) {
-        fwrite(STDERR, getUsage());
+        fwrite($stderr, getUsage());
         return 2;
     }
 
     if (!is_dir($directory)) {
-        fwrite(STDERR, "Error: Directory '{$directory}' does not exist.\n");
+        fwrite($stderr, "Error: Directory '{$directory}' does not exist.\n");
         return 2;
     }
 
     $rules    = getRules();
-    $findings = scanDirectory($directory, $rules);
+    $findings = scanDirectory($directory, $rules, $stderr);
 
     // If scan found nothing and no scannable files exist, report accordingly
     if (empty($findings) && !hasScannableFiles($directory)) {
         $msg = "No PHP files found in '{$directory}'.\n";
         if ($format === 'json') {
-            echo "[]\n";
-            fwrite(STDERR, $msg);
+            fwrite($stdout, "[]\n");
+            fwrite($stderr, $msg);
         } else {
-            echo $msg;
+            fwrite($stdout, $msg);
         }
         return 0;
     }
 
     if (empty($findings)) {
         if ($format === 'json') {
-            echo "[]\n";
+            fwrite($stdout, "[]\n");
         } else {
-            echo "✅ No compatibility issues found. The project appears compatible with oasis/http v3.\n";
+            fwrite($stdout, "✅ No compatibility issues found. The project appears compatible with oasis/http v3.\n");
         }
         return 0;
     }
 
     if ($format === 'json') {
-        reportJson($findings, $directory);
+        reportJson($findings, $directory, $stdout);
     } else {
-        reportText($findings, $directory);
+        reportText($findings, $directory, $stdout);
     }
 
     // Exit code: 1 if any 🔴 finding, 0 otherwise
@@ -419,10 +451,13 @@ function hasScannableFiles(string $dir): bool
  * Uses realpath() to deduplicate and avoid symlink loops.
  *
  * @param list<array> $rules
+ * @param resource|null $stderr  Error stream for warnings
  * @return list<array{file: string, line: int, severity: string, issue: string, action: string, rule_id: string}>
  */
-function scanDirectory(string $dir, array $rules): array
+function scanDirectory(string $dir, array $rules, $stderr = null): array
 {
+    $stderr = $stderr ?? STDERR;
+
     $realDir = realpath($dir);
     if ($realDir === false) {
         return [];
@@ -431,7 +466,7 @@ function scanDirectory(string $dir, array $rules): array
     $findings    = [];
     $visitedDirs = [];
 
-    scanDirectoryRecursive($realDir, $realDir, $rules, $findings, $visitedDirs);
+    scanDirectoryRecursive($realDir, $realDir, $rules, $findings, $visitedDirs, $stderr);
 
     return $findings;
 }
@@ -444,13 +479,15 @@ function scanDirectory(string $dir, array $rules): array
  * @param list<array> $rules
  * @param list<array> &$findings  Accumulated findings (by reference)
  * @param array<string, true> &$visitedDirs  Visited real paths (by reference)
+ * @param resource $stderr  Error stream for warnings
  */
 function scanDirectoryRecursive(
     string $currentDir,
     string $baseDir,
     array $rules,
     array &$findings,
-    array &$visitedDirs
+    array &$visitedDirs,
+    $stderr
 ): void {
     $realCurrent = realpath($currentDir);
     if ($realCurrent === false) {
@@ -465,7 +502,7 @@ function scanDirectoryRecursive(
 
     $entries = @scandir($currentDir);
     if ($entries === false) {
-        fwrite(STDERR, "Warning: Cannot read directory '{$currentDir}', skipping.\n");
+        fwrite($stderr, "Warning: Cannot read directory '{$currentDir}', skipping.\n");
         return;
     }
 
@@ -477,7 +514,7 @@ function scanDirectoryRecursive(
         $fullPath = $currentDir . DIRECTORY_SEPARATOR . $entry;
 
         if (is_dir($fullPath)) {
-            scanDirectoryRecursive($fullPath, $baseDir, $rules, $findings, $visitedDirs);
+            scanDirectoryRecursive($fullPath, $baseDir, $rules, $findings, $visitedDirs, $stderr);
             continue;
         }
 
@@ -487,13 +524,15 @@ function scanDirectoryRecursive(
 
         // Check readability
         if (!is_readable($fullPath)) {
-            fwrite(STDERR, "Warning: Cannot read file '{$fullPath}', skipping.\n");
+            fwrite($stderr, "Warning: Cannot read file '{$fullPath}', skipping.\n");
             continue;
         }
 
         if ($entry === 'composer.json') {
-            $composerFindings = scanComposerJson($fullPath, $rules, $baseDir);
-            array_push($findings, ...$composerFindings);
+            $composerFindings = scanComposerJson($fullPath, $rules, $baseDir, $stderr);
+            if ($composerFindings) {
+                array_push($findings, ...$composerFindings);
+            }
             continue;
         }
 
@@ -505,7 +544,7 @@ function scanDirectoryRecursive(
 
             $content = @file_get_contents($fullPath);
             if ($content === false) {
-                fwrite(STDERR, "Warning: Cannot read file '{$fullPath}', skipping.\n");
+                fwrite($stderr, "Warning: Cannot read file '{$fullPath}', skipping.\n");
                 continue;
             }
 
@@ -514,7 +553,9 @@ function scanDirectoryRecursive(
             }
 
             $fileFindings = scanPhpFile($fullPath, $content, $rules, $baseDir);
-            array_push($findings, ...$fileFindings);
+            if ($fileFindings) {
+                array_push($findings, ...$fileFindings);
+            }
         }
     }
 }
@@ -786,20 +827,29 @@ function isPimpleAccess(array $tokens, int $i, int $tokenCount): bool
  * @param list<array> $rules
  * @return list<array{file: string, line: int, severity: string, issue: string, action: string, rule_id: string}>
  */
-function scanComposerJson(string $filePath, array $rules, string $baseDir): array
+/**
+ * Scan a composer.json file for removed package references.
+ *
+ * @param list<array> $rules
+ * @param resource|null $stderr  Error stream for warnings
+ * @return list<array{file: string, line: int, severity: string, issue: string, action: string, rule_id: string}>
+ */
+function scanComposerJson(string $filePath, array $rules, string $baseDir, $stderr = null): array
 {
+    $stderr = $stderr ?? STDERR;
+
     $findings     = [];
     $relativePath = getRelativePath($filePath, $baseDir);
 
     $content = @file_get_contents($filePath);
     if ($content === false) {
-        fwrite(STDERR, "Warning: Cannot read file '{$filePath}', skipping.\n");
+        fwrite($stderr, "Warning: Cannot read file '{$filePath}', skipping.\n");
         return [];
     }
 
     $data = json_decode($content, true);
     if (!is_array($data)) {
-        fwrite(STDERR, "Warning: Invalid JSON in '{$filePath}', skipping.\n");
+        fwrite($stderr, "Warning: Invalid JSON in '{$filePath}', skipping.\n");
         return [];
     }
 
@@ -863,9 +913,14 @@ function findLineInFile(string $content, string $needle): int
  * Output findings in text format, grouped by severity.
  *
  * @param list<array{file: string, line: int, severity: string, issue: string, action: string, rule_id: string}> $findings
+ * @param resource|null $stdout  Output stream (defaults to php://output for OB compatibility)
  */
-function reportText(array $findings, string $targetDir): void
+function reportText(array $findings, string $targetDir, $stdout = null): void
 {
+    if ($stdout === null) {
+        $stdout = fopen('php://output', 'w');
+    }
+
     // Group by severity
     $groups = [
         '🔴' => [],
@@ -894,12 +949,12 @@ function reportText(array $findings, string $targetDir): void
 
         $label = $severityLabels[$severity] ?? $severity;
         $count = count($groupFindings);
-        echo "\n=== {$severity} {$label} ({$count} findings) ===\n\n";
+        fwrite($stdout, "\n=== {$severity} {$label} ({$count} findings) ===\n\n");
 
         foreach ($groupFindings as $finding) {
-            echo "{$finding['file']}:{$finding['line']}\n";
-            echo "  [{$finding['rule_id']}] {$finding['issue']}\n";
-            echo "  → {$finding['action']}\n\n";
+            fwrite($stdout, "{$finding['file']}:{$finding['line']}\n");
+            fwrite($stdout, "  [{$finding['rule_id']}] {$finding['issue']}\n");
+            fwrite($stdout, "  → {$finding['action']}\n\n");
         }
     }
 
@@ -909,20 +964,25 @@ function reportText(array $findings, string $targetDir): void
     $yellowCount = count($groups['🟡']);
     $greenCount  = count($groups['🟢']);
 
-    echo "=== Summary ===\n";
-    echo "Total: {$total} findings\n";
-    echo "  🔴 必须改: {$redCount}\n";
-    echo "  🟡 建议改: {$yellowCount}\n";
-    echo "  🟢 可选: {$greenCount}\n";
+    fwrite($stdout, "=== Summary ===\n");
+    fwrite($stdout, "Total: {$total} findings\n");
+    fwrite($stdout, "  🔴 必须改: {$redCount}\n");
+    fwrite($stdout, "  🟡 建议改: {$yellowCount}\n");
+    fwrite($stdout, "  🟢 可选: {$greenCount}\n");
 }
 
 /**
  * Output findings in JSON format.
  *
  * @param list<array{file: string, line: int, severity: string, issue: string, action: string, rule_id: string}> $findings
+ * @param resource|null $stdout  Output stream (defaults to php://output for OB compatibility)
  */
-function reportJson(array $findings, string $targetDir): void
+function reportJson(array $findings, string $targetDir, $stdout = null): void
 {
+    if ($stdout === null) {
+        $stdout = fopen('php://output', 'w');
+    }
+
     $output = [];
     foreach ($findings as $finding) {
         $output[] = [
@@ -934,7 +994,7 @@ function reportJson(array $findings, string $targetDir): void
         ];
     }
 
-    echo json_encode($output, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) . "\n";
+    fwrite($stdout, json_encode($output, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) . "\n");
 }
 
 // ============================================================

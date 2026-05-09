@@ -56,6 +56,12 @@ composer install
 # 运行 PBT 测试（需单独声明，或看 coverage 时跑）
 ./vendor/bin/phpunit --testsuite pbt
 
+# 生成 coverage 报告（使用 pcov 驱动，比 Xdebug 快数倍）
+php -d pcov.enabled=1 -d pcov.directory=src ./vendor/bin/phpunit --coverage-text
+php -d pcov.enabled=1 -d pcov.directory=src ./vendor/bin/phpunit --coverage-html build/coverage-html
+# 同时输出 junit 耗时报告 + coverage text
+php -d pcov.enabled=1 -d pcov.directory=src ./vendor/bin/phpunit --log-junit build/junit-report.xml --coverage-text=build/coverage-report.txt
+
 # 静态分析
 ./vendor/bin/phpstan analyse
 

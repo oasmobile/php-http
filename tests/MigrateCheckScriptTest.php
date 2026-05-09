@@ -27,6 +27,11 @@ class MigrateCheckScriptTest extends TestCase
     private const SCRIPT_PATH = __DIR__ . '/../bin/oasis-http-migrate-v3-check';
 
     /**
+     * Whether the script functions have been loaded into the current process.
+     */
+    private static bool $scriptLoaded = false;
+
+    /**
      * Temporary directories created during tests, cleaned up in tearDown.
      */
     private array $tempDirs = [];
@@ -74,7 +79,10 @@ class MigrateCheckScriptTest extends TestCase
     }
 
     /**
-     * Run the check script and return [exitCode, stdout, stderr].
+     * Run the check script in-process and return [exitCode, stdout, stderr].
+     *
+     * Loads the script functions once (the script's CLI guard prevents main() from auto-executing),
+     * then calls main() with custom stdout/stderr streams for output capture.
      *
      * @param list<string> $args  Command-line arguments (after the script name).
      *
@@ -82,28 +90,32 @@ class MigrateCheckScriptTest extends TestCase
      */
     private function runScript(array $args = []): array
     {
-        $cmd = 'php ' . escapeshellarg(self::SCRIPT_PATH);
-        foreach ($args as $arg) {
-            $cmd .= ' ' . escapeshellarg($arg);
+        // Load script functions once
+        if (!self::$scriptLoaded) {
+            require_once self::SCRIPT_PATH;
+            self::$scriptLoaded = true;
         }
 
-        $descriptors = [
-            0 => ['pipe', 'r'],
-            1 => ['pipe', 'w'],
-            2 => ['pipe', 'w'],
-        ];
+        // Build fake $argv
+        $argv = array_merge(['oasis-http-migrate-v3-check'], $args);
 
-        $process = proc_open($cmd, $descriptors, $pipes);
-        $this->assertIsResource($process, 'Failed to start check script process');
+        // Create memory streams for capturing output
+        $stdout = fopen('php://memory', 'r+');
+        $stderr = fopen('php://memory', 'r+');
 
-        fclose($pipes[0]);
-        $stdout = stream_get_contents($pipes[1]);
-        fclose($pipes[1]);
-        $stderr = stream_get_contents($pipes[2]);
-        fclose($pipes[2]);
-        $exitCode = proc_close($process);
+        // Call main() with custom streams
+        $exitCode = main($argv, $stdout, $stderr);
 
-        return [$exitCode, $stdout, $stderr];
+        // Read captured output
+        rewind($stdout);
+        $stdoutContent = stream_get_contents($stdout);
+        fclose($stdout);
+
+        rewind($stderr);
+        $stderrContent = stream_get_contents($stderr);
+        fclose($stderr);
+
+        return [$exitCode, $stdoutContent, $stderrContent];
     }
 
     /**

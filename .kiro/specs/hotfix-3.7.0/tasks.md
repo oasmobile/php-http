@@ -4,7 +4,7 @@
 
 - [x] 1. 编写 Bug Condition 探索测试（红色测试，修复前必须失败）
 
-  - [ ] 1.1 编写 Security 注入 API 缺失的探索测试
+  - [x] 1.1 编写 Security 注入 API 缺失的探索测试
     - **Property 1: Bug Condition** — Security Config Injection API Missing
     - **关键**：此测试必须在未修复代码上失败——失败即证明 bug 存在
     - **不要**在测试失败时尝试修复测试或代码
@@ -21,14 +21,14 @@
     - 记录发现的 counterexamples：所有注入 API 调用均产生 Fatal Error
     - Ref: Expected Behavior 1, 2, 3, 4
 
-  - [ ] 1.2 Checkpoint：确认测试已编写、运行并记录失败结果，commit
+  - [x] 1.2 Checkpoint：确认测试已编写、运行并记录失败结果，commit
     - 运行 `./vendor/bin/phpunit tests/PBT/Security/SecurityInjectionBugConditionTest.php`
     - 确认测试失败（Fatal Error），记录失败输出
     - commit message: `test: add bug condition exploration test for security injection API`
 
-- [ ] 2. 编写 Preservation 属性测试（修复前必须通过）
+- [x] 2. 编写 Preservation 属性测试（修复前必须通过）
 
-  - [ ] 2.1 编写 Constructor-Only Security Config 不变性属性测试
+  - [x] 2.1 编写 Constructor-Only Security Config 不变性属性测试
     - **Property 2: Preservation** — Constructor-Only Security Config Unchanged
     - **重要**：遵循 observation-first 方法论
     - 测试文件：`tests/PBT/Security/SecurityPreservationPropertyTest.php`
@@ -43,14 +43,14 @@
     - **预期结果**：测试通过（确认需要保持的基线行为）
     - Ref: Unchanged Behavior 1, 2, 3, 4, 5
 
-  - [ ] 2.2 Checkpoint：确认 preservation 测试已编写、运行并在未修复代码上通过，commit
+  - [x] 2.2 Checkpoint：确认 preservation 测试已编写、运行并在未修复代码上通过，commit
     - 运行 `./vendor/bin/phpunit tests/PBT/Security/SecurityPreservationPropertyTest.php`
     - 确认所有测试通过
     - commit message: `test: add preservation property tests for constructor-only security config`
 
-- [ ] 3. 创建 SecurityTrait 核心注入 API 和合并逻辑
+- [x] 3. 创建 SecurityTrait 核心注入 API 和合并逻辑
 
-  - [ ] 3.1 创建 `src/Kernel/SecurityTrait.php` 最小可用版本
+  - [x] 3.1 创建 `src/Kernel/SecurityTrait.php` 最小可用版本
     - 实现 `addSecurityConfig(array $config, bool $allowOverwrite = false): void`
     - 实现 `registerSecurity(): void`（合并 Constructor_Config + Pending_Queue）
     - 实现 `$pendingSecurityConfigs` 属性
@@ -60,7 +60,7 @@
     - 实现 `validateSecurityConfigConflicts()` 用于注入时 fail-fast 冲突检测
     - Ref: Expected Behavior 1, 3, 4, 5, 6, 7, 10
 
-  - [ ] 3.2 添加细粒度注入 API 到 SecurityTrait
+  - [x] 3.2 添加细粒度注入 API 到 SecurityTrait
     - 实现 `addFirewall(string $name, array $config, bool $allowOverwrite = false): void`
     - 实现 `addAccessRule(array $rule): void`
     - 实现 `addPolicy(string $name, mixed $config, bool $allowOverwrite = false): void`
@@ -71,14 +71,14 @@
     - access_rules：始终按注册顺序追加
     - Ref: Expected Behavior 2, 5, 7, 8, 9, 11
 
-  - [ ] 3.3 将 SecurityTrait 集成到 MicroKernel
+  - [x] 3.3 将 SecurityTrait 集成到 MicroKernel
     - 在 `src/MicroKernel.php` 中添加 `use SecurityTrait`
     - 在 MicroKernel 中添加 `protected array $pendingSecurityConfigs = []` 属性
     - 从 `src/Kernel/ServicesTrait.php` 中移除 `registerSecurity()` 方法
     - 验证无重复方法定义（trait 方法替换 ServicesTrait 方法）
     - Ref: Expected Behavior 1, 2, 3
 
-  - [ ] 3.4 验证 Bug Condition 探索测试现在通过
+  - [x] 3.4 验证 Bug Condition 探索测试现在通过
     - **Property 1: Expected Behavior** — Security Config Injection API Works
     - **重要**：重新运行 task 1 中的同一测试——不要编写新测试
     - task 1 的测试编码了期望行为，测试通过即确认期望行为已满足
@@ -86,21 +86,22 @@
     - **预期结果**：测试通过（确认 bug 已修复）
     - Ref: Expected Behavior 1, 2, 3, 4
 
-  - [ ] 3.5 验证 Preservation 测试仍然通过
+  - [x] 3.5 验证 Preservation 测试仍然通过
     - **Property 2: Preservation** — Constructor-Only Security Config Unchanged
     - **重要**：重新运行 task 2 中的同一测试——不要编写新测试
     - 运行 `./vendor/bin/phpunit tests/PBT/Security/SecurityPreservationPropertyTest.php`
     - **预期结果**：测试通过（确认无回归）
 
-  - [ ] 3.6 Checkpoint：确认 SecurityTrait 实现完成且所有测试通过，commit
+  - [x] 3.6 Checkpoint：确认 SecurityTrait 实现完成且所有测试通过，commit
     - 运行 `./vendor/bin/phpunit` 全量测试
     - 运行 `./vendor/bin/phpstan analyse` 静态分析
     - 确认无失败、无回归
+    - 运行 `./vendor/bin/phpunit --coverage-text`，确认 UT 行覆盖率 ≥ 95%；如未达到，补充单元测试直到满足
     - commit message: `feat: add SecurityTrait with pre-boot security config injection API`
 
-- [ ] 4. RoutingTrait 对齐改造（Fail-Fast + $allowOverwrite）
+- [x] 4. RoutingTrait 对齐改造（Fail-Fast + $allowOverwrite）
 
-  - [ ] 4.1 编写 RoutingTrait overwrite 行为的失败测试
+  - [x] 4.1 编写 RoutingTrait overwrite 行为的失败测试
     - 测试文件：`tests/Routing/MicroKernelRouteOverwriteTest.php`
     - 测试：`addRoute()` 使用重复路由名 + `$allowOverwrite = true`（默认）→ 静默成功
     - 测试：`addRoute()` 使用重复路由名 + `$allowOverwrite = false` → 抛 LogicException
@@ -110,7 +111,7 @@
     - 运行测试 — **预期结果**：测试失败（参数尚不存在）
     - Ref: Design CR Q2 — RoutingTrait 对齐
 
-  - [ ] 4.2 在 RoutingTrait 中实现 `$allowOverwrite` 参数
+  - [x] 4.2 在 RoutingTrait 中实现 `$allowOverwrite` 参数
     - 修改 `addRoute(string $name, Route $route, bool $allowOverwrite = true): void`
     - 修改 `addRoutes(RouteCollection $routes, bool $allowOverwrite = true): void`
     - 添加 fail-fast 重复检测：检查 `$this->pendingRoutes` 中是否有同名路由
@@ -118,15 +119,16 @@
     - `$allowOverwrite = true`（默认）→ 静默覆盖（向后兼容）
     - Ref: Design CR Q2 — RoutingTrait 对齐
 
-  - [ ] 4.3 Checkpoint：确认 RoutingTrait overwrite 测试通过且无回归，commit
+  - [x] 4.3 Checkpoint：确认 RoutingTrait overwrite 测试通过且无回归，commit
     - 重新运行 4.1 的测试，确认通过
     - 运行现有路由测试套件：`./vendor/bin/phpunit --testsuite routing`
     - 确认现有路由测试无回归
+    - 运行 `./vendor/bin/phpunit --coverage-text`，确认 UT 行覆盖率 ≥ 95%；如未达到，补充单元测试直到满足
     - commit message: `feat: add $allowOverwrite parameter to RoutingTrait for fail-fast conflict detection`
 
-- [ ] 5. PBT 文件结构重组与额外属性测试
+- [x] 5. PBT 文件结构重组与额外属性测试
 
-  - [ ] 5.1 重组 `tests/PBT/Security/` 目录结构
+  - [x] 5.1 重组 `tests/PBT/Security/` 目录结构
     - 探索测试（task 1）已在 `tests/PBT/Security/SecurityInjectionBugConditionTest.php`
     - Preservation 测试（task 2）已在 `tests/PBT/Security/SecurityPreservationPropertyTest.php`
     - 移动现有 `tests/PBT/SecurityConfigPropertyTest.php` → `tests/PBT/Security/SecurityConfigPropertyTest.php`
@@ -134,7 +136,7 @@
     - 验证所有 PBT 测试仍可发现且通过
     - Ref: Design CR Q3 — PBT 文件结构重组
 
-  - [ ] 5.2 编写 SecurityTrait 合并逻辑属性测试
+  - [x] 5.2 编写 SecurityTrait 合并逻辑属性测试
     - 测试文件：`tests/PBT/Security/SecurityMergePropertyTest.php`
     - 先编写测试，再验证通过（实现已在 Phase 2 完成）：
     - Property：对所有随机 security config 片段，`mergeSecurityConfigs()` 产生正确的合并输出
@@ -146,14 +148,14 @@
     - 运行测试 — **预期结果**：测试通过（实现已存在）
     - Ref: Expected Behavior 5, 6, 7, 9, 11
 
-  - [ ] 5.3 Checkpoint：确认 PBT 重组完成且所有测试通过，commit
+  - [x] 5.3 Checkpoint：确认 PBT 重组完成且所有测试通过，commit
     - 运行 `./vendor/bin/phpunit --testsuite pbt`
     - 确认所有 PBT 测试通过
     - commit message: `refactor: reorganize PBT security tests into tests/PBT/Security/`
 
 - [ ] 6. 集成测试
 
-  - [ ] 6.1 编写完整 ServiceProvider 流程的集成测试
+  - [x] 6.1 编写完整 ServiceProvider 流程的集成测试
     - 测试文件：`tests/Integration/SecurityInjectionIntegrationTest.php`
     - 测试：ServiceProvider 在 `register()` 中通过 `addSecurityConfig()` 注册 security config → boot → 带 `allowed-roles` 的路由返回 200（非 403）
     - 测试：多个 ServiceProvider 注入不同 firewalls → boot 时全部正确合并
@@ -162,7 +164,7 @@
     - 运行测试 — 验证通过（实现已在 Phase 2 完成）
     - Ref: Expected Behavior 1, 2, 3, 4, 8
 
-  - [ ] 6.2 编写 RoutingTrait + SecurityTrait 共存集成测试
+  - [x] 6.2 编写 RoutingTrait + SecurityTrait 共存集成测试
     - 测试文件：`tests/Integration/SecurityRoutingCoexistenceTest.php`
     - 测试：ServiceProvider 同时注入路由和 security config → boot 后两者均正确工作
     - 测试：路由注入 `$allowOverwrite = false` + security 注入 `$allowOverwrite = false` → 两者独立执行冲突检测
@@ -173,7 +175,7 @@
     - 运行 `./vendor/bin/phpunit` 全量测试
     - 运行 `./vendor/bin/phpstan analyse`
     - 确认无失败、无回归
-    - 验证测试覆盖率至少达到 baseline +1%；如未达到，补充测试直到满足
+    - 运行 `./vendor/bin/phpunit --coverage-text`，确认 UT 行覆盖率 ≥ 95%（目标 96%+）；如未达到，补充测试直到满足
     - commit message: `test: add integration tests for security injection and routing coexistence`
 
 - [ ] 7. 手工测试
@@ -234,6 +236,7 @@
 - SecurityTrait 的 `$pendingSecurityConfigs` 属性定义在 MicroKernel 中（与 `$pendingRoutes` 模式一致），trait 通过 `$this->pendingSecurityConfigs` 访问
 - `registerSecurity()` 从 `ServicesTrait` 迁移到 `SecurityTrait`，调用点（`boot()` 中）不变
 - 所有注入 API 和 `getSecurityConfig()` 在 boot 后调用均抛 LogicException
+- UT 覆盖率要求：行覆盖率 ≥ 95%（目标 96%+），在 task 3.6、4.3、6.3 checkpoint 中验证；未达标时须补充单元测试
 
 ---
 

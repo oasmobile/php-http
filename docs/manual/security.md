@@ -1,6 +1,6 @@
 # Security
 
-`oasis/http` 安全配置说明，涵盖 policies、firewalls、access rules、role hierarchy 和自定义 policy。
+`oasis/http` 安全配置说明，涵盖 policies、firewalls、access rules、role hierarchy、自定义 policy 和编程式注入 API。
 
 ---
 
@@ -226,3 +226,155 @@ $kernel->isGranted("ROLE_ADMIN"); // 角色检查
 $kernel->isGranted("IS_AUTHENTICATED_FULLY"); // 认证状态检查
 $kernel->getUser();               // UserInterface | null
 ```
+
+---
+
+## Programmatic Security Config Injection
+
+除构造函数传入外，`MicroKernel` 提供编程式安全配置注入 API，在 boot 前通过代码注册 security config。典型场景是 ServiceProvider 在 `register()` 阶段注入 firewalls、access_rules、policies、role_hierarchy。
+
+### addSecurityConfig
+
+批量注入安全配置，接受与构造函数 `security` key 相同结构的完整或部分配置：
+
+```php
+$kernel->addSecurityConfig([
+    'firewalls' => [
+        'api' => [
+            'pattern' => '^/api/',
+            'policies' => ['my_policy' => true],
+            'users' => new MyUserProvider(),
+            'stateless' => true,
+        ],
+    ],
+    'access_rules' => [
+        ['pattern' => '^/api/', 'roles' => ['ROLE_API']],
+    ],
+]);
+```
+
+仅允许 `firewalls`、`access_rules`、`policies`、`role_hierarchy` 四个顶层 key，传入未知 key 时抛出 `InvalidArgumentException`。
+
+### 细粒度 API
+
+逐条注入单个配置项：
+
+```php
+// 注入单个 firewall
+$kernel->addFirewall('admin', [
+    'pattern' => '^/admin/',
+    'policies' => ['http' => true],
+    'users' => ['admin' => ['ROLE_ADMIN', '$2y$...']],
+]);
+
+// 注入单条 access rule（始终按注册顺序追加）
+$kernel->addAccessRule([
+    'pattern' => '^/admin/',
+    'roles' => ['ROLE_ADMIN'],
+]);
+
+// 注入单个 policy
+$kernel->addPolicy('my_policy', new MyPolicy());
+
+// 注入单个角色层级
+$kernel->addRoleHierarchy('ROLE_ADMIN', ['ROLE_USER', 'ROLE_SUPPORT']);
+```
+
+### getSecurityConfig
+
+只读查询当前累积的安全配置（Constructor_Config + 已注入的 Pending_Queue 合并视图）：
+
+```php
+$current = $kernel->getSecurityConfig();
+// 条件注入：仅在尚未注册 'api' firewall 时注入
+if (!isset($current['firewalls']['api'])) {
+    $kernel->addFirewall('api', [...]);
+}
+```
+
+### 在 ServiceProvider 中使用
+
+```php
+class MySecurityProvider implements ServiceProviderInterface
+{
+    public function register($kernel): void
+    {
+        // 批量注入
+        $kernel->addSecurityConfig([
+            'firewalls' => [
+                'api' => [
+                    'pattern' => '^/api/',
+                    'policies' => ['token_auth' => true],
+                    'users' => new TokenUserProvider(),
+                    'stateless' => true,
+                ],
+            ],
+            'access_rules' => [
+                ['pattern' => '^/api/', 'roles' => ['ROLE_API']],
+            ],
+        ]);
+
+        // 或使用细粒度 API
+        $kernel->addPolicy('token_auth', new TokenAuthPolicy());
+        $kernel->addRoleHierarchy('ROLE_API', ['ROLE_USER']);
+
+        // 条件注入：查询当前状态后决定
+        $config = $kernel->getSecurityConfig();
+        if (!isset($config['firewalls']['admin'])) {
+            $kernel->addFirewall('admin', [...]);
+        }
+    }
+}
+```
+
+---
+
+## Conflict Detection and $allowOverwrite
+
+安全配置注入采用 fail-fast 冲突检测：注入时立即检查已有配置，发现同名 firewall、policy 或 role_hierarchy 时抛出 `LogicException`。
+
+### 默认行为
+
+| API | `$allowOverwrite` 默认值 | 说明 |
+|-----|--------------------------|------|
+| `addSecurityConfig()` | `false` | 同名冲突时抛异常 |
+| `addFirewall()` | `false` | 同名冲突时抛异常 |
+| `addPolicy()` | `false` | 同名冲突时抛异常 |
+| `addRoleHierarchy()` | `false` | 同角色冲突时抛异常 |
+| `addAccessRule()` | — | 无冲突概念，始终追加 |
+| `addRoute()` | `true` | 同名路由静默覆盖（向后兼容） |
+| `addRoutes()` | `true` | 同名路由静默覆盖（向后兼容） |
+
+Security API 默认 `$allowOverwrite = false`（严格模式），Routing API 默认 `$allowOverwrite = true`（向后兼容）。
+
+### 覆盖模式
+
+传入 `$allowOverwrite = true` 时，同名条目静默覆盖（last-write-wins）：
+
+```php
+// 第一个 provider 注入
+$kernel->addFirewall('api', ['pattern' => '^/api/', ...]);
+
+// 第二个 provider 覆盖（不抛异常）
+$kernel->addFirewall('api', ['pattern' => '^/api/v2/', ...], allowOverwrite: true);
+```
+
+### 冲突示例
+
+```php
+// 两个 provider 注入同名 firewall，默认抛异常
+$kernel->addFirewall('api', [...]);
+$kernel->addFirewall('api', [...]); // LogicException: Duplicate firewall: 'api'
+```
+
+---
+
+## Post-Boot Freeze
+
+boot 完成后，所有安全配置注入 API 和查询 API 被冻结，调用将抛出 `LogicException`：
+
+- `addSecurityConfig()`：抛出 `LogicException('Cannot add security config after the kernel has been booted.')`
+- `addFirewall()` / `addAccessRule()` / `addPolicy()` / `addRoleHierarchy()`：同上
+- `getSecurityConfig()`：抛出 `LogicException('Cannot query security config after the kernel has been booted.')`
+
+所有注入必须在 ServiceProvider 的 `register()` 阶段完成，boot 后不可修改。

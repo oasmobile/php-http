@@ -10,9 +10,9 @@
 
 通过 bootstrap config 数组驱动初始化，config 经 Symfony Config 组件校验后分发给各 Service Provider。
 
-内部逻辑拆分为 `Kernel/` 子 namespace 下的 traits：`BootstrapTrait`（生命周期）、`RoutingTrait`（路由）、`MiddlewareTrait`（中间件）、`ErrorHandlerTrait`（错误处理）、`ConvenienceTrait`（便捷方法）、`ServicesTrait`（服务访问）。CloudFront IP 解析由独立类 `CloudfrontTrustedProxyResolver` 负责。
+内部逻辑拆分为 `Kernel/` 子 namespace 下的 traits：`BootstrapTrait`（生命周期）、`RoutingTrait`（路由）、`SecurityTrait`（安全配置注入）、`MiddlewareTrait`（中间件）、`ErrorHandlerTrait`（错误处理）、`ConvenienceTrait`（便捷方法）、`ServicesTrait`（服务访问）。CloudFront IP 解析由独立类 `CloudfrontTrustedProxyResolver` 负责。
 
-boot 前支持编程式注入：`addMiddleware()`、`addControllerInjectedArg()`、`addRoute()` / `addRoutes()` 等方法在 boot 前暂存，boot 时消费。boot 后路由表冻结，写操作抛出 `LogicException`。
+boot 前支持编程式注入：`addMiddleware()`、`addControllerInjectedArg()`、`addRoute()` / `addRoutes()`、`addSecurityConfig()` / `addFirewall()` / `addAccessRule()` / `addPolicy()` / `addRoleHierarchy()` 等方法在 boot 前暂存，boot 时消费。boot 后路由表和安全配置冻结，写操作抛出 `LogicException`。`getSecurityConfig()` 提供 boot 前只读查询（返回 Constructor_Config + Pending_Queue 合并视图）。
 
 提供便捷方法：`render()` / `renderView()`（Twig 模板渲染）、`path()` / `url()`（URL 生成）、`before()` / `after()` / `error()`（Silex 风格回调注册）、`view()`（view handler 注册）、`abort()` / `redirect()` / `json()` / `stream()` / `sendFile()`（Response 工厂），委托内部 Twig 环境、UrlGenerator、EventDispatcher 和 Symfony HttpFoundation 实现。
 
@@ -30,7 +30,8 @@ src/
 │   ├── ErrorHandlerTrait.php          # error handler 注册与异常处理
 │   ├── MiddlewareTrait.php            # before/after middleware 注册
 │   ├── RoutingTrait.php               # 路由注入 / matcher / generator
-│   └── ServicesTrait.php              # Twig / Security / Token 服务访问
+│   ├── SecurityTrait.php              # 安全配置注入 / registerSecurity / 冲突检测
+│   └── ServicesTrait.php              # Twig / Cookie / CORS / Token 服务访问
 ├── ChainedParameterBagDataProvider.php # 链式参数包数据提供者
 ├── Configuration/                     # Symfony Config 定义（校验 bootstrap 数组）
 ├── ServiceProviders/
@@ -129,6 +130,42 @@ Firewall listener 调用链：
 认证失败（`AuthenticationException`）不阻断请求——catch 后 token 保持 null，由 access rule listener 决定是否拒绝。
 
 Access rule listener 按注册顺序匹配，第一个匹配的 rule 生效：无角色要求则放行，token 为 null 或角色不足则抛出 `AccessDeniedHttpException`。
+
+### Pre-boot 安全配置注入
+
+`SecurityTrait`（`src/Kernel/SecurityTrait.php`）提供 boot 前编程式注入安全配置的能力，模式与 `RoutingTrait` 同构（pending queue + boot 时合并）。
+
+**注入 API**（均在 boot 前调用，boot 后抛 `LogicException`）：
+
+| 方法 | 说明 |
+|------|------|
+| `addSecurityConfig(array $config, bool $allowOverwrite = false)` | 批量注入，接受 `firewalls` / `access_rules` / `policies` / `role_hierarchy` 顶层 key，未知 key 抛 `InvalidArgumentException` |
+| `addFirewall(string $name, array $config, bool $allowOverwrite = false)` | 注入单个 firewall |
+| `addAccessRule(array $rule)` | 注入单条 access rule（始终追加，无冲突概念） |
+| `addPolicy(string $name, mixed $config, bool $allowOverwrite = false)` | 注入单个 policy |
+| `addRoleHierarchy(string $role, array $children, bool $allowOverwrite = false)` | 注入单个角色层级映射 |
+| `getSecurityConfig(): array` | 只读查询，返回 Constructor_Config + Pending_Queue 合并视图 |
+
+**冲突检测**（fail-fast）：注入时立即检测同名 firewall / policy / role_hierarchy 冲突。`$allowOverwrite = false`（默认）时抛 `LogicException`；`$allowOverwrite = true` 时 last-write-wins 静默覆盖。`access_rules` 始终按注册顺序追加。
+
+**合并时机**：`registerSecurity()` 在 `boot()` 中执行，将 Constructor_Config（构造函数 `$httpConfig['security']`）与 `$pendingSecurityConfigs` 队列合并后传给 `SimpleSecurityProvider::register()`。无任何安全配置时 early return。
+
+**典型使用场景**：ServiceProvider 在 `register($kernel)` 阶段调用注入 API 追加 firewalls / access_rules / policies / role_hierarchy，boot 时统一初始化。
+
+---
+
+## 路由注入
+
+`RoutingTrait`（`src/Kernel/RoutingTrait.php`）提供 boot 前编程式路由注入。
+
+| 方法 | 说明 |
+|------|------|
+| `addRoute(string $name, Route $route, bool $allowOverwrite = true)` | 注入单条路由 |
+| `addRoutes(RouteCollection $routes, bool $allowOverwrite = true)` | 批量注入路由集合 |
+
+**冲突检测**（fail-fast）：`$allowOverwrite = true`（默认）时同名路由静默覆盖（向后兼容）；`$allowOverwrite = false` 时抛 `LogicException`。
+
+boot 后调用抛 `LogicException`。
 
 ---
 

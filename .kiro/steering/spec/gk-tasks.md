@@ -25,8 +25,10 @@ description: Spec gatekeeper 校验 tasks 阶段的详细指引。由 spec-gatek
 12. 执行注意事项校验
 13. Socratic Review 校验
 14. 目的性审查
-15. 将修正项写入 Gatekeep Log
-16. Completion：向 main-agent 返回结果
+15. Task Dependency Graph 校验
+16. 文档收敛 Task 校验
+17. 将修正项写入 Gatekeep Log
+18. Completion：向 main-agent 返回结果
 
 ---
 
@@ -52,6 +54,7 @@ Feature / Hotfix 的 tasks.md 必须包含 `## Tasks` section，其中的 top-le
 |------|------|------|
 | 1 ~ N | 自动化实现 task | 代码实现、自动化测试等 |
 | N+1 | 手工测试 task | 整个 feature 统一一个手工测试 top-level task |
+| N+2 | 文档收敛 task | 收敛 state、manual、migration-guide 等文档 |
 | 最后一个 | Code Review task | finish 前的统一 code review |
 
 Release spec 的 tasks 结构不同：
@@ -70,8 +73,9 @@ Release spec 的 tasks 结构不同：
 - [ ] `## Tasks` section 存在
 - [ ] Release spec 中手工测试类 top-level task 的第一个 sub-task 是 "Increment alpha tag"
 - [ ] 倒数第一个 top-level task 是 Code Review
-- [ ] 倒数第二个 top-level task 是手工测试（feature / hotfix spec）
-- [ ] 自动化实现 task 排在手工测试和 Code Review 之前
+- [ ] 倒数第二个 top-level task 是文档收敛（feature / hotfix spec）
+- [ ] 倒数第三个 top-level task 是手工测试（feature / hotfix spec）
+- [ ] 自动化实现 task 排在手工测试、文档收敛和 Code Review 之前
 
 ---
 
@@ -218,20 +222,68 @@ Tasks 的核心目的是：**提供一份可直接执行的实现计划，让执
 - [ ] **Design CR 回应**：读取 design.md Gatekeep Log 中的 Clarification Round，检查用户已回答的每个决策（如实现顺序偏好、测试策略、task 拆分方式等）是否在 tasks 编排中得到体现。未体现的决策应调整对应的 task 排序或描述。
 - [ ] **Design 全覆盖**：tasks 整体是否覆盖了 design 中的所有模块、接口和实现项？是否有 design 中明确要做的事在 tasks 中找不到对应 task？
 - [ ] **可独立执行**：每个 sub-task 的描述是否足够自包含？执行者是否能仅凭 task 描述（加上 Ref 指向的 requirement 和 design section）完成实现，而不需要猜测上下文？
-- [ ] **验收闭环**：checkpoint + 手工测试 + code review 三者组合起来，是否构成了完整的验收闭环？如果所有 checkpoint 通过、手工测试通过、code review 通过，feature 是否就可以交付？
+- [ ] **验收闭环**：checkpoint + 手工测试 + 文档收敛 + code review 四者组合起来，是否构成了完整的验收闭环？如果所有 checkpoint 通过、手工测试通过、文档收敛完成、code review 通过，feature 是否就可以交付？
 - [ ] **执行路径无歧义**：task 的排序和依赖关系是否清晰到执行者不需要自行判断"先做哪个"？是否存在两个 task 看起来都可以先做但实际有隐含依赖的情况？
 
 如果发现文档在上述任一维度不达标，直接修正。修正后在 Gatekeep Log 中记录修正项（修正类型为 `目的`）。
 
 ---
 
-## 15. Gatekeep Log
+## 15. Task Dependency Graph 校验
+
+tasks.md 必须包含 `## Task Dependency Graph` section（位于 `## Gatekeep Log` 之前），定义 sub-task 的执行波次。
+
+### 格式要求
+
+```json
+{"waves": [
+  { "id": 0, "tasks": ["1.1", "1.2"] },
+  { "id": 1, "tasks": ["2.1"] },
+  ...
+]}
+```
+
+- 使用 `{"waves": [...]}` JSON 对象格式
+- 每个 wave 有 `id`（从 0 开始连续递增）和 `tasks` 数组
+- `tasks` 数组中的元素是 sub-task 编号（如 `"3.1"`、`"4.2"`）
+- 同一 wave 内的 task 可并行执行
+- 后续 wave 依赖前序 wave 全部完成
+- 仅包含 leaf sub-task（不包含 top-level task 编号，除非该 top-level task 无 sub-task）
+
+### 检查项
+
+- [ ] `## Task Dependency Graph` section 存在
+- [ ] TDG 使用 `{"waves": [...]}` JSON 格式
+- [ ] 每个 wave 有 `id`（从 0 开始连续递增）和 `tasks` 数组
+- [ ] TDG 中的 task ID 与 `## Tasks` section 中的 sub-task 编号一致（无悬空引用、无遗漏）
+- [ ] wave 顺序反映正确的依赖关系（被依赖的 task 在前序 wave 中）
+- [ ] 同一 wave 内的 task 确实可并行（不修改同一文件、无调用依赖）
+- [ ] 所有 leaf sub-task 都出现在 TDG 中（无遗漏）
+
+---
+
+## 16. 文档收敛 Task 校验
+
+Feature / Hotfix spec 的 tasks.md 必须包含文档收敛 top-level task（位于手工测试之后、Code Review 之前）。
+
+### 检查项
+
+- [ ] 文档收敛 top-level task 存在
+- [ ] 包含 state 文档更新 sub-task（更新 `docs/state/` 反映修复/新增后的系统现状）
+- [ ] 包含 manual 文档更新 sub-task（更新 `docs/manual/` 中的使用说明）
+- [ ] 包含 migration guide sub-task（在 `docs/changes/` 对应版本目录下编写迁移指南）
+- [ ] 包含 checkpoint sub-task（验证文档完整性 + commit）
+- [ ] 文档收敛的内容与 design.md 的 Impact Analysis 中"受影响的 state 文档"一致
+
+---
+
+## 17. Gatekeep Log
 
 将校验过程中的修正项写入 tasks.md 末尾的 `## Gatekeep Log` section。
 
 ---
 
-## 16. Completion
+## 18. Completion
 
 Gatekeeper 完成所有校验和修正后，向 main-agent 返回以下内容：
 

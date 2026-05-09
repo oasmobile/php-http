@@ -2,7 +2,7 @@
 
 ## Tasks
 
-- [ ] 1. 编写 Bug Condition 探索测试（红色测试，修复前必须失败）
+- [x] 1. 编写 Bug Condition 探索测试（红色测试，修复前必须失败）
 
   - [ ] 1.1 编写 Security 注入 API 缺失的探索测试
     - **Property 1: Bug Condition** — Security Config Injection API Missing
@@ -197,7 +197,30 @@
     - 使用仅通过构造函数传入 security config 的现有用法
     - 确认行为与修复前完全一致，无任何变化
 
-- [ ] 8. Code Review
+- [ ] 8. 文档收敛
+
+  - [ ] 8.1 更新 state 文档
+    - 更新 `docs/state/architecture.md`：补充 SecurityTrait 描述、`Kernel/` 目录树新增 `SecurityTrait.php`、boot 前编程式注入描述补充 security 注入 API
+    - 更新 `docs/state/` 中其他受影响文档（如有）
+    - 确保 state 反映修复后的系统现状
+
+  - [ ] 8.2 更新 manual 文档
+    - 在 `docs/manual/` 中补充 SecurityTrait 使用说明：如何在 ServiceProvider 中使用 `addSecurityConfig()`、细粒度 API、`getSecurityConfig()` 查询
+    - 补充 `$allowOverwrite` 参数说明（security 默认 false，routing 默认 true）
+    - 补充 boot 后调用限制说明
+
+  - [ ] 8.3 编写 migration guide
+    - 在 `docs/changes/` 对应版本目录下编写迁移指南
+    - 说明新增 API（addSecurityConfig、addFirewall、addAccessRule、addPolicy、addRoleHierarchy、getSecurityConfig）
+    - 说明 RoutingTrait 接口变更（新增 `$allowOverwrite` 参数，默认 true 向后兼容）
+    - 说明从 workaround（构造函数前手动获取 config）迁移到新 API 的步骤
+    - 说明冲突检测行为和 `$allowOverwrite` 的使用场景
+
+  - [ ] 8.4 Checkpoint：确认文档收敛完成，commit
+    - 检查 state、manual、migration-guide 三类文档均已更新
+    - commit message: `*(docs) by Kiro: 收敛 state/manual/migration-guide 文档`
+
+- [ ] 9. Code Review
   - 委托给 code-reviewer sub-agent 执行
 
 ---
@@ -270,10 +293,11 @@
 - [x] 无 markdown 格式错误
 - [x] `## Tasks` section 存在
 - [x] 倒数第一个 top-level task 是 Code Review
-- [x] 倒数第二个 top-level task 是手工测试
-- [x] 自动化实现 task 排在手工测试和 Code Review 之前
+- [x] 倒数第二个 top-level task 是文档收敛
+- [x] 倒数第三个 top-level task 是手工测试
+- [x] 自动化实现 task 排在手工测试、文档收敛和 Code Review 之前
 - [x] 所有 task 使用 `- [ ]` checkbox 语法
-- [x] top-level task 有序号（1-8）
+- [x] top-level task 有序号（1-9）
 - [x] sub-task 有层级序号（N.M 格式）
 - [x] 序号连续无跳号
 - [x] 每个实现类 sub-task 引用了具体的 requirements 条款
@@ -292,6 +316,7 @@
 - [x] 手工测试 top-level task 存在
 - [x] 手工测试覆盖关键用户场景
 - [x] 手工测试场景描述具体可执行
+- [x] 文档收敛 top-level task 存在（state、manual、migration-guide）
 - [x] Code Review 是最后一个 top-level task
 - [x] Code Review 描述为委托给 code-reviewer sub-agent 执行
 - [x] `## Notes` section 存在
@@ -302,5 +327,36 @@
 - [x] Design CR 决策已在 tasks 编排中体现
 - [x] tasks 覆盖 design 中所有模块、接口和实现项
 - [x] 每个 sub-task 描述自包含，可独立执行
-- [x] checkpoint + 手工测试 + code review 构成完整验收闭环
+- [x] checkpoint + 手工测试 + 文档收敛 + code review 构成完整验收闭环
 - [x] 执行路径无歧义
+- [x] `## Task Dependency Graph` section 存在
+- [x] TDG 使用 `{"waves": [...]}` JSON 格式
+- [x] 每个 wave 有 `id`（从 0 开始连续）和 `tasks` 数组
+- [x] TDG 中的 task ID 与 Tasks section 中的 sub-task 编号一致
+- [x] wave 顺序反映正确的依赖关系
+
+---
+
+## Task Dependency Graph
+
+```json
+{"waves": [
+  { "id": 0, "tasks": ["1.1"] },
+  { "id": 1, "tasks": ["1.2", "2.1"] },
+  { "id": 2, "tasks": ["2.2"] },
+  { "id": 3, "tasks": ["3.1"] },
+  { "id": 4, "tasks": ["3.2"] },
+  { "id": 5, "tasks": ["3.3"] },
+  { "id": 6, "tasks": ["3.4", "3.5"] },
+  { "id": 7, "tasks": ["3.6"] },
+  { "id": 8, "tasks": ["4.1", "5.1"] },
+  { "id": 9, "tasks": ["4.2", "5.2"] },
+  { "id": 10, "tasks": ["4.3", "5.3"] },
+  { "id": 11, "tasks": ["6.1", "6.2"] },
+  { "id": 12, "tasks": ["6.3"] },
+  { "id": 13, "tasks": ["7.1", "7.2", "7.3", "7.4"] },
+  { "id": 14, "tasks": ["8.1", "8.2", "8.3"] },
+  { "id": 15, "tasks": ["8.4"] },
+  { "id": 16, "tasks": ["9"] }
+]}
+```

@@ -29,6 +29,7 @@
             <file>tests/Security/AbstractSimplePreAuthenticateUserProviderTest.php</file>
             <file>tests/Security/SimpleAccessRuleSettersTest.php</file>
             <file>tests/Security/SecurityScenarioTest.php</file>
+            <file>tests/Security/SimpleSecurityProviderProgrammaticApiTest.php</file>
         </testsuite>
         <testsuite name="twig">
             <file>tests/Twig/TwigServiceProviderTest.php</file>

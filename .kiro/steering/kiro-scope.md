@@ -1,5 +1,5 @@
 ---
-inclusion: auto
+inclusion: always
 description: Kiro 平台专属规则，始终生效
 ---
 

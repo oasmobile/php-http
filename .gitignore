@@ -1,6 +1,8 @@
 # Created by .ignore support plugin (hsz.mobi)
 /vendor
 /.idea
+/build
+
 
 # PHPUnit cache (PHPUnit 11+)
 .phpunit.cache/

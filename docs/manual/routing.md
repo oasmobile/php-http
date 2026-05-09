@@ -118,6 +118,17 @@ $kernel->addRoute('health_check', new Route('/health', [
 ]));
 ```
 
+可选参数 `$allowOverwrite`（默认 `true`）控制同名路由的冲突行为：
+
+```php
+// 默认行为：同名路由静默覆盖（向后兼容）
+$kernel->addRoute('health_check', new Route('/health-v2', [...]));
+
+// 严格模式：同名路由抛出 LogicException
+$kernel->addRoute('health_check', new Route('/health-v2', [...]), allowOverwrite: false);
+// LogicException: Duplicate route: 'health_check'
+```
+
 ### addRoutes
 
 批量注入一组路由：
@@ -135,6 +146,12 @@ $routes->add('api.orders', new Route('/api/orders', [
 ]));
 
 $kernel->addRoutes($routes);
+```
+
+同样支持 `$allowOverwrite` 参数（默认 `true`）：
+
+```php
+$kernel->addRoutes($routes, allowOverwrite: false); // 严格模式
 ```
 
 ### 匹配优先级

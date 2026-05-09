@@ -17,6 +17,7 @@
 | v3.6 | 恢复 `view()` / `abort()` / `redirect()` / `json()` / `stream()` / `sendFile()` 便捷方法 |
 | v3.6.3 | MicroKernel 内部 trait 拆分（公共 API 无变更） |
 | v3.6.4 | 迁移文档可读性改进（最小迁移步骤、常见报错速查等） |
+| v3.7.0 | 编程式 security config 注入 API + 路由/安全冲突检测 `$allowOverwrite` 参数 |
 
 **严重程度标注**：
 
@@ -101,6 +102,8 @@
 | CORS Provider → EventSubscriber | [11. CORS](#11-cors) |
 | Cookie Provider → EventSubscriber | [12. Cookie](#12-cookie) |
 | `NullEntryPoint` 适配 | [7. Security](#7-security) |
+| 编程式 security config 注入 API（v3.7.0 新增） | [7. Security](#7-security) |
+| `addRoute()` / `addRoutes()` 新增 `$allowOverwrite` 参数（v3.7.0） | [6. Routing](#6-routing) |
 | `phpunit/phpunit` `^5.2` → `^13.0` | [14. 附录](#14-附录) |
 | `phpstan/phpstan` 新增 `^2.1` | [14. 附录](#14-附录) |
 
@@ -522,8 +525,14 @@ $kernel->error(function (\Throwable $e, Request $request, int $code) {
 | `addExtraParameters(array $extras): void` | 添加额外参数 |
 | `addControllerInjectedArg(object $object): void` | 添加控制器注入参数 |
 | `addMiddleware(MiddlewareInterface $middleware): void` | 添加中间件 |
-| `addRoute(string $name, Route $route): void` | 添加单条路由（v3.2 新增） |
-| `addRoutes(RouteCollection $routes): void` | 批量添加路由（v3.2 新增） |
+| `addRoute(string $name, Route $route, bool $allowOverwrite = true): void` | 添加单条路由（v3.2 新增，v3.7.0 新增 `$allowOverwrite`） |
+| `addRoutes(RouteCollection $routes, bool $allowOverwrite = true): void` | 批量添加路由（v3.2 新增，v3.7.0 新增 `$allowOverwrite`） |
+| `addSecurityConfig(array $config, bool $allowOverwrite = false): void` | 批量注入 security config（v3.7.0 新增） |
+| `addFirewall(string $name, array $config, bool $allowOverwrite = false): void` | 注入单个 firewall（v3.7.0 新增） |
+| `addAccessRule(array $rule): void` | 注入单条 access rule（v3.7.0 新增） |
+| `addPolicy(string $name, mixed $config, bool $allowOverwrite = false): void` | 注入单个 policy（v3.7.0 新增） |
+| `addRoleHierarchy(string $role, array $children, bool $allowOverwrite = false): void` | 注入单个角色层级（v3.7.0 新增） |
+| `getSecurityConfig(): array` | 只读查询当前累积 security config（v3.7.0 新增） |
 | `getCacheDirectories(): array` | 获取缓存目录列表 |
 
 ---
@@ -764,6 +773,25 @@ $kernel->run();
 - boot 后 `getRouter()->getRouteCollection()` 返回 `FrozenRouteCollection`，写操作（`add()` / `addCollection()` / `remove()`）抛出 `LogicException`
 
 **操作**：无需下游操作。这是纯新增 API，不影响现有代码。如果下游代码在 boot 后调用了 `getRouteCollection()->add()`（此前静默失效），v3.2 起会抛出 `LogicException`——这是有意的行为修正，应移除此类调用。
+
+### 🟢 路由冲突检测 `$allowOverwrite` 参数（v3.7.0 新增）
+
+**影响**：v3.7.0 为 `addRoute()` 和 `addRoutes()` 新增第三个参数 `bool $allowOverwrite = true`。默认行为不变（同名路由静默覆盖），传入 `false` 时启用 fail-fast 冲突检测。
+
+**After**:
+
+```php
+// 默认行为（向后兼容）：同名路由静默覆盖
+$kernel->addRoute('health', new Route('/health', [...]));
+$kernel->addRoute('health', new Route('/health-v2', [...])); // 覆盖，不报错
+
+// 严格模式：同名路由抛 LogicException
+$kernel->addRoute('health', new Route('/health', [...]), allowOverwrite: false);
+$kernel->addRoute('health', new Route('/health-v2', [...]), allowOverwrite: false);
+// LogicException: Duplicate route: 'health'
+```
+
+**操作**：无需下游操作。现有调用方不传第三个参数时行为完全不变。多团队协作场景可使用 `allowOverwrite: false` 防止路由名冲突。
 
 ### 🟢 `path()` / `url()` 便捷方法恢复（v3.4）
 
@@ -1110,6 +1138,53 @@ class ApiKeyPolicy extends AbstractSimplePreAuthenticationPolicy
 ```
 
 **操作**：无需下游操作。`NullEntryPoint` 的公共 API 保持不变，仅内部实现适配了新的 Security 架构。
+
+### 🟢 编程式 Security Config 注入 API（v3.7.0 新增）
+
+**影响**：v3.7.0 新增 `SecurityTrait`，为 `MicroKernel` 提供 boot 前编程式安全配置注入能力。ServiceProvider 在 `register()` 阶段可注入 firewalls、access_rules、policies、role_hierarchy。
+
+**After**:
+
+```php
+class MySecurityProvider
+{
+    public function register(MicroKernel $kernel): void
+    {
+        // 批量注入
+        $kernel->addSecurityConfig([
+            'firewalls' => [
+                'api' => [
+                    'pattern' => '^/api/',
+                    'policies' => ['token_auth' => true],
+                    'users' => new TokenUserProvider(),
+                    'stateless' => true,
+                ],
+            ],
+            'access_rules' => [
+                ['pattern' => '^/api/', 'roles' => ['ROLE_API']],
+            ],
+        ]);
+
+        // 或使用细粒度 API
+        $kernel->addFirewall('admin', ['pattern' => '^/admin/', ...]);
+        $kernel->addAccessRule(['pattern' => '^/admin/', 'roles' => ['ROLE_ADMIN']]);
+        $kernel->addPolicy('token_auth', new TokenAuthPolicy());
+        $kernel->addRoleHierarchy('ROLE_ADMIN', ['ROLE_USER']);
+
+        // 条件注入：查询当前状态后决定
+        $config = $kernel->getSecurityConfig();
+        if (!isset($config['firewalls']['admin'])) {
+            $kernel->addFirewall('admin', [...]);
+        }
+    }
+}
+```
+
+**冲突检测**：Security API 默认 `$allowOverwrite = false`（严格模式），同名 firewall/policy/role_hierarchy 抛 `LogicException`。传入 `$allowOverwrite = true` 时 last-write-wins 静默覆盖。`access_rules` 始终按注册顺序追加。
+
+**Boot 后保护**：所有注入 API 和 `getSecurityConfig()` 在 boot 后调用均抛 `LogicException`。
+
+**操作**：无需下游操作。这是纯新增 API。此前需要在构造函数前手动合并 security config 的 workaround 可迁移到新 API。
 
 ---
 
@@ -1586,6 +1661,8 @@ class MyClass
 | 动态属性 | 显式属性声明 | 🟡 |
 | Routing 内部实现 | Symfony Routing 8.x | 🟢 |
 | — | `MicroKernel::addRoute()` / `addRoutes()`（v3.2 新增） | 🟢 |
+| — | `addRoute()` / `addRoutes()` 新增 `$allowOverwrite` 参数（v3.7.0） | 🟢 |
+| — | `SecurityTrait` 编程式 security config 注入 API（v3.7.0 新增） | 🟢 |
 | boot 后 `getRouteCollection()->add()` 静默失效 | 抛出 `LogicException`（v3.2 修正） | 🟢 |
 | CORS Provider | EventSubscriber | 🟢 |
 | Cookie Provider | EventSubscriber | 🟢 |

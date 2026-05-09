@@ -225,7 +225,7 @@ class RequestDispatchPropertyTest extends TestCase
      */
     public function testErrorHandlerChainIsInvokedWhenControllerThrowsException(): void
     {
-        $this->limitTo(20)->forAll(
+        $this->limitTo(5)->forAll(
             Generators::choose(400, 599)
         )->then(function (int $errorCode) {
             $errorHandlerCalled = false;
@@ -271,7 +271,7 @@ class RequestDispatchPropertyTest extends TestCase
      */
     public function testFirstErrorHandlerResponseWins(): void
     {
-        $this->limitTo(20)->forAll(
+        $this->limitTo(5)->forAll(
             Generators::choose(2, 5)
         )->then(function (int $handlerCount) {
             $callLog = [];

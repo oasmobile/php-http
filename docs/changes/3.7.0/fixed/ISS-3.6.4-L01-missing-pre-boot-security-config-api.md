@@ -3,10 +3,10 @@
 | 字段 | 值 |
 |------|-----|
 | Severity | `[P1] major` |
-| Status | `open` |
+| Status | `closed` |
 | Found In | `v3.6.4` |
-| Fixed In | |
-| Related Test | |
+| Fixed In | `v3.7.0` |
+| Related Test | `tests/PBT/Security/SecurityInjectionBugConditionTest.php`, `tests/Integration/SecurityInjectionIntegrationTest.php` |
 
 ---
 

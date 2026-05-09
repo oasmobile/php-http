@@ -6,7 +6,6 @@ namespace Oasis\Mlib\Http\Test\Cors;
 use Oasis\Mlib\Http\ServiceProviders\Cors\CrossOriginResourceSharingProvider;
 use Oasis\Mlib\Http\Test\Helpers\RouteCacheCleaner;
 use Oasis\Mlib\Http\Test\Helpers\WebTestCase;
-use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 
@@ -37,7 +36,6 @@ class CrossOriginResourceSharingAdvancedTest extends WebTestCase
         return require __DIR__ . '/app.cors-advanced.php';
     }
     
-    #[RunInSeparateProcess]
     public function testPreflightWhenAccessIsDeniedRoute()
     {
         $origin   = 'http://baidu.com';
@@ -79,7 +77,6 @@ class CrossOriginResourceSharingAdvancedTest extends WebTestCase
      * credentials_allowed=false (default), no headers_exposed.
      * Covers: onResponse() normal-request path with non-wildcard origin, no credentials.
      */
-    #[RunInSeparateProcess]
     public function testNormalRequestToSecuredCorsRoute()
     {
         $origin = 'http://baidu.com';
@@ -118,7 +115,6 @@ class CrossOriginResourceSharingAdvancedTest extends WebTestCase
      * Covers: onPreRouting() early return when no Origin → activeStrategy stays null,
      *         onResponse() skips all CORS processing.
      */
-    #[RunInSeparateProcess]
     public function testNormalRequestWithoutOriginToSecuredRoute()
     {
         $client = $this->createClient();
@@ -142,7 +138,6 @@ class CrossOriginResourceSharingAdvancedTest extends WebTestCase
      * Preflight request with disallowed origin on the advanced (secured) app.
      * Covers: onResponse() preflight path — isOriginAllowed() returns false.
      */
-    #[RunInSeparateProcess]
     public function testPreflightWithDisallowedOriginOnSecuredRoute()
     {
         $client = $this->createClient();
@@ -165,7 +160,6 @@ class CrossOriginResourceSharingAdvancedTest extends WebTestCase
      * Normal request with disallowed origin on the advanced (secured) app.
      * Covers: onResponse() normal-request path — isOriginAllowed() returns false for disallowed origin.
      */
-    #[RunInSeparateProcess]
     public function testNormalRequestWithDisallowedOriginOnSecuredRoute()
     {
         $client = $this->createClient();

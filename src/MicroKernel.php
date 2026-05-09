@@ -11,6 +11,7 @@ use Oasis\Mlib\Http\Kernel\ConvenienceTrait;
 use Oasis\Mlib\Http\Kernel\ErrorHandlerTrait;
 use Oasis\Mlib\Http\Kernel\MiddlewareTrait;
 use Oasis\Mlib\Http\Kernel\RoutingTrait;
+use Oasis\Mlib\Http\Kernel\SecurityTrait;
 use Oasis\Mlib\Http\Kernel\ServicesTrait;
 use Oasis\Mlib\Http\Middlewares\MiddlewareInterface;
 use Oasis\Mlib\Http\ServiceProviders\Cors\CrossOriginResourceSharingProvider;
@@ -48,6 +49,7 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
     use ConfigurationValidationTrait;
     use ConvenienceTrait;
     use RoutingTrait;
+    use SecurityTrait;
     use ErrorHandlerTrait;
     use MiddlewareTrait;
     use BootstrapTrait;
@@ -92,6 +94,8 @@ class MicroKernel extends Kernel implements AuthorizationCheckerInterface
     protected $routerProvider = null;
     /** @var array<array{name: string, route: Route}|array{collection: RouteCollection}> */
     protected array $pendingRoutes = [];
+    /** @var list<array{config: array<string, mixed>, allowOverwrite: bool}> */
+    protected array $pendingSecurityConfigs = [];
     /** @var CacheableRouter|null Router for programmatic-only routes (no YAML config) */
     protected ?CacheableRouter $directRouter = null;
     /** @var ArrayDataProvider|null */

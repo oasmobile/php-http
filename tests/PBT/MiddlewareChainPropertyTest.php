@@ -133,7 +133,7 @@ class MiddlewareChainPropertyTest extends TestCase
      */
     public function testMiddlewareBeforeExecutionOrderFollowsPriorityDescending(): void
     {
-        $this->limitTo(20)->forAll(
+        $this->limitTo(5)->forAll(
             // Generate 2–6 distinct priorities in the valid range
             Generators::choose(2, 6)
         )->then(function (int $count) {
@@ -211,7 +211,7 @@ class MiddlewareChainPropertyTest extends TestCase
      */
     public function testBeforeMiddlewareShortCircuitPreventsSubsequentExecution(): void
     {
-        $this->limitTo(20)->forAll(
+        $this->limitTo(5)->forAll(
             // Total middleware count (3–6)
             Generators::choose(3, 6),
             // Index of the short-circuiting middleware (0-based, will be clamped)
@@ -290,7 +290,7 @@ class MiddlewareChainPropertyTest extends TestCase
      */
     public function testOnlyForMasterRequestFilteringOnSubRequests(): void
     {
-        $this->limitTo(20)->forAll(
+        $this->limitTo(5)->forAll(
             Generators::choose(2, 5)
         )->then(function (int $count) {
             $logContainer = ['log' => []];

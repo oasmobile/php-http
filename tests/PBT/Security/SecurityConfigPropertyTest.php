@@ -14,7 +14,7 @@ declare(strict_types=1);
  * Ref: Requirements 2.4, 15.1, 15.2, 15.3
  */
 
-namespace Oasis\Mlib\Http\Test\PBT;
+namespace Oasis\Mlib\Http\Test\PBT\Security;
 
 use Eris\Generators;
 use Eris\TestTrait;

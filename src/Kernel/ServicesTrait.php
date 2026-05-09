@@ -6,7 +6,6 @@ namespace Oasis\Mlib\Http\Kernel;
 use Oasis\Mlib\Http\ServiceProviders\Cookie\ResponseCookieContainer;
 use Oasis\Mlib\Http\ServiceProviders\Cookie\SimpleCookieProvider;
 use Oasis\Mlib\Http\ServiceProviders\Cors\CrossOriginResourceSharingProvider;
-use Oasis\Mlib\Http\ServiceProviders\Security\SimpleSecurityProvider;
 use Oasis\Mlib\Http\ServiceProviders\Twig\SimpleTwigServiceProvider;
 use Oasis\Mlib\Utils\DataType;
 
@@ -50,17 +49,5 @@ trait ServicesTrait
 
         $twigProvider = new SimpleTwigServiceProvider();
         $twigProvider->register($this, $twigConfig);
-    }
-
-    protected function registerSecurity(): void
-    {
-        $securityConfig = $this->httpDataProvider->getOptional('security', DataType::Mixed);
-
-        if (!$securityConfig || !\is_array($securityConfig)) {
-            return;
-        }
-
-        $securityProvider = new SimpleSecurityProvider();
-        $securityProvider->register($this, $securityConfig);
     }
 }

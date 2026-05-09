@@ -43,7 +43,7 @@
 # 安装依赖
 composer install
 
-# 运行全量测试
+# 运行全量测试（默认排除 PBT，适合日常验证）
 ./vendor/bin/phpunit
 
 # 运行指定 suite
@@ -53,7 +53,7 @@ composer install
 ./vendor/bin/phpunit --testsuite aws
 ./vendor/bin/phpunit --testsuite exceptions
 
-# 运行 PBT 测试
+# 运行 PBT 测试（需单独声明，或看 coverage 时跑）
 ./vendor/bin/phpunit --testsuite pbt
 
 # 静态分析

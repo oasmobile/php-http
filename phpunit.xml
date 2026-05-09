@@ -3,6 +3,7 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
         bootstrap="tests/bootstrap.php"
+        defaultTestSuite="default"
         failOnRisky="true"
         failOnWarning="true"
         failOnDeprecation="true"
@@ -86,6 +87,8 @@
         <testsuite name="integration">
             <file>tests/Integration/BootstrapConfigurationIntegrationTest.php</file>
             <file>tests/Integration/SecurityAuthenticationFlowIntegrationTest.php</file>
+            <file>tests/Integration/SecurityInjectionIntegrationTest.php</file>
+            <file>tests/Integration/SecurityRoutingCoexistenceTest.php</file>
             <file>tests/Integration/SilexKernelCrossCommunityIntegrationTest.php</file>
         </testsuite>
         <testsuite name="kernel">
@@ -117,6 +120,10 @@
         <testsuite name="pbt">
             <directory>tests/PBT</directory>
             <exclude>tests/PBT/MigrateCheckPropertyTest.php</exclude>
+        </testsuite>
+        <testsuite name="default">
+            <directory>tests</directory>
+            <exclude>tests/PBT</exclude>
         </testsuite>
     </testsuites>
     <source>

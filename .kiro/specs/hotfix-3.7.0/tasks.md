@@ -170,7 +170,7 @@
     - 测试：路由注入 `$allowOverwrite = false` + security 注入 `$allowOverwrite = false` → 两者独立执行冲突检测
     - Ref: Unchanged Behavior 5, Design CR Q2
 
-  - [ ] 6.3 Checkpoint：确认集成测试通过且全量测试无回归，commit
+  - [-] 6.3 Checkpoint：确认集成测试通过且全量测试无回归，commit
     - 运行 `./vendor/bin/phpunit --testsuite integration`
     - 运行 `./vendor/bin/phpunit` 全量测试
     - 运行 `./vendor/bin/phpstan analyse`

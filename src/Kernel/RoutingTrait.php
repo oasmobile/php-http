@@ -23,22 +23,95 @@ use Symfony\Component\Routing\RouteCollection;
  */
 trait RoutingTrait
 {
-    public function addRoute(string $name, Route $route): void
+    public function addRoute(string $name, Route $route, bool $allowOverwrite = true): void
     {
         if ($this->booted) {
             throw new \LogicException('Cannot add routes after the kernel has been booted.');
+        }
+
+        if (!$allowOverwrite && $this->hasPendingRoute($name)) {
+            throw new \LogicException("Duplicate route: '$name'");
+        }
+
+        // If overwrite allowed and duplicate exists, remove the old entry
+        if ($allowOverwrite && $this->hasPendingRoute($name)) {
+            $this->removePendingRoute($name);
         }
 
         $this->pendingRoutes[] = ['name' => $name, 'route' => $route];
     }
 
-    public function addRoutes(RouteCollection $routes): void
+    public function addRoutes(RouteCollection $routes, bool $allowOverwrite = true): void
     {
         if ($this->booted) {
             throw new \LogicException('Cannot add routes after the kernel has been booted.');
         }
 
+        if (!$allowOverwrite) {
+            foreach ($routes->all() as $name => $route) {
+                if ($this->hasPendingRoute($name)) {
+                    throw new \LogicException("Duplicate route: '$name'");
+                }
+            }
+        }
+
+        // If overwrite allowed, remove any existing entries with the same names
+        if ($allowOverwrite) {
+            foreach ($routes->all() as $name => $route) {
+                if ($this->hasPendingRoute($name)) {
+                    $this->removePendingRoute($name);
+                }
+            }
+        }
+
         $this->pendingRoutes[] = ['collection' => $routes];
+    }
+
+    /**
+     * Check if a route name already exists in pendingRoutes.
+     */
+    private function hasPendingRoute(string $name): bool
+    {
+        foreach ($this->pendingRoutes as $entry) {
+            if (isset($entry['name']) && $entry['name'] === $name) {
+                return true;
+            }
+            if (isset($entry['collection'])) {
+                /** @var RouteCollection $collection */
+                $collection = $entry['collection'];
+                if ($collection->get($name) !== null) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Remove a pending route entry by name (for overwrite support).
+     */
+    private function removePendingRoute(string $name): void
+    {
+        foreach ($this->pendingRoutes as $index => $entry) {
+            if (isset($entry['name']) && $entry['name'] === $name) {
+                unset($this->pendingRoutes[$index]);
+                $this->pendingRoutes = array_values($this->pendingRoutes);
+                return;
+            }
+            if (isset($entry['collection'])) {
+                /** @var RouteCollection $collection */
+                $collection = $entry['collection'];
+                if ($collection->get($name) !== null) {
+                    $collection->remove($name);
+                    // If collection is now empty, remove the entry
+                    if ($collection->count() === 0) {
+                        unset($this->pendingRoutes[$index]);
+                        $this->pendingRoutes = array_values($this->pendingRoutes);
+                    }
+                    return;
+                }
+            }
+        }
     }
 
     protected function registerRouting(): void

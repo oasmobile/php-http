@@ -68,6 +68,7 @@
             <file>tests/Routing/MicroKernelRouteInjectionIntegrationTest.php</file>
             <file>tests/Routing/RouteCacheIsolationTest.php</file>
             <file>tests/Routing/RoutingScenarioTest.php</file>
+            <file>tests/Routing/MicroKernelRouteOverwriteTest.php</file>
         </testsuite>
         <testsuite name="cookie">
             <file>tests/Cookie/ResponseCookieContainerTest.php</file>
@@ -94,6 +95,7 @@
             <file>tests/Layer2ConvenienceMethodsTest.php</file>
             <file>tests/CoverageGapTest.php</file>
             <file>tests/CoverageGapSupplementaryTest.php</file>
+            <file>tests/Kernel/SecurityTraitCoverageTest.php</file>
         </testsuite>
         <testsuite name="kernel-web">
             <file>tests/SilexKernelWebTest.php</file>

@@ -25,7 +25,7 @@
         "symfony/twig-bridge"           : "^8.0",
         "twig/twig"                     : "^3.0",
         "oasis/logging"                 : "^3.0",
-        "oasis/utils"                   : "^3.0",
+        "oasis/utils"                   : "^3.2",
         "guzzlehttp/guzzle"             : "^7.0"
     },
     "require-dev"      : {

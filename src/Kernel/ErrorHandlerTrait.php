@@ -41,10 +41,13 @@ trait ErrorHandlerTrait
                     if ($response instanceof Response) {
                         $event->setResponse($response);
                     } elseif ($response !== null) {
+                        $statusCode = (\is_object($response) && \method_exists($response, 'getCode'))
+                            ? $response->getCode()
+                            : $code;
                         foreach ($kernel->getViewHandlers() as $viewHandler) {
                             $viewResponse = $viewHandler($response, $request);
                             if ($viewResponse instanceof Response) {
-                                $viewResponse->setStatusCode($code);
+                                $viewResponse->setStatusCode($statusCode);
                                 $event->setResponse($viewResponse);
                                 return;
                             }
@@ -84,10 +87,13 @@ trait ErrorHandlerTrait
                 if ($response instanceof Response) {
                     $event->setResponse($response);
                 } elseif ($response !== null) {
+                    $statusCode = (\is_object($response) && \method_exists($response, 'getCode'))
+                        ? $response->getCode()
+                        : $code;
                     foreach ($kernel->getViewHandlers() as $viewHandler) {
                         $viewResponse = $viewHandler($response, $request);
                         if ($viewResponse instanceof Response) {
-                            $viewResponse->setStatusCode($code);
+                            $viewResponse->setStatusCode($statusCode);
                             $event->setResponse($viewResponse);
                             return;
                         }

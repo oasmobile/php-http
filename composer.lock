@@ -588,24 +588,26 @@
         },
         {
             "name": "oasis/utils",
-            "version": "v3.0.2",
+            "version": "v3.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/oasmobile/php-utils.git",
-                "reference": "a1e1c72739415b1c3eba0362d69fc59df5988e80"
+                "reference": "ee43b2c0fe398b33d98ec1840408f7c50ac809db"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/oasmobile/php-utils/zipball/a1e1c72739415b1c3eba0362d69fc59df5988e80",
-                "reference": "a1e1c72739415b1c3eba0362d69fc59df5988e80",
+                "url": "https://api.github.com/repos/oasmobile/php-utils/zipball/ee43b2c0fe398b33d98ec1840408f7c50ac809db",
+                "reference": "ee43b2c0fe398b33d98ec1840408f7c50ac809db",
                 "shasum": ""
             },
             "require": {
-                "php": ">=8.2",
+                "php": ">=8.5",
+                "psr/log": "^3.0",
                 "voku/portable-utf8": "^3.0"
             },
             "require-dev": {
-                "phpunit/phpunit": "^11.0"
+                "giorgiosironi/eris": "^1.1",
+                "phpunit/phpunit": "^13.0"
             },
             "type": "library",
             "autoload": {
@@ -626,9 +628,9 @@
             "description": "Various utility classes & functions",
             "support": {
                 "issues": "https://github.com/oasmobile/php-utils/issues",
-                "source": "https://github.com/oasmobile/php-utils/tree/v3.0.2"
+                "source": "https://github.com/oasmobile/php-utils/tree/v3.2.0"
             },
-            "time": "2026-05-02T09:16:51+00:00"
+            "time": "2026-05-10T15:49:38+00:00"
         },
         {
             "name": "psr/cache",

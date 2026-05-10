@@ -15,3 +15,23 @@ scenario.error.throw_forbidden:
     path: /scenario/error/throw-forbidden
     defaults:
         _controller: ScenarioErrorHandlerController::throwForbidden
+
+scenario.error.throw_mandatory_missing:
+    path: /scenario/error/throw-mandatory-missing
+    defaults:
+        _controller: ScenarioErrorHandlerController::throwMandatoryMissing
+
+scenario.error.throw_invalid_type:
+    path: /scenario/error/throw-invalid-type
+    defaults:
+        _controller: ScenarioErrorHandlerController::throwInvalidType
+
+scenario.error.throw_invalid_value:
+    path: /scenario/error/throw-invalid-value
+    defaults:
+        _controller: ScenarioErrorHandlerController::throwInvalidValue
+
+scenario.error.throw_existence_violation:
+    path: /scenario/error/throw-existence-violation
+    defaults:
+        _controller: ScenarioErrorHandlerController::throwExistenceViolation

@@ -11,6 +11,10 @@ declare(strict_types=1);
 
 namespace Oasis\Mlib\Http\Test\Helpers\Controllers;
 
+use Oasis\Mlib\Utils\Exceptions\ExistenceViolationException;
+use Oasis\Mlib\Utils\Exceptions\InvalidDataTypeException;
+use Oasis\Mlib\Utils\Exceptions\InvalidValueException;
+use Oasis\Mlib\Utils\Exceptions\MandatoryValueMissingException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -45,5 +49,37 @@ class ScenarioErrorHandlerController
     public function throwForbidden(Request $request): never
     {
         throw new AccessDeniedHttpException('Access denied for scenario test');
+    }
+
+    /**
+     * Action that throws MandatoryValueMissingException (mandatory parameter not provided).
+     */
+    public function throwMandatoryMissing(Request $request): never
+    {
+        throw (new MandatoryValueMissingException('Field "name" is required'))->withFieldName('name');
+    }
+
+    /**
+     * Action that throws InvalidDataTypeException (parameter type mismatch).
+     */
+    public function throwInvalidType(Request $request): never
+    {
+        throw (new InvalidDataTypeException('Field "age" must be integer'))->withFieldName('age');
+    }
+
+    /**
+     * Action that throws InvalidValueException (parameter value out of range / invalid).
+     */
+    public function throwInvalidValue(Request $request): never
+    {
+        throw (new InvalidValueException('Field "status" has invalid value'))->withFieldName('status');
+    }
+
+    /**
+     * Action that throws ExistenceViolationException (resource not found).
+     */
+    public function throwExistenceViolation(Request $request): never
+    {
+        throw (new ExistenceViolationException('Record with id=999 not found'))->withFieldName('id');
     }
 }

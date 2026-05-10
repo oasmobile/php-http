@@ -137,6 +137,8 @@ $config = [
 
 返回 `null` 时传递给下一个 handler；非 `null` 返回值如果不是 `Response`，会进入 View Handler 链。
 
+View Handler 生成的 `Response` 的 HTTP 状态码确定规则：如果 error handler 返回的对象提供了 `getCode()` 方法（如 `WrappedExceptionInfo`），则使用该方法的返回值作为 HTTP 状态码；否则使用原始 `$code`（`HttpExceptionInterface` 为 `getStatusCode()`，其他异常为 500）。
+
 ---
 
 ## Injected Arguments

@@ -1,5 +1,9 @@
 # Changelog
 
+## v3.8.1 - 2026-05-10
+
+升级内部依赖 `oasis/utils` 至 `^3.2`（锁定 v3.2.0）。详见 [3.8.1/CHANGELOG.md](3.8.1/CHANGELOG.md)。
+
 ## v3.8.0 - 2026-05-10
 
 修复 `ErrorHandlerTrait` view handler 分支 HTTP 状态码不使用 error handler 返回对象的 `getCode()`（ISS-3.7.0-L01）。详见 [3.8.0/CHANGELOG.md](3.8.0/CHANGELOG.md)。

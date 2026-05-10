@@ -18,7 +18,7 @@
 | 测试 | PHPUnit 13.x |
 | 静态分析 | PHPStan（level 8） |
 | PBT | Eris 1.x |
-| 内部依赖 | oasis/utils ^3.0、oasis/logging ^3.0 |
+| 内部依赖 | oasis/utils ^3.2、oasis/logging ^3.0 |
 | 包管理 | Composer |
 
 ---

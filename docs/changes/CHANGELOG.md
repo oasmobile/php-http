@@ -1,5 +1,9 @@
 # Changelog
 
+## v3.8.0 - 2026-05-10
+
+修复 `ErrorHandlerTrait` view handler 分支 HTTP 状态码不使用 error handler 返回对象的 `getCode()`（ISS-3.7.0-L01）。详见 [3.8.0/CHANGELOG.md](3.8.0/CHANGELOG.md)。
+
 ## v3.7.0 - 2026-05-09
 
 修复 MicroKernel 缺少 pre-boot security config 注入 API（ISS-3.6.4-L01），新增 `SecurityTrait` 提供编程式安全配置注入，`RoutingTrait` 对齐新增 `$allowOverwrite` 冲突检测参数。详见 [3.7.0/CHANGELOG.md](3.7.0/CHANGELOG.md)。

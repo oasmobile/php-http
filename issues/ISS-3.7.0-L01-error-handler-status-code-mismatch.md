@@ -7,9 +7,9 @@ issues 层：记录已确认的线上 bug。
 | 字段 | 值 |
 |------|------|
 | Severity | `[P1] major` |
-| Status | `open` |
+| Status | `closed` |
 | Found In | `v3.7.0` |
-| Fixed In | |
+| Fixed In | `v3.8.0` |
 | Related Test | `tests/ErrorHandlers/ErrorHandlerStatusCodeRegressionTest.php` |
 
 ---
@@ -78,3 +78,4 @@ $response = $handler($exception, $request, $code);
 ## History
 
 - `2026-05-10T06:40Z` `v3.7.0` [发现] 下游用户报告 `/panel/api/sp-count/list` 缺少 mandatory 参数时 HTTP 500 但 body code 400；确认为 `ErrorHandlerTrait` 通用问题，编写 failing tests 验证
+- `2026-05-10T07:00Z` `v3.8.0` [修复] 修改 `ErrorHandlerTrait` 两处 view handler 分支，status code 取自 handler 返回对象的 `getCode()`

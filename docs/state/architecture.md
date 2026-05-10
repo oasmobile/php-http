@@ -90,7 +90,7 @@ src/
    - 双层 matcher 架构：编程式路由（内存 `UrlMatcher`，优先匹配）→ YAML 路由（`CacheableRouter` 编译缓存）
    - 通过 `GroupUrlMatcher` 串联，编程式 matcher 排在前面
 5. 返回值非 Response 时进入 View Handler 链
-6. 异常时进入 Error Handler 链
+6. 异常时进入 Error Handler 链：handler 返回 `Response` 直接使用；返回非 `Response` 对象时进入 View Handler 链，HTTP 状态码取自返回对象的 `getCode()`（若存在），否则使用原始 `$code`（`HttpExceptionInterface::getStatusCode()` 或 500）
 7. `KernelEvents::RESPONSE` 触发 after middleware
 8. Response 发送，慢请求检测
 
